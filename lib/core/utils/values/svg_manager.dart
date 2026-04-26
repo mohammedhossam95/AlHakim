@@ -1,0 +1,77 @@
+class SvgAssets {
+  static const String userNetworkError = 'assets/icons/network_error.svg';
+  static const String notFound = 'assets/icons/notFound.svg';
+  static const String notification = 'assets/icons/notification.svg';
+  static const String cart = 'assets/icons/cart.svg';
+  static const String cartFilled = 'assets/icons/cartfilled.svg';
+  static const String profile = 'assets/icons/profile.svg';
+  static const String bills = 'assets/icons/bills.svg';
+  static const String balance = 'assets/icons/balance.svg';
+  static const String home = 'assets/icons/home.svg';
+  static const String homeSvg = 'assets/images/icons8-home.svg';
+  static const String search = 'assets/icons/search.svg';
+  static const String iconDiscount = 'assets/icons/ticket-discount.svg';
+
+  static const String user = 'assets/icons/user.svg';
+  static const String bookmarkTab = 'assets/icons/Bookmark_tab.svg';
+  static const String homeTab = 'assets/icons/home_tab.svg';
+  static const String shop = 'assets/icons/shop.svg';
+  static const String discoverTab = 'assets/icons/discover.svg';
+  static const String bell = 'assets/icons/bell.svg';
+  static const String map = 'assets/icons/map.svg';
+  static const String filter = 'assets/icons/filter.svg';
+  static const String arrowUp = 'assets/icons/arrow_up.svg';
+  static const String arrowDown = 'assets/icons/arrow_down.svg';
+  static const String location = 'assets/icons/location.svg';
+  static const String carTypeIcon = 'assets/icons/car_type_icon.svg';
+  static const String person = 'assets/icons/person.svg';
+  static const String check = 'assets/icons/check.svg';
+  static const String dropDown = 'assets/icons/drop_down.svg';
+  static const String line = 'assets/icons/line.svg';
+  static const String done = 'assets/icons/done.svg';
+  static const String changLanguage = 'assets/icons/change_lang.svg';
+  static const String contactUs = 'assets/icons/contact_us.svg';
+  static const String privacy = 'assets/icons/privacy.svg';
+  static const String terms = 'assets/icons/terms.svg';
+  static const String shareApp = 'assets/icons/share_app.svg';
+  static const String mail = 'assets/icons/mail.svg';
+  static const String headphone = 'assets/icons/headphones.svg';
+  static const String noReservations = 'assets/icons/no_reservations.svg';
+  static const String upload = 'assets/icons/upload.svg';
+  static const String plus = 'assets/icons/plus.svg';
+  static const String minus = 'assets/icons/minus.svg';
+  static const String clock = 'assets/icons/clock.svg';
+  static const String calenderIcon = 'assets/icons/calender_icon.svg';
+  static const String arrowBack = 'assets/icons/arrow_back.svg';
+  static const String arrowForward = 'assets/icons/arrow_forward.svg';
+  static const String iconArrowBackAr = 'assets/icons/arrow-right.svg';
+  static const String iconArrowBackEn = 'assets/icons/arrow-left.svg';
+  static const String appBarArrowBack = 'assets/icons/app_bar_arrow_back.svg';
+  static const String appBarArrowForward =
+      'assets/icons/app_bar_arrow_forward.svg';
+  static const String editProfileIcon = 'assets/icons/edit_profile_icon.svg';
+  static const String languageIcon = 'assets/icons/language_icon.svg';
+  static const String faqIcon = 'assets/icons/faq_icon.svg';
+  static const String privacyIcon = 'assets/icons/privacy_policy_icon.svg';
+  static const String aboutAppIcon = 'assets/icons/about_app_icon.svg';
+  static const String termsIcon = 'assets/icons/terms_icon.svg';
+  static const String contactUsIcon = 'assets/icons/contact_us_icon.svg';
+  //--------------shooping cart icons by ali lotfy----------------
+  static const String notificationIcon = 'assets/images/Vector.svg';
+  static const String approvalImage = 'assets/images/Approval.svg';
+  static const String whatsappIcon = 'assets/icons/whatsapp_icon.svg';
+  static const String favoritesIcon = 'assets/icons/heart-icon.svg';
+  static const String checkMarkIcon = 'assets/icons/check-mark.svg';
+  //-------sulalat
+  static const String lock = 'assets/icons/lock-password-svgrepo-com.svg';
+  static const String categories = 'assets/icons/category.svg';
+  static const String rotate = 'assets/icons/rotate.svg';
+  static const String calendar = 'assets/icons/calendar.svg';
+  static const String orders = 'assets/icons/orders.svg';
+  static const String iconMessage = 'assets/icons/icon-message.svg';
+  static const String trashIcon = 'assets/icons/trash-icon.svg';
+  static const String repeatIcon = 'assets/icons/repeat.svg';
+  static const String chatIcon = 'assets/icons/chat.svg';
+  static const String sendIcon = 'assets/icons/send_icon.svg';
+  static const String notFoundImage = 'assets/icons/notFoundImage.svg';
+}
