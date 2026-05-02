@@ -2,8 +2,11 @@ import 'package:alhakim/features/auth/domain/usecases/delete_user_account_usecas
 import 'package:alhakim/features/auth/domain/usecases/get_all_cities_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/get_countries_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/get_setting_use_case.dart';
+import 'package:alhakim/features/auth/domain/usecases/get_user_type_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/login_use_case.dart';
+import 'package:alhakim/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/register_use_case.dart';
+import 'package:alhakim/features/auth/domain/usecases/save_user_type_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/send_code_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/verify_code_use_case.dart';
 import 'package:alhakim/features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
@@ -46,8 +49,14 @@ Future<void> initAuthFeatureInjection() async {
     () => GetCountriesCubit(getCountriesUseCase: _sl()),
   );
 
-  _sl.registerFactory<SessionCubit>(
-    () => SessionCubit(getSessionStatus: _sl(), saveSessionStatus: _sl()),
+  _sl.registerLazySingleton<SessionCubit>(
+    () => SessionCubit(
+      getSessionStatus: _sl<GetSessionStatusUseCase>(),
+      saveSessionStatus: _sl<SaveSessionStatusUseCase>(),
+      getUserType: _sl<GetUserTypeUseCase>(),
+      saveUserType: _sl<SaveUserTypeUseCase>(),
+      logoutUseCase: _sl<LogoutUseCase>(),
+    ),
   );
   _sl.registerFactory<AcceptTermsCubit>(() => AcceptTermsCubit());
   _sl.registerFactory<GetSettingCubit>(
@@ -64,6 +73,15 @@ Future<void> initAuthFeatureInjection() async {
   );
   _sl.registerLazySingleton<SaveSessionStatusUseCase>(
     () => SaveSessionStatusUseCase(repository: _sl()),
+  );
+  _sl.registerLazySingleton<GetUserTypeUseCase>(
+    () => GetUserTypeUseCase(repository: _sl()),
+  );
+  _sl.registerLazySingleton<SaveUserTypeUseCase>(
+    () => SaveUserTypeUseCase(repository: _sl()),
+  );
+  _sl.registerLazySingleton<LogoutUseCase>(
+    () => LogoutUseCase(repository: _sl()),
   );
 
   _sl.registerLazySingleton<LoginUseCase>(

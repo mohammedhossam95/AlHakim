@@ -1,4 +1,5 @@
 import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/widgets/back_button.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
 import 'package:alhakim/features/auth/presentation/widgets/pin_widget.dart';
@@ -132,7 +133,9 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
                       color: colors.main,
                       btnText: 'confirm',
                       onPressed: () {
-                        context.push(Routes.registerRoute);
+                        sessionCubit.state.userType == UserType.patient
+                            ? context.push(Routes.mainPageRoute)
+                            : context.push(Routes.mainPageRoute);
                       },
                       // onPressed: _onConfirmPressed,
                     ),

@@ -18,6 +18,7 @@ class ImgAssets {
   static const String shrimp = 'assets/images/shrimp.png';
   static const String oil = 'assets/images/oil.png';
   static const String honey = 'assets/images/honey.png';
+  static const String chooseUserTypeImage = 'assets/images/choose.png';
 
   static const String imagesLogoAr = 'assets/images/logo.jpg';
   static const String imagesLogoEn = 'assets/images/logo.jpg';

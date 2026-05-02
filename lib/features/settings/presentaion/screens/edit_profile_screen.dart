@@ -103,13 +103,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     userEntity = user;
     _nameController.text = user.name ?? '';
     _emailController.text = user.email ?? '';
-    _whatsappController.text = user.whatsapp ?? '';
-    _bioController.text = user.bio ?? '';
-    String countryCode = Constants().getCountryCode(user.whatsapp ?? '');
-    _selectedWhatsappCountry =
-        CountryParser.tryParsePhoneCode(countryCode) ??
-        Constants.saudiCountryPicker;
-    _avatarUrl = user.photo ?? '';
+    _whatsappController.text = user.phone ?? '';
+    // _bioController.text = user. ?? '';
+    // String countryCode = Constants().getCountryCode(user.whatsapp ?? '');
+    // _selectedWhatsappCountry =
+    //     CountryParser.tryParsePhoneCode(countryCode) ??
+    //     Constants.saudiCountryPicker;
+    // _avatarUrl = user.photo ?? '';
   }
 
   @override
@@ -396,7 +396,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             email: _emailController.text,
             bio: _bioController.text,
             phone: userEntity.phone,
-            countryCode: userEntity.countryCode,
+            // countryCode: userEntity.countryCode,
             whatsapp: whatsappNum,
             imageUrl: _imageFile?.path,
           ),

@@ -1,5 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
-import 'package:alhakim/core/utils/values/assets.dart';
+import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
             // } else if (session.status == SessionStatus.authenticated) {
             //  context.pushReplacementNamed(Routes.mainPageRoute);
             //}
-            context.pushReplacementNamed(Routes.loginScreenRoute);
+            context.pushReplacementNamed(Routes.chooseUserTypeScreenRoute);
           });
         },
 
@@ -52,7 +52,26 @@ class _SplashScreenState extends State<SplashScreen> {
                 curve: Curves.easeIn,
                 child: Padding(
                   padding: const EdgeInsets.all(40.0),
-                  child: Image.asset(ImgAssets.logo),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 40.r,
+                        backgroundColor: colors.main,
+                        child: Icon(
+                          Icons.medical_services_outlined,
+                          color: colors.whiteColor,
+                          size: 40,
+                        ),
+                      ),
+
+                      Gaps.vGap16,
+
+                      Text(
+                        "Al-Hakim",
+                        style: TextStyles.semiBold24(color: colors.main),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const Spacer(flex: 3),

@@ -75,7 +75,7 @@ class _CustomMarketplaceHeaderState extends State<CustomMarketplaceHeader> {
               },
               child: Center(
                 child: DiffImage(
-                  image: widget.user.coverPhoto ?? '',
+                  image: widget.user.profileImageUrl ?? '',
                   userName: widget.user.name ?? '',
                   height: 40.h,
                   isCircle: true,

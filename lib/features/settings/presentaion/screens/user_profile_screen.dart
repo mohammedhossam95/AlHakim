@@ -131,10 +131,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           double.tryParse(ad.price?.toString() ?? '0') ?? 0,
                       image: imageUrl,
                       isFavorite: ad.isFavorite,
-                      city: CityEntity(
-                        id: ad.city?.id ?? 0,
-                        name: ad.city?.name ?? '',
-                      ),
+                      // city: CityEntity(
+                      //   id: ad.city?.id ?? 0,
+                      //   name: ad.city?.name ?? '',
+                      // ),
                     );
 
                     return InkWell(
@@ -160,7 +160,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final name = user.name ?? 'غير معروف';
     final email = user.email ?? '';
     final phone = user.phone ?? '';
-    final country = user.countryCode ?? '';
+    // final country = user.countryCode ?? '';
     final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     Widget infoRow(IconData icon, String text) {
@@ -228,8 +228,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             Gaps.vGap8,
             infoRow(Icons.email_outlined, email),
             infoRow(Icons.phone_outlined, phone),
-            infoRow(Icons.location_on_outlined, country),
 
+            // infoRow(Icons.location_on_outlined, country),
             Gaps.vGap20,
 
             /// CHAT BUTTON

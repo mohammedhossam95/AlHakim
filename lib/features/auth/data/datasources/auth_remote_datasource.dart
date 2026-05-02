@@ -7,13 +7,13 @@ import 'package:alhakim/features/auth/data/models/delete_user_account_resp_model
 import 'package:alhakim/features/auth/data/models/get_setting_response_model.dart';
 import 'package:alhakim/features/auth/data/models/send_code_resp_model.dart';
 import 'package:alhakim/injection_container.dart';
-import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AuthRespModel> login({required AuthParams params});
   Future<AuthRespModel> register({required AuthParams params});
   Future<AuthRespModel> verifyCode({required AuthParams params});
   Future<SendCodeRespModel> sendCode({required AuthParams params});
+  Future<void> logout({required bool isTeacher});
   Future<CountriesRespModel> getCountries();
   Future<CitiesRespModel> getAllCities({required AuthParams params});
   Future<SettingRespModel> getSetting();
@@ -24,22 +24,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthRespModel> login({required AuthParams params}) async {
     try {
-      FormData formData = FormData();
-
-      if (params.phone != null) {
-        formData.fields.add(MapEntry('phone_number', params.phone ?? ''));
-      }
-      if (params.countryCode != null) {
-        formData.fields.add(MapEntry('country_code', params.countryCode ?? ''));
-      }
-      if (params.password != null) {
-        formData.fields.add(MapEntry('password', params.password ?? ''));
-      }
       final dynamic response = await dioConsumer.post(
-        '/auth/login',
-        formData: formData,
+        "endpoint",
+        // body: params.toLoginJson(),
       );
-      if (response['success'] == true) {
+      final isSuccess =
+          response['success'] == true || response['status'] == 'success';
+      if (isSuccess) {
         return AuthRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');
@@ -51,21 +42,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthRespModel> verifyCode({required AuthParams params}) async {
     try {
-      FormData formData = FormData();
-
-      if (params.otp != null) {
-        formData.fields.add(MapEntry('otp', params.otp ?? ''));
-      }
-      if (params.phone != null) {
-        formData.fields.add(MapEntry('phone', params.phone ?? ''));
-      }
-
       final dynamic response = await dioConsumer.post(
-        '/auth/verify/otp/phone',
-
-        formData: formData,
+        '/auth/verify-otp',
+        // body: params.toVerifyOtpJson(),
       );
-      if (response['success'] == true || response['success'] == 'true') {
+      if (response['success'] == true || response['status'] == 'success') {
         return AuthRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');
@@ -77,46 +58,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthRespModel> register({required AuthParams params}) async {
     try {
-      FormData formData = FormData();
-
-      if (params.name != null) {
-        formData.fields.add(MapEntry('name', params.name ?? ''));
-      }
-
-      if (params.lastName != null) {
-        formData.fields.add(MapEntry('last_name', params.lastName ?? ''));
-      }
-      if (params.phone != null) {
-        formData.fields.add(MapEntry('phone', params.phone ?? ''));
-      }
-      if (params.countryCode != null) {
-        formData.fields.add(MapEntry('country_code', params.countryCode ?? ''));
-      }
-      if (params.password != null) {
-        formData.fields.add(MapEntry('password', params.password ?? ''));
-      }
-      if (params.passwordConfirmation != null) {
-        formData.fields.add(
-          MapEntry('password_confirmation', params.passwordConfirmation ?? ''),
-        );
-      }
-
-      if (params.email != null) {
-        formData.fields.add(MapEntry('email', params.email ?? ''));
-      }
-      if (params.fcmDeviceToken != null) {
-        formData.fields.add(
-          MapEntry('fcm_device_token', params.fcmDeviceToken ?? ''),
-        );
-      }
-
       final dynamic response = await dioConsumer.post(
-        (params.registerType == 'withPhone')
-            ? '/auth/signup/phone'
-            : '/auth/signup/user',
-        formData: formData,
+        '/auth/register',
+        // body: params.toRegisterJson(),
       );
-      if (response['success'] == true || response['success'] == 'true') {
+      if (response['success'] == true || response['status'] == 'success') {
         return AuthRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');
@@ -128,26 +74,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<SendCodeRespModel> sendCode({required AuthParams params}) async {
     try {
-      FormData formData = FormData();
-
-      if (params.phone != null) {
-        formData.fields.add(MapEntry('phone_number', params.phone ?? ''));
-      }
-      if (params.countryCode != null) {
-        formData.fields.add(MapEntry('country_code', params.countryCode ?? ''));
-      }
-      if (params.otpType != null) {
-        formData.fields.add(MapEntry('sms_type', params.otpType ?? ''));
-      }
-
       final dynamic response = await dioConsumer.post(
-        '/clients/send_code',
-        formData: formData,
+        '/auth/send-otp',
+        // body: params.toSendOtpJson(),
       );
-      if (response['success'] == true || response['success'] == 'true') {
+      if (response['success'] == true || response['status'] == 'success') {
         return SendCodeRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> logout({required bool isTeacher}) async {
+    try {
+      final endpoint = isTeacher ? '/instructor/logout' : '/auth/logout';
+      await dioConsumer.post(endpoint, body: {});
     } catch (error) {
       rethrow;
     }
@@ -197,10 +141,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<DeleteUserAccountRespModel> deleteUserAccount() async {
     try {
-      final dynamic response = await dioConsumer.post(
-        '/user/delete',
-      ); //mallah make it post not delete
-      if (response['status'] == 'success' || response['success'] == true) {
+      final dynamic response = await dioConsumer.delete('/api/v1/user/delete');
+      if (response['status'] == 'success') {
         return DeleteUserAccountRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');

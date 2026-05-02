@@ -1,5 +1,4 @@
 import 'package:alhakim/core/utils/constants.dart';
-import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/home/domain/entity/product_entity.dart';
 
 class ProductModel extends ProductEntity {
@@ -23,7 +22,6 @@ class ProductModel extends ProductEntity {
     super.sellerId,
     super.categoryId,
     super.subCategoryId,
-    super.city,
     super.videoUrl,
     super.makingYear,
     super.communicateWay,
@@ -180,7 +178,7 @@ class ProductModel extends ProductEntity {
       sellerId: sId,
       categoryId: parsedCategoryId,
       subCategoryId: parsedSubCategoryId,
-      city: CityModel.fromJson(json['city']),
+      // city: CityModel.fromJson(json['city']),
       videoUrl: videoUrl,
       communicateWay: commWay,
       isFavorite: json['is_fav'],

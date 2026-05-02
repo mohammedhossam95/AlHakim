@@ -13,6 +13,7 @@ enum SettleType { deposit, withdrawal, no_settle }
 enum Modules { settlement, booking }
 
 enum AppUpdateType { flexible, immediately }
+
 enum MessageType { text, file }
 
 enum ExpansionTypes {
@@ -28,6 +29,8 @@ enum ExpansionTypes {
 enum VerifyTypes { email, phone, reset }
 
 enum AvailableTimes { anyDay, today, tomorrow }
+
+enum UserType { doctor, delegate, patient }
 
 enum Building { hospital, clinic }
 
@@ -113,10 +116,10 @@ enum Gender {
 }
 
 enum StaticPageType {
-  aboutUs,    // يقابل key: description_about_us
-  privacy,    // يقابل key: privacy_policy
+  aboutUs, // يقابل key: description_about_us
+  privacy, // يقابل key: privacy_policy
   conditions, // يقابل key: conditions
-  faq         // يقابل key: frequently_asked_questions
+  faq, // يقابل key: frequently_asked_questions
 }
 
 enum FromWidget { coupon, payment, monthly, ios, back, updateQty }

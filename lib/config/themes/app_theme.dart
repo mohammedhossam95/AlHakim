@@ -47,6 +47,10 @@ ThemeData getAppTheme(BuildContext context) {
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: MyColors.whiteColor,
     ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: MyColors.main,
+      foregroundColor: MyColors.whiteColor,
+    ),
     appBarTheme: AppBarTheme(
       elevation: 0,
       centerTitle: false,

@@ -3,11 +3,13 @@ import 'package:alhakim/config/routes/navigator_observer.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get_countries_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_setting/get_setting_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
+import 'package:alhakim/features/auth/presentation/screen/choose_user_type_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/complete_profile_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/forgot_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/login_screen.dart';
@@ -15,10 +17,15 @@ import 'package:alhakim/features/auth/presentation/screen/otp_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/register_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/reset_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/splash_screen.dart';
+import 'package:alhakim/features/booking/presentation/screens/add_family_member_screen.dart';
+import 'package:alhakim/features/booking/presentation/screens/booking_screen.dart';
+import 'package:alhakim/features/booking/presentation/screens/family_members_screen.dart';
+import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/update_user_profile_cubit/update_user_profile_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/screens/edit_profile_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/static_page_content_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/user_profile_screen.dart';
+import 'package:alhakim/features/specialities/presentation/screens/doctors_list_screen.dart';
 import 'package:alhakim/features/specialities/presentation/screens/specialities_screen.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +79,14 @@ abstract class Routes {
   static const String userProfileScreenRoute = '/userProfileScreen';
 
   static const String specialitiesScreenRoute = '/specialitiesScreen';
+  static const String doctorsListScreenRoute = '/doctorsListScreen';
+  static const String bookingScreenRoute = '/bookingScreen';
+  static const String familyMembersScreenRoute = '/familyMembersScreen';
+  static const String addFamilyMemberScreenRoute = '/addFamilyMemberScreen';
+  static const String chooseUserTypeScreenRoute = '/ChooseUserTypeScreen';
+  static const String appointmentsScreenRoute = '/AppointmentsScreenRoute';
+  static const String delegateDoctorsScreenRoute =
+      '/DelegateDoctorsScreenRoute';
 
   static final _sl = ServiceLocator.instance;
 
@@ -149,6 +164,23 @@ abstract class Routes {
           );
         },
       ),
+      GoRoute(
+        name: chooseUserTypeScreenRoute,
+        path: chooseUserTypeScreenRoute,
+        builder: (context, state) => const ChooseUserTypeScreen(),
+      ),
+
+      GoRoute(
+        path: appointmentsScreenRoute,
+        name: appointmentsScreenRoute,
+        builder: (context, state) => const AppointmentsScreen(),
+      ),
+
+      GoRoute(
+        path: delegateDoctorsScreenRoute,
+        name: delegateDoctorsScreenRoute,
+        builder: (context, state) => const DelegateDoctorsScreen(),
+      ),
 
       /// Forgot Password
       GoRoute(
@@ -212,6 +244,33 @@ abstract class Routes {
         name: specialitiesScreenRoute,
         pageBuilder: (context, state) =>
             buildAdaptivePage(state: state, child: const SpecialitiesScreen()),
+      ),
+      GoRoute(
+        path: doctorsListScreenRoute,
+        name: doctorsListScreenRoute,
+        pageBuilder: (context, state) =>
+            buildAdaptivePage(state: state, child: const DoctorsListScreen()),
+      ),
+      GoRoute(
+        path: bookingScreenRoute,
+        name: bookingScreenRoute,
+        pageBuilder: (context, state) =>
+            buildAdaptivePage(state: state, child: const BookingScreen()),
+      ),
+
+      GoRoute(
+        path: familyMembersScreenRoute,
+        name: familyMembersScreenRoute,
+        pageBuilder: (context, state) =>
+            buildAdaptivePage(state: state, child: const FamilyMembersScreen()),
+      ),
+      GoRoute(
+        path: addFamilyMemberScreenRoute,
+        name: addFamilyMemberScreenRoute,
+        pageBuilder: (context, state) => buildAdaptivePage(
+          state: state,
+          child: const AddFamilyMemberScreen(),
+        ),
       ),
 
       /// Edit Profile

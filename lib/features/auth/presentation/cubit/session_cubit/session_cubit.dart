@@ -1,76 +1,97 @@
 import 'dart:developer';
 
-import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
-import 'package:alhakim/injection_container.dart';
+import 'package:alhakim/features/auth/domain/usecases/get_user_type_usecase.dart';
+import 'package:alhakim/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:alhakim/features/auth/domain/usecases/save_user_type_usecase.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/usecases/usecase.dart';
-import '../../../../../core/utils/enums.dart';
+import '/core/usecases/usecase.dart';
+import '/core/utils/enums.dart';
+import '/injection_container.dart';
 import '../../../domain/usecases/get_session_usecase.dart';
 import '../../../domain/usecases/save_session_usecase.dart';
 
 part 'session_state.dart';
 
 class SessionCubit extends Cubit<SessionState> {
-  final GetSessionStatusUseCase getSessionStatus;
-  final SaveSessionStatusUseCase saveSessionStatus;
-
   SessionCubit({
-    required this.getSessionStatus,
-    required this.saveSessionStatus,
-  }) : super(const SessionState.initial());
+    required GetSessionStatusUseCase getSessionStatus,
+    required SaveSessionStatusUseCase saveSessionStatus,
+    required GetUserTypeUseCase getUserType,
+    required SaveUserTypeUseCase saveUserType,
+    required LogoutUseCase logoutUseCase,
+  }) : _getSessionStatus = getSessionStatus,
+       _saveSessionStatus = saveSessionStatus,
+       _getUserType = getUserType,
+       _saveUserType = saveUserType,
+       _logoutUseCase = logoutUseCase,
+       super(const SessionState.initial());
+
+  final GetSessionStatusUseCase _getSessionStatus;
+  final SaveSessionStatusUseCase _saveSessionStatus;
+  final GetUserTypeUseCase _getUserType;
+  final SaveUserTypeUseCase _saveUserType;
+  final LogoutUseCase _logoutUseCase;
 
   Future<void> resolveSession() async {
-    final result = await getSessionStatus(NoParams());
-
+    final result = await _getSessionStatus(NoParams());
     result.fold(
       (f) {
-        debugPrint('SESSION FAILED: ${f.message}');
-        emit(const SessionState(status: SessionStatus.guest));
+        log('SESSION FAILED: ${f.message}');
+        emit(
+          const SessionState(
+            status: SessionStatus.firstLaunch,
+            userType: UserType.patient,
+          ),
+        );
       },
-      (status) {
-        debugPrint('SESSION LOADED: $status');
-        emit(SessionState(status: status));
+      (status) async {
+        log('SESSION LOADED: $status');
+        final userTypeResult = await _getUserType(NoParams());
+        userTypeResult.fold(
+          (f) {
+            log('USER TYPE FAILED: ${f.message}');
+            emit(
+              const SessionState(
+                status: SessionStatus.firstLaunch,
+                userType: UserType.patient,
+              ),
+            );
+          },
+          (userType) {
+            emit(SessionState(status: status, userType: userType));
+          },
+        );
       },
     );
   }
 
-  Future<void> completeOnboarding() async {
-    await saveSessionStatus(SessionStatusParams(status: SessionStatus.guest));
-
-    emit(const SessionState(status: SessionStatus.guest));
+  Future<void> setUserType(UserType userType) async {
+    final result = await _saveUserType(UserTypeParams(userType: userType));
+    result.fold((f) => log('SAVE USER TYPE FAILED: ${f.message}'), (s) {
+      log('USER TYPE SAVED: $userType');
+      emit(SessionState(status: SessionStatus.guest, userType: userType));
+    });
   }
 
-  Future<void> loginSuccess(AuthEntity entity) async {
-    await saveSessionStatus(
+  Future<void> loginSuccess(UserType userType) async {
+    await _saveSessionStatus(
       SessionStatusParams(status: SessionStatus.authenticated),
     );
-    await secureStorage.saveAccessToken(entity.token);
-    log('done  token saved \t${entity.token}');
-    emit(const SessionState(status: SessionStatus.authenticated));
+    emit(SessionState(status: SessionStatus.authenticated, userType: userType));
   }
 
   Future<void> logout() async {
-    await saveSessionStatus(SessionStatusParams(status: SessionStatus.guest));
+    final isTeacher = state.userType == UserType.patient;
+    final result = await _logoutUseCase(LogoutParams(isTeacher: isTeacher));
+    result.fold((f) => log('Logout API failed: ${f.message}'), (_) {});
 
-    // Clear secure storage (tokens)
+    await _saveSessionStatus(SessionStatusParams(status: SessionStatus.guest));
     secureStorage.clearAll();
-
-    // Clear user data from SharedPreferences
     await sharedPreferences.removeUser();
     await sharedPreferences.removeUserId();
 
-    // Clear guest addresses from SQLite
-    // Note: Do NOT clear lastSyncedUserId or isAddressSynced
-    // try {
-    //   await DBHelper.deleteTableData();
-    //   debugPrint('Guest addresses cleared on logout');
-    // } catch (e) {
-    //   debugPrint('Error clearing guest addresses: $e');
-    // }
-
-    emit(const SessionState(status: SessionStatus.guest));
+    emit(state.copyWith(status: SessionStatus.guest));
   }
 }

@@ -1,4 +1,3 @@
-import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:equatable/equatable.dart';
 
 // --- Advertisement Entity ---
@@ -8,7 +7,7 @@ class AdEntity extends Equatable {
   final String? title;
   final String? slug;
   final String? description;
-  final CityEntity? city;
+  // final CityEntity? city;
   final String? isFixed;
   final int? fixedCategoryId;
   final List<PhotoEntity>? photos;
@@ -25,7 +24,7 @@ class AdEntity extends Equatable {
     this.title,
     this.slug,
     this.description,
-    this.city,
+    // this.city,
     this.isFixed,
     this.fixedCategoryId,
     this.photos,
@@ -44,7 +43,7 @@ class AdEntity extends Equatable {
     title,
     slug,
     description,
-    city,
+    // city,
     isFixed,
     fixedCategoryId,
     photos,

@@ -27,6 +27,15 @@ extension StatusLevelExtension on StatusLevel {
   }
 }
 
+extension UserTypeExtension on UserType {
+  static UserType fromString(String value) {
+    return UserType.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => UserType.patient,
+    );
+  }
+}
+
 extension LanguageCodeExtension on LanguageCode {
   static LanguageCode fromString(String value) =>
       LanguageCode.values.firstWhere(
@@ -180,5 +189,3 @@ extension RoundOnlyDouble on double {
     return ((this * mod).round().toDouble() / mod);
   }
 }
-
-

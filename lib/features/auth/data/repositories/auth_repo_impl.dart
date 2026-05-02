@@ -11,6 +11,7 @@ import '../../../../core/utils/enums.dart';
 import '../../../../injection_container.dart';
 import '../../domain/repositories/auth_repo.dart';
 import '../../domain/usecases/save_session_usecase.dart';
+import '../../domain/usecases/save_user_type_usecase.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/auth_resp_model.dart';
 
@@ -51,9 +52,55 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, UserType>> getUserType({
+    required NoParams params,
+  }) async {
+    try {
+      final userType = sharedPreferences.getUserType();
+      return Right<Failure, UserType>(userType);
+    } on AppException catch (error) {
+      Log.e(
+        '[Get User Type][${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, UserType>(error.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> saveUserType({
+    required UserTypeParams params,
+  }) async {
+    try {
+      final result = await sharedPreferences.saveUserType(params.userType);
+      return Right(result);
+    } on AppException catch (error) {
+      Log.e(
+        '[Save User Type] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, bool>(error.toFailure());
+    }
+  }
+
+  void _saveAuthResponse(AuthRespModel response) {
+    if (response.data != null && response.data is UserModel) {
+      final UserModel user = response.data as UserModel;
+      if (user.id != null) {
+        sharedPreferences.saveUserId(user.id!);
+      }
+      sharedPreferences.saveUser(user);
+      if (response.token != null) {
+        secureStorage.saveAccessToken(response.token!);
+      }
+    }
+  }
+
+  @override
   Future<Either<Failure, BaseOneResponse>> loginRepo(AuthParams params) async {
     try {
       final BaseOneResponse response = await remote.login(params: params);
+      if (response is AuthRespModel) {
+        _saveAuthResponse(response);
+      }
       return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
       Log.e(
@@ -67,17 +114,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, BaseOneResponse>> verifyCode(AuthParams params) async {
     try {
       final BaseOneResponse response = await remote.verifyCode(params: params);
-      if (response.data != null && response.data is UserModel) {
-        final UserModel user = response.data as UserModel;
-        if (user.id != null) {
-          sharedPreferences.saveUserId(user.id!);
-        }
-        sharedPreferences.saveUser(user);
-        if (user.token != null) {
-          secureStorage.saveAccessToken(user.token!);
-        }
+      if (response is AuthRespModel) {
+        _saveAuthResponse(response);
       }
-
       return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
       Log.e(
@@ -91,6 +130,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, BaseOneResponse>> register(AuthParams params) async {
     try {
       final BaseOneResponse response = await remote.register(params: params);
+      if (response is AuthRespModel) {
+        _saveAuthResponse(response);
+      }
       return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
       Log.e(
@@ -110,6 +152,17 @@ class AuthRepositoryImpl implements AuthRepository {
         '[sendCode] [${error.runtimeType.toString()}] ---- ${error.message}',
       );
       return Left<Failure, BaseOneResponse>(error.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> logout({required bool isTeacher}) async {
+    try {
+      await remote.logout(isTeacher: isTeacher);
+      return const Right<Failure, bool>(true);
+    } on AppException catch (error) {
+      Log.e('[logout] [${error.runtimeType.toString()}] ---- ${error.message}');
+      return Left<Failure, bool>(error.toFailure());
     }
   }
 

@@ -1,6 +1,7 @@
 // ignore_for_file: strict_top_level_inference
 
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:flutter/material.dart';
@@ -107,38 +108,63 @@ class _MainPageState extends State<MainPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Expanded(
-              child: _navItem(
-                context,
-                0,
-                FontAwesomeIcons.house,
-                "home".tr,
-                currentIndex,
-              ),
-            ),
-            Expanded(
-              child: _navItem(
-                context,
-                1,
-                Icons.group,
-                "specialities_title".tr,
-                currentIndex,
-              ),
-            ),
+            // Expanded(
+            //   child: _navItem(
+            //     context,
+            //     0,
+            //     FontAwesomeIcons.house,
+            //     "home".tr,
+            //     currentIndex,
+            //   ),
+            // ),
+            (sessionCubit.state.userType == UserType.patient)
+                ? Expanded(
+                    child: _navItem(
+                      context,
+                      0,
+
+                      Icons.group,
+                      "specialities_title".tr,
+                      currentIndex,
+                    ),
+                  )
+                : (sessionCubit.state.userType == UserType.delegate)
+                ? Expanded(
+                    child: _navItem(
+                      context,
+                      0,
+
+                      Icons.dashboard,
+                      "dashboard".tr,
+                      currentIndex,
+                    ),
+                  )
+                : const Spacer(),
+
             // const SizedBox(width: 48), // Gap for FAB
+            sessionCubit.state.userType == UserType.delegate
+                ? Expanded(
+                    child: _navItem(
+                      context,
+                      1,
+                      Icons.group,
+                      "doctors".tr,
+                      currentIndex,
+                    ),
+                  )
+                : Expanded(
+                    child: _navItem(
+                      context,
+                      1,
+                      Icons.calendar_month,
+                      "appointments".tr,
+                      currentIndex,
+                    ),
+                  ),
             Expanded(
               child: _navItem(
                 context,
-                3,
-                Icons.notifications,
-                "notifications".tr,
-                currentIndex,
-              ),
-            ),
-            Expanded(
-              child: _navItem(
-                context,
-                4,
+                2,
                 FontAwesomeIcons.user,
                 "my_profile".tr,
                 currentIndex,

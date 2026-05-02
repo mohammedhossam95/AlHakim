@@ -1,4 +1,3 @@
-import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class ProductEntity extends Equatable {
@@ -21,7 +20,6 @@ class ProductEntity extends Equatable {
   final int? sellerId; // optional for inquiries
   final int? categoryId;
   final int? subCategoryId;
-  final CityEntity? city;
   final String? videoUrl;
   final String? makingYear;
   final String? communicateWay;
@@ -48,7 +46,7 @@ class ProductEntity extends Equatable {
     this.sellerId,
     this.categoryId,
     this.subCategoryId,
-    this.city,
+    // this.city,
     this.videoUrl,
     this.communicateWay,
     this.isFavorite,
@@ -83,7 +81,7 @@ class ProductEntity extends Equatable {
     sellerId,
     categoryId,
     subCategoryId,
-    city,
+    // city,
     makingYear,
     videoUrl,
     communicateWay,

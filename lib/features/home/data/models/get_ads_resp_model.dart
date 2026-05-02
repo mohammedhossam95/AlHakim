@@ -1,6 +1,5 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
 import 'package:alhakim/core/base_classes/pagination.dart';
-import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/home/domain/entity/ads_entity.dart';
 
 class AllAdsRespModel extends BaseListResponse {
@@ -73,7 +72,6 @@ class AdModel extends AdEntity {
     super.title,
     super.slug,
     super.description,
-    super.city,
     super.isFixed,
     super.fixedCategoryId,
     super.photos,
@@ -92,7 +90,7 @@ class AdModel extends AdEntity {
       title: json['title'],
       slug: json['slug'],
       description: json['description'],
-      city: CityModel.fromJson(json['city']),
+      // city: CityModel.fromJson(json['city']),
       isFixed: json['is_fixed'],
       fixedCategoryId: json['fixed_category_id'],
       price: json['price'],

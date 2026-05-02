@@ -1,6 +1,10 @@
 // ignore_for_file: unused_import
 
+import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/screens/delegate_dashboard_screen.dart';
+import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
 import 'package:alhakim/features/home/presentation/cubit/home_bannares_cubit/home_banners_cubit.dart';
 import 'package:alhakim/features/home/presentation/screen/home_screen.dart';
 import 'package:alhakim/features/specialities/presentation/screens/specialities_screen.dart';
@@ -20,10 +24,18 @@ class BottomNavBarCubit extends Cubit<BottomNavBarState> {
   int currentIndex = 0;
 
   final List<Widget> screens = [
-    HomeScreen(),
-    SpecialitiesScreen(),
+    // HomeScreen(),
+    switch (sessionCubit.state.userType) {
+      UserType.patient => const SpecialitiesScreen(),
+      UserType.delegate => const DelegateDashboardScreen(),
+      UserType.doctor => Container(),
+    },
 
-    Container(),
+    switch (sessionCubit.state.userType) {
+      UserType.patient => const AppointmentsScreen(),
+      UserType.delegate => const DelegateDoctorsScreen(),
+      UserType.doctor => Container(),
+    },
     const SettingsScreen(),
   ];
 

@@ -4,9 +4,7 @@ import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/values/assets.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
-import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
-import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
@@ -82,13 +80,13 @@ class _CompleteProfileRegisterScreenState
         body: BlocConsumer<RegisterCubit, RegisterState>(
           listener: (context, state) {
             if (state is RegisterLoaded) {
-              final data = state.response.data as AuthEntity;
+              // final data = state.response.data as AuthEntity;
               Constants.showSnakToast(
                 context: context,
                 type: 1,
                 message: state.response.message ?? '',
               );
-              BlocProvider.of<SessionCubit>(context).loginSuccess(data);
+              // BlocProvider.of<SessionCubit>(context).loginSuccess(data);
               context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
               context.pushReplacementNamed(Routes.mainPageRoute);
             } else if (state is RegisterError) {

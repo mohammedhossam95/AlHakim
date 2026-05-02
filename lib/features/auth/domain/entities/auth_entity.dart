@@ -1,143 +1,104 @@
 import 'package:equatable/equatable.dart';
 
+class AuthEntity extends Equatable {
+  final String? token;
+  final String? tokenType;
+  final UserEntity? user;
+
+  const AuthEntity({this.token, this.tokenType, this.user});
+
+  @override
+  List<Object?> get props => [token, tokenType, user];
+}
+
 class UserEntity extends Equatable {
   final int? id;
   final String? name;
-  final String? lastName;
-  final String? shopName;
-  final String? phone;
-  final String? phone2;
-  final String? fcmDeviceToken;
   final String? email;
-
-  final GovernmentEntity? government;
-  final CityEntity? city;
-
-  final String? shopAddress;
-  final String? gender;
-  final String? image;
-
-  final String? latitude;
-  final String? longitude;
-
-  final String? authType;
-
+  final String? phone;
+  final String? parentPhone;
+  final String? role;
+  final int? tenantId;
+  final String? tenantName;
+  final bool? activationStatus;
+  final String? subscriptionType;
+  final String? profileImageUrl;
   final String? createdAt;
-  final String? updatedAt;
-
-  final int? accountType;
-  final String? token;
-  final bool? active;
-
-  final String? bio;
-  final String? countryCode;
-  final String? whatsapp;
-
-  final String? photo;
-  final String? coverPhoto;
-
-  final String? commercialNumber;
-
+  final String? dateOfBirth;
   final String? address;
-
-  /// 🔹 Added from new API response
-  final String? emailVerifiedAt;
-  final String? emailTo;
+  final String? schoolName;
+  final String? parentJob;
+  final String? notes;
+  final GovernorateEntity? governorate;
+  final GradeEntity? grade;
+  final TenantEntity? tenant; // أضفت الـ Tenant للمدرسين
 
   const UserEntity({
     this.id,
     this.name,
-    this.lastName,
-    this.shopName,
-    this.phone,
-    this.phone2,
-    this.fcmDeviceToken,
     this.email,
-    this.government,
-    this.city,
-    this.shopAddress,
-    this.gender,
-    this.image,
-    this.latitude,
-    this.longitude,
-    this.authType,
+    this.phone,
+    this.parentPhone,
+    this.role,
+    this.tenantId,
+    this.tenantName,
+    this.activationStatus,
+    this.subscriptionType,
+    this.profileImageUrl,
     this.createdAt,
-    this.updatedAt,
-    this.accountType,
-    this.token,
-    this.active,
-    this.bio,
-    this.countryCode,
-    this.whatsapp,
-    this.photo,
-    this.coverPhoto,
-    this.commercialNumber,
+    this.dateOfBirth,
     this.address,
-    this.emailVerifiedAt,
-    this.emailTo,
+    this.schoolName,
+    this.parentJob,
+    this.notes,
+    this.governorate,
+    this.grade,
+    this.tenant,
   });
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        lastName,
-        shopName,
-        phone,
-        phone2,
-        fcmDeviceToken,
-        email,
-        government,
-        city,
-        shopAddress,
-        gender,
-        image,
-        latitude,
-        longitude,
-        authType,
-        createdAt,
-        updatedAt,
-        accountType,
-        token,
-        active,
-        bio,
-        countryCode,
-        whatsapp,
-        photo,
-        coverPhoto,
-        commercialNumber,
-        address,
-        emailVerifiedAt,
-        emailTo,
-      ];
+    id, name, email, phone, parentPhone, role,
+    tenantId, tenantName, activationStatus,   
+    subscriptionType, profileImageUrl, createdAt,
+    dateOfBirth, address, schoolName, parentJob,
+    notes, governorate, grade, tenant,
+  ];
 }
 
-class GovernmentEntity extends Equatable {
-  final String? id;
+class TenantEntity extends Equatable {
+  final int? id;
   final String? name;
+  final String? subscriptionType;
+  final bool? multipleTeacher;
 
-  const GovernmentEntity({this.id, this.name});
+  const TenantEntity({
+    this.id,
+    this.name,
+    this.subscriptionType,
+    this.multipleTeacher,
+  });
 
   @override
-  List<Object?> get props => [id, name];
+  List<Object?> get props => [id, name, subscriptionType, multipleTeacher];
 }
 
-class CityEntity extends Equatable {
+class GovernorateEntity extends Equatable {
   final int? id;
   final String? name;
 
-  const CityEntity({this.id, this.name});
+  const GovernorateEntity({this.id, this.name});
 
   @override
   List<Object?> get props => [id, name];
 }
 
-class AuthEntity extends Equatable {
-  final UserEntity? user;
-  final String? token;
+class GradeEntity extends Equatable {
+  final int? id;
+  final String? name;
 
-  const AuthEntity({this.user, this.token});
+  const GradeEntity({this.id, this.name});
 
   @override
-  List<Object?> get props => [user, token];
+  List<Object?> get props => [id, name];
 }

@@ -71,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [CustomBackButton()],
                   ),
 
-                  Gaps.vGap20,
+                  // Gaps.vGap20,
 
                   /// icon
                   CircleAvatar(
@@ -91,13 +91,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyles.semiBold18(),
                   ),
 
-                  Gaps.vGap8,
+                  // Gaps.vGap8,
 
-                  Text(
-                    "join_network".tr,
-                    style: TextStyles.medium14(color: colors.lightTextColor),
-                  ),
-
+                  // Text(
+                  //   "join_network".tr,
+                  //   style: TextStyles.medium14(color: colors.lightTextColor),
+                  // ),
                   Gaps.vGap20,
 
                   /// card
@@ -235,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Gaps.hGap8,
                             Text(
                               "represent_code_hint_text".tr,
-                              style: TextStyles.medium10(
+                              style: TextStyles.medium10( 
                                 color: colors.lightTextColor,
                               ),
                             ),

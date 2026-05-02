@@ -1,3 +1,4 @@
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/home/home_injection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -162,6 +163,7 @@ AppInterceptors get appInterceptors =>
 LogInterceptor get logInterceptor => ServiceLocator.instance<LogInterceptor>();
 
 AppColors get colors => ServiceLocator.instance<AppColors>();
+SessionCubit get sessionCubit => ServiceLocator.instance<SessionCubit>();
 
 AppLocalizations get appLocalizations =>
     ServiceLocator.instance<AppLocalizations>();

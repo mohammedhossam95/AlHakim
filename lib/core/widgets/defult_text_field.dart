@@ -143,7 +143,7 @@ class MyTextFormField extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         labelStyle: TextStyles.medium12(color: labelColor),
         errorStyle: TextStyles.regular10(color: Colors.red),
-        hintStyle: TextStyles.medium12(color: Colors.grey),
+        hintStyle: TextStyles.medium12(color: colors.lightTextColor),
       ),
       style: TextStyles.medium12(color: effectiveColor),
       focusNode: focusNode,

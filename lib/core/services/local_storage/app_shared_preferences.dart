@@ -20,6 +20,8 @@ abstract class _AppSharedPreferencesKeys {
   static const languageCode = 'languageCode';
 
   static const userCycle = 'userCycle';
+  static const userType = 'userType';
+  static const deviceUuid = 'deviceUuid';
   static const cartProviderId = 'cartProviderId';
   static const serviceTypeId = 'service_type_Id';
   static const salesselectedBooksKey = 'salesSelectedBooksKey';
@@ -32,7 +34,6 @@ abstract class _AppSharedPreferencesKeys {
   static const isAddressSynced = 'isAddressSynced';
 
   static const settings = 'settings';
-  static const userFullAddress = 'userFullAddress'; 
 }
 
 abstract class AppSharedPreferences {
@@ -96,6 +97,16 @@ abstract class AppSharedPreferences {
   SessionStatus getSessionStatus();
   Future<bool> removeSessionStatus();
 
+  // User type
+  Future<bool> saveUserType(UserType value);
+  UserType getUserType();
+  Future<bool> removeUserType();
+
+  // Device UUID
+  Future<bool> saveDeviceUuid(String value);
+  String? getDeviceUuid();
+  Future<bool> removeDeviceUuid();
+
   //cart
   Future<void> saveSalesSelectedBooks(Map<int, int> selectedBooks);
   Future<Map<int, int>> loadSalesSelectedBooks();
@@ -111,11 +122,6 @@ abstract class AppSharedPreferences {
   List<Map<String, dynamic>> getBranches();
   Future<bool> removeBranches();
   //endregion
-  // region:: User Address
-  Map<String, dynamic>? getUserFullAddress();
-  Future<bool> saveUserFullAddress(Map<String, dynamic> addressData);
-  Future<bool> removeUserFullAddress();
-  // endregion
 
   //region:: Address Sync
   int? getLastSyncedUserId();
@@ -271,6 +277,32 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   Future<bool> removeSessionStatus() =>
       instance.remove(_AppSharedPreferencesKeys.userCycle);
 
+  // User type
+  @override
+  UserType getUserType() => UserTypeExtension.fromString(
+    instance.getString(_AppSharedPreferencesKeys.userType) ?? '',
+  );
+
+  @override
+  Future<bool> saveUserType(UserType value) =>
+      instance.setString(_AppSharedPreferencesKeys.userType, value.name);
+
+  @override
+  Future<bool> removeUserType() =>
+      instance.remove(_AppSharedPreferencesKeys.userType);
+
+  // Device UUID
+  @override
+  String? getDeviceUuid() => instance.getString(_AppSharedPreferencesKeys.deviceUuid);
+
+  @override
+  Future<bool> saveDeviceUuid(String value) =>
+      instance.setString(_AppSharedPreferencesKeys.deviceUuid, value);
+
+  @override
+  Future<bool> removeDeviceUuid() =>
+      instance.remove(_AppSharedPreferencesKeys.deviceUuid);
+
   //User
 
   @override
@@ -283,7 +315,7 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
 
   @override
   Future<bool> saveUser(UserModel user) =>
-      instance.setString(_AppSharedPreferencesKeys.user, jsonEncode(user));
+      instance.setString(_AppSharedPreferencesKeys.user, jsonEncode(user.toJson()));
 
   @override
   Future<bool> removeUser() => instance.remove(_AppSharedPreferencesKeys.user);
@@ -387,33 +419,6 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   Future<bool> removeBranches() {
     return instance.remove(_AppSharedPreferencesKeys.branches);
   }
-  // region:: User Address Implementation
-  @override
-  Map<String, dynamic>? getUserFullAddress() {
-    final jsonString = instance.getString(_AppSharedPreferencesKeys.userFullAddress);
-    if (jsonString == null) return null;
-    try {
-      return jsonDecode(jsonString) as Map<String, dynamic>;
-    } catch (e) {
-      log('Error decoding User Address: $e');
-      return null;
-    }
-  }
-
-  @override
-  Future<bool> saveUserFullAddress(Map<String, dynamic> addressData) {
-    // This stores address, lat, and long inside one JSON object
-    return instance.setString(
-      _AppSharedPreferencesKeys.userFullAddress,
-      jsonEncode(addressData),
-    );
-  }
-
-  @override
-  Future<bool> removeUserFullAddress() {
-    return instance.remove(_AppSharedPreferencesKeys.userFullAddress);
-  }
-  // endregion
 
   //region:: Address Sync
   @override

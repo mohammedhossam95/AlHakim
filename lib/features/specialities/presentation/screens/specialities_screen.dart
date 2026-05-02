@@ -1,10 +1,14 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/specialities/presentation/widgets/speciality_item.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class SpecialitiesScreen extends StatelessWidget {
   const SpecialitiesScreen({super.key});
@@ -51,61 +55,63 @@ class SpecialitiesScreen extends StatelessWidget {
     ];
     return Scaffold(
       backgroundColor: colors.backGround,
-      appBar: AppBar(
-        title: Text("specialities".tr),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            /// 🔍 search
-            _SearchField(),
+      // appBar: AppBar(
+      //   title: Text("specialities".tr),
+      //   centerTitle: true,
+      //   automaticallyImplyLeading: false,
+      // ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: Column(
+            children: [
+              ///  search
+              _SearchField(),
 
-            Gaps.vGap16,
+              Gaps.vGap16,
 
-            /// banner
-            _BannerCard(),
+              /// banner
+              _BannerCard(),
 
-            Gaps.vGap16,
+              Gaps.vGap16,
 
-            /// header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("all_specialities".tr, style: TextStyles.semiBold16()),
-                Text(
-                  "view_all".tr,
-                  style: TextStyles.medium14(color: colors.main),
-                ),
-              ],
-            ),
-
-            Gaps.vGap16,
-
-            /// grid
-            Expanded(
-              child: GridView.builder(
-                itemCount: specialities.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1,
-                ),
-                itemBuilder: (context, index) {
-                  final item = specialities[index];
-                  return _SpecialityItem(item);
-                },
+              /// header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("all_specialities".tr, style: TextStyles.semiBold16()),
+                  Text(
+                    "see_all".tr,
+                    style: TextStyles.medium14(color: colors.main),
+                  ),
+                ],
               ),
-            ),
 
-            Gaps.vGap12,
+              Gaps.vGap16,
 
-            /// bottom card
-            _BottomCard(),
-          ],
+              /// grid
+              Expanded(
+                child: GridView.builder(
+                  itemCount: specialities.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = specialities[index];
+                    return InkWell(
+                      onTap: () {
+                        context.push(Routes.doctorsListScreenRoute);
+                      },
+                      child: SpecialityItem(item),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -115,126 +121,82 @@ class SpecialitiesScreen extends StatelessWidget {
 class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: "search_speciality".tr,
-        hintStyle: TextStyles.medium14(color: colors.lightTextColor),
-        prefixIcon: Icon(Icons.search, color: colors.main),
-        filled: true,
-        fillColor: colors.whiteColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20.r),
-          borderSide: BorderSide.none,
-        ),
-      ),
+    return MyTextFormField(
+      hintText: "search_speciality".tr,
+      prefixIcon: Icon(Icons.search, color: colors.main),
+
+      textInputAction: TextInputAction.search,
+      controller: TextEditingController(),
     );
   }
 }
 
 class _BannerCard extends StatelessWidget {
+  const _BannerCard();
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 140.h,
-      padding: EdgeInsets.all(16.w),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       decoration: BoxDecoration(
+        color: colors.main,
         borderRadius: BorderRadius.circular(20.r),
-        gradient: LinearGradient(colors: [colors.main, colors.secondary]),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "special_care".tr,
-            style: TextStyles.semiBold18(color: colors.whiteColor),
+          /// 🔝 icon (top right)
+          Row(
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // const SizedBox(),
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: colors.whiteColor.withValues(alpha: .15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.psychology,
+                  color: colors.whiteColor,
+                  size: 18.sp,
+                ),
+              ),
+              Gaps.hGap6,
+
+              /// 🧠 title
+              Text(
+                "ai_engine_title".tr,
+                style: TextStyles.semiBold18(color: colors.whiteColor),
+              ),
+            ],
           ),
+
           Gaps.vGap8,
+
+          Gaps.vGap8,
+
+          /// 📝 desc
           Text(
-            "special_care_desc".tr,
-            style: TextStyles.medium12(color: colors.whiteColor),
+            "ai_engine_desc".tr,
+            style: TextStyles.medium14(
+              color: colors.whiteColor.withValues(alpha: .85),
+            ),
           ),
-          const Spacer(),
+
+          Gaps.vGap20,
+
+          /// 🔘 button
           Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: colors.whiteColor,
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                "book_now".tr,
-                style: TextStyles.medium14(color: colors.main),
-              ),
+            alignment: Alignment.centerRight,
+            child: MyDefaultButton(
+              onPressed: () {},
+              btnText: "start_diagnosis",
+              color: colors.whiteColor,
+              textColor: colors.main,
+              width: ScreenUtil().screenWidth * .45,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SpecialityItem extends StatelessWidget {
-  final Map<String, dynamic> item;
-
-  const _SpecialityItem(this.item);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: colors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: item['color'].withValues(alpha: .2),
-            ),
-            child: Icon(item['icon'], color: item['color'], size: 26),
-          ),
-          Gaps.vGap12,
-          Text(item['title'], style: TextStyles.medium16()),
-          Gaps.vGap4,
-          Text(
-            "${item['count']} ${"doctors".tr}",
-            style: TextStyles.medium12(color: colors.lightTextColor),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BottomCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: colors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: colors.secondary.withValues(alpha: .2),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(Icons.verified, color: colors.secondary),
-          ),
-          Gaps.hGap12,
-          Text("quick_consult".tr, style: TextStyles.medium14()),
-          Gaps.hGap40,
-          Expanded(
-            child: MyDefaultButton(onPressed: () {}, btnText: "book_now"),
           ),
         ],
       ),
