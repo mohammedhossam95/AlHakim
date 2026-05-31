@@ -75,8 +75,8 @@ class _CustomMarketplaceHeaderState extends State<CustomMarketplaceHeader> {
               },
               child: Center(
                 child: DiffImage(
-                  image: widget.user.profileImageUrl ?? '',
-                  userName: widget.user.name ?? '',
+                  image: widget.user.profilePhotoUrl ?? '',
+                  userName: widget.user.firstName ?? '',
                   height: 40.h,
                   isCircle: true,
                   width: 40.w,
@@ -113,7 +113,7 @@ class _CustomMarketplaceHeaderState extends State<CustomMarketplaceHeader> {
               children: [
                 Expanded(
                   child: (Constants.isAuth(context))
-                      ? Text(widget.user.name ?? '')
+                      ? Text(widget.user.firstName ?? '')
                       : InkWell(
                           onTap: () {
                             context.pushNamed(Routes.loginScreenRoute);

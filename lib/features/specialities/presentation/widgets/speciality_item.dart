@@ -1,12 +1,14 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/features/specialities/domain/entities/specialty_entity.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SpecialityItem extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final SpecialtyEntity item;
 
   const SpecialityItem(this.item, {super.key});
 
@@ -21,19 +23,21 @@ class SpecialityItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: item['color'].withValues(alpha: .2),
-            ),
-            child: Icon(item['icon'], color: item['color'], size: 26),
+          DiffImage(
+            image: item.icon,
+            height: 75.h,
+            width: 75.w,
+            isCircle: true,
           ),
           Gaps.vGap12,
-          Text(item['title'], style: TextStyles.medium16()),
+          Text(
+            item.name ?? '',
+            style: TextStyles.medium16(),
+            textAlign: TextAlign.center,
+          ),
           Gaps.vGap4,
           Text(
-            "${item['count']} ${"doctors".tr}",
+            "${item.doctorsCount} ${"doctors".tr}",
             style: TextStyles.medium12(color: colors.lightTextColor),
           ),
         ],

@@ -4,14 +4,17 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
+import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
+import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
-
-import '../../../../injection_container.dart';
-import '../cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -139,7 +142,15 @@ class _MainPageState extends State<MainPage> {
                       currentIndex,
                     ),
                   )
-                : const Spacer(),
+                : Expanded(
+                    child: _navItem(
+                      context,
+                      0,
+                      Icons.home_outlined,
+                      "home".tr,
+                      currentIndex,
+                    ),
+                  ),
 
             // const SizedBox(width: 48), // Gap for FAB
             sessionCubit.state.userType == UserType.delegate
@@ -152,12 +163,22 @@ class _MainPageState extends State<MainPage> {
                       currentIndex,
                     ),
                   )
-                : Expanded(
+                : sessionCubit.state.userType == UserType.patient
+                ? Expanded(
                     child: _navItem(
                       context,
                       1,
                       Icons.calendar_month,
                       "appointments".tr,
+                      currentIndex,
+                    ),
+                  )
+                : Expanded(
+                    child: _navItem(
+                      context,
+                      1,
+                      Icons.manage_history,
+                      "queue_management".tr,
                       currentIndex,
                     ),
                   ),
@@ -191,14 +212,21 @@ class _MainPageState extends State<MainPage> {
       //height: 60,
       child: InkWell(
         onTap: () {
-          // features that require auth
-          // final protectedTabs = [1, 3];
-
-          // if (protectedTabs.contains(index)) {
-          //   if (!Constants.requireAuth(context)) return;
-          // }
-
           context.read<BottomNavBarCubit>().changeCurrentScreen(index: index);
+          if (index == 1 && sessionCubit.state.userType == UserType.delegate) {
+            context.read<GetDoctorsCubit>().getDoctors();
+          }
+          if (index == 1 && sessionCubit.state.userType == UserType.patient) {
+            context.read<GetAppointmentsCubit>().getAppointments();
+          }
+          if (index == 1 && sessionCubit.state.userType == UserType.doctor) {
+            context.read<GetQueueManagementCubit>().getQueueManagement(
+              doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
+            );
+          }
+          if (index == 0 && sessionCubit.state.userType == UserType.doctor) {
+            context.read<GetDoctorHomeCubit>().getDoctorHome();
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(12.0),

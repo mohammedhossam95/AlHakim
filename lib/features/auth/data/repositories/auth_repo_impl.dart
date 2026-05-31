@@ -1,5 +1,6 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
 import 'package:alhakim/core/base_classes/base_one_response.dart';
+import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/log_utils.dart';
 import 'package:dartz/dartz.dart';
 
@@ -81,15 +82,14 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  void _saveAuthResponse(AuthRespModel response) {
-    if (response.data != null && response.data is UserModel) {
-      final UserModel user = response.data as UserModel;
-      if (user.id != null) {
-        sharedPreferences.saveUserId(user.id!);
-      }
-      sharedPreferences.saveUser(user);
-      if (response.token != null) {
-        secureStorage.saveAccessToken(response.token!);
+  Future<void> _saveAuthResponse(AuthRespModel response) async {
+    if (response.data != null && response.data is AuthModel) {
+      final auth = response.data as AuthModel;
+
+      sharedPreferences.saveAuth(auth);
+
+      if (auth.token != null && auth.token!.isNotEmpty) {
+        await secureStorage.saveAccessToken(auth.token!);
       }
     }
   }
@@ -99,7 +99,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final BaseOneResponse response = await remote.login(params: params);
       if (response is AuthRespModel) {
-        _saveAuthResponse(response);
+        await _saveAuthResponse(response);
       }
       return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
@@ -127,11 +127,28 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, AuthRespModel>> completeProfile({
+    required CompleteProfileParams params,
+  }) async {
+    try {
+      final result = await remote.completeProfile(params: params);
+
+      await _saveAuthResponse(result);
+
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, BaseOneResponse>> register(AuthParams params) async {
     try {
       final BaseOneResponse response = await remote.register(params: params);
       if (response is AuthRespModel) {
-        _saveAuthResponse(response);
+        await _saveAuthResponse(response);
       }
       return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
@@ -143,9 +160,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, BaseOneResponse>> sendCode(AuthParams params) async {
+  Future<Either<Failure, BaseOneResponse>> resendOtp(AuthParams params) async {
     try {
-      final BaseOneResponse response = await remote.sendCode(params: params);
+      final result = await remote.resendOtp(params);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> sendCode(params) async {
+    try {
+      final BaseOneResponse response = await remote.sendOtp(params);
       return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
       Log.e(
@@ -156,9 +185,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> logout({required bool isTeacher}) async {
+  Future<Either<Failure, bool>> logout() async {
     try {
-      await remote.logout(isTeacher: isTeacher);
+      await remote.logout();
       return const Right<Failure, bool>(true);
     } on AppException catch (error) {
       Log.e('[logout] [${error.runtimeType.toString()}] ---- ${error.message}');

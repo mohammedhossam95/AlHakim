@@ -177,8 +177,8 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
           if (!mounted) return;
           BlocProvider.of<RegisterCubit>(context).register(
             AuthParams(
-              phone: phoneNum,
-              registerType: 'withPhone',
+              phoneNumber: phoneNum,
+              // registerType: 'withPhone',
               countryCode: _selectedCountry.phoneCode,
             ),
           );

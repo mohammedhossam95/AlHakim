@@ -1,135 +1,217 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/features/booking/domain/entities/family_member_entity.dart';
+import 'package:alhakim/features/booking/presentation/cubit/get_family_members_cubit/get_family_members_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-class FamilyMembersScreen extends StatelessWidget {
+class FamilyMembersScreen extends StatefulWidget {
   const FamilyMembersScreen({super.key});
 
   @override
+  State<FamilyMembersScreen> createState() => _FamilyMembersScreenState();
+}
+
+class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<GetFamilyMembersCubit>().getFamilyMembers();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final familyMembers = [
-      {
-        "name": "أحمد محمد",
-        "relation": "ابن",
-        "age": "8 سنوات",
-        "image": "https://i.pravatar.cc/150?img=3",
-      },
-      {
-        "name": "سارة محمود",
-        "relation": "زوجة",
-        "age": "32 سنة",
-        "image": "https://i.pravatar.cc/150?img=5",
-      },
-    ];
     return Scaffold(
-      appBar: AppBar(title: Text("family_members".tr), centerTitle: true),
+      appBar: AppBar(title: Text("family_members".tr)),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push(Routes.addFamilyMemberScreenRoute);
+        onPressed: () async {
+          final result = await context.push(Routes.addFamilyMemberScreenRoute);
+
+          if (result == true) {
+            if (!context.mounted) return;
+            context.read<GetFamilyMembersCubit>().getFamilyMembers();
+          }
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// count
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: colors.secondary.withValues(alpha: .2),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                "2 ${"members".tr}",
-                style: TextStyles.medium12(color: colors.secondary),
-              ),
-            ),
 
-            Gaps.vGap16,
+      body: BlocBuilder<GetFamilyMembersCubit, GetFamilyMembersState>(
+        builder: (context, state) {
+          if (state is GetFamilyMembersLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            /// list
-            Expanded(
-              child: ListView.separated(
-                itemCount: familyMembers.length,
-                separatorBuilder: (_, _) => Gaps.vGap12,
-                itemBuilder: (context, index) {
-                  return _FamilyItem(familyMembers[index]);
-                },
-              ),
+          if (state is GetFamilyMembersError) {
+            return Center(child: Text(state.message));
+          }
+
+          List<FamilyMemberEntity> familyMembers = [];
+
+          if (state is GetFamilyMembersSuccess) {
+            familyMembers = state.response.data as List<FamilyMemberEntity>;
+          }
+
+          return Padding(
+            padding: EdgeInsets.all(16.w),
+
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+
+                    vertical: 4.h,
+                  ),
+
+                  decoration: BoxDecoration(
+                    color: colors.secondary.withValues(alpha: .2),
+
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+
+                  child: Text(
+                    "${familyMembers.length} ${"members".tr}",
+
+                    style: TextStyles.medium12(color: colors.secondary),
+                  ),
+                ),
+
+                Gaps.vGap16,
+
+                Expanded(
+                  child: familyMembers.isEmpty
+                      ? Center(child: ErrorText(text: "noData".tr, width: 300))
+                      : ListView.separated(
+                          itemCount: familyMembers.length,
+
+                          separatorBuilder: (_, _) => Gaps.vGap12,
+
+                          itemBuilder: (context, index) {
+                            return _FamilyItem(
+                              item: familyMembers[index],
+
+                              onTap: () {
+                                Navigator.pop(context, familyMembers[index]);
+                              },
+                            );
+                          },
+                        ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 }
 
 class _FamilyItem extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final FamilyMemberEntity item;
 
-  const _FamilyItem(this.item);
+  final VoidCallback onTap;
+
+  const _FamilyItem({required this.item, required this.onTap});
+
+  String getAge(String? birthDate) {
+    if (birthDate == null) {
+      return "-";
+    }
+
+    final date = DateFormat("yyyy-MM-dd").parse(birthDate);
+
+    final age = DateTime.now().year - date.year;
+
+    return "$age";
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: colors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 24.r,
-            backgroundImage: NetworkImage(item['image']),
-          ),
+    return GestureDetector(
+      onTap: onTap,
 
-          Gaps.hGap12,
+      child: Container(
+        padding: EdgeInsets.all(14.w),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item['name'], style: TextStyles.semiBold16()),
-                Gaps.vGap4,
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.secondary.withValues(alpha: .2),
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      child: Text(
-                        item['relation'],
-                        style: TextStyles.medium12(color: colors.secondary),
-                      ),
-                    ),
-                    Gaps.hGap8,
-                    Text(
-                      "${"age".tr}: ${item['age']}",
-                      style: TextStyles.medium12(color: colors.lightTextColor),
-                    ),
-                  ],
-                ),
-              ],
+        decoration: BoxDecoration(
+          color: colors.whiteColor,
+
+          borderRadius: BorderRadius.circular(16.r),
+
+          border: Border.all(color: colors.main, width: 1.5),
+        ),
+
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24.r,
+
+              backgroundColor: colors.main.withValues(alpha: .1),
+
+              child: Icon(Icons.person, color: colors.main),
             ),
-          ),
 
-          Gaps.hGap12,
+            Gaps.hGap12,
 
-          Icon(Icons.delete_outline, color: colors.errorColor),
-        ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Text(item.fullName ?? '', style: TextStyles.semiBold16()),
+
+                  Gaps.vGap4,
+
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+
+                          vertical: 2.h,
+                        ),
+
+                        decoration: BoxDecoration(
+                          color: colors.secondary.withValues(alpha: .2),
+
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+
+                        child: Text(
+                          item.kinship?.label ?? '',
+
+                          style: TextStyles.medium12(color: colors.secondary),
+                        ),
+                      ),
+
+                      Gaps.hGap8,
+
+                      Text(
+                        "${"age".tr}: ${getAge(item.birthDate)}",
+
+                        style: TextStyles.medium12(
+                          color: colors.lightTextColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            Icon(Icons.keyboard_arrow_left_rounded, color: colors.main),
+          ],
+        ),
       ),
     );
   }

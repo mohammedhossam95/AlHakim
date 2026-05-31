@@ -1,8 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:alhakim/core/params/auth_params.dart';
-import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/widgets/back_button.dart';
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
+import 'package:alhakim/features/auth/presentation/cubit/resend_otp_cubit/resend_otp_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
 import 'package:alhakim/features/auth/presentation/widgets/pin_widget.dart';
+import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
@@ -57,13 +62,24 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
     return "$minutes:$seconds";
   }
 
-  void _onConfirmPressed() {
+  void _onConfirmPressed() async {
     final code = codeController.text;
-    if (code.length < 4) return;
+    if (code.length < 6) return;
+
+    final phone = await Constants.phoneParsing(
+      phone: widget.authParams.phoneNumber,
+      countryCode: "${widget.authParams.countryCode}",
+
+      withCode: false,
+    );
     context.read<VerifyCodeCubit>().verifyCode(
       AuthParams(
         otp: codeController.text,
-        phone: widget.authParams.phone ?? '',
+        phoneNumber: phone ?? '',
+        countryCode: "${widget.authParams.countryCode}",
+        userType: sessionCubit.state.userType,
+        secretaryPhone: widget.authParams.secretaryPhone,
+        secretaryCountryCode: widget.authParams.secretaryCountryCode,
       ),
     );
   }
@@ -88,12 +104,16 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
                 ),
               ),
             ),
+
             Gaps.vGap40,
+
             FadeInUp(
               delay: Duration(milliseconds: 300),
               child: Text('activation_code'.tr, style: TextStyles.semiBold24()),
             ),
+
             Gaps.vGap10,
+
             FadeInUp(
               delay: Duration(milliseconds: 400),
               child: Text(
@@ -103,21 +123,27 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
                 ),
               ),
             ),
+
             Gaps.vGap10,
+
             FadeInUp(
               delay: Duration(milliseconds: 500),
               child: Center(
                 child: Text(
-                  widget.authParams.phone ?? '',
+                  widget.authParams.phoneNumber ?? '',
                   style: TextStyles.semiBold14(color: colors.lightTextColor),
                 ),
               ),
             ),
+
             Gaps.vGap40,
+
             FadeInUp(
               delay: Duration(milliseconds: 600),
               child: PinCodeWidget(
-                pinLength: 4,
+                pinBoxWidth: 50.w,
+                pinLength: 6,
+
                 controller: codeController,
                 focus: codeFocus,
                 textSubmit: (_) => _onConfirmPressed(),
@@ -125,6 +151,7 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
             ),
 
             Gaps.vGap50,
+
             isLoading
                 ? const LoadingView()
                 : FadeIn(
@@ -132,14 +159,10 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
                     child: MyDefaultButton(
                       color: colors.main,
                       btnText: 'confirm',
-                      onPressed: () {
-                        sessionCubit.state.userType == UserType.patient
-                            ? context.push(Routes.mainPageRoute)
-                            : context.push(Routes.mainPageRoute);
-                      },
-                      // onPressed: _onConfirmPressed,
+                      onPressed: () => _onConfirmPressed(),
                     ),
                   ),
+
             if (errorMessage != null) ...[
               Gaps.vGap10,
               Center(
@@ -151,8 +174,10 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
                 ),
               ),
             ],
+
             Gaps.vGap30,
             Gaps.vGap35,
+
             FadeInUp(
               delay: Duration(milliseconds: 800),
               child: Row(
@@ -161,22 +186,27 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
                   AnimatedBuilder(
                     animation: timeController,
                     builder: (context, _) {
-                      // التحقق هل انتهى الوقت أم لا
                       bool isTimerFinished = timeController.value == 0;
 
                       return GestureDetector(
                         onTap: (isTimerFinished)
-                            ? () {
-                                // //todo resend code
-                                // context.read<RegisterCubit>().register(
-                                //   AuthParams(
-                                //     phone: widget.authParams.phone,
-                                //     registerType: 'withPhone',
-                                //     countryCode: 'EG',
-                                //   ),
-                                // );
-                                // timeController.reverse(from: 1.0);
-                                // codeController.clear();
+                            ? () async {
+                                final phone = await Constants.phoneParsing(
+                                  phone: widget.authParams.phoneNumber,
+                                  countryCode:
+                                      "${widget.authParams.countryCode}",
+                                  withCode: false,
+                                );
+                                if (phone != null) {
+                                  if (!mounted) return;
+                                  context.read<ResendOtpCubit>().resendOtp(
+                                    AuthParams(
+                                      countryCode:
+                                          widget.authParams.countryCode,
+                                      phoneNumber: phone,
+                                    ),
+                                  );
+                                }
                               }
                             : null,
                         child: Text(
@@ -190,7 +220,9 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
                       );
                     },
                   ),
+
                   Gaps.hGap16,
+
                   AnimatedBuilder(
                     animation: timeController,
                     builder: (context, _) => Text(
@@ -211,26 +243,79 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(leading: Center(child: CustomBackButton())),
-      body: BlocListener<VerifyCodeCubit, VerifyCodeState>(
-        listener: (context, state) {
-          if (state is VerifyCodeLoaded) {
-            Constants.showSnakToast(
-              context: context,
-              type: 1,
-              message: state.response.message,
-            );
-            context.pushReplacementNamed(
-              Routes.completeProfileRegisterScreenRoute,
-              extra: widget.authParams,
-            );
-          } else if (state is VerifyCodeError) {
-            Constants.showSnakToast(
-              context: context,
-              type: 3,
-              message: state.message,
-            );
-          }
-        },
+
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<ResendOtpCubit, ResendOtpState>(
+            listener: (context, state) {
+              if (state is ResendOtpSuccess) {
+                Constants.showSnakToast(
+                  context: context,
+                  type: 1,
+                  message: state.response.message,
+                );
+
+                /// restart timer
+                timeController.reverse(from: 1.0);
+              }
+
+              if (state is ResendOtpError) {
+                Constants.showSnakToast(
+                  context: context,
+                  type: 3,
+                  message: state.message,
+                );
+              }
+            },
+          ),
+
+          BlocListener<VerifyCodeCubit, VerifyCodeState>(
+            listener: (context, state) {
+              if (state is VerifyCodeLoaded) {
+                Constants.showSnakToast(
+                  context: context,
+                  type: 1,
+                  message: state.response.message,
+                );
+                final data = state.response.data as AuthModel;
+                sharedPreferences.saveAuth(data);
+
+                if (data.token != null && data.token!.isNotEmpty) {
+                  secureStorage.saveAccessToken(data.token!);
+                }
+
+                context.read<SessionCubit>().loginSuccess(
+                  sessionCubit.state.userType,
+                );
+
+                switch (data.nextStep) {
+                  case "complete_profile":
+                    context.pushReplacementNamed(
+                      Routes.completeProfileRegisterScreenRoute,
+                    );
+                    return;
+
+                  case "go_to_home":
+                  default:
+                    context.read<BottomNavBarCubit>().changeCurrentScreen(
+                      index: 0,
+                    );
+
+                    context.pushReplacementNamed(Routes.mainPageRoute);
+                    return;
+                }
+              }
+
+              if (state is VerifyCodeError) {
+                Constants.showSnakToast(
+                  context: context,
+                  type: 3,
+                  message: state.message,
+                );
+              }
+            },
+          ),
+        ],
 
         child: BlocBuilder<VerifyCodeCubit, VerifyCodeState>(
           builder: (context, state) => _buildOtpUI(

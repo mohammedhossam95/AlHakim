@@ -1,5 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
-import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -32,14 +32,14 @@ class _SplashScreenState extends State<SplashScreen> {
         listener: (context, session) {
           Future.delayed(const Duration(seconds: 2), () {
             //this applay geust mode
-            // if (session.status == SessionStatus.firstLaunch) {
-            //   context.pushReplacementNamed(Routes.phoneEntryScreenRoute);
-            // } else if (session.status == SessionStatus.guest) {
-            //   context.pushReplacementNamed(Routes.loginScreenRoute);
-            // } else if (session.status == SessionStatus.authenticated) {
-            //  context.pushReplacementNamed(Routes.mainPageRoute);
-            //}
-            context.pushReplacementNamed(Routes.chooseUserTypeScreenRoute);
+            if (session.status == SessionStatus.firstLaunch) {
+              context.pushReplacementNamed(Routes.chooseUserTypeScreenRoute);
+            } else if (session.status == SessionStatus.guest) {
+              context.pushReplacementNamed(Routes.chooseUserTypeScreenRoute);
+            } else if (session.status == SessionStatus.authenticated) {
+              context.pushReplacementNamed(Routes.mainPageRoute);
+            }
+            // context.pushReplacementNamed(Routes.completeProfileRegisterScreenRoute);
           });
         },
 
@@ -48,29 +48,12 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               const Spacer(flex: 3),
               FadeIn(
-                delay: Duration(milliseconds: 600),
+                delay: Duration(milliseconds: 800),
                 curve: Curves.easeIn,
                 child: Padding(
                   padding: const EdgeInsets.all(40.0),
                   child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 40.r,
-                        backgroundColor: colors.main,
-                        child: Icon(
-                          Icons.medical_services_outlined,
-                          color: colors.whiteColor,
-                          size: 40,
-                        ),
-                      ),
-
-                      Gaps.vGap16,
-
-                      Text(
-                        "Al-Hakim",
-                        style: TextStyles.semiBold24(color: colors.main),
-                      ),
-                    ],
+                    children: [Image.asset("assets/images/logo.png", height: 400.h)],
                   ),
                 ),
               ),

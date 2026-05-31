@@ -1,189 +1,75 @@
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
+import 'package:alhakim/features/auth/domain/entities/verify_otp_entity.dart';
+import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 
-
-/// ===========================================================================
-/// Auth Response Model
-/// ===========================================================================
 class AuthRespModel extends BaseOneResponse {
-  final String? tokenType;
-  final String? token;
-
-  const AuthRespModel({
-    super.data,
-    super.status,
-    super.message,
-    this.tokenType,
-    this.token,
-  });
+  const AuthRespModel({super.status, super.message, super.data});
 
   factory AuthRespModel.fromJson(Map<String, dynamic> json) {
-    dynamic dataNode = json["data"];
-    UserModel? userModel;
-    String? extractedToken;
-    String? extractedTokenType;
-
-    if (dataNode != null && dataNode is Map<String, dynamic>) {
-      // CASE 1: Teacher/Instructor (Nested structure: data -> user)
-      if (dataNode.containsKey('user')) {
-        userModel = UserModel.fromJson(dataNode['user']);
-        extractedToken = dataNode['token'];
-        extractedTokenType = dataNode['token_type'];
-      }
-      // CASE 2: Student/Parent (Flat structure: data -> {fields})
-      else {
-        userModel = UserModel.fromJson(dataNode);
-        // Sometimes tokens are at the root or inside data
-        extractedToken = dataNode['token'] ?? json['token'];
-        extractedTokenType = dataNode['token_type'] ?? json['token_type'];
-      }
-    }
-
     return AuthRespModel(
-      data: userModel,
-      message: json["message"],
-      status: json["status"],
-      token: extractedToken,
-      tokenType: extractedTokenType,
+      status: json['status'],
+      message: json['message'],
+      data: json['data'] != null ? AuthModel.fromJson(json['data']) : null,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> base = {"status": status, "message": message};
-
-    if (data != null && data is UserModel) {
-      base["data"] = {
-        "token": token,
-        "token_type": tokenType,
-        "user": (data as UserModel).toJson(),
-      };
-    }
-    return base;
   }
 }
 
-/// ===========================================================================
-/// User Model
-/// ===========================================================================
+class AuthModel extends UserAuthEntity {
+  const AuthModel({super.token, super.user, super.doctor, super.nextStep});
+
+  factory AuthModel.fromJson(Map<String, dynamic> json) {
+    return AuthModel(
+      token: json['token'],
+      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
+      doctor: json['doctor'] != null
+          ? DoctorModel.fromJson(json['doctor'])
+          : null,
+      nextStep: json['next_step'],
+    );
+  }
+  Map<String, dynamic> toJson() => {
+    "token": token,
+    "user": user is UserModel ? (user as UserModel).toJson() : null,
+    "doctor": doctor is DoctorModel ? (doctor as DoctorModel).toJson() : null,
+  };
+}
+
 class UserModel extends UserEntity {
   const UserModel({
     super.id,
-    super.name,
-    super.email,
-    super.phone,
-    super.parentPhone,
-    super.role,
-    super.tenantId,
-    super.tenantName,
-    super.activationStatus,
-    super.profileImageUrl,
-    super.subscriptionType,
-    super.createdAt,
-    super.dateOfBirth,
-    super.address,
-    super.schoolName,
-    super.parentJob,
-    super.notes,
-    super.governorate,
-    super.grade,
-    super.tenant,
+    super.firstName,
+    super.lastName,
+    super.phoneNumber,
+    super.countryCode,
+    super.birthDate,
+    super.isPhoneVerified,
+    super.profilePhotoUrl,
+    super.referralCode,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-  return UserModel(
-    id: json['id'],
-    name: json['name'],
-    email: json['email'],
-    phone: json['phone'],
-    parentPhone: json['parent_phone']?.toString(), // تأكد من تحويلها لنص
-    role: json['role'],
-    tenantId: json['tenant_id'] ?? json['tenant']?['id'],
-    tenantName: json['tenant_name'] ?? json['tenant']?['name'],
-    activationStatus: json['activation_status'] == 1 || 
-                      json['activation_status'] == '1' || 
-                      json['activation_status'] == true,
-    profileImageUrl: json['profile_image_url'],
-    subscriptionType: json['subscription_type'],
-    createdAt: json['created_at'],
-    dateOfBirth: json['date_of_birth'],
-    address: json['address']?.toString(),
-    schoolName: json['school_name']?.toString(),
-    parentJob: json['parent_job']?.toString(),
-    notes: json['notes']?.toString(),
-    governorate: json['governorate'] != null 
-        ? GovernorateModel.fromJson(json['governorate']) 
-        : null,
-    grade: json['grade'] != null 
-        ? GradeModel.fromJson(json['grade']) 
-        : null,
-    tenant: json['tenant'] != null 
-        ? TenantModel.fromJson(json['tenant']) 
-        : null,
-  );
-}
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'email': email,
-    'phone': phone,
-    'parent_phone': parentPhone,
-    'role': role,
-    'tenant_id': tenantId,
-    'activation_status': activationStatus,
-    'profile_image_url': profileImageUrl,
-    'date_of_birth': dateOfBirth,
-    'address': address,
-    'school_name': schoolName,
-    'parent_job': parentJob,
-    'notes': notes,
-    'governorate': governorate is GovernorateModel
-        ? (governorate as GovernorateModel).toJson()
-        : null,
-    'grade': grade is GradeModel ? (grade as GradeModel).toJson() : null,
-  };
-}
-
-/// ===========================================================================
-/// Supporting Models
-/// ===========================================================================
-
-class TenantModel extends TenantEntity {
-  const TenantModel({
-    super.id,
-    super.name,
-    super.subscriptionType,
-    super.multipleTeacher,
-  });
-
-  factory TenantModel.fromJson(Map<String, dynamic> json) {
-    return TenantModel(
+    return UserModel(
       id: json['id'],
-      name: json['name'],
-      subscriptionType: json['subscription_type'],
-      multipleTeacher:
-          json['multiple_teacher'] == 1 || json['multiple_teacher'] == true,
+      firstName: json['first_name'],
+      lastName: json['last_name'],
+      phoneNumber: json['phone_number'],
+      countryCode: json['country_code'],
+      birthDate: json['birth_date'],
+      isPhoneVerified: json['is_phone_verified'],
+      profilePhotoUrl: json['profile_photo_url'],
+      referralCode: json['referral_code'],
     );
   }
-
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'subscription_type': subscriptionType,
-    'multiple_teacher': multipleTeacher,
+    "id": id,
+    "first_name": firstName,
+    "last_name": lastName,
+    "phone_number": phoneNumber,
+    "country_code": countryCode,
+    "birth_date": birthDate,
+    "is_phone_verified": isPhoneVerified,
+    "profile_photo_url": profilePhotoUrl,
+    "referral_code": referralCode,
   };
-}
-
-class GovernorateModel extends GovernorateEntity {
-  const GovernorateModel({super.id, super.name});
-  factory GovernorateModel.fromJson(Map<String, dynamic> json) =>
-      GovernorateModel(id: json['id'], name: json['name']);
-  Map<String, dynamic> toJson() => {'id': id, 'name': name};
-}
-
-class GradeModel extends GradeEntity {
-  const GradeModel({super.id, super.name});
-  factory GradeModel.fromJson(Map<String, dynamic> json) =>
-      GradeModel(id: json['id'], name: json['name']);
-  Map<String, dynamic> toJson() => {'id': id, 'name': name};
 }

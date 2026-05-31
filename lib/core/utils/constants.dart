@@ -273,42 +273,40 @@ class Constants {
       return '';
     }
   }
-  // static Future<void> makePhoneCall(String phoneNumber) async {
-  //   final Uri launchUri = Uri(
-  //     scheme: 'tel',
-  //     path: phoneNumber,
-  //   );
-  //   try {
-  //     await launchUrl(launchUri);
-  //   } catch (e) {
-  //     throw 'Could not launch $launchUri';
-  //   }
-  // }
 
-  // static picker.Country egyptCountryPicker = picker.Country(
-  //   phoneCode: '20',
-  //   countryCode: 'EG',
-  //   e164Sc: 0,
-  //   geographic: true,
-  //   level: -1,
-  //   name: 'Egypt',
-  //   example: '1020304050',
-  //   displayName: 'Egypt (EG) [+20]',
-  //   displayNameNoCountryCode: 'Egypt (EG)',
-  //   e164Key: '20-EG-0',
-  // );
-  static picker.Country saudiCountryPicker = picker.Country(
-    phoneCode: '966',
-    countryCode: 'SA',
+  static Future<void> makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    try {
+      await launchUrl(launchUri);
+    } catch (e) {
+      throw 'Could not launch $launchUri';
+    }
+  }
+
+  static picker.Country egyptCountryPicker = picker.Country(
+    phoneCode: '20',
+    countryCode: 'EG',
     e164Sc: 0,
     geographic: true,
-    level: 1,
-    name: 'Saudi Arabia',
-    example: '512345678',
-    displayName: 'Saudi Arabia (SA) [+966]',
-    displayNameNoCountryCode: 'Saudi Arabia (SA)',
-    e164Key: '966-SA-0',
+    level: -1,
+    name: 'Egypt',
+    example: '1020304050',
+    displayName: 'Egypt (EG) [+20]',
+    displayNameNoCountryCode: 'Egypt (EG)',
+    e164Key: '20-EG-0',
   );
+  // static picker.Country saudiCountryPicker = picker.Country(
+  //   phoneCode: '966',
+  //   countryCode: 'SA',
+  //   e164Sc: 0,
+  //   geographic: true,
+  //   level: 1,
+  //   name: 'Saudi Arabia',
+  //   example: '512345678',
+  //   displayName: 'Saudi Arabia (SA) [+966]',
+  //   displayNameNoCountryCode: 'Saudi Arabia (SA)',
+  //   e164Key: '966-SA-0',
+  // );
 
   static String greeting() {
     var hour = DateTime.now().hour;
@@ -334,31 +332,33 @@ class Constants {
     String? countryCode,
     bool withCode = true,
   }) async {
-    PhoneNumber phoneParsed;
     try {
-      phoneParsed = PhoneNumber.parse(
-        phone!,
-        callerCountry: IsoCode.values
-            .where((element) => element.name == countryCode!.toUpperCase())
-            .first,
-        destinationCountry: countryCode == 'SA'
-            ? IsoCode.SA
-            : IsoCode.values
-                  .where(
-                    (element) => element.name == countryCode!.toUpperCase(),
-                  )
-                  .first,
+      if (phone == null || phone.isEmpty) return null;
+      if (countryCode == null || countryCode.isEmpty) return null;
+
+      final isoCode = IsoCode.values.firstWhere(
+        (element) => element.name.toUpperCase() == countryCode.toUpperCase(),
+        orElse: () => IsoCode.EG,
+      );
+
+      final phoneParsed = PhoneNumber.parse(
+        phone,
+        callerCountry: isoCode,
+        destinationCountry: isoCode,
       );
 
       if (phoneParsed.isValid()) {
-        return withCode == true ? phoneParsed.international : phoneParsed.nsn;
-      } else {
-        log('Phone number is invalid');
-        // throw 'Invalid Phone Number';
-        return null;
+        return withCode ? phoneParsed.international : phoneParsed.nsn;
       }
-    } on PlatformException {
-      rethrow;
+
+      log('Phone number is invalid');
+      return null;
+    } on PlatformException catch (e) {
+      log('Phone parsing error: ${e.message}');
+      return null;
+    } catch (e) {
+      log('Unexpected error: $e');
+      return null;
     }
   }
 
@@ -372,12 +372,143 @@ class Constants {
     }
   }
 
-  static bool checkPDFFiles(String file) {
-    var newString = file.substring(file.length - 5);
+  static Future<bool?> showConfirmDialog({
+    required BuildContext context,
+    required String title,
+    required String content,
 
-    debugPrint('file $file');
-    debugPrint('checkFile pdf or image  $newString');
-    return newString.contains('pdf') ? true : false;
+    /// texts
+    String yesText = 'yes',
+    String noText = 'no',
+
+    /// actions
+    VoidCallback? onYesPressed,
+
+    /// style
+    double borderRadius = 12.0,
+    double buttonBorderRadius = 8.0,
+
+    Color? yesButtonColor,
+    Color? noButtonColor,
+
+    TextStyle? titleStyle,
+    TextStyle? contentStyle,
+    TextStyle? yesTextStyle,
+    TextStyle? noTextStyle,
+
+    double widthFactor = 0.8,
+  }) {
+    return showDialog<bool>(
+      context: context,
+
+      builder: (dialogContext) => Center(
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+
+          content: Padding(
+            padding: const EdgeInsets.all(8.0),
+
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+
+              crossAxisAlignment: CrossAxisAlignment.center,
+
+              children: [
+                ElasticInLeft(
+                  child: Center(
+                    child: Text(
+                      title,
+                      style: titleStyle ?? TextStyles.semiBold18(),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+
+                Gaps.vGap10,
+
+                ElasticInRight(
+                  child: Center(
+                    child: Text(
+                      content,
+                      style:
+                          contentStyle ??
+                          TextStyles.medium14(color: colors.lightTextColor),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+
+                Gaps.vGap16,
+
+                Divider(height: 2),
+
+                Gaps.vGap16,
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElasticInLeft(
+                        child: MyDefaultButton(
+                          height: 42.h,
+
+                          onPressed: () {
+                            Navigator.pop(dialogContext, false);
+                          },
+
+                          btnText: noText,
+
+                          color: noButtonColor ?? colors.whiteColor,
+
+                          borderColor: noButtonColor ?? colors.main,
+
+                          textColor: colors.main,
+
+                          textStyle:
+                              noTextStyle ??
+                              TextStyles.medium14(color: colors.main),
+                        ),
+                      ),
+                    ),
+
+                    Gaps.hGap16,
+
+                    Expanded(
+                      child: ElasticInRight(
+                        child: MyDefaultButton(
+                          height: 42.h,
+
+                          onPressed: () async {
+                            Navigator.pop(dialogContext, true);
+
+                            onYesPressed?.call();
+                          },
+
+                          btnText: yesText,
+
+                          color: yesButtonColor ?? colors.main,
+
+                          borderColor: yesButtonColor ?? colors.main,
+
+                          textStyle:
+                              yesTextStyle ??
+                              TextStyles.medium14(color: colors.whiteColor),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static bool checkPDFFiles(String file) {
+    return file.toLowerCase().endsWith('.pdf');
   }
 
   static bool checkAuth(String msg) {

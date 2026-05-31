@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import '/core/base_classes/pagination.dart';
 
 class BaseListResponse extends Equatable {
@@ -19,17 +20,17 @@ class BaseListResponse extends Equatable {
   final bool? success;
   final Pagination? pagination;
   final int? statusCode;
-  final String? status;
+  final bool? status;
 
   @override
   List<Object?> get props => [
-        data,
-        message,
-        success,
-        pagination,
-        value,
-        key,
-        status,
-        statusCode,
-      ];
+    data,
+    message,
+    success,
+    pagination,
+    value,
+    key,
+    status,
+    statusCode,
+  ];
 }

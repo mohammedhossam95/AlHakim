@@ -1,18 +1,17 @@
+import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
+import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/core/utils/values/assets.dart';
+import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/auth/presentation/widgets/user_type_card_widget.dart';
+import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-
-import '/config/locale/app_localizations.dart';
-import '/config/routes/app_routes.dart';
-import '/core/utils/enums.dart';
-import '/core/utils/values/assets.dart';
-import '/core/utils/values/text_styles.dart';
-import '/core/widgets/gaps.dart';
-import '/core/widgets/my_default_button.dart';
-import '/injection_container.dart';
 
 class ChooseUserTypeScreen extends StatefulWidget {
   const ChooseUserTypeScreen({super.key});

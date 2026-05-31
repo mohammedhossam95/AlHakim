@@ -1,41 +1,71 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/diff_img.dart';
+import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
+import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
+import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class AppointmentsScreen extends StatelessWidget {
+class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
+
+  @override
+  State<AppointmentsScreen> createState() => _AppointmentsScreenState();
+}
+
+class _AppointmentsScreenState extends State<AppointmentsScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<GetAppointmentsCubit>().getAppointments();
+  }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
+
       child: Scaffold(
         backgroundColor: colors.backGround,
+
         appBar: AppBar(
           title: Text("appointments".tr),
 
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(60.h),
+
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+
               decoration: BoxDecoration(
                 color: colors.whiteColor,
+
                 borderRadius: BorderRadius.circular(30.r),
               ),
+
               child: TabBar(
                 indicatorSize: TabBarIndicatorSize.tab,
+
                 indicator: BoxDecoration(
                   color: colors.main,
+
                   borderRadius: BorderRadius.circular(30.r),
                 ),
+
                 labelColor: colors.whiteColor,
+
                 unselectedLabelColor: colors.textColor,
-                dividerColor: Colors.transparent,
+
                 tabs: [
                   Tab(text: "upcoming".tr),
+
                   Tab(text: "previous".tr),
                 ],
               ),
@@ -43,12 +73,67 @@ class AppointmentsScreen extends StatelessWidget {
           ),
         ),
 
-        /// 🔥 BODY
-        body: const TabBarView(
-          children: [
-            _AppointmentsList(isUpcoming: true),
-            _AppointmentsList(isUpcoming: false),
-          ],
+        body: BlocListener<CancelAppointmentCubit, CancelAppointmentState>(
+          listener: (context, state) {
+            if (state is CancelAppointmentLoading) {
+              Constants.showLoading(context);
+            } else if (state is CancelAppointmentSuccess) {
+              Constants.hideLoading(context);
+              Constants.showSnakToast(
+                message: state.response.message ?? '',
+                context: context,
+                type: 1,
+              );
+              context.read<GetAppointmentsCubit>().getAppointments();
+            } else if (state is CancelAppointmentError) {
+              Constants.hideLoading(context);
+              Constants.showSnakToast(
+                message: state.message,
+                context: context,
+                type: 3,
+              );
+            }
+          },
+          child: BlocBuilder<GetAppointmentsCubit, GetAppointmentsState>(
+            builder: (context, state) {
+              if (state is GetAppointmentsLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state is GetAppointmentsError) {
+                return Center(
+                  child: ErrorText(
+                    text: state.message,
+                    width: 300,
+                    onRetry: () =>
+                        context.read<GetAppointmentsCubit>().getAppointments(),
+                  ),
+                );
+              }
+
+              List<AppointmentEntity> appointments = [];
+
+              if (state is GetAppointmentsSuccess) {
+                appointments = state.response.data as List<AppointmentEntity>;
+              }
+
+              final upcoming = appointments
+                  .where((e) => e.status == "confirmed")
+                  .toList();
+
+              final previous = appointments
+                  .where((e) => e.status != "confirmed")
+                  .toList();
+
+              return TabBarView(
+                children: [
+                  _AppointmentsList(data: upcoming),
+
+                  _AppointmentsList(data: previous),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -56,34 +141,12 @@ class AppointmentsScreen extends StatelessWidget {
 }
 
 class _AppointmentsList extends StatelessWidget {
-  final bool isUpcoming;
+  final List<AppointmentEntity> data;
 
-  const _AppointmentsList({required this.isUpcoming});
+  const _AppointmentsList({required this.data});
 
   @override
   Widget build(BuildContext context) {
-    /// 🔥 Dummy Data (replace with API)
-    final List<Map<String, dynamic>> data = isUpcoming
-        ? [
-            {
-              "name": "د. أحمد علي",
-              "speciality": "استشاري أمراض القلب",
-              "date": "15 أكتوبر",
-              "time": "10:00 صباحًا",
-              "image": "https://i.pravatar.cc/150?img=3",
-            },
-          ]
-        : [
-            {
-              "name": "د. سارة محمود",
-              "speciality": "أخصائية أطفال",
-              "date": "10 أكتوبر",
-              "time": "04:30 مساءً",
-              "image": "https://i.pravatar.cc/150?img=5",
-            },
-          ];
-
-    /// ❌ Empty State
     if (data.isEmpty) {
       return Center(
         child: Text("no_appointments".tr, style: TextStyles.medium14()),
@@ -92,8 +155,11 @@ class _AppointmentsList extends StatelessWidget {
 
     return ListView.separated(
       padding: EdgeInsets.all(16.w),
+
       itemCount: data.length,
+
       separatorBuilder: (_, _) => Gaps.vGap12,
+
       itemBuilder: (context, index) {
         return _AppointmentCard(data[index]);
       },
@@ -102,7 +168,7 @@ class _AppointmentsList extends StatelessWidget {
 }
 
 class _AppointmentCard extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final AppointmentEntity item;
 
   const _AppointmentCard(this.item);
 
@@ -110,42 +176,69 @@ class _AppointmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(14.w),
+
       decoration: BoxDecoration(
         color: colors.whiteColor,
+
         borderRadius: BorderRadius.circular(16.r),
       ),
+
       child: Column(
         children: [
-          /// 🔥 HEADER
           Row(
             children: [
-              CircleAvatar(
-                radius: 24.r,
-                backgroundImage: NetworkImage(item['image']),
+              DiffImage(
+                image: item.doctor?.profileImage ?? '',
+
+                width: 50.w,
+
+                height: 50.h,
+                isCircle: true,
               ),
+
               Gaps.hGap10,
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
-                    Text(item['name'], style: TextStyles.semiBold16()),
-                    Gaps.vGap4,
                     Text(
-                      item['speciality'],
+                      item.doctor?.name ?? '',
+
+                      style: TextStyles.semiBold16(),
+                    ),
+
+                    Gaps.vGap4,
+
+                    Text(
+                      item.doctor?.specialty?.name ?? '',
+
                       style: TextStyles.medium12(color: colors.lightTextColor),
                     ),
                   ],
                 ),
               ),
+
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+
                 decoration: BoxDecoration(
-                  color: colors.secondary.withValues(alpha: .2),
+                  color: item.status == "confirmed"
+                      ? colors.success.withValues(alpha: .2)
+                      : colors.error.withValues(alpha: .2),
+
                   borderRadius: BorderRadius.circular(20.r),
                 ),
+
                 child: Text(
-                  "confirmed".tr,
-                  style: TextStyles.medium12(color: colors.secondary),
+                  item.status == "confirmed" ? "حجز مؤكد" : "ملغي",
+
+                  style: TextStyles.medium12(
+                    color: item.status == "confirmed"
+                        ? colors.success
+                        : colors.error,
+                  ),
                 ),
               ),
             ],
@@ -153,73 +246,69 @@ class _AppointmentCard extends StatelessWidget {
 
           Gaps.vGap12,
 
-          /// 🔥 DATE & TIME
           Row(
             children: [
-              Expanded(
-                child: _InfoBox(
-                  title: "time".tr,
-                  value: item['time'],
-                  icon: Icons.access_time,
-                ),
-              ),
-              Gaps.hGap10,
               Expanded(
                 child: _InfoBox(
                   title: "date".tr,
-                  value: item['date'],
+
+                  value: item.appointmentDate ?? '',
+
                   icon: Icons.calendar_today,
+                ),
+              ),
+
+              Gaps.hGap10,
+              Expanded(
+                child: _InfoBox(
+                  title: "الحالة",
+
+                  value: item.status == "confirmed" ? "حجز مؤكد" : "ملغاة",
+
+                  icon: Icons.access_time,
                 ),
               ),
             ],
           ),
 
           Gaps.vGap12,
-
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    /// edit logic
+          item.status == "confirmed"
+              ? GestureDetector(
+                  onTap: () async {
+                    Constants.showConfirmDialog(
+                      context: context,
+                      title: "cancel_appointment".tr,
+                      content: "cancel_appointment_desc".tr,
+                      onYesPressed: () async {
+                        if (!context.mounted) return;
+                        context
+                            .read<CancelAppointmentCubit>()
+                            .cancelAppointment(
+                              appointmentId: item.id.toString(),
+                            );
+                      },
+                    );
                   },
+
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 10.h),
-                    decoration: BoxDecoration(
-                      color: colors.main,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      "edit".tr,
-                      style: TextStyles.medium14(color: colors.whiteColor),
-                    ),
-                  ),
-                ),
-              ),
-              Gaps.hGap10,
 
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    /// cancel logic
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 10.h),
                     decoration: BoxDecoration(
                       color: colors.errorColor.withValues(alpha: .1),
+
                       borderRadius: BorderRadius.circular(10.r),
                     ),
+
                     alignment: Alignment.center,
+
                     child: Text(
-                      "cancel".tr,
+                      "cancel_appointment".tr,
+
                       style: TextStyles.medium14(color: colors.errorColor),
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
+                )
+              : Container(),
         ],
       ),
     );
@@ -241,18 +330,25 @@ class _InfoBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(10.w),
+
       decoration: BoxDecoration(
         color: colors.lightBackGroundColor,
+
         borderRadius: BorderRadius.circular(10.r),
       ),
+
       child: Row(
         children: [
           Icon(icon, size: 18, color: colors.main),
+
           Gaps.hGap8,
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
               Text(title, style: TextStyles.medium10()),
+
               Text(value, style: TextStyles.medium12()),
             ],
           ),

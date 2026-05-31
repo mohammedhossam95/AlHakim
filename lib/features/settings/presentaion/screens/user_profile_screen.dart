@@ -1,4 +1,3 @@
-import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
@@ -32,10 +31,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<GetUserProfileCubit>().getUserProfile(
-      AuthParams(userId: widget.userId),
-    );
-    context.read<AllAdsCubit>().getAds(adId: widget.userId);
   }
 
   @override
@@ -157,11 +152,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Widget _buildHeaderSection(UserEntity user) {
-    final name = user.name ?? 'غير معروف';
-    final email = user.email ?? '';
-    final phone = user.phone ?? '';
+    // final name = user.name ?? 'غير معروف';
+    // final email = user.email ?? '';
+    // final phone = user.phone ?? '';
     // final country = user.countryCode ?? '';
-    final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final initials = '?';
 
     Widget infoRow(IconData icon, String text) {
       if (text.isEmpty) return const SizedBox.shrink();
@@ -219,15 +214,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             Gaps.vGap8,
             Center(
               child: Text(
-                name,
+                "name",
                 style: TextStyles.semiBold16(),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             Gaps.vGap8,
-            infoRow(Icons.email_outlined, email),
-            infoRow(Icons.phone_outlined, phone),
+            infoRow(Icons.email_outlined, "email"),
+            infoRow(Icons.phone_outlined, "phone"),
 
             // infoRow(Icons.location_on_outlined, country),
             Gaps.vGap20,

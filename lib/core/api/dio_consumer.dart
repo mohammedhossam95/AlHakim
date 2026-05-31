@@ -15,8 +15,8 @@ import '../utils/values/strings.dart';
 import 'status_code.dart';
 
 abstract class ApiConstants {
-  static const String dev = 'https://alhakim.sa/api/v1';
-  static const String live = 'https://alhakim.sa/api/v1';
+  static const String dev = 'https://alhakim-eg.com/api/v1';
+  static const String live = 'https://alhakim-eg.com/api/v1';
   static const String baseUrl = dev;
 }
 
@@ -94,8 +94,8 @@ class DioConsumerImpl implements DioConsumer {
   }
 
   Future<void> _handleAccessTokenHeader() async {
-    //ToDo update access token and remove static one
     final String? accessToken = await secureStorage.getAccessToken();
+
     if (accessToken != null && accessToken.isNotEmpty) {
       client.options.headers[HttpHeaders.authorizationHeader] =
           'Bearer $accessToken';

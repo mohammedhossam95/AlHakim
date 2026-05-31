@@ -1,5 +1,11 @@
+import 'package:alhakim/features/appointments/appointments_injection.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/booking/booking_injection.dart';
+import 'package:alhakim/features/delegate/delegate_injection.dart';
+import 'package:alhakim/features/doctors/doctors_injection.dart';
 import 'package:alhakim/features/home/home_injection.dart';
+import 'package:alhakim/features/queue_management/queue_management_injection.dart';
+import 'package:alhakim/features/specialities/specialties_injection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -34,8 +40,13 @@ abstract class ServiceLocator {
     await initAuthFeatureInjection();
     await initTabbarFeatureInjection();
     await initNotificationsFeatureInjection();
-
+    await initDoctorsFeatureInjection();
     await initHomeFeatureInjection();
+    await initSpecialtiesInjection();
+    await initDelegateFeatureInjection();
+    await initAppointmentsInjection();
+    await initBookingFeatureInjection();
+    await initQueueManagementInjection();
 
     /// Core
     await _injectSharedPreferences();

@@ -135,7 +135,7 @@ class MyTextFormField extends StatelessWidget {
           borderSide: BorderSide(color: colors.errorColor, width: 1.0),
         ),
         floatingLabelBehavior: labelText != null
-            ? FloatingLabelBehavior.auto
+            ? FloatingLabelBehavior.never
             : FloatingLabelBehavior.never,
         hintText: hintText,
         labelText: labelText,

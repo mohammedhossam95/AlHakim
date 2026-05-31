@@ -72,16 +72,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailFocus = FocusNode();
     _bioFocus = FocusNode();
 
-    _selectedWhatsappCountry = CountryParser.parsePhoneCode('966');
+    _selectedWhatsappCountry = CountryParser.parsePhoneCode('+20');
 
     // Trigger profile fetch after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<GetUserProfileCubit>().getUserProfile(
-          AuthParams(isMyProfile: true),
-        );
-      }
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (mounted) {
+    //     context.read<GetUserProfileCubit>().getUserProfile(
+    //       AuthParams(),
+    //     );
+    //   }
+    // });
   }
 
   @override
@@ -101,9 +101,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _updateControllers(UserEntity user) {
     userEntity = user;
-    _nameController.text = user.name ?? '';
-    _emailController.text = user.email ?? '';
-    _whatsappController.text = user.phone ?? '';
+    // _nameController.text = user.name ?? '';
+    // _emailController.text = user.email ?? '';
+    // _whatsappController.text = user.phone ?? '';
     // _bioController.text = user. ?? '';
     // String countryCode = Constants().getCountryCode(user.whatsapp ?? '');
     // _selectedWhatsappCountry =
@@ -141,7 +141,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 message: state.message.toString(),
                 onRetry: () => context
                     .read<GetUserProfileCubit>()
-                    .getUserProfile(AuthParams(isMyProfile: true)),
+                    .getUserProfile(AuthParams()),
               );
             }
 
@@ -392,13 +392,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
         BlocProvider.of<UpdateUserProfileCubit>(context).updateUserProfile(
           AuthParams(
-            name: _nameController.text,
-            email: _emailController.text,
-            bio: _bioController.text,
-            phone: userEntity.phone,
+            // name: _nameController.text,
+            // email: _emailController.text,
+            // bio: _bioController.text,
+            // phone: userEntity.phone,
             // countryCode: userEntity.countryCode,
-            whatsapp: whatsappNum,
-            imageUrl: _imageFile?.path,
+            // whatsapp: whatsappNum,
+            // imageUrl: _imageFile?.path,
           ),
         );
       } catch (e) {

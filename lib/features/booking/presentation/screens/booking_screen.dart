@@ -1,15 +1,26 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
+import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/booking/domain/entities/family_member_entity.dart';
+import 'package:alhakim/features/booking/domain/entities/schedule.dart';
+import 'package:alhakim/features/booking/presentation/cubit/book_appointment_cubit/book_appointment_cubit.dart';
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class BookingScreen extends StatefulWidget {
-  const BookingScreen({super.key});
+  final DoctorEntity doctor;
+
+  const BookingScreen({super.key, required this.doctor});
 
   @override
   State<BookingScreen> createState() => _BookingScreenState();
@@ -18,176 +29,583 @@ class BookingScreen extends StatefulWidget {
 class _BookingScreenState extends State<BookingScreen> {
   int selectedIndex = 0;
 
+  int selectedDateIndex = 0;
+
+  FamilyMemberEntity? selectedFamilyMember;
+
+  late List<AvailableBookingDate> availableDates;
+
+  @override
+  void initState() {
+    super.initState();
+
+    availableDates = BookingDatesHelper.generateAvailableDates(
+      widget.doctor.schedules ?? [],
+    );
+  }
+
+  String formatTime(String time) {
+    final parts = time.split(':');
+
+    final date = DateTime(2025, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+
+    final hour = DateFormat('hh:mm', 'en').format(date);
+
+    final period = date.hour >= 12
+        ? (appLocalizations.isArLocale ? 'مساء' : 'PM')
+        : (appLocalizations.isArLocale ? 'صباحاً' : 'AM');
+
+    return "$hour $period";
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedBooking = availableDates[selectedDateIndex];
+
     return Scaffold(
       backgroundColor: colors.backGround,
-      
-      appBar: AppBar(title: Text("booking".tr), centerTitle: true),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            /// 👨‍⚕️ doctor card
-            _DoctorCard(),
 
-            Gaps.vGap20,
+      appBar: AppBar(title: Text("booking".tr)),
 
-            /// title
-            Text("who_is_booking".tr, style: TextStyles.semiBold18()),
+      body: availableDates.isEmpty
+          ? Center(
+              child: Text(
+                "no_available_dates".tr,
 
-            Gaps.vGap8,
+                style: TextStyles.semiBold16(),
+              ),
+            )
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
 
-            Text(
-              "booking_desc".tr,
-              style: TextStyles.medium14(color: colors.lightTextColor),
-              textAlign: TextAlign.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  /// doctor card
+                  DoctorBookingCard(doctor: widget.doctor),
+
+                  Gaps.vGap24,
+
+                  /// title
+                  Text(
+                    "choose_booking_date".tr,
+
+                    style: TextStyles.semiBold18(),
+                  ),
+
+                  Gaps.vGap8,
+
+                  Text(
+                    "choose_booking_date_desc".tr,
+
+                    style: TextStyles.medium14(color: colors.lightTextColor),
+                  ),
+
+                  Gaps.vGap20,
+
+                  /// dates
+                  SizedBox(
+                    height: 120.h,
+
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+
+                      itemCount: availableDates.length,
+
+                      separatorBuilder: (_, _) => Gaps.hGap12,
+
+                      itemBuilder: (context, index) {
+                        final bookingDate = availableDates[index];
+
+                        final date = bookingDate.date;
+
+                        final isSelected = selectedDateIndex == index;
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedDateIndex = index;
+                            });
+                          },
+
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+
+                            width: 82.w,
+
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? colors.main
+                                  : colors.whiteColor,
+
+                              borderRadius: BorderRadius.circular(22.r),
+
+                              border: Border.all(
+                                color: isSelected
+                                    ? colors.main
+                                    : colors.main.withValues(alpha: .08),
+                              ),
+                            ),
+
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+
+                              children: [
+                                Text(
+                                  DateFormat(
+                                    'EEE',
+                                    appLocalizations.locale?.languageCode,
+                                  ).format(date),
+
+                                  style: TextStyles.medium14(
+                                    color: isSelected
+                                        ? colors.whiteColor
+                                        : colors.lightTextColor,
+                                  ),
+                                ),
+
+                                Gaps.vGap10,
+
+                                Text(
+                                  "${date.day}",
+
+                                  style: TextStyles.semiBold24(
+                                    color: isSelected
+                                        ? colors.whiteColor
+                                        : colors.textColor,
+                                  ),
+                                ),
+
+                                Gaps.vGap8,
+
+                                Text(
+                                  DateFormat(
+                                    'MMM',
+                                    appLocalizations.locale?.languageCode,
+                                  ).format(date),
+
+                                  style: TextStyles.medium12(
+                                    color: isSelected
+                                        ? colors.whiteColor
+                                        : colors.lightTextColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Gaps.vGap20,
+
+                  /// selected date card
+                  Container(
+                    width: double.infinity,
+
+                    padding: EdgeInsets.all(18.w),
+
+                    decoration: BoxDecoration(
+                      color: colors.main.withValues(alpha: .05),
+
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12.w),
+
+                              decoration: BoxDecoration(
+                                color: colors.main.withValues(alpha: .12),
+
+                                shape: BoxShape.circle,
+                              ),
+
+                              child: Icon(
+                                Icons.calendar_today,
+                                color: colors.main,
+                              ),
+                            ),
+
+                            Gaps.hGap16,
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+
+                                children: [
+                                  Text(
+                                    "selected_date".tr,
+
+                                    style: TextStyles.medium12(
+                                      color: colors.lightTextColor,
+                                    ),
+                                  ),
+
+                                  Gaps.vGap8,
+
+                                  Text(
+                                    DateFormat(
+                                      'EEEE, d MMM yyyy',
+
+                                      appLocalizations.locale?.languageCode,
+                                    ).format(selectedBooking.date),
+
+                                    style: TextStyles.medium14(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        Gaps.vGap18,
+
+                        Divider(),
+
+                        Gaps.vGap18,
+
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12.w),
+
+                              decoration: BoxDecoration(
+                                color: colors.secondary.withValues(alpha: .12),
+
+                                shape: BoxShape.circle,
+                              ),
+
+                              child: Icon(
+                                Icons.access_time,
+                                color: colors.secondary,
+                              ),
+                            ),
+
+                            Gaps.hGap16,
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+
+                                children: [
+                                  Text(
+                                    "available_time".tr,
+
+                                    style: TextStyles.medium12(
+                                      color: colors.lightTextColor,
+                                    ),
+                                  ),
+
+                                  Gaps.vGap8,
+
+                                  Text(
+                                    "from_to_time".trParams({
+                                      "start": formatTime(
+                                        selectedBooking.schedule.startTime ??
+                                            '',
+                                      ),
+
+                                      "end": formatTime(
+                                        selectedBooking.schedule.endTime ?? '',
+                                      ),
+                                    }),
+
+                                    style: TextStyles.medium14(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Gaps.vGap30,
+
+                  /// booking for
+                  Text("who_is_booking".tr, style: TextStyles.semiBold18()),
+
+                  Gaps.vGap8,
+
+                  Text(
+                    "booking_desc".tr,
+
+                    style: TextStyles.medium14(color: colors.lightTextColor),
+                  ),
+
+                  Gaps.vGap18,
+
+                  BookingOptionItem(
+                    index: 0,
+                    selectedIndex: selectedIndex,
+                    title: "myself".tr,
+                    desc: "myself_desc".tr,
+                    icon: Icons.person_outline,
+
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = 0;
+
+                        selectedFamilyMember = null;
+                      });
+                    },
+                  ),
+
+                  Gaps.vGap16,
+
+                  selectedFamilyMember != null
+                      ? Container(
+                          padding: EdgeInsets.all(16.w),
+
+                          decoration: BoxDecoration(
+                            color: colors.whiteColor,
+
+                            borderRadius: BorderRadius.circular(20.r),
+
+                            border: Border.all(color: colors.main, width: 1.5),
+                          ),
+
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48.w,
+                                height: 48.w,
+
+                                decoration: BoxDecoration(
+                                  color: colors.main.withValues(alpha: .1),
+
+                                  shape: BoxShape.circle,
+                                ),
+
+                                child: Icon(
+                                  Icons.groups_outlined,
+
+                                  color: colors.main,
+                                ),
+                              ),
+
+                              Gaps.hGap12,
+
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                                  children: [
+                                    Text(
+                                      selectedFamilyMember?.fullName ?? '',
+
+                                      style: TextStyles.semiBold14(),
+                                    ),
+
+                                    Gaps.vGap8,
+
+                                    Text(
+                                      selectedFamilyMember?.kinship?.label ??
+                                          '',
+
+                                      style: TextStyles.medium12(
+                                        color: colors.lightTextColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              TextButton(
+                                onPressed: () async {
+                                  final result = await context.push(
+                                    Routes.familyMembersScreenRoute,
+                                  );
+
+                                  if (result is FamilyMemberEntity) {
+                                    setState(() {
+                                      selectedIndex = 1;
+
+                                      selectedFamilyMember = result;
+                                    });
+                                  }
+                                },
+
+                                child: Text("change".tr),
+                              ),
+                            ],
+                          ),
+                        )
+                      : BookingOptionItem(
+                          index: 1,
+                          selectedIndex: selectedIndex,
+                          title: "family_member".tr,
+                          desc: "family_member_desc".tr,
+                          icon: Icons.groups_outlined,
+
+                          onTap: () async {
+                            final result = await context.push(
+                              Routes.familyMembersScreenRoute,
+                            );
+
+                            if (result is FamilyMemberEntity) {
+                              setState(() {
+                                selectedIndex = 1;
+
+                                selectedFamilyMember = result;
+                              });
+                            }
+                          },
+                        ),
+
+                  // Gaps.vGap16,
+
+                  // BookingOptionItem(
+                  //   index: 2,
+                  //   selectedIndex: selectedIndex,
+                  //   title: "other_person".tr,
+                  //   desc: "other_person_desc".tr,
+                  //   icon: Icons.person_add_alt_1,
+
+                  //   onTap: () {
+                  //     setState(() {
+                  //       selectedIndex = 2;
+                  //     });
+
+                  //     context.push(Routes.addFamilyMemberScreenRoute);
+                  //   },
+                  // ),
+                  Gaps.vGap30,
+
+                  /// confirm button
+                  BlocConsumer<BookAppointmentCubit, BookAppointmentState>(
+                    listener: (context, state) {
+                      if (state is BookAppointmentSuccess) {
+                        Constants.showSnakToast(
+                          context: context,
+                          message: state.response.message ?? '',
+                          type: 1,
+                        );
+
+                        context.pop(true);
+                      } else if (state is BookAppointmentError) {
+                        Constants.showSnakToast(
+                          context: context,
+                          message: state.message,
+                          type: 3,
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      return state is BookAppointmentLoading
+                          ? LoadingView()
+                          : MyDefaultButton(
+                              btnText: "confirm_booking",
+
+                              borderRadius: 30,
+
+                              height: 54,
+
+                              onPressed: () {
+                                context
+                                    .read<BookAppointmentCubit>()
+                                    .bookAppointment(
+                                      doctorId: widget.doctor.id ?? '',
+
+                                      appointmentDate: DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).format(selectedBooking.date),
+
+                                      familyMemberId: selectedFamilyMember?.id,
+                                    );
+                              },
+                            );
+                    },
+                  ),
+
+                  Gaps.vGap20,
+                ],
+              ),
             ),
-
-            Gaps.vGap20,
-
-            /// options
-            _OptionItem(
-              index: 0,
-              selectedIndex: selectedIndex,
-              title: "myself".tr,
-              desc: "myself_desc".tr,
-              icon: Icons.person,
-              onTap: () => setState(() => selectedIndex = 0),
-            ),
-
-            Gaps.vGap12,
-
-            _OptionItem(
-              index: 1,
-              selectedIndex: selectedIndex,
-              title: "family_member".tr,
-              desc: "family_member_desc".tr,
-              icon: Icons.groups,
-              onTap: () => setState(() => selectedIndex = 1),
-            ),
-
-            Gaps.vGap12,
-
-            _OptionItem(
-              index: 2,
-              selectedIndex: selectedIndex,
-              title: "other_person".tr,
-              desc: "other_person_desc".tr,
-              icon: Icons.person_add,
-              onTap: () => setState(() => selectedIndex = 2),
-            ),
-            Gaps.vGap30,
-
-            /// 🔘 confirm button
-            MyDefaultButton(
-              btnText: "confirm_booking",
-              borderRadius: 30,
-              height: 50,
-              onPressed: () async {
-                if (selectedIndex == 1) {
-                  final result = await context.push(
-                    Routes.familyMembersScreenRoute,
-                  );
-
-                  if (result != null) {
-                    // setState(() {
-                    //   selectedPerson = result;
-                    // });
-                  }
-                } else if (selectedIndex == 2) {
-                  final result = await context.push(
-                    Routes.addFamilyMemberScreenRoute,
-                  );
-
-                  if (result != null) {
-                    // setState(() {
-                    //   selectedPerson = result;
-                    // });
-                  }
-                } else {}
-              },
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
 
-class _DoctorCard extends StatelessWidget {
+class DoctorBookingCard extends StatelessWidget {
+  final DoctorEntity doctor;
+
+  const DoctorBookingCard({super.key, required this.doctor});
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(14.w),
+      padding: EdgeInsets.all(16.w),
+
       decoration: BoxDecoration(
         color: colors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
+
+        borderRadius: BorderRadius.circular(22.r),
       ),
+
       child: Row(
         children: [
-          /// image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: Image.network(
-              "https://i.pravatar.cc/150?img=12",
-              width: 70.w,
-              height: 70.w,
-              fit: BoxFit.cover,
-            ),
+          DiffImage(
+            image: doctor.profileImage,
+            width: 75.w,
+            height: 75.w,
+            isCircle: true,
           ),
 
-          Gaps.hGap12,
+          Gaps.hGap16,
 
-          /// info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
-                Text("د. أحمد خالد", style: TextStyles.semiBold16()),
-
-                Gaps.vGap4,
-
                 Text(
-                  "استشاري جراحة العظام والمفاصل",
-                  style: TextStyles.medium14(color: colors.main),
+                  appLocalizations.isArLocale
+                      ? doctor.name?.ar ?? ''
+                      : doctor.name?.en ?? '',
+                  style: TextStyles.semiBold16(),
                 ),
 
                 Gaps.vGap8,
 
+                Text(
+                  doctor.specialty?.name ?? '',
+
+                  style: TextStyles.medium14(color: colors.main),
+                ),
+
+                Gaps.vGap10,
+
                 Row(
                   children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: colors.lightTextColor,
-                    ),
-                    Gaps.hGap4,
-                    Text("24 مايو", style: TextStyles.medium12()),
+                    Icon(Icons.star, size: 16.sp, color: colors.review),
 
-                    Gaps.hGap12,
-
-                    Icon(
-                      Icons.access_time,
-                      size: 14,
-                      color: colors.lightTextColor,
-                    ),
                     Gaps.hGap4,
-                    Text("10:30 صباحاً", style: TextStyles.medium12()),
+
+                    Text("4.9", style: TextStyles.medium12()),
                   ],
                 ),
               ],
             ),
           ),
 
-          /// verified
           Container(
-            padding: EdgeInsets.all(6.w),
+            padding: EdgeInsets.all(8.w),
+
             decoration: BoxDecoration(
-              color: colors.secondary.withValues(alpha: .2),
+              color: colors.secondary.withValues(alpha: .15),
+
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.verified, size: 18, color: colors.secondary),
+
+            child: Icon(Icons.verified, color: colors.secondary),
           ),
         ],
       ),
@@ -195,15 +613,19 @@ class _DoctorCard extends StatelessWidget {
   }
 }
 
-class _OptionItem extends StatelessWidget {
+class BookingOptionItem extends StatelessWidget {
   final int index;
   final int selectedIndex;
+
   final String title;
   final String desc;
+
   final IconData icon;
+
   final VoidCallback onTap;
 
-  const _OptionItem({
+  const BookingOptionItem({
+    super.key,
     required this.index,
     required this.selectedIndex,
     required this.title,
@@ -218,33 +640,44 @@ class _OptionItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(14.w),
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
+        padding: EdgeInsets.all(16.w),
+
         decoration: BoxDecoration(
           color: colors.whiteColor,
-          borderRadius: BorderRadius.circular(16.r),
+
+          borderRadius: BorderRadius.circular(20.r),
+
           border: Border.all(
             color: isSelected ? colors.main : Colors.transparent,
+
             width: 1.5,
           ),
         ),
+
         child: Row(
           children: [
-            /// radio
             Container(
-              width: 20.w,
-              height: 20.w,
+              width: 24.w,
+              height: 24.w,
+
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+
                 border: Border.all(
                   color: isSelected ? colors.main : colors.lightTextColor,
                 ),
               ),
+
               child: isSelected
                   ? Center(
                       child: Container(
-                        width: 10.w,
-                        height: 10.w,
+                        width: 12.w,
+                        height: 12.w,
+
                         decoration: BoxDecoration(
                           color: colors.main,
                           shape: BoxShape.circle,
@@ -256,28 +689,33 @@ class _OptionItem extends StatelessWidget {
 
             Gaps.hGap12,
 
-            /// text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
                   Text(title, style: TextStyles.semiBold14()),
-                  Gaps.vGap4,
+
+                  Gaps.vGap8,
+
                   Text(
                     desc,
+
                     style: TextStyles.medium12(color: colors.lightTextColor),
                   ),
                 ],
               ),
             ),
 
-            /// icon
             Container(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(12.w),
+
               decoration: BoxDecoration(
-                color: colors.secondary.withValues(alpha: .15),
+                color: colors.secondary.withValues(alpha: .12),
+
                 shape: BoxShape.circle,
               ),
+
               child: Icon(icon, color: colors.secondary),
             ),
           ],

@@ -2,69 +2,76 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
+import 'package:alhakim/core/widgets/diff_img.dart';
+import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/specialities/domain/entities/specialty_entity.dart';
+import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
 import 'package:alhakim/features/specialities/presentation/widgets/speciality_item.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SpecialitiesScreen extends StatelessWidget {
   const SpecialitiesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final specialities = [
-      {
-        "title": "الأطفال",
-        "icon": Icons.child_care,
-        "color": colors.secondary,
-        "count": 24,
-      },
-      {
-        "title": "القلب",
-        "icon": Icons.favorite,
-        "color": colors.errorColor,
-        "count": 12,
-      },
-      {
-        "title": "العظام",
-        "icon": Icons.accessibility,
-        "color": colors.secondary,
-        "count": 15,
-      },
-      {
-        "title": "العيون",
-        "icon": Icons.visibility,
-        "color": colors.main,
-        "count": 8,
-      },
-      {
-        "title": "الأسنان",
-        "icon": Icons.medical_services,
-        "color": colors.main,
-        "count": 20,
-      },
-      {
-        "title": "الجلدية",
-        "icon": Icons.spa,
-        "color": colors.secondary,
-        "count": 18,
-      },
-    ];
     return Scaffold(
       backgroundColor: colors.backGround,
-      // appBar: AppBar(
-      //   title: Text("specialities".tr),
-      //   centerTitle: true,
-      //   automaticallyImplyLeading: false,
-      // ),
+
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Column(
             children: [
+              Row(
+                children: [
+                  DiffImage(
+                    image: sharedPreferences.getAuth()?.user?.profilePhotoUrl,
+
+                    height: 60,
+                    width: 60,
+                    isCircle: true,
+
+                    userName: "${sharedPreferences.getAuth()?.user?.firstName}",
+                  ),
+
+                  Gaps.hGap12,
+
+                  Text(
+                    "welcome".tr,
+
+                    style: TextStyles.medium14(color: colors.lightTextColor),
+                  ),
+
+                  Gaps.hGap4,
+
+                  Text(
+                    sharedPreferences.getAuth()?.user?.firstName ?? '',
+
+                    style: TextStyles.semiBold14(),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    padding: EdgeInsets.all(10.w),
+
+                    decoration: BoxDecoration(
+                      color: colors.main.withValues(alpha: .12),
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    child: Icon(Icons.notifications_none, color: colors.main),
+                  ),
+                ],
+              ),
+              Gaps.vGap10,
+
               ///  search
               _SearchField(),
 
@@ -77,13 +84,13 @@ class SpecialitiesScreen extends StatelessWidget {
 
               /// header
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("all_specialities".tr, style: TextStyles.semiBold16()),
-                  Text(
-                    "see_all".tr,
-                    style: TextStyles.medium14(color: colors.main),
-                  ),
+                  // Text(
+                  //   "see_all".tr,
+                  //   style: TextStyles.medium14(color: colors.main),
+                  // ),
                 ],
               ),
 
@@ -91,22 +98,126 @@ class SpecialitiesScreen extends StatelessWidget {
 
               /// grid
               Expanded(
-                child: GridView.builder(
-                  itemCount: specialities.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1,
-                  ),
-                  itemBuilder: (context, index) {
-                    final item = specialities[index];
-                    return InkWell(
-                      onTap: () {
-                        context.push(Routes.doctorsListScreenRoute);
-                      },
-                      child: SpecialityItem(item),
-                    );
+                child: BlocBuilder<GetSpecialtiesCubit, GetSpecialtiesState>(
+                  builder: (context, state) {
+                    if (state is GetSpecialtiesLoading) {
+                      return GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 6,
+
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14.h,
+                          crossAxisSpacing: 14.w,
+                          childAspectRatio: .88,
+                        ),
+
+                        itemBuilder: (context, index) {
+                          return Shimmer.fromColors(
+                            baseColor: Colors.grey.shade300,
+                            highlightColor: Colors.grey.shade100,
+                            child: Container(
+                              padding: EdgeInsets.all(14.w),
+
+                              decoration: BoxDecoration(
+                                color: colors.whiteColor,
+                                borderRadius: BorderRadius.circular(22.r),
+                              ),
+
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  /// image shimmer
+                                  Container(
+                                    height: 70.h,
+                                    width: 70.w,
+
+                                    decoration: BoxDecoration(
+                                      color: colors.whiteColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+
+                                  Gaps.vGap16,
+
+                                  /// title shimmer
+                                  Container(
+                                    height: 12.h,
+                                    width: 90.w,
+
+                                    decoration: BoxDecoration(
+                                      color: colors.whiteColor,
+                                      borderRadius: BorderRadius.circular(20.r),
+                                    ),
+                                  ),
+
+                                  Gaps.vGap10,
+
+                                  Container(
+                                    height: 10.h,
+                                    width: 60.w,
+
+                                    decoration: BoxDecoration(
+                                      color: colors.whiteColor,
+                                      borderRadius: BorderRadius.circular(20.r),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    } else if (state is GetSpecialtiesError) {
+                      return Center(
+                        child: ErrorText(
+                          width: 300.w,
+                          text: state.message,
+                          onRetry: () => context
+                              .read<GetSpecialtiesCubit>()
+                              .getSpecialties(),
+                        ),
+                      );
+                    } else if (state is GetSpecialtiesSuccess) {
+                      final List<SpecialtyEntity> specialities =
+                          state.response.data as List<SpecialtyEntity>;
+
+                      if (specialities.isEmpty) {
+                        return Center(
+                          child: ErrorText(width: 300.w, text: "noData".tr),
+                        );
+                      }
+                      return GridView.builder(
+                        padding: EdgeInsets.only(bottom: 20.h),
+
+                        itemCount: specialities.length,
+
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14.h,
+                          crossAxisSpacing: 14.w,
+                          childAspectRatio: .88,
+                        ),
+
+                        itemBuilder: (context, index) {
+                          final item = specialities[index];
+
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(22.r),
+
+                            onTap: () {
+                              context.push(
+                                Routes.doctorsListScreenRoute,
+                                extra: item,
+                              );
+                            },
+
+                            child: SpecialityItem(item),
+                          );
+                        },
+                      );
+                    }
+                    return Container();
                   },
                 ),
               ),

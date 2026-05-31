@@ -1,98 +1,138 @@
 import 'package:alhakim/config/routes/app_routes.dart';
-import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/features/delegate/presentation/widgets/doctor_item.dart';
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-class DelegateDoctorsScreen extends StatelessWidget {
+class DelegateDoctorsScreen extends StatefulWidget {
   const DelegateDoctorsScreen({super.key});
+
+  @override
+  State<DelegateDoctorsScreen> createState() => _DelegateDoctorsScreenState();
+}
+
+class _DelegateDoctorsScreenState extends State<DelegateDoctorsScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<GetDoctorsCubit>().getDoctors();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colors.backGround,
+
       appBar: AppBar(title: const Text("الدكاترة المسجلين")),
+
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push(Routes.registerRoute);
+        onPressed: () async {
+          final result = await context.push(Routes.addDoctorScreenRoute);
+
+          if (result == true) {
+            if (!context.mounted) return;
+            context.read<GetDoctorsCubit>().getDoctors();
+          }
         },
         child: const Icon(Icons.add),
       ),
-      body: ListView.separated(
-        padding: EdgeInsets.all(16.w),
-        itemCount: _doctors.length,
-        separatorBuilder: (_, _) => Gaps.vGap12,
-        itemBuilder: (context, index) {
-          return _DoctorItem(_doctors[index]);
-        },
-      ),
-    );
-  }
-}
 
-class _DoctorItem extends StatelessWidget {
-  final Map<String, String> doctor;
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<DeleteDoctorCubit, DeleteDoctorState>(
+            listener: (context, state) {
+              if (state is DeleteDoctorLoading) {
+                Constants.showLoading(context);
+              }
+              if (state is DeleteDoctorSuccess) {
+                context.read<GetDoctorsCubit>().getDoctors();
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.response.message,
+                  type: 1,
+                );
+              }
 
-  const _DoctorItem(this.doctor);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: colors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          /// avatar (يمين)
-          CircleAvatar(
-            radius: 26.r,
-            backgroundImage: NetworkImage(doctor['image']!),
+              if (state is DeleteDoctorError) {
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.message,
+                  type: 3,
+                );
+              }
+            },
           ),
+          BlocListener<ToggelDoctorStatusCubit, ToggelDoctorStatusState>(
+            listener: (context, state) {
+              if (state is ToggleDoctorStatusLoading) {
+                Constants.showLoading(context);
+              }
+              if (state is ToggleDoctorStatusSuccess) {
+                context.read<GetDoctorsCubit>().getDoctors();
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.response.message,
+                  type: 1,
+                );
+              }
 
-          Gaps.hGap12,
-
-          /// info (النص)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                doctor['name']!,
-                style: TextStyles.semiBold16(),
-                textAlign: TextAlign.right,
-              ),
-              Gaps.vGap8,
-              Text(
-                doctor['speciality']!,
-                style: TextStyles.medium12(color: colors.lightTextColor),
-                textAlign: TextAlign.right,
-              ),
-            ],
+              if (state is ToggleDoctorStatusError) {
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.message,
+                  type: 3,
+                );
+              }
+            },
           ),
         ],
+        child: BlocBuilder<GetDoctorsCubit, GetDoctorsState>(
+          builder: (context, state) {
+            if (state is GetDoctorsLoading) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (state is GetDoctorsError) {
+              return Center(child: Text(state.message));
+            }
+
+            if (state is GetDoctorsSuccess) {
+              final doctors = state.response.data as List<DoctorEntity>;
+
+              if (doctors.isEmpty) {
+                return const Center(child: Text("لا يوجد دكاترة"));
+              }
+
+              return ListView.separated(
+                padding: EdgeInsets.all(16.w),
+
+                itemCount: doctors.length,
+
+                separatorBuilder: (_, _) => Gaps.vGap18,
+
+                itemBuilder: (context, index) {
+                  return DoctorItem(doctor: doctors[index]);
+                },
+              );
+            }
+
+            return const SizedBox();
+          },
+        ),
       ),
     );
   }
 }
-
-/// 🔥 داتا وهمية
-final List<Map<String, String>> _doctors = [
-  {
-    "name": "د. سمير القحطاني",
-    "speciality": "استشاري جراحة القلب",
-    "image": "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    "name": "د. ليلى عثمان",
-    "speciality": "أخصائية طب الأطفال",
-    "image": "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    "name": "د. خالد الفيصل",
-    "speciality": "طب الأسرة",
-    "image": "https://randomuser.me/api/portraits/men/65.jpg",
-  },
-];

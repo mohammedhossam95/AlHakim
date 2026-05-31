@@ -53,7 +53,7 @@ ThemeData getAppTheme(BuildContext context) {
     ),
     appBarTheme: AppBarTheme(
       elevation: 0,
-      centerTitle: false,
+      centerTitle: true,
       backgroundColor: MyColors.whiteColor,
       titleSpacing: 35.w,
       toolbarHeight: 70.h,

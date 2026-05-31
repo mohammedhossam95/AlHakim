@@ -5,12 +5,16 @@ import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/country_code_widget.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
-import 'package:alhakim/features/auth/presentation/cubit/login/login_cubit.dart';
-import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
+import 'package:alhakim/features/auth/domain/entities/send_otp_entity.dart';
+import 'package:alhakim/features/auth/presentation/cubit/send_code_cubit/send_code_cubit.dart';
 import 'package:alhakim/injection_container.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,17 +33,23 @@ class _LoginScreenState extends State<LoginScreen> {
   final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  bool isPatient = true;
+  // bool isPatient = true;
+  late Country _selectedCountry;
 
   @override
   void initState() {
     super.initState();
+    getCountry();
   }
 
   @override
   void dispose() {
     _phoneController.dispose();
     super.dispose();
+  }
+
+  void getCountry() {
+    _selectedCountry = CountryParser.parsePhoneCode('20');
   }
 
   @override
@@ -120,137 +130,63 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       Gaps.vGap20,
 
-                      // /// patient / doctor switch
-                      // Container(
-                      //   decoration: BoxDecoration(
-                      //     color: colors.main.withValues(alpha: 0.3),
-                      //     borderRadius: BorderRadius.circular(30.r),
-                      //   ),
-                      //   padding: EdgeInsets.all(4.w),
-                      //   child: Row(
-                      //     children: [
-                      //       Expanded(
-                      //         child: GestureDetector(
-                      //           onTap: () => setState(() => isPatient = true),
-                      //           child: AnimatedContainer(
-                      //             duration: const Duration(milliseconds: 200),
-                      //             padding: EdgeInsets.symmetric(vertical: 10.h),
-                      //             decoration: BoxDecoration(
-                      //               color: isPatient
-                      //                   ? colors.whiteColor
-                      //                   : Colors.transparent,
-                      //               borderRadius: BorderRadius.circular(30.r),
-                      //               border: isPatient
-                      //                   ? Border.all(
-                      //                       color: colors.main,
-                      //                       width: 1.5,
-                      //                     )
-                      //                   : null,
-                      //               boxShadow: isPatient
-                      //                   ? [
-                      //                       BoxShadow(
-                      //                         color: colors.main.withValues(
-                      //                           alpha: 0.1,
-                      //                         ),
-                      //                         blurRadius: 8,
-                      //                         offset: const Offset(0, 2),
-                      //                       ),
-                      //                     ]
-                      //                   : [],
-                      //             ),
-                      //             child: Center(
-                      //               child: Text(
-                      //                 "patient".tr,
-                      //                 style: TextStyles.medium14(
-                      //                   color: isPatient
-                      //                       ? colors.main
-                      //                       : colors.lightTextColor,
-                      //                 ),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ),
-
-                      //       Expanded(
-                      //         child: GestureDetector(
-                      //           onTap: () => setState(() => isPatient = false),
-                      //           child: AnimatedContainer(
-                      //             duration: const Duration(milliseconds: 200),
-                      //             padding: EdgeInsets.symmetric(vertical: 10.h),
-                      //             decoration: BoxDecoration(
-                      //               color: !isPatient
-                      //                   ? colors.whiteColor
-                      //                   : Colors.transparent,
-                      //               borderRadius: BorderRadius.circular(30.r),
-                      //               border: !isPatient
-                      //                   ? Border.all(
-                      //                       color: colors.main,
-                      //                       width: 1.5,
-                      //                     )
-                      //                   : null,
-                      //               boxShadow: !isPatient
-                      //                   ? [
-                      //                       BoxShadow(
-                      //                         color: colors.main.withValues(
-                      //                           alpha: 0.1,
-                      //                         ),
-                      //                         blurRadius: 8,
-                      //                         offset: const Offset(0, 2),
-                      //                       ),
-                      //                     ]
-                      //                   : [],
-                      //             ),
-                      //             child: Center(
-                      //               child: Text(
-                      //                 "doctor".tr,
-                      //                 style: TextStyles.medium14(
-                      //                   color: !isPatient
-                      //                       ? colors.main
-                      //                       : colors.lightTextColor,
-                      //                 ),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ),
-
-                      //     ],
-                      //   ),
-                      // ),
-                      Gaps.vGap16,
-
                       /// phone field
-                      MyTextFormField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        validatorType: ValidatorType.phone,
-                        hintText: "phone".tr,
-                        prefixIcon: Icon(
-                          Icons.phone_android,
-                          color: colors.main,
-                          size: 16,
+                      ElasticInLeft(
+                        child: Row(
+                          children: [
+                            CountryCodeWidget(
+                              country: _selectedCountry,
+                              updateValue: (country) {
+                                setState(() {
+                                  _selectedCountry = country;
+                                });
+                              },
+                            ),
+                            Gaps.hGap8,
+                            Expanded(
+                              flex: 5,
+                              child: MyTextFormField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                validatorType: ValidatorType.phone,
+                                hintText: "phone".tr,
+                                prefixIcon: Icon(
+                                  Icons.phone_android,
+                                  color: colors.main,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
                       Gaps.vGap30,
 
                       /// button
-                      BlocConsumer<LoginCubit, LoginState>(
+                      BlocConsumer<SendCodeCubit, SendCodeState>(
                         listener: (context, state) {
-                          if (state is LoginLoaded) {
+                          if (state is SendCodeLoaded) {
+                            final data = state.response.data as SendOtpEntity;
+                            if (data.nextStep == "complete_profile") {
+                              context.push(
+                                Routes.completeProfileRegisterScreenRoute,
+                              );
+                              secureStorage.saveAccessToken(
+                                state.response.data.token,
+                              );
+                              return;
+                            }
                             // final data = state.response.data as AuthEntity;
 
-                            // BlocProvider.of<SessionCubit>(
-                            //   context,
-                            // ).loginSuccess(data);
-
-                            context
-                                .read<BottomNavBarCubit>()
-                                .changeCurrentScreen(index: 0);
-
-                            context.pushReplacementNamed(Routes.mainPageRoute);
-                          } else if (state is LoginError) {
+                            context.push(
+                              Routes.otpAuthRoute,
+                              extra: AuthParams(
+                                phoneNumber: _phoneController.text,
+                                countryCode: "+${_selectedCountry.phoneCode}",
+                              ),
+                            );
+                          } else if (state is SendCodeError) {
                             Constants.showSnakToast(
                               context: context,
                               type: 3,
@@ -259,33 +195,51 @@ class _LoginScreenState extends State<LoginScreen> {
                           }
                         },
                         builder: (context, state) {
-                          return MyDefaultButton(
-                            btnText: "send_code",
-                            isLoading: state is LoginIsLoading,
-                            onPressed: () {
-                              context.push(
-                                Routes.otpAuthRoute,
-                                extra: AuthParams(phone: _phoneController.text),
-                              );
-                            },
-                            // onPressed: () async {
-                            //   if (_formKey.currentState!.validate()) {
-                            //     final phone = await Constants.phoneParsing(
-                            //       phone: _phoneController.text,
-                            //       withCode: false,
-                            //     );
+                          return FadeInDown(
+                            child: state is SendCodeIsLoading
+                                ? LoadingView()
+                                : MyDefaultButton(
+                                    btnText: "send_code",
 
-                            //     if (phone != null) {
-                            //       final params = AuthParams(
-                            //         phone: phone,
-                            //         password: '',
-                            //         fcmDeviceToken: '',
-                            //       );
+                                    onPressed: () async {
+                                      if (_formKey.currentState!.validate()) {
+                                        final phone =
+                                            await Constants.phoneParsing(
+                                              phone: _phoneController.text,
+                                              countryCode:
+                                                  _selectedCountry.countryCode,
+                                              withCode: false,
+                                            );
 
-                            //       context.read<LoginCubit>().login(params);
-                            //     }
-                            //   }
-                            // },
+                                        if (phone != null) {
+                                          final params = AuthParams(
+                                            phoneNumber: phone,
+                                            countryCode:
+                                                "+${_selectedCountry.phoneCode}",
+                                            userType:
+                                                sessionCubit.state.userType,
+                                            secretaryPhone: phone,
+                                            secretaryCountryCode:
+                                                _selectedCountry.phoneCode,
+                                          );
+
+                                          context
+                                              .read<SendCodeCubit>()
+                                              .sendCode(params);
+                                        }
+
+                                        /// invalid phone
+                                        if (phone == null) {
+                                          Constants.showSnakToast(
+                                            context: context,
+                                            type: 3,
+                                            message: "invalid_phone".tr,
+                                          );
+                                          return;
+                                        }
+                                      }
+                                    },
+                                  ),
                           );
                         },
                       ),

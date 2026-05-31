@@ -34,6 +34,7 @@ abstract class _AppSharedPreferencesKeys {
   static const isAddressSynced = 'isAddressSynced';
 
   static const settings = 'settings';
+  static const auth = 'auth';
 }
 
 abstract class AppSharedPreferences {
@@ -48,6 +49,9 @@ abstract class AppSharedPreferences {
   Future<bool> saveCountryId(int countryId);
   Future<bool> removeCountryId();
 
+  AuthModel? getAuth();
+  Future<bool> saveAuth(AuthModel auth);
+  Future<bool> removeAuth();
   //region:: Provider Id
   String? getCartProviderId();
   Future<bool> saveCartProviderId(String providerId);
@@ -66,7 +70,7 @@ abstract class AppSharedPreferences {
 
   //region:: user Id
   int? getUserId();
-  Future<bool> saveUserId(int id);
+  Future<bool> saveUserId(String id);
   Future<bool> removeUserId();
 
   //region:: user
@@ -182,6 +186,27 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   @override
   String? getServiceTypeId() =>
       instance.getString(_AppSharedPreferencesKeys.serviceTypeId);
+  @override
+  AuthModel? getAuth() {
+    final authString = instance.getString(_AppSharedPreferencesKeys.auth);
+
+    if (authString == null) return null;
+
+    return AuthModel.fromJson(jsonDecode(authString));
+  }
+
+  @override
+  Future<bool> saveAuth(AuthModel auth) {
+    return instance.setString(
+      _AppSharedPreferencesKeys.auth,
+      jsonEncode(auth.toJson()),
+    );
+  }
+
+  @override
+  Future<bool> removeAuth() {
+    return instance.remove(_AppSharedPreferencesKeys.auth);
+  }
 
   @override
   Future<bool> saveServiceTypeId(String typeId) =>
@@ -212,8 +237,8 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   int? getUserId() => instance.getInt(_AppSharedPreferencesKeys.userId);
 
   @override
-  Future<bool> saveUserId(int id) =>
-      instance.setInt(_AppSharedPreferencesKeys.userId, id);
+  Future<bool> saveUserId(String id) =>
+      instance.setString(_AppSharedPreferencesKeys.userId, id);
 
   @override
   Future<bool> removeUserId() =>
@@ -293,7 +318,8 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
 
   // Device UUID
   @override
-  String? getDeviceUuid() => instance.getString(_AppSharedPreferencesKeys.deviceUuid);
+  String? getDeviceUuid() =>
+      instance.getString(_AppSharedPreferencesKeys.deviceUuid);
 
   @override
   Future<bool> saveDeviceUuid(String value) =>
@@ -314,8 +340,10 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   }
 
   @override
-  Future<bool> saveUser(UserModel user) =>
-      instance.setString(_AppSharedPreferencesKeys.user, jsonEncode(user.toJson()));
+  Future<bool> saveUser(UserModel user) => instance.setString(
+    _AppSharedPreferencesKeys.user,
+    jsonEncode(user.toJson()),
+  );
 
   @override
   Future<bool> removeUser() => instance.remove(_AppSharedPreferencesKeys.user);

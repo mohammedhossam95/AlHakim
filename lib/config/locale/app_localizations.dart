@@ -19,9 +19,10 @@ class AppLocalizations {
   late Map<String, String> _localizedStrings;
 
   Future<void> load({Locale? locale}) async {
-    this.locale = locale?? Locale(sharedPreferences.getLanguageCode().name);
-    String jsonString =
-        await rootBundle.loadString('lang/${locale?.languageCode?? this.locale?.languageCode}.json');
+    this.locale = locale ?? Locale(sharedPreferences.getLanguageCode().name);
+    String jsonString = await rootBundle.loadString(
+      'lang/${locale?.languageCode ?? this.locale?.languageCode}.json',
+    );
     Map<String, dynamic> jsonMap = json.decode(jsonString);
     _localizedStrings = jsonMap.map<String, String>((key, value) {
       return MapEntry(key, value.toString());
@@ -35,7 +36,16 @@ class AppLocalizations {
 
 extension AppLocalizationsExtension on String {
   String get tr {
-    String translate = appLocalizations.text(this);
-    return translate;
+    return appLocalizations.text(this);
+  }
+
+  String trParams(Map<String, String> params) {
+    String text = appLocalizations.text(this);
+
+    params.forEach((key, value) {
+      text = text.replaceAll('{$key}', value);
+    });
+
+    return text;
   }
 }

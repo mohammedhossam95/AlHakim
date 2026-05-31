@@ -83,9 +83,8 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   Future<UserProfileRespModel> getUserProfile(AuthParams params) async {
     try {
       final dynamic response = await dioConsumer.get(
-        (params.isMyProfile == true)
-            ? '/user/my/profile'
-            : '/get/user/profile/${params.userId}',
+        '/user/my/profile',
+        // : '/get/user/profile/${params.userId}',
       );
       if (response['success'] == true) {
         return UserProfileRespModel.fromJson(response);
@@ -103,43 +102,43 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
 
       // ===== 1. الحقول النصية =====
 
-      if (params.name != null) {
-        formData.fields.add(MapEntry('name', params.name!));
-      }
-      if (params.lastName != null) {
-        formData.fields.add(MapEntry('last_name', params.lastName!));
-      }
-      if (params.phone != null) {
-        formData.fields.add(MapEntry('phone', params.phone!));
-      }
-      if (params.countryCode != null) {
-        formData.fields.add(MapEntry('country_code', params.countryCode!));
-      }
-      if (params.whatsapp != null) {
-        formData.fields.add(MapEntry('whatsapp', params.whatsapp!));
-      }
-      if (params.email != null) {
-        formData.fields.add(MapEntry('email', params.email!));
-      }
-      if (params.bio != null) {
-        formData.fields.add(MapEntry('bio', params.bio!));
-      }
+      // if (params.name != null) {
+      //   formData.fields.add(MapEntry('name', params.name!));
+      // }
+      // if (params.lastName != null) {
+      //   formData.fields.add(MapEntry('last_name', params.lastName!));
+      // }
+      // if (params.phone != null) {
+      //   formData.fields.add(MapEntry('phone', params.phone!));
+      // }
+      // if (params.countryCode != null) {
+      //   formData.fields.add(MapEntry('country_code', params.countryCode!));
+      // }
+      // if (params.whatsapp != null) {
+      //   formData.fields.add(MapEntry('whatsapp', params.whatsapp!));
+      // }
+      // if (params.email != null) {
+      //   formData.fields.add(MapEntry('email', params.email!));
+      // }
+      // if (params.bio != null) {
+      //   formData.fields.add(MapEntry('bio', params.bio!));
+      // }
 
-      // ===== 2. الصورة =====
-      if (params.imageUrl != null && params.imageUrl!.isNotEmpty) {
-        bool isLocalFile = !params.imageUrl!.startsWith('http');
-        if (isLocalFile) {
-          formData.files.add(
-            MapEntry(
-              'image',
-              await MultipartFile.fromFile(
-                params.imageUrl!,
-                filename: params.imageUrl!.split('/').last,
-              ),
-            ),
-          );
-        }
-      }
+      // // ===== 2. الصورة =====
+      // if (params.imageUrl != null && params.imageUrl!.isNotEmpty) {
+      //   bool isLocalFile = !params.imageUrl!.startsWith('http');
+      //   if (isLocalFile) {
+      //     formData.files.add(
+      //       MapEntry(
+      //         'image',
+      //         await MultipartFile.fromFile(
+      //           params.imageUrl!,
+      //           filename: params.imageUrl!.split('/').last,
+      //         ),
+      //       ),
+      //     );
+      //   }
+      // }
       Log.d('formData: ${formData.fields.toString()}');
 
       // ===== 3. طلب الـ API =====

@@ -59,7 +59,9 @@ class DiffImage extends StatelessWidget {
       height: safeHeight,
       padding: hasBorder ? padding ?? EdgeInsets.all(2.w) : null,
       decoration: BoxDecoration(
-        borderRadius: borderRadius ?? BorderRadius.circular(safeRadius),
+        borderRadius: isCircle
+            ? BorderRadius.circular(999.r)
+            : borderRadius ?? BorderRadius.circular(safeRadius),
         border: hasBorder ? Border.all(color: colors.main) : null,
         boxShadow: hasShadow == true
             ? const [
@@ -74,7 +76,9 @@ class DiffImage extends StatelessWidget {
       ),
       child: image is String && image.toString().isNotEmpty
           ? ClipRRect(
-              borderRadius: borderRadius ?? BorderRadius.circular(safeRadius),
+              borderRadius: isCircle
+                  ? BorderRadius.circular(999.r)
+                  : borderRadius ?? BorderRadius.circular(safeRadius),
               child: image.toString().startsWith('http')
                   ? CachedNetworkImage(
                       placeholder: (context, url) => const SizedBox(),

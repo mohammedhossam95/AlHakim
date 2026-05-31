@@ -4,7 +4,7 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserCubit extends Cubit<UserEntity?> {
-  UserCubit() : super(sharedPreferences.getUser());
+  UserCubit() : super(sharedPreferences.getAuth()?.user);
 
   void updateUser(UserModel user) {
     sharedPreferences.saveUser(user);
@@ -12,6 +12,6 @@ class UserCubit extends Cubit<UserEntity?> {
   }
 
   void loadUser() {
-    emit(sharedPreferences.getUser());
+    emit(sharedPreferences.getAuth()?.user);
   }
 }

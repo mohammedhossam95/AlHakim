@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class APIError extends Equatable {
-  final String? status;
+  final bool? status;
   final bool? success;
   final Map<String, dynamic>? result;
   final String? message;

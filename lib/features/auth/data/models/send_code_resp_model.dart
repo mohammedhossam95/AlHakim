@@ -1,35 +1,26 @@
 import 'package:alhakim/core/base_classes/base_one_response.dart';
+import 'package:alhakim/features/auth/domain/entities/send_otp_entity.dart';
 
-class SendCodeRespModel extends BaseOneResponse {
-  const SendCodeRespModel({super.success, super.data, super.message});
+class SendOtpRespModel extends BaseOneResponse {
+  const SendOtpRespModel({super.status, super.message, super.data});
 
-  factory SendCodeRespModel.fromJson(Map<String, dynamic> json) =>
-      SendCodeRespModel(
-        data: json["data"] == null
-            ? null
-            : SendCodeModel.fromJson(json["data"]),
-        success: json["success"],
-        message: json["message"],
-      );
-
-  Map<String, dynamic> toJson() => {
-    "data": data?.toJson(),
-    "success": success,
-    "message": message,
-  };
+  factory SendOtpRespModel.fromJson(Map<String, dynamic> json) {
+    return SendOtpRespModel(
+      status: json['status'],
+      message: json['message'],
+      data: json['data'] != null ? SendOtpModel.fromJson(json['data']) : null,
+    );
+  }
 }
 
-class SendCodeModel {
-  final bool? done;
-  final int? code;
+class SendOtpModel extends SendOtpEntity {
+  const SendOtpModel({super.otp, super.nextStep, super.token});
 
-  const SendCodeModel({this.done, this.code});
-
-  factory SendCodeModel.fromJson(Map<String, dynamic> json) {
-    return SendCodeModel(done: json['done'], code: json['code']);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'done': done, 'code': code};
+  factory SendOtpModel.fromJson(Map<String, dynamic> json) {
+    return SendOtpModel(
+      otp: json['otp'],
+      nextStep: json['next_step'],
+      token: json['token'],
+    );
   }
 }

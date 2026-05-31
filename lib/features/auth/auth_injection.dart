@@ -1,3 +1,4 @@
+import 'package:alhakim/features/auth/domain/usecases/complete_profile_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/delete_user_account_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/get_all_cities_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/get_countries_use_case.dart';
@@ -6,14 +7,18 @@ import 'package:alhakim/features/auth/domain/usecases/get_user_type_usecase.dart
 import 'package:alhakim/features/auth/domain/usecases/login_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/register_use_case.dart';
+import 'package:alhakim/features/auth/domain/usecases/resend_otp_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/save_user_type_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/send_code_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/verify_code_use_case.dart';
+import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get_countries_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_setting/get_setting_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/logout/logout_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/resend_otp_cubit/resend_otp_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/send_code_cubit/send_code_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
@@ -65,8 +70,17 @@ Future<void> initAuthFeatureInjection() async {
   _sl.registerFactory<DeleteUserAccountCubit>(
     () => DeleteUserAccountCubit(_sl()),
   );
+  _sl.registerFactory(() => ResendOtpCubit(usecase: _sl()));
+
+  /// logout cubit
+  _sl.registerFactory(() => LogoutCubit(logoutUsecase: _sl()));
+  _sl.registerFactory(() => CompleteProfileCubit(usecase: _sl()));
+
+  _sl.registerLazySingleton(() => CompleteProfileUsecase(repository: _sl()));
 
   ///-> UseCases
+
+  _sl.registerLazySingleton(() => ResendOtpUsecase(repository: _sl()));
 
   _sl.registerLazySingleton<GetSessionStatusUseCase>(
     () => GetSessionStatusUseCase(repository: _sl()),

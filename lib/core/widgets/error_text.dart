@@ -1,25 +1,28 @@
 import 'package:alhakim/core/utils/values/text_styles.dart';
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import '/core/utils/enums.dart';
 import '/core/utils/values/assets.dart';
 import '/core/widgets/my_default_button.dart';
-import '../../config/routes/app_routes.dart';
 import '../../injection_container.dart';
-import '../utils/app_strings.dart';
 import '../utils/values/gif_manager.dart';
-import '../utils/values/strings.dart';
 
 class ErrorText extends StatefulWidget {
   final String? text;
+
   final bool isNetwork;
+
   final double? height;
+
   final double width;
+
   final MyError search;
+
   final EdgeInsetsGeometry? margin;
+
+  final VoidCallback? onRetry;
 
   const ErrorText({
     super.key,
@@ -29,6 +32,7 @@ class ErrorText extends StatefulWidget {
     this.height,
     this.search = MyError.defaultError,
     this.margin,
+    this.onRetry,
   });
 
   @override
@@ -39,44 +43,82 @@ class _ErrorTextState extends State<ErrorText> {
   @override
   Widget build(BuildContext context) {
     return widget.isNetwork
-        ? Scaffold(body: SafeArea(child: _builContainer(context, widget.width)))
-        : _builContainer(context, widget.width);
+        ? Scaffold(
+            body: SafeArea(child: _buildContainer(context, widget.width)),
+          )
+        : _buildContainer(context, widget.width);
   }
 
-  Container _builContainer(BuildContext context, width) {
+  Widget _buildContainer(BuildContext context, double width) {
     return Container(
-      height: double.infinity,
       width: double.infinity,
-      margin: widget.margin ?? const EdgeInsets.all(0.0),
+      height: double.infinity,
+
+      margin: widget.margin ?? EdgeInsets.zero,
+
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+
         crossAxisAlignment: CrossAxisAlignment.center,
+
         children: [
+          /// image
           SizedBox(
-            width: width * 0.65,
-            height: width * 0.65,
+            width: width * .65,
+            height: width * .65,
+
             child: Image.asset(
               widget.isNetwork
                   ? ImgAssets.noData
                   : errorImage(widget.search, context),
             ),
           ),
-          SizedBox(height: 10.h),
-          AutoSizeText(
-            widget.text == AppStrings.unAuthorizedFailure
-                ? Strings.welcomeToAppMessage
-                : '${widget.text}',
-            textAlign: TextAlign.center,
-            style: TextStyles.regular18(color: colors.errorColor),
-          ),
-          SizedBox(height: 10.h),
-          if (widget.text == AppStrings.unAuthorizedFailure)
+
+          // Gaps.vGap10,
+
+          // /// text
+          // Padding(
+          //   padding: EdgeInsets.symmetric(horizontal: 24.w),
+
+          //   child: AutoSizeText(
+          //     widget.text == AppStrings.unAuthorizedFailure
+          //         ? Strings.welcomeToAppMessage
+          //         : "${widget.text}",
+
+          //     textAlign: TextAlign.center,
+
+          //     style: TextStyles.regular18(color: colors.errorColor),
+          //   ),
+          // ),
+          Gaps.vGap16,
+
+          /// login button
+          // if (widget.text == AppStrings.unAuthorizedFailure)
+          //   Container(
+          //     margin: EdgeInsets.all(20.r),
+
+          //     child: MyDefaultButton(
+          //       onPressed: () {
+          //         context.go(Routes.loginScreenRoute);
+          //       },
+
+          //       btnText: Strings.login,
+
+          //       localeText: true,
+          //     ),
+          //   ),
+
+          // /// retry button
+          if (widget.onRetry != null)
             Container(
-              margin: EdgeInsets.all(20.r),
+              margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+
               child: MyDefaultButton(
-                onPressed: () => context.go(Routes.loginScreenRoute),
-                btnText: Strings.login,
-                localeText: true,
+                width: 200.w,
+                height: 40.h,
+                btnText: 'retry',
+                onPressed: widget.onRetry!,
+                textStyle: TextStyles.semiBold14(color: colors.whiteColor),
               ),
             ),
         ],
