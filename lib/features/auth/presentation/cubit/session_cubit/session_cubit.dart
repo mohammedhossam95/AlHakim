@@ -25,14 +25,14 @@ class SessionCubit extends Cubit<SessionState> {
        _saveSessionStatus = saveSessionStatus,
        _getUserType = getUserType,
        _saveUserType = saveUserType,
-       //  _logoutUseCase = logoutUseCase,
+       _logoutUseCase = logoutUseCase,
        super(const SessionState.initial());
 
   final GetSessionStatusUseCase _getSessionStatus;
   final SaveSessionStatusUseCase _saveSessionStatus;
   final GetUserTypeUseCase _getUserType;
   final SaveUserTypeUseCase _saveUserType;
-  // final LogoutUseCase _logoutUseCase;
+  final LogoutUseCase _logoutUseCase;
 
   Future<void> resolveSession() async {
     final result = await _getSessionStatus(NoParams());
@@ -83,13 +83,32 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<void> logout() async {
-    // final result = await _logoutUseCase(NoParams());
-    // result.fold((f) => log('Logout API failed: ${f.message}'), (_) {});
+    final result = await _logoutUseCase(NoParams());
+    result.fold(
+      (failure) => log('Logout API failed: ${failure.message}'),
+      (_) {},
+    );
 
-    await _saveSessionStatus(SessionStatusParams(status: SessionStatus.guest));
-    secureStorage.clearAll();
-    await sharedPreferences.clearAll();
+    await secureStorage.clearAll();
 
-    emit(state.copyWith(status: SessionStatus.guest));
+    final guestResult = await _saveSessionStatus(
+      SessionStatusParams(status: SessionStatus.guest),
+    );
+    guestResult.fold(
+      (failure) => log('SAVE GUEST SESSION FAILED: ${failure.message}'),
+      (_) {},
+    );
+
+    await sharedPreferences.removeUser();
+    await sharedPreferences.removeUserId();
+    await sharedPreferences.removeUserType();
+
+    emit(
+      const SessionState(
+        status: SessionStatus.guest,
+        userType: UserType.patient,
+        error: null,
+      ),
+    );
   }
 }

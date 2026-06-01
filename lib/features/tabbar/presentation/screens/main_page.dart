@@ -1,20 +1,26 @@
-// ignore_for_file: strict_top_level_inference
-
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
+import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
+import 'package:alhakim/features/auth/presentation/cubit/logout/logout_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/screens/delegate_dashboard_screen.dart';
+import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
+import 'package:alhakim/features/settings/presentaion/screens/settings_screen.dart';
+import 'package:alhakim/features/specialities/presentation/screens/specialities_screen.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -25,47 +31,92 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final PageStorageBucket bucket = PageStorageBucket();
-  final PersistentTabController _controller = PersistentTabController();
 
   int badge = 0;
+  bool _pendingBottomNavResync = false;
   final padding = EdgeInsets.symmetric(horizontal: 18, vertical: 12);
   double gap = 10;
 
+  List<Widget> _buildTabsFor(UserType role) => [
+    // HomeScreen(),
+    switch (role) {
+      UserType.patient => const SpecialitiesScreen(),
+      UserType.delegate => const DelegateDashboardScreen(),
+      UserType.doctor => ClinicHomeScreen(),
+    },
+
+    switch (role) {
+      UserType.patient => const AppointmentsScreen(),
+      UserType.delegate => const DelegateDoctorsScreen(),
+      UserType.doctor => QueueManagementScreen(),
+    },
+    BlocProvider(
+      create: (context) => ServiceLocator.instance<LogoutCubit>(),
+      child: const SettingsScreen(),
+    ),
+  ];
+
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    // BottomNavBarCubit lives above routes; a prior role (e.g. teacher tab 3) can
+    // outlive navigation. Reset when MainPage mounts so tab count always matches.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
-      listenWhen: (pre, current) => pre.index != current.index,
-      listener: (context, state) {},
-      builder: (context, state) {
-        final cubit = context.read<BottomNavBarCubit>();
+    return BlocBuilder<SessionCubit, SessionState>(
+      buildWhen: (prev, curr) => prev.userType != curr.userType,
+      builder: (context, sessionState) {
+        final role = sessionState.userType;
+        final tabs = _buildTabsFor(role);
+        // final isTeacherShell = role == UserType.doctor;
 
-        return PopScope(
-          canPop: state.index == 0,
-          onPopInvokedWithResult: (didPop, result) {
-            if (didPop) return;
-            context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
+        return BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
+          listenWhen: (pre, current) => pre.index != current.index,
+          listener: (context, state) {},
+          builder: (context, state) {
+            final tabCount = tabs.length;
+            final displayIndex = state.index >= 0 && state.index < tabCount
+                ? state.index
+                : 0;
+            if (state.index != displayIndex && !_pendingBottomNavResync) {
+              _pendingBottomNavResync = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _pendingBottomNavResync = false;
+                if (!context.mounted) return;
+                context.read<BottomNavBarCubit>().changeCurrentScreen(
+                  index: displayIndex,
+                );
+              });
+            }
+            return PopScope(
+              canPop: displayIndex == 0,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) return;
+                context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
+              },
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                // ACCESSING THE SCREEN VIA CUBIT STATE
+                body: PageStorage(bucket: bucket, child: tabs[displayIndex]),
+
+                // floatingActionButton: _buildFab(),
+                // floatingActionButtonLocation:
+                //     FloatingActionButtonLocation.centerDocked,
+                bottomNavigationBar: _buildBottomBar(context, displayIndex),
+              ),
+            );
           },
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            // ACCESSING THE SCREEN VIA CUBIT STATE
-            body: IndexedStack(index: state.index, children: cubit.screens),
-
-            // floatingActionButton: _buildFab(),
-            // floatingActionButtonLocation:
-            //     FloatingActionButtonLocation.centerDocked,
-            bottomNavigationBar: _buildBottomBar(context, state.index),
-          ),
         );
       },
     );

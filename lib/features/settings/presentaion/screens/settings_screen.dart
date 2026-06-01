@@ -5,12 +5,12 @@ import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_c
 import 'package:alhakim/features/settings/presentaion/widgets/custom_app_bar.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/language_setting_widget.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/profile_widget.dart';
-import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+
 import '/config/routes/app_routes.dart';
 import '/core/utils/constants.dart';
 import '/core/utils/enums.dart';
@@ -379,15 +379,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   //   );
   // }
 
-  void _handleLogout() {
+  Future<void> _handleLogout() async {
+    if (!mounted) return;
     Constants.showLoading(context);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      Constants.hideLoading(context);
-      BlocProvider.of<SessionCubit>(context).logout();
-      BlocProvider.of<BottomNavBarCubit>(context).changeCurrentScreen(index: 0);
-      context.pushReplacementNamed(Routes.chooseUserTypeScreenRoute);
-    });
+    try {
+      await sessionCubit.logout();
+    } catch (e, st) {
+      debugPrint('Logout error: $e\n$st');
+      if (mounted) {
+        Constants.showSnakToast(
+          context: context,
+          type: 3,
+          message: e.toString(),
+        );
+      }
+    } finally {
+      if (mounted) Constants.hideLoading(context);
+    }
+    if (!mounted) return;
+    context.go(Routes.initialRoute);
   }
 }
 
