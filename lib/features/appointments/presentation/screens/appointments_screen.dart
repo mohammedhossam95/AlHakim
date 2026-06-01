@@ -209,7 +209,7 @@ class _AppointmentCard extends StatelessWidget {
                       style: TextStyles.semiBold16(),
                     ),
 
-                    Gaps.vGap4,
+                    Gaps.vGap8,
 
                     Text(
                       item.doctor?.specialty?.name ?? '',
@@ -348,6 +348,8 @@ class _InfoBox extends StatelessWidget {
 
             children: [
               Text(title, style: TextStyles.medium10()),
+
+              Gaps.vGap8,
 
               Text(value, style: TextStyles.medium12()),
             ],

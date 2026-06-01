@@ -1,5 +1,8 @@
+import 'package:alhakim/core/utils/app_strings.dart';
+import 'package:alhakim/core/utils/values/strings.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -74,22 +77,22 @@ class _ErrorTextState extends State<ErrorText> {
             ),
           ),
 
-          // Gaps.vGap10,
+          Gaps.vGap10,
 
-          // /// text
-          // Padding(
-          //   padding: EdgeInsets.symmetric(horizontal: 24.w),
+          /// text
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
 
-          //   child: AutoSizeText(
-          //     widget.text == AppStrings.unAuthorizedFailure
-          //         ? Strings.welcomeToAppMessage
-          //         : "${widget.text}",
+            child: AutoSizeText(
+              widget.text == AppStrings.unAuthorizedFailure
+                  ? Strings.welcomeToAppMessage
+                  : "${widget.text}",
 
-          //     textAlign: TextAlign.center,
+              textAlign: TextAlign.center,
 
-          //     style: TextStyles.regular18(color: colors.errorColor),
-          //   ),
-          // ),
+              style: TextStyles.regular18(color: colors.errorColor),
+            ),
+          ),
           Gaps.vGap16,
 
           /// login button
