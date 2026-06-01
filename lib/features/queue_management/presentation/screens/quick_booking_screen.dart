@@ -169,11 +169,11 @@ class _QuickBookingScreenState extends State<QuickBookingScreen> {
                         children: [
                           Expanded(
                             child: MyTextFormField(
-                              controller: lastNameController,
+                              controller: firstNameController,
 
-                              focusNode: lastNameFocus,
+                              focusNode: firstNameFocus,
 
-                              hintText: "last_name".tr,
+                              hintText: "first_name".tr,
 
                               textInputAction: TextInputAction.next,
 
@@ -188,16 +188,15 @@ class _QuickBookingScreenState extends State<QuickBookingScreen> {
                               },
                             ),
                           ),
-
                           Gaps.hGap12,
 
                           Expanded(
                             child: MyTextFormField(
-                              controller: firstNameController,
+                              controller: lastNameController,
 
-                              focusNode: firstNameFocus,
+                              focusNode: lastNameFocus,
 
-                              hintText: "first_name".tr,
+                              hintText: "last_name".tr,
 
                               textInputAction: TextInputAction.next,
 
