@@ -88,21 +88,10 @@ class _BookingScreenState extends State<BookingScreen> {
                   Gaps.vGap24,
 
                   /// title
-                  InkWell(
-                    onTap: () {
-                      context.push(
-                        Routes.appoinmentSuccessScreen,
-                        extra: {
-                          "doctor": widget.doctor,
-                          "appointmentDate": selectedBooking.date.toString(),
-                        },
-                      );
-                    },
-                    child: Text(
-                      "choose_booking_date".tr,
+                  Text(
+                    "choose_booking_date".tr,
 
-                      style: TextStyles.semiBold18(),
-                    ),
+                    style: TextStyles.semiBold18(),
                   ),
 
                   Gaps.vGap8,
@@ -497,11 +486,18 @@ class _BookingScreenState extends State<BookingScreen> {
                       if (state is BookAppointmentSuccess) {
                         Constants.showSnakToast(
                           context: context,
+
                           message: state.response.message ?? '',
                           type: 1,
                         );
 
-                        context.pop(true);
+                        context.push(
+                          Routes.appoinmentSuccessScreen,
+                          extra: {
+                            "doctor": widget.doctor,
+                            "appointmentDate": selectedBooking.date.toString(),
+                          },
+                        );
                       } else if (state is BookAppointmentError) {
                         Constants.showSnakToast(
                           context: context,
