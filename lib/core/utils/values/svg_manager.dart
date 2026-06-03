@@ -11,6 +11,7 @@ class SvgAssets {
   static const String homeSvg = 'assets/images/icons8-home.svg';
   static const String search = 'assets/icons/search.svg';
   static const String iconDiscount = 'assets/icons/ticket-discount.svg';
+  static const String familyIcon = 'assets/icons/family.svg';
 
   static const String user = 'assets/icons/user.svg';
   static const String bookmarkTab = 'assets/icons/Bookmark_tab.svg';

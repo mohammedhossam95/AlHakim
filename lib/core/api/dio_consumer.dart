@@ -30,6 +30,13 @@ abstract class DioConsumer {
     Map<String, dynamic>? queryParameters,
   });
 
+  Future<dynamic> patch(
+    String path, {
+    FormData? formData,
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? queryParameters,
+  });
+
   Future<dynamic> put(
     String path, {
     FormData? formData,
@@ -279,5 +286,33 @@ class DioConsumerImpl implements DioConsumer {
     }
 
     throw ServerException(message: getErrorMessage(error.response?.data));
+  }
+
+  @override
+  Future<dynamic> patch(
+    String path, {
+    FormData? formData,
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      Log.i(
+        '[PATCH][$path], formData: ${formData?.toPrint}, body: ${body.toString()}, params: ${queryParameters.toString()}',
+      );
+      await _handleAccessTokenHeader();
+      final response = await client.patch(
+        path,
+        queryParameters: queryParameters,
+        data: formData ?? body,
+      );
+      Log.i('[PATCH][$path], response: ${response.data.toString()}');
+      return response.data;
+    } on SocketException {
+      throw InternetConnectionException(message: Strings.noInternetConnection);
+    } on DioException catch (error) {
+      _handleDioError(error);
+    } catch (error) {
+      throw ServerException(message: error.toString());
+    }
   }
 }

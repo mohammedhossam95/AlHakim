@@ -44,7 +44,10 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     return Scaffold(
       backgroundColor: colors.backGround,
 
-      appBar: AppBar(title: Text("clinic_dashboard".tr)),
+      appBar: AppBar(
+        title: Text("clinic_dashboard".tr),
+        automaticallyImplyLeading: false,
+      ),
 
       body: BlocBuilder<GetDoctorHomeCubit, GetDoctorHomeState>(
         builder: (context, state) {

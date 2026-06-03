@@ -28,6 +28,7 @@ import 'package:alhakim/features/booking/presentation/cubit/get_kinships_cubit/g
 import 'package:alhakim/features/booking/presentation/screens/add_family_member_screen.dart';
 import 'package:alhakim/features/booking/presentation/screens/booking_screen.dart';
 import 'package:alhakim/features/booking/presentation/screens/family_members_screen.dart';
+import 'package:alhakim/features/booking/presentation/screens/success_screen.dart';
 import 'package:alhakim/features/delegate/presentation/cubit/get_representative_stats_cubit/get_representative_stats_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/screens/add_new_doctor_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
@@ -126,6 +127,7 @@ abstract class Routes {
   static const String queueManagementScreenRoute =
       '/QueueManagementScreenRoute';
   static const String quickBookingScreenRoute = '/QuickBookingScreenRoute';
+  static const String appoinmentSuccessScreen = '/AppoinmentSuccessScreen';
 
   static final sl = ServiceLocator.instance;
 
@@ -493,6 +495,21 @@ abstract class Routes {
           return buildAdaptivePage(
             state: state,
             child: const ContactUsScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        name: appoinmentSuccessScreen,
+        path: appoinmentSuccessScreen,
+        pageBuilder: (context, state) {
+          final args = state.extra as Map<String, dynamic>;
+
+          return buildAdaptivePage(
+            state: state,
+            child: AppoinmentSuccessScreen(
+              doctor: args['doctor'],
+              appointmentDate: args['appointmentDate'],
+            ),
           );
         },
       ),

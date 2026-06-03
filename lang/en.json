@@ -399,5 +399,12 @@
   "enter_height": "Enter height (cm)",
   "enter_weight": "Enter weight (kg)",
   "select_blood_type": "Select blood type",
-  "enter_location": "Enter your current location"
+  "enter_location": "Enter your current location",
+  "choose_blood_type": "Choose blood type",
+  "booking_confirmed": "Booking Confirmed!",
+  "booking_confirmed_desc": "Appointment details and confirmation have been sent to your registered phone.",
+  "clinic": "Clinic",
+  "add_to_calendar": "Add To Calendar",
+  "go_to_home": "Back To Home",
+  "go_to_appointments": "My Appointments"
 }

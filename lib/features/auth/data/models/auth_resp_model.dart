@@ -46,6 +46,10 @@ class UserModel extends UserEntity {
     super.isPhoneVerified,
     super.profilePhotoUrl,
     super.referralCode,
+    super.tall,
+    super.weight,
+    super.bloodType,
+    super.location,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -59,6 +63,10 @@ class UserModel extends UserEntity {
       isPhoneVerified: json['is_phone_verified'],
       profilePhotoUrl: json['profile_photo_url'],
       referralCode: json['referral_code'],
+      tall: json['tall'],
+      weight: json['weight'],
+      bloodType: json['blood_type'],
+      location: json['location'],
     );
   }
   Map<String, dynamic> toJson() => {
@@ -71,5 +79,9 @@ class UserModel extends UserEntity {
     "is_phone_verified": isPhoneVerified,
     "profile_photo_url": profilePhotoUrl,
     "referral_code": referralCode,
+    "tall": tall,
+    "weight": weight,
+    "blood_type": bloodType,
+    "location": location,
   };
 }

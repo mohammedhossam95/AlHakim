@@ -1,6 +1,8 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
 import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:dartz/dartz.dart';
 
 import '/core/base_classes/base_one_response.dart';
@@ -19,7 +21,9 @@ abstract class SettingRepo {
   );
   Future<Either<Failure, SupportPhoneResp>> getSupportPhone();
   Future<Either<Failure, BaseOneResponse>> getUserProfile(AuthParams params);
-  Future<Either<Failure, BaseOneResponse>> updateUserProfile(AuthParams params);
+  Future<Either<Failure, UserModel>> updateUserProfile(
+    CompleteProfileParams params,
+  );
   Future<Either<Failure, BaseListResponse>> getCommonQuestions();
   Future<Either<Failure, BaseOneResponse>> getStaticPageContent(
     StaticPageType type,

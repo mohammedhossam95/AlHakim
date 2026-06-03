@@ -1,10 +1,11 @@
 import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/log_utils.dart';
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/app_setting_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/common_questions_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/static_page_content_resp_model.dart';
-import 'package:alhakim/features/settings/data/model/user_profile_resp_model.dart';
 import 'package:dio/dio.dart';
 
 import '/core/error/exceptions.dart';
@@ -21,8 +22,8 @@ abstract class SettingRemoteDataSource {
   );
   Future<SupportPhoneRespModel> getRemoteSupportPhone();
   Future<ContactUsRespModel> contactUsMethod(ContactUsParam params);
-  Future<UserProfileRespModel> getUserProfile(AuthParams params);
-  Future<UserProfileRespModel> updateUserProfile(AuthParams params);
+  Future<AuthRespModel> getUserProfile(AuthParams params);
+  Future<UserModel> updateUserProfile(CompleteProfileParams params);
   Future<CommonQuestionsRespModel> getCommonQuestions();
   Future<StaticPageContentRespModel> getStaticPageContent(StaticPageType type);
   Future<AppSettingRespModel> getAppSetting();
@@ -80,14 +81,14 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   }
 
   @override
-  Future<UserProfileRespModel> getUserProfile(AuthParams params) async {
+  Future<AuthRespModel> getUserProfile(AuthParams params) async {
     try {
       final dynamic response = await dioConsumer.get(
         '/user/my/profile',
         // : '/get/user/profile/${params.userId}',
       );
       if (response['success'] == true) {
-        return UserProfileRespModel.fromJson(response);
+        return AuthRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');
     } catch (error) {
@@ -96,60 +97,20 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   }
 
   @override
-  Future<UserProfileRespModel> updateUserProfile(AuthParams params) async {
+  Future<UserModel> updateUserProfile(CompleteProfileParams params) async {
     try {
       FormData formData = FormData();
 
-      // ===== 1. الحقول النصية =====
-
-      // if (params.name != null) {
-      //   formData.fields.add(MapEntry('name', params.name!));
-      // }
-      // if (params.lastName != null) {
-      //   formData.fields.add(MapEntry('last_name', params.lastName!));
-      // }
-      // if (params.phone != null) {
-      //   formData.fields.add(MapEntry('phone', params.phone!));
-      // }
-      // if (params.countryCode != null) {
-      //   formData.fields.add(MapEntry('country_code', params.countryCode!));
-      // }
-      // if (params.whatsapp != null) {
-      //   formData.fields.add(MapEntry('whatsapp', params.whatsapp!));
-      // }
-      // if (params.email != null) {
-      //   formData.fields.add(MapEntry('email', params.email!));
-      // }
-      // if (params.bio != null) {
-      //   formData.fields.add(MapEntry('bio', params.bio!));
-      // }
-
-      // // ===== 2. الصورة =====
-      // if (params.imageUrl != null && params.imageUrl!.isNotEmpty) {
-      //   bool isLocalFile = !params.imageUrl!.startsWith('http');
-      //   if (isLocalFile) {
-      //     formData.files.add(
-      //       MapEntry(
-      //         'image',
-      //         await MultipartFile.fromFile(
-      //           params.imageUrl!,
-      //           filename: params.imageUrl!.split('/').last,
-      //         ),
-      //       ),
-      //     );
-      //   }
-      // }
       Log.d('formData: ${formData.fields.toString()}');
 
       // ===== 3. طلب الـ API =====
-      final dynamic response = await dioConsumer.post(
-        '/user/update/profile',
-        formData: formData,
+      final dynamic response = await dioConsumer.patch(
+        '/profile',
+        body: params.toJson(),
       );
 
-      // ===== 4. التحقق من النجاح =====
-      if (response['success'] == true) {
-        return UserProfileRespModel.fromJson(response);
+      if (response['status'] == true) {
+        return UserModel.fromJson(response['data']);
       }
 
       throw ServerException(message: response['message'] ?? 'Error occurred');

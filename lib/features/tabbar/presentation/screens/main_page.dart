@@ -20,7 +20,6 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -237,8 +236,8 @@ class _MainPageState extends State<MainPage> {
               child: _navItem(
                 context,
                 2,
-                FontAwesomeIcons.user,
-                "my_profile".tr,
+                Icons.settings,
+                "settings".tr,
                 currentIndex,
               ),
             ),

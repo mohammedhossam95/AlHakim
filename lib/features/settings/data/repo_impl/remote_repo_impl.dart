@@ -1,6 +1,8 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
 import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:dartz/dartz.dart';
 
 import '/core/base_classes/base_one_response.dart';
@@ -75,18 +77,18 @@ class SettingRemoteRepoImpl extends SettingRepo {
   }
 
   @override
-  Future<Either<Failure, BaseOneResponse>> updateUserProfile(
-    AuthParams params,
+  Future<Either<Failure, UserModel>> updateUserProfile(
+    CompleteProfileParams params,
   ) async {
     try {
-      final BaseOneResponse response = await settingRemoteDataSource
+      final UserModel response = await settingRemoteDataSource
           .updateUserProfile(params);
-      return Right<Failure, BaseOneResponse>(response);
+      return Right<Failure, UserModel>(response);
     } on AppException catch (error) {
       log.Log.e(
-        '[getUserProfile] [${error.runtimeType.toString()}] ---- ${error.message}',
+        '[updateUserProfile] [${error.runtimeType.toString()}] ---- ${error.message}',
       );
-      return Left<Failure, BaseOneResponse>(error.toFailure());
+      return Left<Failure, UserModel>(error.toFailure());
     }
   }
 

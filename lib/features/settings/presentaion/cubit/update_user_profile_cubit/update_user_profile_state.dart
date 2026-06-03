@@ -14,7 +14,7 @@ class UpdateUserProfileIsLoading extends UpdateUserProfileState {
 }
 
 class UpdateUserProfileLoaded extends UpdateUserProfileState {
-  final BaseOneResponse response;
+  final UserModel response;
 
   const UpdateUserProfileLoaded({required this.response});
 }

@@ -22,6 +22,10 @@ class UserEntity extends Equatable {
   final bool? isPhoneVerified;
   final String? profilePhotoUrl;
   final String? referralCode;
+  final String? tall;
+  final String? weight;
+  final String? bloodType;
+  final String? location;
 
   const UserEntity({
     this.id,
@@ -33,6 +37,10 @@ class UserEntity extends Equatable {
     this.isPhoneVerified,
     this.profilePhotoUrl,
     this.referralCode,
+    this.tall,
+    this.weight,
+    this.bloodType,
+    this.location,
   });
 
   @override
@@ -46,5 +54,9 @@ class UserEntity extends Equatable {
     isPhoneVerified,
     profilePhotoUrl,
     referralCode,
+    tall,
+    weight,
+    bloodType,
+    location,
   ];
 }

@@ -398,5 +398,12 @@
   "enter_height": "ادخل الطول (سم)",
   "enter_weight": "ادخل الوزن (كجم)",
   "select_blood_type": "اختر فصيلة الدم",
-  "enter_location": "ادخل موقعك الحالي"
+  "enter_location": "ادخل موقعك الحالي",
+  "choose_blood_type": "اختر فصيلة الدم",
+  "booking_confirmed": "تم تأكيد الحجز بنجاح!",
+  "booking_confirmed_desc": "تم إرسال تفاصيل الموعد ورسالة التأكيد إلى هاتفك المسجل.",
+  "clinic": "الفرع",
+  "add_to_calendar": "أضف للتقويم",
+  "go_to_home": "العودة للرئيسية",
+  "go_to_appointments": "الذهاب للمواعيد"
 }

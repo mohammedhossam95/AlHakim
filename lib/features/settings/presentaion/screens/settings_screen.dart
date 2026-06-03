@@ -45,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   delegate: SliverChildListDelegate([
                     Row(
                       children: [
-                        CustomAppBar(title: 'my_profile'.tr, isInTabBar: true),
+                        CustomAppBar(title: 'settings'.tr, isInTabBar: true),
                         Spacer(),
                         (sessionState.status == SessionStatus.authenticated)
                             ? InkWell(
@@ -73,7 +73,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                     Gaps.vGap16,
-                    if (sessionState.status == SessionStatus.authenticated) ...[
+                    if (sessionState.status == SessionStatus.authenticated &&
+                        sessionCubit.state.userType == UserType.patient) ...[
                       _buildSectionCard(
                         child: Column(
                           children: [
@@ -84,23 +85,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 context.push(Routes.editProfileScreenRoute);
                               },
                             ),
-                            // ProfileWidet(
-                            //   title: 'my_addresses'.tr,
-                            //   icon: SvgAssets.location,
-                            //   onTap: () {
-                            //     // context.push(
-                            //     //   Routes.mainPageRoute,
-                            //     //   extra: false,
-                            //     // );
-                            //   },
-                            // ),
-                            // ProfileWidet(
-                            //   title: 'favorites'.tr,
-                            //   icon: SvgAssets.favoritesIcon,
-                            //   onTap: () {
-                            //     context.push(Routes.favoritesScreenRoute);
-                            //   },
-                            // ),
+
+                            ProfileWidet(
+                              title: 'family_members'.tr,
+                              icon: SvgAssets.familyIcon,
+                              onTap: () {
+                                context.push(Routes.familyMembersScreenRoute);
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -121,35 +113,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
                             },
                           ),
-                          // if (sessionState.status ==
-                          //     SessionStatus.authenticated)
-                          //   ProfileWidet(
-                          //     //done
-                          //     title: 'contact_us'.tr,
-                          //     icon: SvgAssets.contactUsIcon,
-                          //     onTap: () {
-                          //       context.push(Routes.contactUsRoute);
-                          //     },
-                          //   ),
 
                           // ProfileWidet(
                           //   //done
-                          //   title: 'our_branches'.tr,
-                          //   icon: SvgAssets.location,
+                          //   title: 'contact_us'.tr,
+                          //   icon: SvgAssets.contactUsIcon,
                           //   onTap: () {
-                          //     context.push(Routes.allBrancesRoute);
+                          //     context.push(Routes.contactUsRoute);
                           //   },
                           // ),
-                          ProfileWidet(
-                            title: 'terms_conditions'.tr,
-                            icon: SvgAssets.termsIcon,
-                            onTap: () {
-                              context.push(
-                                Routes.staticPageScreenRoute,
-                                extra: StaticPageType.conditions,
-                              );
-                            },
-                          ),
+
                           ProfileWidet(
                             title: 'how_we'.tr,
                             icon: SvgAssets.aboutAppIcon,

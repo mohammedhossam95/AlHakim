@@ -8,6 +8,7 @@ class AuthParams extends Equatable {
   final UserType? userType;
   final String? secretaryPhone;
   final String? secretaryCountryCode;
+  
 
   const AuthParams({
     this.countryCode,

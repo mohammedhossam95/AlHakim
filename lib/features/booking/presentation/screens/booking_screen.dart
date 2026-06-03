@@ -88,10 +88,21 @@ class _BookingScreenState extends State<BookingScreen> {
                   Gaps.vGap24,
 
                   /// title
-                  Text(
-                    "choose_booking_date".tr,
+                  InkWell(
+                    onTap: () {
+                      context.push(
+                        Routes.appoinmentSuccessScreen,
+                        extra: {
+                          "doctor": widget.doctor,
+                          "appointmentDate": selectedBooking.date.toString(),
+                        },
+                      );
+                    },
+                    child: Text(
+                      "choose_booking_date".tr,
 
-                    style: TextStyles.semiBold18(),
+                      style: TextStyles.semiBold18(),
+                    ),
                   ),
 
                   Gaps.vGap8,

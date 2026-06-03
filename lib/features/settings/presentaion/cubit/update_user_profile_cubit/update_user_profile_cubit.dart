@@ -1,5 +1,5 @@
-import 'package:alhakim/core/base_classes/base_one_response.dart';
-import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/core/params/complete_profile_params.dart';
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/settings/domain/use_case/update_user_profile_use_case.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
@@ -16,17 +16,17 @@ class UpdateUserProfileCubit extends Cubit<UpdateUserProfileState> {
     : super(UpdateUserProfileInitial());
   bool isLoading = false;
 
-  Future<void> updateUserProfile(AuthParams params) async {
+  Future<void> updateUserProfile(CompleteProfileParams params) async {
     try {
       changeLoadingView();
-      final Either<Failure, BaseOneResponse> eitherResult =
+      final Either<Failure, UserModel> eitherResult =
           await udateUserProfileUseCase(params);
       changeLoadingView();
       eitherResult.fold(
         (Failure failure) {
           emit(UpdateUserProfileError(failure.message ?? ''));
         },
-        (BaseOneResponse response) {
+        (UserModel response) {
           emit(UpdateUserProfileLoaded(response: response));
         },
       );
