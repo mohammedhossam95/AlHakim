@@ -105,8 +105,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   child: ErrorText(
                     text: state.message,
                     width: 300,
-                    onRetry: () =>
-                        context.read<GetAppointmentsCubit>().getAppointments(),
+                    // onRetry: () =>
+                    //     context.read<GetAppointmentsCubit>().getAppointments(),
                   ),
                 );
               }

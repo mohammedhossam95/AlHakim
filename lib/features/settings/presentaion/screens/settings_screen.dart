@@ -122,7 +122,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           //     context.push(Routes.contactUsRoute);
                           //   },
                           // ),
-
                           ProfileWidet(
                             title: 'how_we'.tr,
                             icon: SvgAssets.aboutAppIcon,
@@ -171,7 +170,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   await Future.delayed(Duration(seconds: 2));
                                   if (!context.mounted) return;
                                   Constants.hideLoading(context);
-                                  context.push(Routes.loginScreenRoute);
+                                  context.push(
+                                    Routes.chooseUserTypeScreenRoute,
+                                  );
                                 },
                                 btnText: 'login',
                               ),

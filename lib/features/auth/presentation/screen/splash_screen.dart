@@ -38,8 +38,9 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
       final session = context.read<SessionCubit>().state;
       log('Splash navigate for: ${session.status}');
-      if (session.status == SessionStatus.firstLaunch) {
-        context.go(Routes.chooseUserTypeScreenRoute);
+      if ((session.status == SessionStatus.guest ||
+          session.status == SessionStatus.firstLaunch)) {
+        context.go(Routes.mainPageRoute);
       } else if (session.status == SessionStatus.authenticated) {
         context.go(Routes.mainPageRoute);
       } else {

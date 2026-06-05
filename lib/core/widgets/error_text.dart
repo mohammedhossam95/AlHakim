@@ -1,3 +1,4 @@
+import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/core/utils/values/strings.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
@@ -5,6 +6,7 @@ import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '/core/utils/enums.dart';
 import '/core/utils/values/assets.dart';
@@ -95,21 +97,21 @@ class _ErrorTextState extends State<ErrorText> {
           ),
           Gaps.vGap16,
 
-          /// login button
-          // if (widget.text == AppStrings.unAuthorizedFailure)
-          //   Container(
-          //     margin: EdgeInsets.all(20.r),
+          //login button
+          if (widget.text == AppStrings.unAuthorizedFailure)
+            Container(
+              margin: EdgeInsets.all(20.r),
 
-          //     child: MyDefaultButton(
-          //       onPressed: () {
-          //         context.go(Routes.loginScreenRoute);
-          //       },
+              child: MyDefaultButton(
+                onPressed: () {
+                  context.go(Routes.chooseUserTypeScreenRoute);
+                },
 
-          //       btnText: Strings.login,
+                btnText: Strings.login,
 
-          //       localeText: true,
-          //     ),
-          //   ),
+                localeText: true,
+              ),
+            ),
 
           // /// retry button
           if (widget.onRetry != null)

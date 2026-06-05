@@ -1,4 +1,6 @@
 import 'package:alhakim/config/routes/app_routes.dart';
+import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
@@ -254,6 +256,15 @@ class _DoctorItem extends StatelessWidget {
           /// button
           MyDefaultButton(
             onPressed: () {
+              if (sessionCubit.state.status != SessionStatus.authenticated) {
+                Constants.showLoginWarningDialog(
+                  context,
+                  onOkPressed: () {
+                    context.go(Routes.chooseUserTypeScreenRoute);
+                  },
+                );
+                return;
+              }
               context.push(Routes.bookingScreenRoute, extra: doctor);
             },
 
