@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MyColors {
-  static const Color backGround = Color(0xFFECECEC);
+  static const Color backGround = Color(0xFFF6F7F9);
+  // static const Color backGround = Color(0xFFECECEC);
   static const Color main = Color(0xFF005FB8);
   static const Color secondary = Color(0xFF00897B);
   static const Color textColor = Color(0xFF000000);
@@ -76,8 +77,7 @@ class AppColors extends ThemeExtension<AppColors> {
       errorColor: errorColor ?? this.errorColor,
       review: review ?? this.review,
       lightTextColor: lightTextColor ?? this.lightTextColor,
-      lightBackGroundColor:
-          lightBackGroundColor ?? this.lightBackGroundColor,
+      lightBackGroundColor: lightBackGroundColor ?? this.lightBackGroundColor,
       success: success ?? this.success,
       error: error ?? this.error,
       warning: warning ?? this.warning,
@@ -91,25 +91,17 @@ class AppColors extends ThemeExtension<AppColors> {
     }
 
     return AppColors(
-      backGround:
-          Color.lerp(backGround, other.backGround, t) ?? backGround,
+      backGround: Color.lerp(backGround, other.backGround, t) ?? backGround,
       main: Color.lerp(main, other.main, t) ?? main,
-      secondary:
-          Color.lerp(secondary, other.secondary, t) ?? secondary,
-      textColor:
-          Color.lerp(textColor, other.textColor, t) ?? textColor,
-      whiteColor:
-          Color.lerp(whiteColor, other.whiteColor, t) ?? whiteColor,
-      errorColor:
-          Color.lerp(errorColor, other.errorColor, t) ?? errorColor,
+      secondary: Color.lerp(secondary, other.secondary, t) ?? secondary,
+      textColor: Color.lerp(textColor, other.textColor, t) ?? textColor,
+      whiteColor: Color.lerp(whiteColor, other.whiteColor, t) ?? whiteColor,
+      errorColor: Color.lerp(errorColor, other.errorColor, t) ?? errorColor,
       review: Color.lerp(review, other.review, t) ?? review,
-      lightTextColor: Color.lerp(
-              lightTextColor, other.lightTextColor, t) ??
-          lightTextColor,
-      lightBackGroundColor: Color.lerp(
-              lightBackGroundColor,
-              other.lightBackGroundColor,
-              t) ??
+      lightTextColor:
+          Color.lerp(lightTextColor, other.lightTextColor, t) ?? lightTextColor,
+      lightBackGroundColor:
+          Color.lerp(lightBackGroundColor, other.lightBackGroundColor, t) ??
           lightBackGroundColor,
 
       /// 🔥 new colors
