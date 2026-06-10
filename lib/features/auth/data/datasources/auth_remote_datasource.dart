@@ -70,6 +70,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           MapEntry('secretary_country_code', params.countryCode!),
         );
       }
+      if (params.firebaseToken != null) {
+        formData.fields.add(MapEntry('device_token', params.firebaseToken!));
+      }
       final isPatient = params.userType == UserType.patient;
       final isRepresentative = params.userType == UserType.delegate;
       // final isDoctor = params.userType == UserType.doctor;

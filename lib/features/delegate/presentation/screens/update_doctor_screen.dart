@@ -69,7 +69,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
   final _academicDegreeController = TextEditingController();
 
-  final _clinicPhoneController = TextEditingController();
+  // final _clinicPhoneController = TextEditingController();
 
   final _secretaryPhoneController = TextEditingController();
 
@@ -90,7 +90,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
   final _academicDegreeFocus = FocusNode();
 
-  final _clinicPhoneFocus = FocusNode();
+  // final _clinicPhoneFocus = FocusNode();
 
   final _secretaryPhoneFocus = FocusNode();
 
@@ -119,6 +119,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     }
   }
 
+  bool hidePrice = false;
+
   @override
   void initState() {
     super.initState();
@@ -138,14 +140,14 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
     _academicDegreeController.text = widget.doctor.academicDegree ?? '';
 
-    _clinicPhoneController.text = widget.doctor.clinicPhone ?? '';
+    // _clinicPhoneController.text = widget.doctor.clinicPhone ?? '';
 
     _secretaryPhoneController.text = widget.doctor.secretaryPhone ?? '';
 
     _minPatientsController.text = widget.doctor.minPatients ?? '';
 
     _priceController.text = widget.doctor.price ?? '';
-
+    hidePrice = widget.doctor.priceHidden ?? false;
     _representativeCodeController.text = widget.doctor.representativeCode ?? '';
 
     if (widget.doctor.schedules != null &&
@@ -186,7 +188,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
     _academicDegreeController.dispose();
 
-    _clinicPhoneController.dispose();
+    // _clinicPhoneController.dispose();
 
     _secretaryPhoneController.dispose();
 
@@ -206,7 +208,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
     _academicDegreeFocus.dispose();
 
-    _clinicPhoneFocus.dispose();
+    // _clinicPhoneFocus.dispose();
 
     _secretaryPhoneFocus.dispose();
 
@@ -245,11 +247,11 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
       countryCode: _selectedCountry.countryCode,
       withCode: false,
     );
-    final clinicPhone = await Constants.phoneParsing(
-      phone: _clinicPhoneController.text,
-      countryCode: _selectedCountry.countryCode,
-      withCode: false,
-    );
+    // final clinicPhone = await Constants.phoneParsing(
+    //   phone: _clinicPhoneController.text,
+    //   countryCode: _selectedCountry.countryCode,
+    //   withCode: false,
+    // );
     if (!context.mounted) return;
     context.read<UpdateDoctorCubit>().updateDoctor(
       params: AddDoctorParams(
@@ -267,13 +269,14 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
         academicDegree: _academicDegreeController.text,
 
-        clinicPhone: clinicPhone,
+        clinicPhone: secretaryPhone,
 
         secretaryPhone: secretaryPhone,
 
         minPatients: _minPatientsController.text,
 
         price: _priceController.text,
+        hidePrice: hidePrice,
 
         representativeCode: _representativeCodeController.text,
 
@@ -650,10 +653,9 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                       textInputAction: TextInputAction.next,
 
-                      onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_clinicPhoneFocus);
-                      },
-
+                      // onSubmit: (_) {
+                      //   FocusScope.of(context).requestFocus();
+                      // },
                       hintText: "enter_academic_degree".tr,
 
                       prefixIcon: Icon(
@@ -662,56 +664,55 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                       ),
                     ),
 
-                    Gaps.vGap16,
+                    // Gaps.vGap16,
 
                     /// clinic phone
-                    buildLabel("clinic_phone".tr),
+                    // buildLabel("clinic_phone".tr),
 
-                    Gaps.vGap8,
+                    // Gaps.vGap8,
 
-                    Row(
-                      children: [
-                        CountryCodeWidget(
-                          country: _selectedCountry,
-                          updateValue: (country) {
-                            setState(() {
-                              _selectedCountry = country;
-                            });
-                          },
-                        ),
-                        Gaps.hGap8,
-                        Expanded(
-                          flex: 5,
-                          child: MyTextFormField(
-                            controller: _clinicPhoneController,
+                    // Row(
+                    //   children: [
+                    //     CountryCodeWidget(
+                    //       country: _selectedCountry,
+                    //       updateValue: (country) {
+                    //         setState(() {
+                    //           _selectedCountry = country;
+                    //         });
+                    //       },
+                    //     ),
+                    //     Gaps.hGap8,
+                    //     Expanded(
+                    //       flex: 5,
+                    //       child: MyTextFormField(
+                    //         controller: _clinicPhoneController,
 
-                            focusNode: _clinicPhoneFocus,
+                    //         focusNode: _clinicPhoneFocus,
 
-                            textInputAction: TextInputAction.next,
+                    //         textInputAction: TextInputAction.next,
 
-                            onSubmit: (_) {
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(_secretaryPhoneFocus);
-                            },
+                    //         onSubmit: (_) {
+                    //           FocusScope.of(
+                    //             context,
+                    //           ).requestFocus(_secretaryPhoneFocus);
+                    //         },
 
-                            keyboardType: TextInputType.phone,
+                    //         keyboardType: TextInputType.phone,
 
-                            hintText: "enter_clinic_phone".tr,
+                    //         hintText: "enter_clinic_phone".tr,
 
-                            prefixIcon: Icon(
-                              Icons.local_hospital_outlined,
-                              color: colors.main,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
+                    //         prefixIcon: Icon(
+                    //           Icons.local_hospital_outlined,
+                    //           color: colors.main,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     Gaps.vGap16,
 
                     /// secretary phone
-                    buildLabel("secretary_phone".tr),
+                    buildLabel("clinic_phone".tr),
 
                     Gaps.vGap8,
 
@@ -810,6 +811,30 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                         Icons.payments_outlined,
                         color: colors.main,
                       ),
+                    ),
+                    Gaps.vGap8,
+
+                    /// description
+                    // buildLabel("hide_price_to_patients".tr),
+                    // Gaps.vGap8,
+                    Row(
+                      children: [
+                        Checkbox(
+                          activeColor: colors.main,
+                          value: hidePrice,
+                          onChanged: (value) {
+                            setState(() {
+                              hidePrice = value!;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: Text(
+                            "hide_price_to_patients_desc".tr,
+                            style: TextStyles.medium14(),
+                          ),
+                        ),
+                      ],
                     ),
 
                     Gaps.vGap16,

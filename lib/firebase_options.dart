@@ -50,19 +50,18 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA5NOpfdbGb1-6bLrJ-QeIBawS_-ta84jM',
-    appId: '1:717725817364:android:75203ba47e3f342bfb6501',
-    messagingSenderId: '717725817364',
-    projectId: 'al-muttahida',
-    storageBucket: 'al-muttahida.firebasestorage.app',
+    apiKey: 'AIzaSyAU-2UQKdeJMPURmmrKVpKZFPdbVCY-Sfs',
+    appId: '1:1062564717227:android:a1cf9e11cf8c9404dacdee',
+    messagingSenderId: '1062564717227',
+    projectId: 'al-hakim-6f7ba',
+    storageBucket: 'al-hakim-6f7ba.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBv6l1vM_8l1ipEZpQLaoWztQdq2RVMK-g',
-    appId: '1:717725817364:ios:42c57bfd74d3305dfb6501',
-    messagingSenderId: '717725817364',
-    projectId: 'al-muttahida',
-    storageBucket: 'al-muttahida.firebasestorage.app',
-    iosBundleId: 'com.sharafTech.alhakim',
+    apiKey: 'AIzaSyAHMfntdhtlmZs1OWJujC9kws5AMRx03NI',
+    appId: '1:1062564717227:ios:5623991d3d44debfdacdee',
+    messagingSenderId: '1062564717227',
+    projectId: 'al-hakim-6f7ba',
+    storageBucket: 'al-hakim-6f7ba.firebasestorage.app',
+    iosBundleId: 'com.sharaftech.alhakim',
   );
 }

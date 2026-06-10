@@ -406,5 +406,7 @@
   "clinic": "Clinic",
   "add_to_calendar": "Add To Calendar",
   "go_to_home": "Back To Home",
-  "go_to_appointments": "My Appointments"
+  "go_to_appointments": "My Appointments",
+  "hide_price_to_patients": "Hide price from patients",
+  "hide_price_to_patients_desc": "When this option is enabled, the consultation price will be hidden from patients"
 }

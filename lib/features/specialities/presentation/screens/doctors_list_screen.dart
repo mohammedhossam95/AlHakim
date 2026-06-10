@@ -1,6 +1,7 @@
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
@@ -102,6 +103,14 @@ class _DoctorItem extends StatelessWidget {
         color: colors.whiteColor,
 
         borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: colors.lightTextColor.withValues(alpha: .2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: colors.lightTextColor.withValues(alpha: .1)),
       ),
 
       child: Column(
@@ -118,7 +127,9 @@ class _DoctorItem extends StatelessWidget {
                   image: doctor.profileImage,
                   width: 70.w,
                   height: 70.w,
-                  isCircle: true,
+                  isCircle: false,
+                  radius: 12.r,
+                  fitType: BoxFit.fill,
                 ),
               ),
 
@@ -133,10 +144,10 @@ class _DoctorItem extends StatelessWidget {
                       appLocalizations.isArLocale
                           ? doctor.name?.ar ?? ''
                           : doctor.name?.en ?? '',
-                      style: TextStyles.semiBold16(),
+                      style: TextStyles.semiBold18(),
                     ),
 
-                    Gaps.vGap4,
+                    Gaps.vGap8,
 
                     Text(
                       doctor.specialty?.name ?? '',
@@ -144,47 +155,33 @@ class _DoctorItem extends StatelessWidget {
                       style: TextStyles.medium14(color: colors.main),
                     ),
 
-                    Gaps.vGap8,
+                    Gaps.vGap4,
 
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 16,
-                          color: colors.lightTextColor,
-                        ),
+                    if (doctor.location?.city != null)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 16,
+                            color: colors.lightTextColor,
+                          ),
 
-                        Gaps.hGap4,
+                          Gaps.hGap4,
 
-                        Expanded(
-                          child: Text(
-                            doctor.location?.city ?? '',
+                          Expanded(
+                            child: Text(
+                              doctor.location?.city ?? '',
 
-                            style: TextStyles.medium12(
-                              color: colors.lightTextColor,
+                              style: TextStyles.medium12(
+                                color: colors.lightTextColor,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),
-            ],
-          ),
-
-          Gaps.vGap12,
-
-          /// price
-          Row(
-            children: [
-              Text(
-                "${doctor.price ?? ''} ج.م / كشف",
-
-                style: TextStyles.semiBold16(color: colors.main),
-              ),
-
-              const Spacer(),
 
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -226,31 +223,55 @@ class _DoctorItem extends StatelessWidget {
             ],
           ),
 
+          Gaps.vGap4,
+          // bio
+          if (doctor.bio != null)
+            Text(
+              appLocalizations.isArLocale
+                  ? doctor.bio?.ar ?? ''
+                  : doctor.bio?.en ?? '',
+
+              style: TextStyles.medium14(color: colors.lightTextColor),
+            ),
+
           Gaps.vGap12,
 
+          /// price
+          if (doctor.priceHidden == false)
+            Row(
+              children: [
+                Text(
+                  "${doctor.price ?? ''} ج.م / كشف",
+
+                  style: TextStyles.semiBold16(color: colors.main),
+                ),
+              ],
+            ),
+
+          // Gaps.vGap12,
+
           /// rating
-          Row(
-            children: [
-              Icon(Icons.star, size: 18, color: colors.secondary),
+          // Row(
+          //   children: [
+          //     Icon(Icons.star, size: 18, color: colors.secondary),
 
-              Gaps.hGap4,
+          //     Gaps.hGap4,
 
-              Text(
-                "${doctor.rating?.average ?? 0}",
+          //     Text(
+          //       "${doctor.rating?.average ?? 0}",
 
-                style: TextStyles.medium14(),
-              ),
+          //       style: TextStyles.medium14(),
+          //     ),
 
-              Gaps.hGap8,
+          //     Gaps.hGap8,
 
-              Text(
-                "(${doctor.rating?.count ?? 0})",
+          //     Text(
+          //       "(${doctor.rating?.count ?? 0})",
 
-                style: TextStyles.medium12(color: colors.lightTextColor),
-              ),
-            ],
-          ),
-
+          //       style: TextStyles.medium12(color: colors.lightTextColor),
+          //     ),
+          //   ],
+          // ),
           Gaps.vGap16,
 
           /// button
@@ -270,6 +291,26 @@ class _DoctorItem extends StatelessWidget {
 
             btnText: "book_now",
           ),
+          Gaps.vGap20,
+
+          /// button
+          MyDefaultButton(
+            withDottedBorder: false,
+
+            color: colors.whiteColor,
+            borderColor: colors.main,
+            textColor: colors.main,
+            onPressed: () {
+              Constants.makePhoneCall(
+                "${doctor.secretaryCountryCode ?? "20"}${doctor.secretaryPhone}",
+              );
+            },
+            localeText: true,
+            svgAsset: SvgAssets.callIcon,
+            btnText:
+                "${doctor.secretaryCountryCode ?? "20"}${doctor.secretaryPhone}",
+          ),
+          Gaps.vGap10,
         ],
       ),
     );

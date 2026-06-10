@@ -13,6 +13,7 @@ class DoctorEntity extends Equatable {
   final String? academicDegree;
   final String? clinicPhone;
   final String? secretaryPhone;
+  final String? secretaryCountryCode;
   final String? profileImage;
   final dynamic distanceKm;
   final List<LanguageEntity>? languages;
@@ -22,6 +23,7 @@ class DoctorEntity extends Equatable {
   final String? updatedAt;
   final String? minPatients;
   final String? representativeCode;
+  final bool? priceHidden;
 
   const DoctorEntity({
     this.id,
@@ -45,6 +47,8 @@ class DoctorEntity extends Equatable {
     this.updatedAt,
     this.minPatients,
     this.representativeCode,
+    this.priceHidden,
+    this.secretaryCountryCode,
   });
 
   @override
@@ -70,6 +74,8 @@ class DoctorEntity extends Equatable {
     updatedAt,
     minPatients,
     representativeCode,
+    priceHidden,
+    secretaryCountryCode,
   ];
 }
 

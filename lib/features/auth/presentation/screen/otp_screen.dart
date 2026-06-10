@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/widgets/back_button.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
@@ -10,6 +12,7 @@ import 'package:alhakim/features/auth/presentation/widgets/pin_widget.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,12 +43,27 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
   late AnimationController timeController;
 
   final Duration timeOut = const Duration(minutes: 1);
+  String firebaseToken = '';
 
   @override
   void initState() {
     super.initState();
     timeController = AnimationController(vsync: this, duration: timeOut);
     timeController.reverse(from: 1.0);
+    codeFocus.requestFocus();
+    _getFirebaseToken();
+  }
+
+  Future<void> _getFirebaseToken() async {
+    FirebaseMessaging.instance
+        .getToken()
+        .then((token) {
+          firebaseToken = token!;
+          log("Firebase Token: $firebaseToken");
+        })
+        .catchError((e) {
+          firebaseToken = '';
+        });
   }
 
   @override
@@ -65,11 +83,9 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
   void _onConfirmPressed() async {
     final code = codeController.text;
     if (code.length < 6) return;
-
     final phone = await Constants.phoneParsing(
       phone: widget.authParams.phoneNumber,
       countryCode: "${widget.authParams.countryCode}",
-
       withCode: false,
     );
     context.read<VerifyCodeCubit>().verifyCode(
@@ -80,6 +96,7 @@ class _OtpAuthScreenState extends State<OtpAuthScreen>
         userType: sessionCubit.state.userType,
         secretaryPhone: widget.authParams.secretaryPhone,
         secretaryCountryCode: widget.authParams.secretaryCountryCode,
+        firebaseToken: firebaseToken,
       ),
     );
   }

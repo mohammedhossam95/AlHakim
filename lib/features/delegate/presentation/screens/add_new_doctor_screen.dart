@@ -54,7 +54,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   final _professionalNumberController = TextEditingController();
   final _academicDegreeController = TextEditingController();
 
-  final _clinicPhoneController = TextEditingController();
+  // final _clinicPhoneController = TextEditingController();
   final _secretaryPhoneController = TextEditingController();
 
   final _minPatientsController = TextEditingController();
@@ -78,6 +78,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   final _priceFocus = FocusNode();
 
   final _representativeCodeFocus = FocusNode();
+  bool hidePrice = false;
 
   SpecialtyEntity? selectedSpeciality;
   final List<Map<String, dynamic>> weekDays = [
@@ -129,7 +130,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _professionalNumberController.dispose();
     _academicDegreeController.dispose();
 
-    _clinicPhoneController.dispose();
+    // _clinicPhoneController.dispose();
     _secretaryPhoneController.dispose();
 
     _minPatientsController.dispose();
@@ -185,11 +186,11 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
         countryCode: _selectedCountry.countryCode,
         withCode: false,
       );
-      final clinicPhone = await Constants.phoneParsing(
-        phone: _clinicPhoneController.text,
-        countryCode: _selectedCountry.countryCode,
-        withCode: false,
-      );
+      // final clinicPhone = await Constants.phoneParsing(
+      //   phone: _clinicPhoneController.text,
+      //   countryCode: _selectedCountry.countryCode,
+      //   withCode: false,
+      // );
 
       if (!context.mounted) return;
       context.read<AddDoctorCubit>().addDoctor(
@@ -201,7 +202,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           specialtyId: selectedSpeciality?.id,
           professionalRegistrationNumber: _professionalNumberController.text,
           academicDegree: _academicDegreeController.text,
-          clinicPhone: clinicPhone,
+          clinicPhone: secretaryPhone,
           secretaryPhone: secretaryPhone,
           minPatients: _minPatientsController.text,
           price: _priceController.text,
@@ -221,6 +222,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           }).toList(),
           secretaryCountryCode: "+${_selectedCountry.phoneCode}",
           clinicCountryCode: "+${_selectedCountry.phoneCode}",
+          hidePrice: hidePrice,
         ),
       );
     }
@@ -514,9 +516,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       controller: _academicDegreeController,
                       focusNode: _academicDegreeFocus,
                       textInputAction: TextInputAction.next,
-                      onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_clinicPhoneFocus);
-                      },
+
                       hintText: "enter_academic_degree".tr,
                       prefixIcon: Icon(
                         Icons.school_outlined,
@@ -526,47 +526,47 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// clinic phone
-                    buildLabel("clinic_phone".tr),
-                    Gaps.vGap8,
+                    // /// clinic phone
+                    // buildLabel("clinic_phone".tr),
+                    // Gaps.vGap8,
 
-                    Row(
-                      children: [
-                        CountryCodeWidget(
-                          country: _selectedCountry,
-                          updateValue: (country) {
-                            setState(() {
-                              _selectedCountry = country;
-                            });
-                          },
-                        ),
-                        Gaps.hGap8,
-                        Expanded(
-                          flex: 5,
-                          child: MyTextFormField(
-                            controller: _clinicPhoneController,
-                            focusNode: _clinicPhoneFocus,
-                            textInputAction: TextInputAction.next,
-                            onSubmit: (_) {
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(_secretaryPhoneFocus);
-                            },
-                            keyboardType: TextInputType.phone,
-                            hintText: "enter_clinic_phone".tr,
-                            prefixIcon: Icon(
-                              Icons.local_hospital_outlined,
-                              color: colors.main,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     CountryCodeWidget(
+                    //       country: _selectedCountry,
+                    //       updateValue: (country) {
+                    //         setState(() {
+                    //           _selectedCountry = country;
+                    //         });
+                    //       },
+                    //     ),
+                    //     Gaps.hGap8,
+                    //     Expanded(
+                    //       flex: 5,
+                    //       child: MyTextFormField(
+                    //         controller: _clinicPhoneController,
+                    //         focusNode: _clinicPhoneFocus,
+                    //         textInputAction: TextInputAction.next,
+                    //         onSubmit: (_) {
+                    //           FocusScope.of(
+                    //             context,
+                    //           ).requestFocus(_secretaryPhoneFocus);
+                    //         },
+                    //         keyboardType: TextInputType.phone,
+                    //         hintText: "enter_clinic_phone".tr,
+                    //         prefixIcon: Icon(
+                    //           Icons.local_hospital_outlined,
+                    //           color: colors.main,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
 
-                    Gaps.vGap16,
+                    // Gaps.vGap16,
 
                     /// secretary phone
-                    buildLabel("secretary_phone".tr),
+                    buildLabel("clinic_phone".tr),
                     Gaps.vGap8,
 
                     Row(
@@ -644,6 +644,31 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                         Icons.payments_outlined,
                         color: colors.main,
                       ),
+                    ),
+
+                    Gaps.vGap8,
+
+                    /// description
+                    // buildLabel("hide_price_to_patients".tr),
+                    // Gaps.vGap8,
+                    Row(
+                      children: [
+                        Checkbox(
+                          activeColor: colors.main,
+                          value: hidePrice,
+                          onChanged: (value) {
+                            setState(() {
+                              hidePrice = value!;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: Text(
+                            "hide_price_to_patients_desc".tr,
+                            style: TextStyles.medium14(),
+                          ),
+                        ),
+                      ],
                     ),
 
                     Gaps.vGap16,

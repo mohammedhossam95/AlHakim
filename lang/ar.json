@@ -405,5 +405,7 @@
   "clinic": "الفرع",
   "add_to_calendar": "أضف للتقويم",
   "go_to_home": "العودة للرئيسية",
-  "go_to_appointments": "الذهاب للمواعيد"
+  "go_to_appointments": "الذهاب للمواعيد",
+  "hide_price_to_patients": "إخفاء سعر الكشف عن المرضى",
+  "hide_price_to_patients_desc": "عند تفعيل هذا الخيار سيتم إخفاء سعر الكشف عن المرضى."
 }

@@ -1,3 +1,4 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -20,6 +21,7 @@ class MyDefaultButton extends StatelessWidget {
   final TextStyle? textStyle;
   final double? borderRadius;
   final Color? borderColor;
+  final bool withDottedBorder;
 
   const MyDefaultButton({
     super.key,
@@ -36,6 +38,7 @@ class MyDefaultButton extends StatelessWidget {
     this.svgAsset,
     this.borderRadius,
     this.borderColor,
+    this.withDottedBorder = true,
   });
 
   @override
@@ -43,61 +46,89 @@ class MyDefaultButton extends StatelessWidget {
     var screenWidth = MediaQuery.of(context).size.width;
     AppLocalizations locale = AppLocalizations.of(context)!;
 
-    return SizedBox(
-      width: width ?? screenWidth,
-      height: (height ?? 48.0).h,
-      child:isLoading==true?Center(
-        child: CircularProgressIndicator(),
-      ): ElevatedButton(
-        style: ButtonStyle(
-          mouseCursor: WidgetStateProperty.all<MouseCursor>(
-            SystemMouseCursors.click,
-          ),
-          alignment: Alignment.center,
-          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(borderRadius?.r ?? 15.r),
-              side: BorderSide(color: borderColor ?? colors.main),
+    return DottedBorder(
+      options: withDottedBorder
+          ? CustomPathDottedBorderOptions(
+              dashPattern: [10, 5],
+              strokeWidth: 1,
+              padding: EdgeInsets.all(4.r),
+              color: borderColor ?? colors.main,
+              customPath: (size) {
+                return Path()..addRRect(
+                  RRect.fromRectAndRadius(
+                    Offset.zero & size,
+                    Radius.circular(30.r),
+                  ),
+                );
+              },
+            )
+          : RectDottedBorderOptions(
+              padding: EdgeInsets.zero,
+              color: Colors.transparent,
             ),
-          ),
-          backgroundColor: WidgetStateProperty.all<Color>(color ?? colors.main),
-          foregroundColor: WidgetStateProperty.all<Color>(
-            textColor ?? colors.textColor,
-          ),
-        ),
-        onPressed: onPressed,
-        child: svgAsset == null
-            ? Text(
-                localeText ? btnText! : locale.text(btnText!),
-                textAlign: TextAlign.center,
-                style:
-                    textStyle ??
-                    TextStyles.medium16(color: textColor ?? colors.whiteColor),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    svgAsset!,
-                    height: 24.h,
-                    width: 24.w,
-                    colorFilter: ColorFilter.mode(
-                      textColor ?? colors.whiteColor,
-                      BlendMode.srcIn,
+
+      child: SizedBox(
+        width: width ?? screenWidth,
+        height: (height ?? 50.0).h,
+        child: isLoading == true
+            ? Center(child: CircularProgressIndicator())
+            : ElevatedButton(
+                style: ButtonStyle(
+                  mouseCursor: WidgetStateProperty.all<MouseCursor>(
+                    SystemMouseCursors.click,
+                  ),
+                  alignment: Alignment.center,
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        borderRadius?.r ?? 30.r,
+                      ),
+                      side: BorderSide(color: borderColor ?? colors.main),
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    localeText ? btnText! : locale.text(btnText!),
-                    textAlign: TextAlign.center,
-                    style:
-                        textStyle ??
-                        TextStyles.medium16(
-                          color: textColor ?? colors.whiteColor,
-                        ),
+                  backgroundColor: WidgetStateProperty.all<Color>(
+                    color ?? colors.main,
                   ),
-                ],
+                  foregroundColor: WidgetStateProperty.all<Color>(
+                    textColor ?? colors.textColor,
+                  ),
+                ),
+                onPressed: onPressed,
+                child: svgAsset == null
+                    ? Text(
+                        localeText ? btnText! : locale.text(btnText!),
+                        textAlign: TextAlign.center,
+                        style:
+                            textStyle ??
+                            TextStyles.medium16(
+                              color: textColor ?? colors.whiteColor,
+                            ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            svgAsset!,
+                            height: 24.h,
+                            width: 24.w,
+                            // colorFilter: ColorFilter.mode(
+                            //   textColor ?? colors.whiteColor,
+                            //   BlendMode.srcIn,
+                            // ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            localeText ? btnText! : locale.text(btnText!),
+                            textAlign: TextAlign.center,
+                            style:
+                                textStyle ??
+                                TextStyles.medium16(
+                                  color: textColor ?? colors.whiteColor,
+                                ),
+                          ),
+                        ],
+                      ),
               ),
       ),
     );

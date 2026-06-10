@@ -135,6 +135,7 @@ class NotificationService {
   Future<void> _setupMessageHandlers() async {
     //foreground message
     FirebaseMessaging.onMessage.listen((message) {
+      showNotification(message);
       //todo
       // if (routeObserver.currentRoute != Routes.messagesRoute) {
       //   showNotification(message);
@@ -153,6 +154,7 @@ class NotificationService {
 
   void _handleBackgroundMessage(RemoteMessage message) {
     log(message.data.toString());
+    
 
     // int? typeId = int.parse(message.data['type_id'] ?? 0);
     // String? type = message.data['type'];

@@ -55,6 +55,7 @@ class SvgAssets {
   static const String faqIcon = 'assets/icons/faq_icon.svg';
   static const String privacyIcon = 'assets/icons/privacy_policy_icon.svg';
   static const String aboutAppIcon = 'assets/icons/about_app_icon.svg';
+  static const String callIcon = 'assets/icons/call.svg';
   static const String termsIcon = 'assets/icons/terms_icon.svg';
   static const String contactUsIcon = 'assets/icons/contact_us_icon.svg';
   //--------------shooping cart icons by ali lotfy----------------

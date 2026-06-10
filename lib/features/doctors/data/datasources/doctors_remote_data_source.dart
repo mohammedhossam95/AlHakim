@@ -113,6 +113,11 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       if (params.price != null) {
         formData.fields.add(MapEntry("price", params.price!));
       }
+      if (params.hidePrice != null) {
+        formData.fields.add(
+          MapEntry("price_hidden", params.hidePrice!.toString()),
+        );
+      }
 
       if (params.profileImage != null) {
         final compressedImage = await Constants.getCompressedFile(
@@ -287,7 +292,11 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       if (params.price != null) {
         formData.fields.add(MapEntry("price", params.price!));
       }
-
+      if (params.hidePrice != null) {
+        formData.fields.add(
+          MapEntry("price_hidden", params.hidePrice!.toString()),
+        );
+      }
       if (params.profileImage != null) {
         final compressedImage = await Constants.getCompressedFile(
           params.profileImage!,

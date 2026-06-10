@@ -28,6 +28,7 @@ class AddDoctorParams extends Equatable {
   final File? profileImage;
   final File? license;
   final List<dynamic>? schedules;
+  final bool? hidePrice;
 
   const AddDoctorParams({
     this.id,
@@ -48,6 +49,7 @@ class AddDoctorParams extends Equatable {
     this.schedules,
     this.clinicCountryCode,
     this.secretaryCountryCode,
+    this.hidePrice, 
   });
 
   @override
@@ -70,5 +72,6 @@ class AddDoctorParams extends Equatable {
     schedules,
     clinicCountryCode,
     secretaryCountryCode,
+    hidePrice,
   ];
 }

@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:alhakim/core/services/local_database/database_helper.dart';
 import 'package:alhakim/core/services/local_database/favorite_database_helper.dart';
+import 'package:alhakim/core/services/notifications/notification_service.dart';
+import 'package:alhakim/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,12 +31,12 @@ Future<void> main() async {
     ),
   );
 
-  //await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // SystemChrome.setPreferredOrientations([
-  //   DeviceOrientation.portraitUp,
-  //   DeviceOrientation.portraitDown,
-  // ]);
-  // NotificationService.instance.initialize();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  NotificationService.instance.initialize();
   Bloc.observer = AppBlocObserver();
   dioConsumer.updateDeviceTypeHeader();
   sharedPreferences.clearSecureStorageOnFreshInstall();

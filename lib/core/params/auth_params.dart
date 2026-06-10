@@ -8,7 +8,7 @@ class AuthParams extends Equatable {
   final UserType? userType;
   final String? secretaryPhone;
   final String? secretaryCountryCode;
-  
+  final String? firebaseToken;
 
   const AuthParams({
     this.countryCode,
@@ -17,6 +17,7 @@ class AuthParams extends Equatable {
     this.userType,
     this.secretaryPhone,
     this.secretaryCountryCode,
+    this.firebaseToken,
   });
 
   @override
@@ -27,6 +28,7 @@ class AuthParams extends Equatable {
     userType,
     secretaryPhone,
     secretaryCountryCode,
+    firebaseToken,
   ];
 
   Map<String, dynamic> toJson() => {
@@ -35,5 +37,6 @@ class AuthParams extends Equatable {
     "otp": otp,
     "secretary_phone": secretaryPhone,
     "secretary_country_code": secretaryCountryCode,
+    "token": firebaseToken,
   };
 }

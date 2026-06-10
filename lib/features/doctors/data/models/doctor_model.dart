@@ -40,6 +40,8 @@ class DoctorModel extends DoctorEntity {
     super.updatedAt,
     super.minPatients,
     super.representativeCode,
+    super.priceHidden,
+    super.secretaryCountryCode,
   });
 
   factory DoctorModel.fromJson(Map<String, dynamic> json) {
@@ -51,6 +53,7 @@ class DoctorModel extends DoctorEntity {
       bio: json['bio'] != null ? BioModel.fromJson(json['bio']) : null,
 
       price: json['price'],
+      priceHidden: json['price_hidden'],
 
       rating: json['rating'] != null
           ? RatingModel.fromJson(json['rating'])
@@ -99,6 +102,8 @@ class DoctorModel extends DoctorEntity {
       minPatients: json['min_patients'].toString(),
 
       representativeCode: json['representative_code'],
+
+      secretaryCountryCode: json['secretary_country_code'],
     );
   }
 
@@ -152,6 +157,8 @@ class DoctorModel extends DoctorEntity {
     "created_at": createdAt,
 
     "updated_at": updatedAt,
+    "price_hidden": priceHidden,
+    "secretary_country_code": secretaryCountryCode,
   };
 }
 

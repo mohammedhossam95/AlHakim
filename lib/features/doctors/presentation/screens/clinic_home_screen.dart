@@ -4,6 +4,7 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_home_entity.dart';
@@ -45,8 +46,25 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
       backgroundColor: colors.backGround,
 
       appBar: AppBar(
-        title: Text("clinic_dashboard".tr),
+        title: Row(
+          children: [
+            if (sharedPreferences.getAuth()?.doctor?.profileImage != null) ...[
+              DiffImage(
+                image: sharedPreferences.getAuth()?.doctor?.profileImage ?? '',
+
+                height: 40.h,
+
+                width: 40.w,
+              ),
+              Gaps.hGap12,
+            ],
+            Text(
+              "${"welcome".tr} ${sharedPreferences.getAuth()?.doctor?.name?.ar ?? ''}",
+            ),
+          ],
+        ),
         automaticallyImplyLeading: false,
+        centerTitle: false,
       ),
 
       body: BlocBuilder<GetDoctorHomeCubit, GetDoctorHomeState>(
