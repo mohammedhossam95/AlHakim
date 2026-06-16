@@ -3,9 +3,12 @@ import 'package:alhakim/config/routes/navigator_observer.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
+import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
+import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get_countries_cubit.dart';
@@ -128,6 +131,7 @@ abstract class Routes {
       '/QueueManagementScreenRoute';
   static const String quickBookingScreenRoute = '/QuickBookingScreenRoute';
   static const String appoinmentSuccessScreen = '/AppoinmentSuccessScreen';
+  static const String followUpQueueScreenRoute = '/FollowUpQueueScreenRoute';
 
   static final sl = ServiceLocator.instance;
 
@@ -278,6 +282,19 @@ abstract class Routes {
         path: appointmentsScreenRoute,
         name: appointmentsScreenRoute,
         builder: (context, state) => const AppointmentsScreen(),
+      ),
+
+      GoRoute(
+        path: followUpQueueScreenRoute,
+        name: followUpQueueScreenRoute,
+        builder: (context, state) {
+          final args = state.extra as AppointmentEntity;
+          return BlocProvider(
+            create: (context) => sl<GetQueueStatusCubit>()
+              ..getQueueStatus(appointmentId: args.id.toString()),
+            child: FollowUpQueueScreen(appointment: args),
+          );
+        },
       ),
 
       GoRoute(

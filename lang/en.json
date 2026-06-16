@@ -408,5 +408,22 @@
   "go_to_home": "Back To Home",
   "go_to_appointments": "My Appointments",
   "hide_price_to_patients": "Hide price from patients",
-  "hide_price_to_patients_desc": "When this option is enabled, the consultation price will be hidden from patients"
+  "hide_price_to_patients_desc": "When this option is enabled, the consultation price will be hidden from patients",
+  "follow_up_appointment": "Follow Up Queue",
+  "live_alert": "Live Alert",
+  "doctor_started_examination": "Dr. {doctor} has started examinations now. Please be ready.",
+  "current_status": "Current Status",
+  "current_clinic_turn": "Current turn in the clinic",
+  "your_queue_number": "Your queue number",
+  "your_position_in_list": "Your position in the list",
+  "please_be_at_clinic_soon": "Please be at the clinic soon",
+  "turn_progress": "Turn Progress",
+  "examined_count": "{current} of {total} examined",
+  "the_beginning": "Start",
+  "your_goal": "Your goal ({number})",
+  "estimated_time": "Estimated Time",
+  "minutes_count": "{count} minutes",
+  "your_follow_up_doctor": "Your follow-up doctor",
+  "call_clinic": "Call the clinic",
+  "position_ordinal": "({number})"
 }

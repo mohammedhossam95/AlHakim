@@ -1,4 +1,5 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
@@ -11,6 +12,7 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
@@ -271,42 +273,80 @@ class _AppointmentCard extends StatelessWidget {
             ],
           ),
 
-          Gaps.vGap12,
+          Gaps.vGap16,
           item.status == "confirmed"
-              ? GestureDetector(
-                  onTap: () async {
-                    Constants.showConfirmDialog(
-                      context: context,
-                      title: "cancel_appointment".tr,
-                      content: "cancel_appointment_desc".tr,
-                      onYesPressed: () async {
-                        if (!context.mounted) return;
-                        context
-                            .read<CancelAppointmentCubit>()
-                            .cancelAppointment(
-                              appointmentId: item.id.toString(),
-                            );
-                      },
-                    );
-                  },
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          context.push(Routes.followUpQueueScreenRoute,
+                            extra: item,
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 10.h),
 
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 10.h),
+                          decoration: BoxDecoration(
+                            color: colors.main.withValues(alpha: 1),
 
-                    decoration: BoxDecoration(
-                      color: colors.errorColor.withValues(alpha: .1),
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
 
-                      borderRadius: BorderRadius.circular(10.r),
+                          alignment: Alignment.center,
+
+                          child: Text(
+                            "follow_up_appointment".tr,
+
+                            style: TextStyles.medium14(
+                              color: colors.whiteColor,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
+                    Gaps.hGap10,
 
-                    alignment: Alignment.center,
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Constants.showConfirmDialog(
+                            context: context,
+                            title: "cancel_appointment".tr,
+                            content: "cancel_appointment_desc".tr,
+                            onYesPressed: () async {
+                              if (!context.mounted) return;
+                              context
+                                  .read<CancelAppointmentCubit>()
+                                  .cancelAppointment(
+                                    appointmentId: item.id.toString(),
+                                  );
+                            },
+                          );
+                        },
 
-                    child: Text(
-                      "cancel_appointment".tr,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 10.h),
 
-                      style: TextStyles.medium14(color: colors.errorColor),
+                          decoration: BoxDecoration(
+                            color: colors.errorColor.withValues(alpha: .1),
+
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+
+                          alignment: Alignment.center,
+
+                          child: Text(
+                            "cancel_appointment".tr,
+
+                            style: TextStyles.medium14(
+                              color: colors.errorColor,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 )
               : Container(),
         ],

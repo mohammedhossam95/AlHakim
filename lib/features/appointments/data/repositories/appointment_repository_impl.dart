@@ -40,4 +40,21 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> getQueueStatus({
+    required String appointmentId,
+  }) async {
+    try {
+      final result = await remoteDataSource.getQueueStatus(
+        appointmentId: appointmentId,
+      );
+
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

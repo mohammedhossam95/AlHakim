@@ -407,5 +407,22 @@
   "go_to_home": "العودة للرئيسية",
   "go_to_appointments": "الذهاب للمواعيد",
   "hide_price_to_patients": "إخفاء سعر الكشف عن المرضى",
-  "hide_price_to_patients_desc": "عند تفعيل هذا الخيار سيتم إخفاء سعر الكشف عن المرضى."
+  "hide_price_to_patients_desc": "عند تفعيل هذا الخيار سيتم إخفاء سعر الكشف عن المرضى.",
+  "follow_up_appointment": "متابعة الدور",
+  "live_alert": "تنبيه مباشر",
+  "doctor_started_examination": "الدكتور {doctor} بدأت الكشف الآن. يرجى الاستعداد.",
+  "current_status": "الوضع الحالي",
+  "current_clinic_turn": "الدور الحالي بالعيادة",
+  "your_queue_number": "رقم دورك الخاص",
+  "your_position_in_list": "موقعك في القائمة",
+  "please_be_at_clinic_soon": "يرجى التواجد في العيادة قريباً",
+  "turn_progress": "تقدم الدور",
+  "examined_count": "تم فحص {current} من {total}",
+  "the_beginning": "البداية",
+  "your_goal": "هدفك ({number})",
+  "estimated_time": "الوقت التقديري",
+  "minutes_count": "{count} دقيقة",
+  "your_follow_up_doctor": "طبيبك المتابع",
+  "call_clinic": "اتصال بالعيادة",
+  "position_ordinal": "({number})"
 }

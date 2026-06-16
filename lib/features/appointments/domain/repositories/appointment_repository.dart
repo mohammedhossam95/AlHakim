@@ -8,4 +8,7 @@ abstract class AppointmentRepository {
   Future<Either<Failure, BaseOneResponse>> cancelAppointment({
     required String appointmentId,
   });
+  Future<Either<Failure, BaseOneResponse>> getQueueStatus({
+    required String appointmentId,
+  });
 }
