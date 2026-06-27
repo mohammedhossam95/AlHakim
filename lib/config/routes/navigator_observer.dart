@@ -4,8 +4,12 @@ import '../../core/utils/log_utils.dart';
 import '../../injection_container.dart';
 import 'app_routes.dart';
 
+final AppNavigatorObserver routeObserver = AppNavigatorObserver();
+
 class AppNavigatorObserver extends NavigatorObserver {
   String? currentRoute;
+
+  BuildContext? get context => navigator?.context;
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);

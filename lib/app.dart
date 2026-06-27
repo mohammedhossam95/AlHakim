@@ -1,5 +1,8 @@
 import 'dart:developer';
 
+import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/api/auth_event_bus.dart';
+import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +11,7 @@ import '/features/settings/setting_injection.dart';
 import '/features/tabbar/tabbar_injection.dart';
 import 'config/locale/app_localizations_setup.dart';
 import 'config/routes/app_routes.dart';
+import 'config/routes/navigator_observer.dart';
 import 'config/themes/app_theme.dart';
 import 'core/utils/app_strings.dart';
 import 'features/language/language_injection.dart';
@@ -21,42 +25,44 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  // final bool _isDialogShown = false;
+  bool _isDialogShown = false;
   @override
   void initState() {
     super.initState();
 
-    // AuthEventBus.instance.unauthorizedStream.listen((_) async {
-    //   if (_isDialogShown) return; // Prevent showing multiple dialogs
-    //   final ctx = navigatorKey.currentContext!;
-    //   if (!ctx.mounted) return;
+    AuthEventBus.instance.unauthorizedStream.listen((_) async {
+      if (_isDialogShown) return;
 
-    //   // Ensure the current route is valid before showing the dialog
-    //   if (routeObserver.currentRoute == null) return;
+      final ctx = routeObserver.context;
+      if (ctx == null || !ctx.mounted) return;
+      if (routeObserver.currentRoute == null) return;
+      if (routeObserver.currentRoute == Routes.loginScreenRoute) return;
 
-    //   debugPrint("current route ${routeObserver.currentRoute}");
-    //   _isDialogShown = true;
-    //   CustomAlert().showAlertDialog(
-    //     context: ctx,
-    //     onpress: () async {
-    //       Navigator.of(ctx).pop(); // Close the dialog
-    //       // Clear secure storage
-
-    //       secureStorage.removeDeviceToken();
-    //       secureStorage.clearAll();
-    //       // Navigate to login screen
-    //       navigatorKey.currentState?.pushNamedAndRemoveUntil(
-    //         Routes.loginScreenRoute,
-    //         (route) => false,
-    //       );
-    //       // Reset the dialog flag once it's closed
-    //       _isDialogShown = false;
-    //     },
-    //     title: "sessionExpiredTitle".tr,
-    //     subTitle: "sessionExpired".tr,
-    //     btnTitle: "login",
-    //   );
-    // });
+      _isDialogShown = true;
+      await showDialog<void>(
+        context: ctx,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: Text('sessionExpiredTitle'.tr),
+            content: Text('sessionExpired'.tr),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop();
+                  await secureStorage.removeDeviceToken();
+                  await secureStorage.clearAll();
+                  Routes.router.go(Routes.loginScreenRoute);
+                  _isDialogShown = false;
+                },
+                child: Text('login'.tr),
+              ),
+            ],
+          );
+        },
+      );
+      _isDialogShown = false;
+    });
   }
 
   @override

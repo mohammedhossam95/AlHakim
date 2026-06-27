@@ -1,5 +1,6 @@
 import 'package:alhakim/config/routes/adaptive_route_page.dart';
-import 'package:alhakim/config/routes/navigator_observer.dart';
+import 'package:alhakim/config/routes/navigator_observer.dart'
+    show routeObserver;
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/core/utils/enums.dart';
@@ -137,7 +138,7 @@ abstract class Routes {
 
   static final router = GoRouter(
     initialLocation: initialRoute,
-    observers: [AppNavigatorObserver()],
+    observers: [routeObserver],
     routes: [
       GoRoute(
         name: initialRoute,
