@@ -33,10 +33,18 @@ import 'package:alhakim/features/booking/presentation/screens/add_family_member_
 import 'package:alhakim/features/booking/presentation/screens/booking_screen.dart';
 import 'package:alhakim/features/booking/presentation/screens/family_members_screen.dart';
 import 'package:alhakim/features/booking/presentation/screens/success_screen.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/add_medical_center_cubit/add_medical_center_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/delete_medical_center_cubit/delete_medical_center_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/get_medical_centers_cubit/get_medical_centers_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/cubit/get_representative_stats_cubit/get_representative_stats_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/toggle_medical_center_status_cubit/toggle_medical_center_status_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/update_medical_center_cubit/update_medical_center_cubit.dart';
+import 'package:alhakim/features/delegate/domain/entities/medical_center_entity.dart';
 import 'package:alhakim/features/delegate/presentation/screens/add_new_doctor_screen.dart';
+import 'package:alhakim/features/delegate/presentation/screens/add_new_medical_center_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/update_doctor_screen.dart';
+import 'package:alhakim/features/delegate/presentation/screens/update_medical_center_screen.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
@@ -124,7 +132,10 @@ abstract class Routes {
   static const String delegateDoctorsScreenRoute =
       '/DelegateDoctorsScreenRoute';
   static const String addDoctorScreenRoute = '/AddDoctorScreenRoute';
+  static const String addMedicalCenterScreenRoute = '/AddMedicalCenterScreenRoute';
   static const String updateDoctorScreenRoute = '/UpdateDoctorScreenRoute';
+  static const String updateMedicalCenterScreenRoute =
+      '/UpdateMedicalCenterScreenRoute';
   static const String clinicHomeScreenRoute = '/ClinicHomeScreenRoute';
   static const String rescheduleAppointmentsScreenRoute =
       '/RescheduleAppointmentsScreenRoute';
@@ -204,6 +215,33 @@ abstract class Routes {
                 BlocProvider(create: (context) => sl<UpdateDoctorCubit>()),
               ],
               child: UpdateDoctorScreen(doctor: doctor),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: addMedicalCenterScreenRoute,
+        name: addMedicalCenterScreenRoute,
+        pageBuilder: (context, state) {
+          return buildAdaptivePage(
+            state: state,
+            child: BlocProvider(
+              create: (context) => sl<AddMedicalCenterCubit>(),
+              child: const AddNewMedicalCenterScreen(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: updateMedicalCenterScreenRoute,
+        name: updateMedicalCenterScreenRoute,
+        pageBuilder: (context, state) {
+          final medicalCenter = state.extra as MedicalCenterEntity;
+          return buildAdaptivePage(
+            state: state,
+            child: BlocProvider(
+              create: (context) => sl<UpdateMedicalCenterCubit>(),
+              child: UpdateMedicalCenterScreen(medicalCenter: medicalCenter),
             ),
           );
         },
@@ -370,6 +408,19 @@ abstract class Routes {
 
                       BlocProvider(
                         create: (context) => sl<GetRepresentativeStatsCubit>(),
+                      ),
+
+                      BlocProvider(
+                        create: (context) =>
+                            sl<GetMedicalCentersCubit>()..getMedicalCenters(),
+                      ),
+
+                      BlocProvider(
+                        create: (context) => sl<DeleteMedicalCenterCubit>(),
+                      ),
+
+                      BlocProvider(
+                        create: (context) => sl<ToggleMedicalCenterStatusCubit>(),
                       ),
                     ],
 

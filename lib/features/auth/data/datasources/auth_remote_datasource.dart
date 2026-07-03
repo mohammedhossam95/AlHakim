@@ -31,9 +31,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthRespModel> login({required AuthParams params}) async {
     try {
-      final endPoint = params.userType == UserType.delegate
-          ? "/auth/representative/verify-otp"
-          : "/auth/login";
+      final endPoint = "/auth/login";
       final dynamic response = await dioConsumer.post(
         endPoint,
         body: params.toJson(),
@@ -73,14 +71,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (params.firebaseToken != null) {
         formData.fields.add(MapEntry('device_token', params.firebaseToken!));
       }
-      final isPatient = params.userType == UserType.patient;
-      final isRepresentative = params.userType == UserType.delegate;
+
       // final isDoctor = params.userType == UserType.doctor;
-      final endpoint = isPatient
-          ? '/auth/login/verify-otp'
-          : isRepresentative
-          ? '/auth/representative/verify-otp'
-          : '/auth/doctor/verify-otp';
+      final endpoint = '/auth/verify-otp';
+
       final response = await dioConsumer.post(endpoint, formData: formData);
 
       if (response['status'] == true) {
@@ -114,7 +108,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     try {
       final response = await dioConsumer.post(
-        '/auth/login/complete-profile',
+        '/auth/complete-profile',
         formData: FormData.fromMap(params.toJson()),
       );
 
@@ -141,7 +135,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             })
           : null;
       final response = await dioConsumer.post(
-        '/auth/representative/resend-otp',
+        '/auth/resend-otp',
         formData: formData,
       );
 
@@ -195,14 +189,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<SendOtpRespModel> sendOtp(AuthParams params) async {
     try {
-      final isPatient = params.userType == UserType.patient;
-      final isRepresentative = params.userType == UserType.delegate;
-      // final isDoctor = params.userType == UserType.doctor;
-      final endpoint = isPatient
-          ? '/auth/login/phone'
-          : isRepresentative
-          ? '/auth/representative/send-otp'
-          : '/auth/doctor/send-otp';
+      final endpoint = '/auth/send-otp';
       final FormData? formData =
           params.countryCode != null && params.phoneNumber != null
           ? FormData.fromMap({
