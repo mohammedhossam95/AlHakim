@@ -1,0 +1,193 @@
+---
+alwaysApply: true
+---
+# Flutter Clean Architecture Rules for This Project
+
+## Base Response Rules
+- When I provide a JSON and indicate that the response is a *list*, generate:
+  - Model extending: BaseListResponse
+  - Parse "data" correctly as a list using the same pattern used in CountriesRespModel.
+  - Place model in: features/{feature}/data/models/
+  - Example reference:
+    - CountriesRespModel
+    - CountryModel
+
+- When I provide a JSON and indicate that the response is a *single object*, generate:
+  - Model extending: BaseOneResponse
+  - Parse "data" correctly as an object.
+  - Place model in: features/{feature}/data/models/
+
+- Always follow the existing pattern:
+  - BaseListResponse → success, message, data (list)
+  - BaseOneResponse  → success, message, data (object)
+
+## Model Generation Rules
+- For each model:
+  - If data is a list → extend BaseListResponse.
+  - If data is a single object → extend BaseOneResponse.
+  - Generate:
+    - fromJson()
+    - toJson()
+    - copyWith() only if needed.
+  - Follow the same implementation style as:
+    - CountriesRespModel
+    - CountryModel
+
+- Entities:
+  - Each model that represents a domain object must extend its entity.
+  - Entities go to:
+    features/{feature}/domain/entities/{name}_entity.dart
+
+- Models:
+  - Models go to:
+    features/{feature}/data/models/{name}_model.dart
+
+- Model Parsing Rules:
+  - When parsing list items → use:
+      List<ChildModel>.from((json["data"]["listName"] ?? []).map((x) => ChildModel.fromJson(x)))
+  - When parsing single object → use:
+      data: json["data"] == null ? null : ChildModel.fromJson(json["data"])
+
+## Data Source Rules
+- Update or generate the remote data source in:
+  features/{feature}/data/datasources/{feature}_remote_datasource.dart
+- Follow this pattern:
+  - Methods return either BaseListResponse-derived model or BaseOneResponse-derived model.
+  - No business logic.
+  - Only API calls + mapping JSON to model.
+# Params Generation Rules
+- When any API request, repository method, or usecase requires parameters
+  (query params, body params, path params, or any inputs), Cursor must:
+  1. Generate a dedicated params class.
+  2. File name format: {Feature}{Action}Params or {Action}Params.
+  3. File path:
+     features/{feature}/domain/usecases/params/
+  4. The Params class must:
+     - Be immutable (use final fields)
+     - Include a copyWith()
+     - Include toJson() if it will be sent in a request body
+     - Not extend BaseListResponse or BaseOneResponse
+     - Represent only input parameters, never response data
+  5. Params classes must always be used in:
+     - UseCases (as the input type)
+     - Repository methods (as arguments)
+     - Data source methods (for request body or query)
+
+- Naming Convention Examples:
+  - LoginParams
+  - RegisterParams
+  - GetCountriesParams
+  - UpdateProfileParams
+
+- Example Structure:
+  class ExampleParams {
+    final String? name;
+    final int? age;
+    const ExampleParams({this.name, this.age});
+
+    Map<String, dynamic> toJson() => {
+      "name": name,
+      "age": age,
+    };
+
+    ExampleParams copyWith({String? name, int? age}) {
+      return ExampleParams(
+        name: name ?? this.name,
+        age: age ?? this.age,
+      );
+    }
+  }
+
+## Repository Interface and Implementation Rules
+- Domain repository:
+  features/{feature}/domain/repository/{feature}_repository.dart
+  - Abstract methods return Either<Failure, Entity or List<Entity>>
+
+- Data repository implementation:
+  features/{feature}/data/repository/{feature}_repository_impl.dart
+  - Convert Model → Entity
+  - Handle exceptions and return Failure on error
+
+## UseCase Rules
+- Each new feature or action gets a use case:
+  features/{feature}/domain/usecases/{action}_{feature}.dart
+- UseCase always:
+  - Takes parameters object if needed
+  - Calls repository
+  - Returns Either<Failure, Entity or List<Entity>>
+
+## Cubit Rules
+- Cubit is generated inside:
+  features/{feature}/presentation/cubit/{feature}_cubit.dart
+- State inside:
+  features/{feature}/presentation/cubit/{feature}_state.dart
+- Cubit Responsibilities:
+  - Call the correct use case
+  - Emit: loading, success, failure
+  - No mapping to models here
+  - Cubit has one function only. 
+
+## UI Rules
+- UI page inside:
+  features/{feature}/presentation/pages/{feature}_page.dart
+- UI:
+  - Uses Cubit only
+  - No business logic
+  - Handle states and build widgets
+
+## Automatic Feature Creation
+When I say: "اعمل feature جديدة" or provide a JSON:
+1. Create model(s).
+2. Create entity/entities.
+3. Create data source method.
+4. Create repository interface + implementation.
+5. Create use case(s).
+6. Create cubit + state.
+7. Create UI screen wired with the cubit.
+
+## Code Style Rules
+- Use null-safety everywhere.
+- Avoid dynamic unless necessary.
+- Follow the same style as CountriesRespModel & CountryModel.
+- No logic inside UI.
+
+# Core Priority Rules
+- Anything inside "lib/core/" must always be used first before generating any new helper, class, or utility.
+- The assistant must search core modules for:
+  - constants
+  - helpers
+  - base classes
+  - extensions
+  - app-wide widgets
+  - network utilities
+- Core implementations always override any autogenerated alternative.
+- If a needed function already exists in core → DO NOT create another one.
+
+# Constants Usage Rules
+- All API endpoints, keys, or routes must use the existing constants file inside:
+  lib/core/constants/
+- Before generating any endpoint string, Cursor must:
+  1. Check if the endpoint exists in constants.
+  2. If found → use it directly.
+  3. If not found → add a new constant in the same file following the existing naming style.
+- Constants file must remain clean and organized. Follow the existing naming pattern such as:
+  - ApiConstants.baseUrl
+  - ApiConstants.getCountries
+  - ApiKeys.token
+- Never hardcode URLs or keys inside data sources, repositories, or UI.
+
+# Shimmer Loading Rules
+- Any UI requiring loading placeholders must use shimmer widgets by default.
+- Use the shimmer widget located in:
+  lib/core/widgets/shimmer/
+- If a specific shimmer template exists (e.g. ListShimmer, GridShimmer) → use it.
+- If no template exists, generate a simple reusable shimmer widget in:
+  lib/core/widgets/shimmer/{name}_shimmer.dart
+
+# UI Loading Behavior
+- When Cubit emits a loading state in any feature:
+  - UI screens must display shimmer widgets.
+  - Avoid using CircularProgressIndicator in feature screens unless explicitly requested, when requested use showLoading that in constants file.
+- Shimmer must wrap the exact widget structure (e.g., list, card, grid).
+
+

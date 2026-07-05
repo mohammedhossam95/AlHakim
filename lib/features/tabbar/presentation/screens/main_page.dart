@@ -8,6 +8,8 @@ import 'package:alhakim/features/auth/presentation/cubit/logout/logout_cubit.dar
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_dashboard_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/get_medical_centers_cubit/get_medical_centers_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/screens/delegate_medical_centers_screen.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
@@ -36,24 +38,34 @@ class _MainPageState extends State<MainPage> {
   final padding = EdgeInsets.symmetric(horizontal: 18, vertical: 12);
   double gap = 10;
 
-  List<Widget> _buildTabsFor(UserType role) => [
-    // HomeScreen(),
-    switch (role) {
-      UserType.patient => const SpecialitiesScreen(),
-      UserType.delegate => const DelegateDashboardScreen(),
-      UserType.doctor => ClinicHomeScreen(),
-    },
-
-    switch (role) {
-      UserType.patient => const AppointmentsScreen(),
-      UserType.delegate => const DelegateDoctorsScreen(),
-      UserType.doctor => QueueManagementScreen(),
-    },
-    BlocProvider(
+  List<Widget> _buildTabsFor(UserType role) {
+    final settingsTab = BlocProvider(
       create: (context) => ServiceLocator.instance<LogoutCubit>(),
       child: const SettingsScreen(),
-    ),
-  ];
+    );
+
+    return switch (role) {
+      UserType.delegate => [
+        const DelegateDashboardScreen(),
+        const DelegateDoctorsScreen(),
+        const DelegateMedicalCentersScreen(),
+        settingsTab,
+      ],
+      UserType.patient => [
+        const SpecialitiesScreen(),
+        const AppointmentsScreen(),
+        settingsTab,
+      ],
+      UserType.doctor => [
+        ClinicHomeScreen(),
+        QueueManagementScreen(),
+        settingsTab,
+      ],
+    };
+  }
+
+  int _settingsTabIndex(UserType role) =>
+      role == UserType.delegate ? 3 : 2;
 
   @override
   void dispose() {
@@ -143,6 +155,9 @@ class _MainPageState extends State<MainPage> {
 
   // Bottom Navigation Bar UI
   Widget _buildBottomBar(BuildContext context, int currentIndex) {
+    final role = sessionCubit.state.userType;
+    final settingsIndex = _settingsTabIndex(role);
+
     return Container(
       decoration: BoxDecoration(
         //color: Colors.white,
@@ -232,10 +247,20 @@ class _MainPageState extends State<MainPage> {
                       currentIndex,
                     ),
                   ),
+            if (role == UserType.delegate)
+              Expanded(
+                child: _navItem(
+                  context,
+                  2,
+                  Icons.local_hospital_outlined,
+                  "medical_centers".tr,
+                  currentIndex,
+                ),
+              ),
             Expanded(
               child: _navItem(
                 context,
-                2,
+                settingsIndex,
                 Icons.settings,
                 "settings".tr,
                 currentIndex,
@@ -265,6 +290,9 @@ class _MainPageState extends State<MainPage> {
           context.read<BottomNavBarCubit>().changeCurrentScreen(index: index);
           if (index == 1 && sessionCubit.state.userType == UserType.delegate) {
             context.read<GetDoctorsCubit>().getDoctors();
+          }
+          if (index == 2 && sessionCubit.state.userType == UserType.delegate) {
+            context.read<GetMedicalCentersCubit>().getMedicalCenters();
           }
           if (index == 1 && sessionCubit.state.userType == UserType.patient) {
             context.read<GetAppointmentsCubit>().getAppointments();
