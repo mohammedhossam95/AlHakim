@@ -66,4 +66,5 @@ class ImgAssets {
   static const String imoImg = 'assets/images/imo.png';
   static const String friendRequest = 'assets/images/add-friend.png';
   static const String noData = 'assets/images/noData.png';
+  static const String privacyNoticeImage = 'assets/images/shield.png';
 }

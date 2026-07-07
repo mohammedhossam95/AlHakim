@@ -3,6 +3,7 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/values/assets.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
@@ -185,90 +186,91 @@ class _CompleteProfileRegisterScreenState
                   Gaps.vGap16,
 
                   /// Height
-                  Text("height".tr, style: TextStyles.semiBold14()),
+                  // Text("height".tr, style: TextStyles.semiBold14()),
 
-                  Gaps.vGap8,
+                  // Gaps.vGap8,
 
-                  MyTextFormField(
-                    controller: heightController,
-                    focusNode: heightFocus,
-                    hintText: "enter_height".tr,
-                    keyboardType: TextInputType.number,
-                    backgroundColor: colors.main.withValues(alpha: .1),
-                    prefixIcon: Icon(Icons.height, color: colors.main),
-                  ),
+                  // MyTextFormField(
+                  //   controller: heightController,
+                  //   focusNode: heightFocus,
+                  //   hintText: "enter_height".tr,
+                  //   keyboardType: TextInputType.number,
+                  //   backgroundColor: colors.main.withValues(alpha: .1),
+                  //   prefixIcon: Icon(Icons.height, color: colors.main),
+                  // ),
 
-                  Gaps.vGap16,
+                  // Gaps.vGap16,
 
                   /// Weight
-                  Text("weight".tr, style: TextStyles.semiBold14()),
+                  // Text("weight".tr, style: TextStyles.semiBold14()),
 
-                  Gaps.vGap8,
+                  // Gaps.vGap8,
 
-                  MyTextFormField(
-                    controller: weightController,
-                    focusNode: weightFocus,
-                    hintText: "enter_weight".tr,
-                    keyboardType: TextInputType.number,
-                    backgroundColor: colors.main.withValues(alpha: .1),
-                    prefixIcon: Icon(
-                      Icons.monitor_weight_outlined,
-                      color: colors.main,
-                    ),
-                  ),
+                  // MyTextFormField(
+                  //   controller: weightController,
+                  //   focusNode: weightFocus,
+                  //   hintText: "enter_weight".tr,
+                  //   keyboardType: TextInputType.number,
+                  //   backgroundColor: colors.main.withValues(alpha: .1),
+                  //   prefixIcon: Icon(
+                  //     Icons.monitor_weight_outlined,
+                  //     color: colors.main,
+                  //   ),
+                  // ),
 
-                  Gaps.vGap16,
+                  // Gaps.vGap16,
 
                   /// Blood Type
-                  Text("blood_type".tr),
+                  // Text("blood_type".tr),
 
-                  Gaps.vGap8,
+                  // Gaps.vGap8,
 
-                  DropdownButtonFormField<String>(
-                    value: selectedBloodType,
-                    decoration: InputDecoration(
-                      label: Text("select_blood_type".tr),
-                      labelStyle: TextStyles.semiBold12(),
-                      prefixIcon: Icon(
-                        Icons.bloodtype_outlined,
-                        color: colors.main,
-                      ),
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      filled: true,
-                      fillColor: colors.main.withValues(alpha: .1),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    items: bloodTypes
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedBloodType = value;
-                      });
-                    },
-                  ),
+                  // DropdownButtonFormField<String>(
+                  //   value: selectedBloodType,
+                  //   decoration: InputDecoration(
+                  //     label: Text("select_blood_type".tr),
+                  //     labelStyle: TextStyles.semiBold12(),
+                  //     prefixIcon: Icon(
+                  //       Icons.bloodtype_outlined,
+                  //       color: colors.main,
+                  //     ),
+                  //     floatingLabelBehavior: FloatingLabelBehavior.never,
+                  //     filled: true,
+                  //     fillColor: colors.main.withValues(alpha: .1),
+                  //     border: OutlineInputBorder(
+                  //       borderRadius: BorderRadius.circular(16.r),
+                  //       borderSide: BorderSide.none,
+                  //     ),
+                  //   ),
+                  //   items: bloodTypes
+                  //       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  //       .toList(),
+                  //   onChanged: (value) {
+                  //     setState(() {
+                  //       selectedBloodType = value;
+                  //     });
+                  //   },
+                  // ),
 
-                  Gaps.vGap16,
+                  // Gaps.vGap16,
 
                   /// Location
-                  Text("location".tr, style: TextStyles.semiBold14()),
+                  // Text("location".tr, style: TextStyles.semiBold14()),
 
-                  Gaps.vGap8,
+                  // Gaps.vGap8,
 
-                  MyTextFormField(
-                    controller: locationController,
-                    focusNode: locationFocus,
-                    hintText: "enter_location".tr,
-                    backgroundColor: colors.main.withValues(alpha: .1),
-                    prefixIcon: Icon(
-                      Icons.location_on_outlined,
-                      color: colors.main,
-                    ),
-                  ),
-
+                  // MyTextFormField(
+                  //   controller: locationController,
+                  //   focusNode: locationFocus,
+                  //   hintText: "enter_location".tr,
+                  //   backgroundColor: colors.main.withValues(alpha: .1),
+                  //   prefixIcon: Icon(
+                  //     Icons.location_on_outlined,
+                  //     color: colors.main,
+                  //   ),
+                  // ),
+                  Gaps.vGap16,
+                  PrivacyNoticeCard(),
                   Gaps.vGap40,
 
                   MyDefaultButton(
@@ -279,14 +281,14 @@ class _CompleteProfileRegisterScreenState
                         return;
                       }
 
-                      if (selectedBloodType == null) {
-                        Constants.showSnakToast(
-                          context: context,
-                          type: 3,
-                          message: "choose_blood_type".tr,
-                        );
-                        return;
-                      }
+                      // if (selectedBloodType == null) {
+                      //   Constants.showSnakToast(
+                      //     context: context,
+                      //     type: 3,
+                      //     message: "choose_blood_type".tr,
+                      //   );
+                      //   return;
+                      // }
 
                       context.read<CompleteProfileCubit>().completeProfile(
                         params: CompleteProfileParams(
@@ -296,13 +298,13 @@ class _CompleteProfileRegisterScreenState
 
                           birthDate: birthDateController.text,
 
-                          tall: heightController.text,
+                          // tall: heightController.text,
 
-                          weight: weightController.text,
+                          // weight: weightController.text,
 
-                          bloodType: selectedBloodType,
+                          // bloodType: selectedBloodType,
 
-                          location: locationController.text,
+                          // location: locationController.text,
                         ),
                       );
                     },
@@ -314,6 +316,76 @@ class _CompleteProfileRegisterScreenState
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class PrivacyNoticeCard extends StatelessWidget {
+  final String title;
+  final String body;
+
+  const PrivacyNoticeCard({
+    super.key,
+    this.title = 'خصوصية بياناتك أولويتنا',
+    this.body =
+        'تشفّر بياناتك الشخصية بالكامل ولا يتم مشاركتها إلا مع الكادر الطبي المصرح له خلال المواعيد.',
+  });
+
+  // Palette pulled from the design.
+  static const _cardBg = Color(0xFFE3F3EC);
+  static const _iconBoxBg = Color(0xFFA9DCC8);
+  static const _accentTeal = Color(0xFF2E8B7C);
+  static const _bodyText = Color(0xFF8CA39C);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon box (sits on the right in RTL because it's the first child).
+          Container(
+            width: 46,
+            height: 46,
+            padding: EdgeInsets.all(10.r),
+            decoration: BoxDecoration(
+              color: _iconBoxBg,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Image.asset(
+              ImgAssets.privacyNoticeImage,
+              color: _accentTeal,
+              width: 24.w,
+              height: 24.h,
+            ),
+          ),
+          Gaps.hGap16,
+          // Text column.
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  style: TextStyles.semiBold14(color: _accentTeal),
+                ),
+                Gaps.vGap10,
+                Text(
+                  body,
+                  textAlign: TextAlign.right,
+                  style: TextStyles.regular12(color: _bodyText),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

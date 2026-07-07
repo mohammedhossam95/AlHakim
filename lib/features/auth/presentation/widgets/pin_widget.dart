@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,15 +26,24 @@ class PinCodeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQueryValues(context).width;
+    final horizontalPadding = 40.0;
+    final spacing = 8.0;
+    final pinLengthCount = pinLength ?? 4;
+    final width =
+        (screenWidth - horizontalPadding - ((pinLengthCount - 1) * spacing)) /
+        pinLengthCount;
+
+    final fieldWidth = math.max(40.0.w, width.w);
     return Center(
       child: PinCodeTextField(
         autofocus: false,
         highlight: true,
         focusNode: focus,
         controller: controller,
-        maxLength: pinLength ?? 4,
-        pinBoxHeight: MediaQueryValues(context).width * 0.16,
-        pinBoxWidth: pinBoxWidth ?? MediaQueryValues(context).width * 0.14,
+        maxLength: pinLengthCount,
+        pinBoxHeight: fieldWidth,
+        pinBoxWidth: pinBoxWidth ?? fieldWidth,
         pinBoxRadius: 8.0.r,
         pinBoxBorderWidth: 1.5,
         wrapAlignment: WrapAlignment.center,

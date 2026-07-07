@@ -13,6 +13,6 @@ class VerifyCodeUseCase extends UseCase<BaseOneResponse, AuthParams> {
 
   @override
   Future<Either<Failure, BaseOneResponse>> call(AuthParams params) async {
-    return await repository.verifyCode(params);
+    return await repository.checkPhoneVerified(params);
   }
 }

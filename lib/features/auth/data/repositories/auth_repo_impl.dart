@@ -127,6 +127,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, BaseOneResponse>> checkPhoneVerified(
+    AuthParams params,
+  ) async {
+    try {
+      final BaseOneResponse response = await remote.checkRemotePhoneVerified(
+        params: params,
+      );
+      if (response is AuthRespModel) {
+        _saveAuthResponse(response);
+      }
+      return Right<Failure, BaseOneResponse>(response);
+    } on AppException catch (error) {
+      Log.e(
+        '[verifyCode] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, BaseOneResponse>(error.toFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, AuthRespModel>> completeProfile({
     required CompleteProfileParams params,
   }) async {

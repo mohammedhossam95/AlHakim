@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
@@ -201,44 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : MyDefaultButton(
                                     btnText: "send_code",
 
-                                    onPressed: () async {
-                                      if (_formKey.currentState!.validate()) {
-                                        final phone =
-                                            await Constants.phoneParsing(
-                                              phone: _phoneController.text,
-                                              countryCode:
-                                                  _selectedCountry.countryCode,
-                                              withCode: false,
-                                            );
-
-                                        if (phone != null) {
-                                          final params = AuthParams(
-                                            phoneNumber: phone,
-                                            countryCode:
-                                                "+${_selectedCountry.phoneCode}",
-                                            userType:
-                                                sessionCubit.state.userType,
-                                            secretaryPhone: phone,
-                                            secretaryCountryCode:
-                                                _selectedCountry.phoneCode,
-                                          );
-
-                                          context
-                                              .read<SendCodeCubit>()
-                                              .sendCode(params);
-                                        }
-
-                                        /// invalid phone
-                                        if (phone == null) {
-                                          Constants.showSnakToast(
-                                            context: context,
-                                            type: 3,
-                                            message: "invalid_phone".tr,
-                                          );
-                                          return;
-                                        }
-                                      }
-                                    },
+                                    onPressed: onSendCodePressed,
                                   ),
                           );
                         },
@@ -252,5 +213,37 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void onSendCodePressed() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      final phone = await Constants.phoneParsing(
+        phone: _phoneController.text,
+        countryCode: _selectedCountry.countryCode,
+        withCode: false,
+      );
+
+      if (phone != null) {
+        final params = AuthParams(
+          phoneNumber: phone,
+          countryCode: "+${_selectedCountry.phoneCode}",
+          userType: sessionCubit.state.userType,
+        );
+        if (!mounted) return;
+        context.push(Routes.otpAuthRoute, extra: params);
+      }
+
+      /// invalid phone
+      if (phone == null) {
+        if (!mounted) return;
+        Constants.showSnakToast(
+          context: context,
+          type: 3,
+          message: "invalid_phone".tr,
+        );
+        return;
+      }
+    }
   }
 }

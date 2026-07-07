@@ -108,16 +108,6 @@ class MyDefaultButton extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SvgPicture.asset(
-                            svgAsset!,
-                            height: 24.h,
-                            width: 24.w,
-                            // colorFilter: ColorFilter.mode(
-                            //   textColor ?? colors.whiteColor,
-                            //   BlendMode.srcIn,
-                            // ),
-                          ),
-                          const SizedBox(width: 6),
                           Text(
                             localeText ? btnText! : locale.text(btnText!),
                             textAlign: TextAlign.center,
@@ -126,6 +116,16 @@ class MyDefaultButton extends StatelessWidget {
                                 TextStyles.medium16(
                                   color: textColor ?? colors.whiteColor,
                                 ),
+                          ),
+                          const SizedBox(width: 6),
+                          SvgPicture.asset(
+                            svgAsset!,
+                            height: 24.h,
+                            width: 24.w,
+                            colorFilter: ColorFilter.mode(
+                              textColor ?? colors.whiteColor,
+                              BlendMode.srcIn,
+                            ),
                           ),
                         ],
                       ),

@@ -1,7 +1,6 @@
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
-import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/cities_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/countries_resp_model.dart';
@@ -15,6 +14,7 @@ abstract class AuthRemoteDataSource {
   Future<AuthRespModel> login({required AuthParams params});
   Future<AuthRespModel> register({required AuthParams params});
   Future<AuthRespModel> verifyCode({required AuthParams params});
+  Future<AuthRespModel> checkRemotePhoneVerified({required AuthParams params});
   Future<SendOtpRespModel> sendOtp(AuthParams params);
   Future<SendOtpRespModel> resendOtp(AuthParams params);
   Future<void> logout();
@@ -91,17 +91,38 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  // Future<void> _saveAuthResponse(AuthRespModel response) async {
-  //   if (response.data != null && response.data is AuthModel) {
-  //     final auth = response.data as AuthModel;
+  @override
+  Future<AuthRespModel> checkRemotePhoneVerified({
+    required AuthParams params,
+  }) async {
+    try {
+      final FormData formData = FormData();
+      if (params.countryCode != null) {
+        formData.fields.add(MapEntry('country_code', params.countryCode!));
+      }
+      if (params.phoneNumber != null) {
+        formData.fields.add(MapEntry('phone_number', params.phoneNumber!));
+      }
 
-  //     sharedPreferences.saveAuth(auth);
+      if (params.firebaseToken != null) {
+        formData.fields.add(MapEntry('device_token', params.firebaseToken!));
+      }
 
-  //     if (auth.token != null && auth.token!.isNotEmpty) {
-  //       await secureStorage.saveAccessToken(auth.token!);
-  //     }
-  //   }
-  // }
+      // final isDoctor = params.userType == UserType.doctor;
+      final endpoint = '/auth/phone-verified';
+
+      final response = await dioConsumer.post(endpoint, formData: formData);
+
+      if (response['status'] == true) {
+        return AuthRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   @override
   Future<AuthRespModel> completeProfile({
     required CompleteProfileParams params,
