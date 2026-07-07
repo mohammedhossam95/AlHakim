@@ -14,6 +14,7 @@ import 'config/routes/app_routes.dart';
 import 'config/routes/navigator_observer.dart';
 import 'config/themes/app_theme.dart';
 import 'core/utils/app_strings.dart';
+import 'core/utils/values/text_styles.dart';
 import 'features/language/language_injection.dart';
 import 'features/language/presentation/cubit/locale_cubit/locale_cubit.dart';
 
@@ -75,6 +76,7 @@ class _AppState extends State<App> {
         },
         builder: (context, state) {
           log('LocaleCubit state: ${state.locale.languageCode}');
+          TextStyles.updateForLocale(state.locale.languageCode);
           return LayoutBuilder(
             builder: (context, constrants) {
               return ScreenUtilInit(
@@ -87,7 +89,7 @@ class _AppState extends State<App> {
                     title: AppStrings.appName,
                     locale: state.locale,
                     debugShowCheckedModeBanner: false,
-                    theme: getAppTheme(context),
+                    theme: getAppTheme(state.locale.languageCode),
                     themeMode: ThemeMode.light,
                     routerDelegate: Routes.router.routerDelegate,
                     routeInformationParser:

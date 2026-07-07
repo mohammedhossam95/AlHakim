@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/utils/values/app_colors.dart';
 import '../../core/utils/values/fonts.dart';
 
-ThemeData getAppTheme(BuildContext context) {
+ThemeData getAppTheme(String languageCode) {
+  final fontFamily = Fonts.forLocale(languageCode);
+
   return ThemeData(
     extensions: <ThemeExtension<AppColors>>[
       AppColors(
@@ -22,7 +24,7 @@ ThemeData getAppTheme(BuildContext context) {
         warning: MyColors.warning,
       ),
     ],
-    fontFamily: Fonts.primary,
+    fontFamily: fontFamily,
     brightness: Brightness.light,
     primaryColor: MyColors.main,
     colorScheme: const ColorScheme.light(
@@ -60,7 +62,7 @@ ThemeData getAppTheme(BuildContext context) {
       actionsIconTheme: IconThemeData(color: MyColors.textColor, size: 24.r),
       iconTheme: IconThemeData(color: MyColors.textColor, size: 24.r),
       titleTextStyle: TextStyle(
-        fontFamily: Fonts.primary,
+        fontFamily: fontFamily,
         fontSize: 16.sp,
         fontWeight: FontWeight.w600,
         color: MyColors.textColor,
@@ -70,13 +72,13 @@ ThemeData getAppTheme(BuildContext context) {
       backgroundColor: MyColors.whiteColor,
       type: BottomNavigationBarType.fixed,
       selectedLabelStyle: TextStyle(
-        fontFamily: Fonts.primary,
+        fontFamily: fontFamily,
         fontSize: 12.sp,
         fontWeight: FontWeight.w400,
         color: MyColors.textColor,
       ),
       unselectedLabelStyle: TextStyle(
-        fontFamily: Fonts.primary,
+        fontFamily: fontFamily,
         fontSize: 12.sp,
         fontWeight: FontWeight.w400,
         color: MyColors.textColor,

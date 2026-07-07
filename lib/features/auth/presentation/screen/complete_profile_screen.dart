@@ -122,33 +122,60 @@ class _CompleteProfileRegisterScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /// First Name
-                  Text("first_name".tr, style: TextStyles.semiBold14()),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "first_name".tr,
+                              style: TextStyles.semiBold14(),
+                            ),
+                            Gaps.vGap8,
 
-                  Gaps.vGap8,
+                            MyTextFormField(
+                              controller: firstNameController,
+                              focusNode: firstNameFocus,
+                              hintText: "enter_first_name".tr,
 
-                  MyTextFormField(
-                    controller: firstNameController,
-                    focusNode: firstNameFocus,
-                    hintText: "enter_first_name".tr,
-                    // validatorType: ValidatorType.name,
-                    backgroundColor: colors.main.withValues(alpha: .1),
-                    prefixIcon: Icon(Icons.person_outline, color: colors.main),
-                  ),
+                              // validatorType: ValidatorType.name,
+                              prefixIcon: Icon(
+                                Icons.person_outline,
+                                color: colors.main,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Gaps.hGap16,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// Last Name
+                            Text(
+                              "last_name".tr,
+                              style: TextStyles.semiBold14(),
+                            ),
 
-                  Gaps.vGap16,
+                            Gaps.vGap8,
 
-                  /// Last Name
-                  Text("last_name".tr, style: TextStyles.semiBold14()),
-
-                  Gaps.vGap8,
-
-                  MyTextFormField(
-                    controller: lastNameController,
-                    focusNode: lastNameFocus,
-                    hintText: "enter_last_name".tr,
-                    // validatorType: ValidatorType.name,
-                    backgroundColor: colors.main.withValues(alpha: .1),
-                    prefixIcon: Icon(Icons.person_outline, color: colors.main),
+                            MyTextFormField(
+                              controller: lastNameController,
+                              focusNode: lastNameFocus,
+                              hintText: "enter_last_name".tr,
+                              // validatorType: ValidatorType.name,
+                              // backgroundColor: colors.main.withValues(alpha: .1),
+                              prefixIcon: Icon(
+                                Icons.person_outline,
+                                color: colors.main,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
 
                   Gaps.vGap16,
@@ -163,7 +190,7 @@ class _CompleteProfileRegisterScreenState
                     focusNode: birthDateFocus,
                     readOnly: true,
                     hintText: "select_birth_date".tr,
-                    backgroundColor: colors.main.withValues(alpha: .1),
+                    // backgroundColor: colors.main.withValues(alpha: .1),
                     prefixIcon: Icon(
                       Icons.calendar_month_outlined,
                       color: colors.main,

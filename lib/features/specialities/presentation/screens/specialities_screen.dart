@@ -1,5 +1,6 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
+import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
@@ -272,38 +273,34 @@ class _BannerCard extends StatelessWidget {
                 ),
               ),
               Gaps.hGap6,
-
-              /// 🧠 title
               Text(
                 "ai_engine_title".tr,
                 style: TextStyles.semiBold18(color: colors.whiteColor),
               ),
             ],
           ),
-
           Gaps.vGap8,
-
-          Gaps.vGap8,
-
-          /// 📝 desc
           Text(
             "ai_engine_desc".tr,
             style: TextStyles.medium14(
               color: colors.whiteColor.withValues(alpha: .85),
             ),
           ),
-
           Gaps.vGap20,
 
           /// 🔘 button
           Align(
             alignment: Alignment.centerRight,
             child: MyDefaultButton(
+              borderColor: colors.whiteColor,
               onPressed: () {},
               btnText: "start_diagnosis",
               color: colors.whiteColor,
+              svgAsset: SvgAssets.iconArrowBackEn,
               textColor: colors.main,
+              textStyle: TextStyles.semiBold12(color: colors.main),
               width: ScreenUtil().screenWidth * .45,
+              height: 40.h,
             ),
           ),
         ],

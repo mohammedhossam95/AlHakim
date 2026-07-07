@@ -1,4 +1,8 @@
 abstract class Fonts {
-  static const String primary = 'Alexandria';
-  static const String secondary = 'Almarai';
+  static const String cairo = 'Cairo';
+  static const String inter = 'Inter';
+
+  static String forLocale(String languageCode) {
+    return languageCode == 'ar' ? cairo : inter;
+  }
 }

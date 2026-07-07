@@ -112,14 +112,38 @@ flutter:
     - assets/icons/
 
   fonts:
-    - family: Alexandria
+    - family: Cairo
       fonts:
-        - asset: assets/fonts/Alexandria/Alexandria-Black.ttf
-        - asset: assets/fonts/Alexandria/Alexandria-Bold.ttf
-        - asset: assets/fonts/Alexandria/Alexandria-SemiBold.ttf
-        - asset: assets/fonts/Alexandria/Alexandria-Medium.ttf
-        - asset: assets/fonts/Alexandria/Alexandria-Regular.ttf
-        - asset: assets/fonts/Alexandria/Alexandria-Light.ttf
+        - asset: assets/fonts/Cairo/Cairo-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Cairo/Cairo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Cairo/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo/Cairo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Cairo/Cairo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cairo/Cairo-Light.ttf
+          weight: 300
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter/Inter_18pt-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Inter/Inter_18pt-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Inter/Inter_18pt-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter/Inter_18pt-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter/Inter_18pt-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter/Inter_18pt-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter/Inter_18pt-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Inter/Inter_18pt-ExtraLight.ttf
+          weight: 200
     - family: rayal
       fonts:
         - asset: assets/fonts/saudi_riyal.ttf
