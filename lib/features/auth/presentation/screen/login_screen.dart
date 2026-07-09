@@ -6,15 +6,11 @@ import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/country_code_widget.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
-import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
-import 'package:alhakim/features/auth/domain/entities/send_otp_entity.dart';
-import 'package:alhakim/features/auth/presentation/cubit/send_code_cubit/send_code_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -161,48 +157,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       Gaps.vGap30,
 
-                      /// button
-                      BlocConsumer<SendCodeCubit, SendCodeState>(
-                        listener: (context, state) {
-                          if (state is SendCodeLoaded) {
-                            final data = state.response.data as SendOtpEntity;
-                            if (data.nextStep == "complete_profile") {
-                              context.push(
-                                Routes.completeProfileRegisterScreenRoute,
-                              );
-                              secureStorage.saveAccessToken(
-                                state.response.data.token,
-                              );
-                              return;
-                            }
-                            // final data = state.response.data as AuthEntity;
+                      FadeInDown(
+                        child: MyDefaultButton(
+                          btnText: "send_code",
 
-                            context.push(
-                              Routes.otpAuthRoute,
-                              extra: AuthParams(
-                                phoneNumber: _phoneController.text,
-                                countryCode: "+${_selectedCountry.phoneCode}",
-                              ),
-                            );
-                          } else if (state is SendCodeError) {
-                            Constants.showSnakToast(
-                              context: context,
-                              type: 3,
-                              message: state.message,
-                            );
-                          }
-                        },
-                        builder: (context, state) {
-                          return FadeInDown(
-                            child: state is SendCodeIsLoading
-                                ? LoadingView()
-                                : MyDefaultButton(
-                                    btnText: "send_code",
-
-                                    onPressed: onSendCodePressed,
-                                  ),
-                          );
-                        },
+                          onPressed: onSendCodePressed,
+                        ),
                       ),
                     ],
                   ),

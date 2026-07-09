@@ -2,20 +2,30 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:alhakim/features/auth/presentation/cubit/logout/logout_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/delete_medical_center_cubit/delete_medical_center_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/get_medical_centers_cubit/get_medical_centers_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/get_representative_stats_cubit/get_representative_stats_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/toggle_medical_center_status_cubit/toggle_medical_center_status_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_dashboard_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
-import 'package:alhakim/features/delegate/presentation/cubit/get_medical_centers_cubit/get_medical_centers_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_medical_centers_screen.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/settings_screen.dart';
+import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
 import 'package:alhakim/features/specialities/presentation/screens/specialities_screen.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -64,8 +74,84 @@ class _MainPageState extends State<MainPage> {
     };
   }
 
-  int _settingsTabIndex(UserType role) =>
-      role == UserType.delegate ? 3 : 2;
+  int _settingsTabIndex(UserType role) => role == UserType.delegate ? 3 : 2;
+
+  Widget _wrapWithRoleProviders({
+    required UserType role,
+    required Widget child,
+  }) {
+    switch (role) {
+      case UserType.delegate:
+        return MultiBlocProvider(
+          key: ValueKey('main-page-providers-${role.name}'),
+          providers: [
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<GetDoctorsCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<DeleteDoctorCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<ToggelDoctorStatusCubit>(),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  ServiceLocator.instance<GetRepresentativeStatsCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<GetMedicalCentersCubit>(),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  ServiceLocator.instance<DeleteMedicalCenterCubit>(),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  ServiceLocator.instance<ToggleMedicalCenterStatusCubit>(),
+            ),
+          ],
+          child: child,
+        );
+      case UserType.patient:
+        return MultiBlocProvider(
+          key: ValueKey('main-page-providers-${role.name}'),
+          providers: [
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<GetSpecialtiesCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<GetAppointmentsCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<CancelAppointmentCubit>(),
+            ),
+          ],
+          child: child,
+        );
+      case UserType.doctor:
+        return MultiBlocProvider(
+          key: ValueKey('main-page-providers-${role.name}'),
+          providers: [
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<GetDoctorHomeCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<CloseClinicTodayCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<ToggleClinicCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<GetQueueManagementCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<UpdateQueueStatusCubit>(),
+            ),
+          ],
+          child: child,
+        );
+    }
+  }
 
   @override
   void dispose() {
@@ -92,42 +178,47 @@ class _MainPageState extends State<MainPage> {
         final tabs = _buildTabsFor(role);
         // final isTeacherShell = role == UserType.doctor;
 
-        return BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
-          listenWhen: (pre, current) => pre.index != current.index,
-          listener: (context, state) {},
-          builder: (context, state) {
-            final tabCount = tabs.length;
-            final displayIndex = state.index >= 0 && state.index < tabCount
-                ? state.index
-                : 0;
-            if (state.index != displayIndex && !_pendingBottomNavResync) {
-              _pendingBottomNavResync = true;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _pendingBottomNavResync = false;
-                if (!context.mounted) return;
-                context.read<BottomNavBarCubit>().changeCurrentScreen(
-                  index: displayIndex,
-                );
-              });
-            }
-            return PopScope(
-              canPop: displayIndex == 0,
-              onPopInvokedWithResult: (didPop, result) {
-                if (didPop) return;
-                context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
-              },
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                // ACCESSING THE SCREEN VIA CUBIT STATE
-                body: PageStorage(bucket: bucket, child: tabs[displayIndex]),
+        return _wrapWithRoleProviders(
+          role: role,
+          child: BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
+            listenWhen: (pre, current) => pre.index != current.index,
+            listener: (context, state) {},
+            builder: (context, state) {
+              final tabCount = tabs.length;
+              final displayIndex = state.index >= 0 && state.index < tabCount
+                  ? state.index
+                  : 0;
+              if (state.index != displayIndex && !_pendingBottomNavResync) {
+                _pendingBottomNavResync = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _pendingBottomNavResync = false;
+                  if (!context.mounted) return;
+                  context.read<BottomNavBarCubit>().changeCurrentScreen(
+                    index: displayIndex,
+                  );
+                });
+              }
+              return PopScope(
+                canPop: displayIndex == 0,
+                onPopInvokedWithResult: (didPop, result) {
+                  if (didPop) return;
+                  context.read<BottomNavBarCubit>().changeCurrentScreen(
+                    index: 0,
+                  );
+                },
+                child: Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  // ACCESSING THE SCREEN VIA CUBIT STATE
+                  body: PageStorage(bucket: bucket, child: tabs[displayIndex]),
 
-                // floatingActionButton: _buildFab(),
-                // floatingActionButtonLocation:
-                //     FloatingActionButtonLocation.centerDocked,
-                bottomNavigationBar: _buildBottomBar(context, displayIndex),
-              ),
-            );
-          },
+                  // floatingActionButton: _buildFab(),
+                  // floatingActionButtonLocation:
+                  //     FloatingActionButtonLocation.centerDocked,
+                  bottomNavigationBar: _buildBottomBar(context, displayIndex),
+                ),
+              );
+            },
+          ),
         );
       },
     );

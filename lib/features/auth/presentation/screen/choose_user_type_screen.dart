@@ -34,12 +34,11 @@ class _ChooseUserTypeScreenState extends State<ChooseUserTypeScreen> {
     return Scaffold(
       backgroundColor: colors.backGround,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Illustration section
-              Container(
-                height: 300.h,
+        child: Column(
+          children: [
+            // Illustration section
+            Expanded(
+              child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -58,86 +57,86 @@ class _ChooseUserTypeScreenState extends State<ChooseUserTypeScreen> {
                   ),
                 ),
               ),
-              Gaps.vGap32,
-              // Text section
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  children: [
-                    Text(
-                      'choose_account_type'.tr,
-                      textAlign: TextAlign.center,
-                      style: TextStyles.semiBold16(color: colors.textColor),
+            ),
+            Gaps.vGap32,
+            // Text section
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                children: [
+                  Text(
+                    'choose_account_type'.tr,
+                    textAlign: TextAlign.center,
+                    style: TextStyles.semiBold16(color: colors.textColor),
+                  ),
+                  Gaps.vGap8,
+                  Text(
+                    'choose_account_type_description'.tr,
+                    textAlign: TextAlign.center,
+                    style: TextStyles.regular14(
+                      color: colors.textColor.withValues(alpha: 0.7),
                     ),
-                    Gaps.vGap12,
-                    Text(
-                      'choose_account_type_description'.tr,
-                      textAlign: TextAlign.center,
-                      style: TextStyles.regular14(
-                        color: colors.textColor.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    Gaps.vGap32,
+                  ),
+                  Gaps.vGap20,
 
-                    UserTypeCardWidget(
-                      title: 'patient_account'.tr,
-                      description: 'patient_account_description'.tr,
-                      userType: UserType.patient,
-                      isSelected: _selectedUserType == UserType.patient,
-                      isProminent: true,
-                      onTap: () {
-                        setState(() {
-                          _selectedUserType = UserType.patient;
-                        });
-                      },
-                    ),
-                    Gaps.vGap20,
-                    Row(
-                      children: [
-                        Expanded(
-                          child: UserTypeCardWidget(
-                            title: 'doctor_account'.tr,
-                            description: 'doctor_account_description'.tr,
-                            userType: UserType.doctor,
-                            isSelected: _selectedUserType == UserType.doctor,
-                            onTap: () {
-                              setState(() {
-                                _selectedUserType = UserType.doctor;
-                              });
-                            },
-                          ),
+                  UserTypeCardWidget(
+                    title: 'patient_account'.tr,
+                    description: 'patient_account_description'.tr,
+                    userType: UserType.patient,
+                    isSelected: _selectedUserType == UserType.patient,
+                    isProminent: true,
+                    onTap: () {
+                      setState(() {
+                        _selectedUserType = UserType.patient;
+                      });
+                    },
+                  ),
+                  Gaps.vGap10,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: UserTypeCardWidget(
+                          title: 'doctor_account'.tr,
+                          description: 'doctor_account_description'.tr,
+                          userType: UserType.doctor,
+                          isSelected: _selectedUserType == UserType.doctor,
+                          onTap: () {
+                            setState(() {
+                              _selectedUserType = UserType.doctor;
+                            });
+                          },
                         ),
-                        Gaps.hGap16,
-                        Expanded(
-                          child: UserTypeCardWidget(
-                            title: 'delegate_account'.tr,
-                            description: 'delegate_account_description'.tr,
-                            userType: UserType.delegate,
-                            isSelected: _selectedUserType == UserType.delegate,
-                            onTap: () {
-                              setState(() {
-                                _selectedUserType = UserType.delegate;
-                              });
-                            },
-                          ),
+                      ),
+                      Gaps.hGap8,
+                      Expanded(
+                        child: UserTypeCardWidget(
+                          title: 'delegate_account'.tr,
+                          description: 'delegate_account_description'.tr,
+                          userType: UserType.delegate,
+                          isSelected: _selectedUserType == UserType.delegate,
+                          onTap: () {
+                            setState(() {
+                              _selectedUserType = UserType.delegate;
+                            });
+                          },
                         ),
-                      ],
-                    ),
-                    Gaps.vGap40,
-                    MyDefaultButton(
-                      btnText: 'continue',
-                      onPressed: () {
-                        final session = BlocProvider.of<SessionCubit>(context);
-                        session.setUserType(_selectedUserType);
-                        context.pushNamed(Routes.loginScreenRoute);
-                      },
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  Gaps.vGap20,
+                  MyDefaultButton(
+                    btnText: 'continue',
+                    onPressed: () {
+                      final session = BlocProvider.of<SessionCubit>(context);
+                      session.setUserType(_selectedUserType);
+                      context.pushNamed(Routes.loginScreenRoute);
+                    },
+                  ),
+                ],
               ),
-              Gaps.vGap40,
-            ],
-          ),
+            ),
+            Gaps.vGap40,
+          ],
         ),
       ),
     );

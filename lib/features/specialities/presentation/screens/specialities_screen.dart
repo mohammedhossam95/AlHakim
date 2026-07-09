@@ -293,7 +293,9 @@ class _BannerCard extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: MyDefaultButton(
               borderColor: colors.whiteColor,
-              onPressed: () {},
+              onPressed: () {
+                context.push(Routes.agentScreenRoute);
+              },
               btnText: "start_diagnosis",
               color: colors.whiteColor,
               svgAsset: SvgAssets.iconArrowBackEn,

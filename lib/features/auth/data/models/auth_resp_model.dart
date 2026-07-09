@@ -16,11 +16,18 @@ class AuthRespModel extends BaseOneResponse {
 }
 
 class AuthModel extends UserAuthEntity {
-  const AuthModel({super.token, super.user, super.doctor, super.nextStep});
+  const AuthModel({
+    super.token,
+    super.role,
+    super.user,
+    super.doctor,
+    super.nextStep,
+  });
 
   factory AuthModel.fromJson(Map<String, dynamic> json) {
     return AuthModel(
       token: json['token'],
+      role: json['role'],
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
       doctor: json['doctor'] != null
           ? DoctorModel.fromJson(json['doctor'])
@@ -30,6 +37,7 @@ class AuthModel extends UserAuthEntity {
   }
   Map<String, dynamic> toJson() => {
     "token": token,
+    "role": role,
     "user": user is UserModel ? (user as UserModel).toJson() : null,
     "doctor": doctor is DoctorModel ? (doctor as DoctorModel).toJson() : null,
   };

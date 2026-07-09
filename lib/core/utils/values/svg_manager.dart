@@ -76,4 +76,5 @@ class SvgAssets {
   static const String chatIcon = 'assets/icons/chat.svg';
   static const String sendIcon = 'assets/icons/send_icon.svg';
   static const String notFoundImage = 'assets/icons/notFoundImage.svg';
+  static const String autoAwesome = 'assets/icons/auto_awesome.svg';
 }

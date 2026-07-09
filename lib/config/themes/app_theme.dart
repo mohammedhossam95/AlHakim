@@ -15,6 +15,7 @@ ThemeData getAppTheme(String languageCode) {
         main: MyColors.main,
         secondary: MyColors.secondary,
         textColor: MyColors.textColor,
+        subTextColor: MyColors.subTextColor,
         errorColor: MyColors.errorColor,
         review: MyColors.review,
         lightTextColor: MyColors.lightTextColor,

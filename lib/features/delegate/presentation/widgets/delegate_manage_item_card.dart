@@ -75,7 +75,7 @@ class DelegateManageItemCard extends StatelessWidget {
                       style: TextStyles.semiBold16(),
                       textAlign: TextAlign.right,
                     ),
-                    Gaps.vGap12,
+                    Gaps.vGap8,
                     Text(
                       subtitle,
                       style: TextStyles.medium13(color: colors.lightTextColor),
@@ -83,7 +83,7 @@ class DelegateManageItemCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Gaps.vGap12,
+                    Gaps.vGap8,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -129,9 +129,7 @@ class DelegateManageItemCard extends StatelessWidget {
           ),
           if (showActions &&
               (onEdit != null || onToggle != null || onDelete != null)) ...[
-            Gaps.vGap30,
-            Gaps.line,
-            Gaps.vGap30,
+            Divider(),
             Row(
               children: [
                 if (onEdit != null)
@@ -156,11 +154,13 @@ class DelegateManageItemCard extends StatelessWidget {
                         icon: isActive
                             ? Icons.ac_unit_rounded
                             : Icons.play_arrow_rounded,
-                        label: isActive ? toggleActiveLabel : toggleInactiveLabel,
-                        iconColor:
-                            isActive ? Colors.orange : colors.whiteColor,
-                        labelColor:
-                            isActive ? Colors.orange : colors.whiteColor,
+                        label: isActive
+                            ? toggleActiveLabel
+                            : toggleInactiveLabel,
+                        iconColor: isActive ? Colors.orange : colors.whiteColor,
+                        labelColor: isActive
+                            ? Colors.orange
+                            : colors.whiteColor,
                         backgroundColor: isActive
                             ? Colors.orange.withValues(alpha: .12)
                             : colors.main,
@@ -210,7 +210,7 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(24.r),
@@ -221,7 +221,7 @@ class _ActionTile extends StatelessWidget {
       child: Column(
         children: [
           Icon(icon, color: iconColor, size: 30.sp),
-          Gaps.vGap8,
+          Gaps.vGap4,
           Text(label, style: TextStyles.medium14(color: labelColor)),
         ],
       ),

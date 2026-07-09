@@ -53,6 +53,10 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
     try {
       FormData formData = FormData();
 
+      formData.fields.add(
+        MapEntry("price_hidden", params.hidePrice == true ? "1" : "0"),
+      );
+
       if (params.nameEn != null) {
         formData.fields.add(MapEntry("translations[en][name]", params.nameEn!));
       }
@@ -112,11 +116,6 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
 
       if (params.price != null) {
         formData.fields.add(MapEntry("price", params.price!));
-      }
-      if (params.hidePrice != null) {
-        formData.fields.add(
-          MapEntry("price_hidden", params.hidePrice!.toString()),
-        );
       }
 
       if (params.profileImage != null) {
@@ -294,7 +293,7 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       }
       if (params.hidePrice != null) {
         formData.fields.add(
-          MapEntry("price_hidden", params.hidePrice!.toString()),
+          MapEntry("price_hidden", params.hidePrice == true ? "1" : "0"),
         );
       }
       if (params.profileImage != null) {

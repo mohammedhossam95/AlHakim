@@ -4,8 +4,9 @@ class MyColors {
   static const Color backGround = Color(0xFFF6F7F9);
   // static const Color backGround = Color(0xFFECECEC);
   static const Color main = Color(0xFF005FB8);
-  static const Color secondary = Color(0xFF00897B);
+  static const Color secondary = Color(0xFF8DF5E4);
   static const Color textColor = Color(0xFF000000);
+  static const Color subTextColor = Color(0xFF017165);
   static const Color lightTextColor = Color(0xFF565656);
   static const Color lightBackGroundColor = Color(0xFFfafafa);
   static const Color errorColor = Color(0xFFEF0F0F);
@@ -27,6 +28,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color main;
   final Color secondary;
   final Color textColor;
+  final Color subTextColor;
   final Color whiteColor;
   final Color errorColor;
   final Color review;
@@ -43,6 +45,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.main,
     required this.secondary,
     required this.textColor,
+    required this.subTextColor,
     required this.whiteColor,
     required this.errorColor,
     required this.review,
@@ -59,6 +62,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? main,
     Color? secondary,
     Color? textColor,
+    Color? subTextColor,
     Color? whiteColor,
     Color? errorColor,
     Color? review,
@@ -73,6 +77,7 @@ class AppColors extends ThemeExtension<AppColors> {
       main: main ?? this.main,
       secondary: secondary ?? this.secondary,
       textColor: textColor ?? this.textColor,
+      subTextColor: subTextColor ?? this.subTextColor,
       whiteColor: whiteColor ?? this.whiteColor,
       errorColor: errorColor ?? this.errorColor,
       review: review ?? this.review,
@@ -95,6 +100,8 @@ class AppColors extends ThemeExtension<AppColors> {
       main: Color.lerp(main, other.main, t) ?? main,
       secondary: Color.lerp(secondary, other.secondary, t) ?? secondary,
       textColor: Color.lerp(textColor, other.textColor, t) ?? textColor,
+      subTextColor:
+          Color.lerp(subTextColor, other.subTextColor, t) ?? subTextColor,
       whiteColor: Color.lerp(whiteColor, other.whiteColor, t) ?? whiteColor,
       errorColor: Color.lerp(errorColor, other.errorColor, t) ?? errorColor,
       review: Color.lerp(review, other.review, t) ?? review,

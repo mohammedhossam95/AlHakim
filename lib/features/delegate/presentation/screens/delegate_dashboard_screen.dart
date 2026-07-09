@@ -471,7 +471,7 @@ class _DashboardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 20.h),
+      padding: EdgeInsets.all(16.r),
 
       decoration: BoxDecoration(
         color: color.withValues(alpha: .07),
@@ -485,19 +485,21 @@ class _DashboardItem extends StatelessWidget {
 
         children: [
           /// icon
-          Container(
-            padding: EdgeInsets.all(14.w),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(14.w),
 
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: .12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: .12),
 
-              borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+
+              child: Icon(icon, color: color, size: 24.sp),
             ),
-
-            child: Icon(icon, color: color, size: 24.sp),
           ),
 
-          Gaps.vGap10,
+          Gaps.vGap8,
 
           /// title
           Text(
@@ -512,7 +514,7 @@ class _DashboardItem extends StatelessWidget {
             style: TextStyles.medium13(),
           ),
 
-          Gaps.vGap16,
+          Gaps.vGap8,
 
           /// value
           Text(value, style: TextStyles.semiBold20(color: color)),

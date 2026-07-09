@@ -7,7 +7,6 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
 class UserTypeCardWidget extends StatelessWidget {
   final String title;
   final String description;
@@ -32,7 +31,7 @@ class UserTypeCardWidget extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: isProminent ? double.infinity : null,
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: isSelected
               ? colors.main.withValues(alpha: 0.15)
@@ -54,7 +53,7 @@ class UserTypeCardWidget extends StatelessWidget {
                 color: isSelected ? colors.main : colors.textColor,
               ),
             ),
-            Gaps.vGap10,
+            Gaps.vGap8,
             Text(
               textAlign: TextAlign.center,
               description,

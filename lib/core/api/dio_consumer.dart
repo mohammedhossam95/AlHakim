@@ -18,6 +18,7 @@ abstract class ApiConstants {
   static const String dev = 'https://alhakim-eg.com/api/v1';
   static const String live = 'https://alhakim-eg.com/api/v1';
   static const String baseUrl = dev;
+  static const String analyzeComplaint = '/complaints/analyze';
 }
 
 abstract class DioConsumer {

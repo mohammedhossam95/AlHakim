@@ -142,3 +142,5 @@ enum Status {
   refunded,
   underReview,
 }
+
+enum ButtonIconType { svg, icon, image, none }

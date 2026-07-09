@@ -7,6 +7,8 @@ import '/core/utils/values/text_styles.dart';
 import '../../config/locale/app_localizations.dart';
 import '../../injection_container.dart';
 
+enum ButtonIconType { svg, icon, image, none }
+
 class MyDefaultButton extends StatelessWidget {
   final String? btnText;
   final bool localeText;
@@ -22,6 +24,11 @@ class MyDefaultButton extends StatelessWidget {
   final double? borderRadius;
   final Color? borderColor;
   final bool withDottedBorder;
+  final bool rightIcon;
+  final ButtonIconType buttonIconType;
+  final IconData? iconData;
+  final String? imageAsset;
+  final double iconSize;
 
   const MyDefaultButton({
     super.key,
@@ -39,12 +46,53 @@ class MyDefaultButton extends StatelessWidget {
     this.borderRadius,
     this.borderColor,
     this.withDottedBorder = true,
+    this.rightIcon = false,
+    this.buttonIconType = ButtonIconType.none,
+    this.iconData,
+    this.imageAsset,
+    this.iconSize = 24,
   });
+
+  ButtonIconType get _resolvedIconType {
+    if (buttonIconType != ButtonIconType.none) return buttonIconType;
+    if (svgAsset != null) return ButtonIconType.svg;
+    if (iconData != null) return ButtonIconType.icon;
+    if (imageAsset != null) return ButtonIconType.image;
+    return ButtonIconType.none;
+  }
+
+  Widget? _buildButtonIcon() {
+    final Color iconColor = textColor ?? colors.whiteColor;
+    switch (_resolvedIconType) {
+      case ButtonIconType.svg:
+        if (svgAsset == null) return null;
+        return SvgPicture.asset(
+          svgAsset!,
+          height: iconSize.h,
+          width: iconSize.w,
+          colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+        );
+      case ButtonIconType.icon:
+        if (iconData == null) return null;
+        return Icon(iconData, size: iconSize.sp, color: iconColor);
+      case ButtonIconType.image:
+        if (imageAsset == null) return null;
+        return Image.asset(
+          imageAsset!,
+          height: iconSize.h,
+          width: iconSize.w,
+          color: iconColor,
+        );
+      case ButtonIconType.none:
+        return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
     AppLocalizations locale = AppLocalizations.of(context)!;
+    final buttonIcon = _buildButtonIcon();
 
     return DottedBorder(
       options: withDottedBorder
@@ -94,7 +142,7 @@ class MyDefaultButton extends StatelessWidget {
                   ),
                 ),
                 onPressed: onPressed,
-                child: svgAsset == null
+                child: buttonIcon == null
                     ? Text(
                         localeText ? btnText! : locale.text(btnText!),
                         textAlign: TextAlign.center,
@@ -108,6 +156,10 @@ class MyDefaultButton extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          if (rightIcon) ...[
+                            buttonIcon,
+                            const SizedBox(width: 6),
+                          ],
                           Text(
                             localeText ? btnText! : locale.text(btnText!),
                             textAlign: TextAlign.center,
@@ -117,16 +169,10 @@ class MyDefaultButton extends StatelessWidget {
                                   color: textColor ?? colors.whiteColor,
                                 ),
                           ),
-                          const SizedBox(width: 6),
-                          SvgPicture.asset(
-                            svgAsset!,
-                            height: 24.h,
-                            width: 24.w,
-                            colorFilter: ColorFilter.mode(
-                              textColor ?? colors.whiteColor,
-                              BlendMode.srcIn,
-                            ),
-                          ),
+                          if (!rightIcon) ...[
+                            const SizedBox(width: 6),
+                            buttonIcon,
+                          ],
                         ],
                       ),
               ),

@@ -4,12 +4,19 @@ import 'package:equatable/equatable.dart';
 
 class UserAuthEntity extends Equatable {
   final String? token;
+  final String? role;
   final UserEntity? user;
   final DoctorEntity? doctor;
   final String? nextStep;
 
-  const UserAuthEntity({this.token, this.user, this.doctor, this.nextStep});
+  const UserAuthEntity({
+    this.token,
+    this.role,
+    this.user,
+    this.doctor,
+    this.nextStep,
+  });
 
   @override
-  List<Object?> get props => [token, user, doctor, nextStep];
+  List<Object?> get props => [token, role, user, doctor, nextStep];
 }

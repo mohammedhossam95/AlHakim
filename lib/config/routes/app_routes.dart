@@ -5,8 +5,6 @@ import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
-import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
-import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
@@ -33,13 +31,9 @@ import 'package:alhakim/features/booking/presentation/screens/add_family_member_
 import 'package:alhakim/features/booking/presentation/screens/booking_screen.dart';
 import 'package:alhakim/features/booking/presentation/screens/family_members_screen.dart';
 import 'package:alhakim/features/booking/presentation/screens/success_screen.dart';
-import 'package:alhakim/features/delegate/presentation/cubit/add_medical_center_cubit/add_medical_center_cubit.dart';
-import 'package:alhakim/features/delegate/presentation/cubit/delete_medical_center_cubit/delete_medical_center_cubit.dart';
-import 'package:alhakim/features/delegate/presentation/cubit/get_medical_centers_cubit/get_medical_centers_cubit.dart';
-import 'package:alhakim/features/delegate/presentation/cubit/get_representative_stats_cubit/get_representative_stats_cubit.dart';
-import 'package:alhakim/features/delegate/presentation/cubit/toggle_medical_center_status_cubit/toggle_medical_center_status_cubit.dart';
-import 'package:alhakim/features/delegate/presentation/cubit/update_medical_center_cubit/update_medical_center_cubit.dart';
 import 'package:alhakim/features/delegate/domain/entities/medical_center_entity.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/add_medical_center_cubit/add_medical_center_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/cubit/update_medical_center_cubit/update_medical_center_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/screens/add_new_doctor_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/add_new_medical_center_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
@@ -47,20 +41,13 @@ import 'package:alhakim/features/delegate/presentation/screens/update_doctor_scr
 import 'package:alhakim/features/delegate/presentation/screens/update_medical_center_screen.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_doctor_cubit/update_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
 import 'package:alhakim/features/doctors/presentation/screens/reschedule_appointments_screen.dart';
-import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
+import 'package:alhakim/features/home/presentation/screen/agent_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/quick_booking_cubit/quick_booking_cubit.dart';
-import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/quick_booking_screen.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/update_user_profile_cubit/update_user_profile_cubit.dart';
@@ -80,6 +67,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
 import '../../features/auth/presentation/screen/phone_entry_screen.dart';
 import '../../features/home/presentation/cubit/all_ads_cubit/all_ads_cubit.dart';
+import '../../features/home/presentation/cubit/analyze_complaint_cubit/analyze_complaint_cubit.dart';
 import '../../features/notifications/presentation/cubits/notifications_cubit/notifications_cubit.dart';
 import '../../features/notifications/presentation/screens/notification_screen.dart';
 import '../../features/settings/presentaion/cubit/get_user_profile_cubit/get_user_profile_cubit.dart';
@@ -101,6 +89,7 @@ abstract class Routes {
   static const String resetPasswordRoute = '/ResetPasswordScreen';
   static const String otpAuthRoute = '/OtpAuthScreen';
   static const String mainPageRoute = '/MainPage';
+  static const String agentScreenRoute = '/AgentScreen';
   static const String editProfileScreenRoute = '/EditProfileScreen';
   static const String changePasswordScreenRoute = '/ChangePasswordScreen';
   static const String contactUsRoute = '/ContactUsScreen';
@@ -132,7 +121,8 @@ abstract class Routes {
   static const String delegateDoctorsScreenRoute =
       '/DelegateDoctorsScreenRoute';
   static const String addDoctorScreenRoute = '/AddDoctorScreenRoute';
-  static const String addMedicalCenterScreenRoute = '/AddMedicalCenterScreenRoute';
+  static const String addMedicalCenterScreenRoute =
+      '/AddMedicalCenterScreenRoute';
   static const String updateDoctorScreenRoute = '/UpdateDoctorScreenRoute';
   static const String updateMedicalCenterScreenRoute =
       '/UpdateMedicalCenterScreenRoute';
@@ -169,10 +159,7 @@ abstract class Routes {
         path: loginScreenRoute,
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
-          child: BlocProvider(
-            create: (context) => sl<SendCodeCubit>(),
-            child: const LoginScreen(),
-          ),
+          child: const LoginScreen(),
         ),
       ),
 
@@ -329,8 +316,9 @@ abstract class Routes {
         builder: (context, state) {
           final args = state.extra as AppointmentEntity;
           return BlocProvider(
-            create: (context) => sl<GetQueueStatusCubit>()
-              ..getQueueStatus(appointmentId: args.id.toString()),
+            create: (context) =>
+                sl<GetQueueStatusCubit>()
+                  ..getQueueStatus(appointmentId: args.id.toString()),
             child: FollowUpQueueScreen(appointment: args),
           );
         },
@@ -383,88 +371,22 @@ abstract class Routes {
         path: mainPageRoute,
 
         pageBuilder: (context, state) {
-          final isDelegate = sessionCubit.state.userType == UserType.delegate;
-
-          final isPatient = sessionCubit.state.userType == UserType.patient;
-
           return buildAdaptivePage(
             state: state,
-
-            child: isDelegate
-                ? MultiBlocProvider(
-                    providers: [
-                      BlocProvider(
-                        create: (context) =>
-                            sl<GetDoctorsCubit>()..getDoctors(),
-                      ),
-
-                      BlocProvider(
-                        create: (context) => sl<DeleteDoctorCubit>(),
-                      ),
-
-                      BlocProvider(
-                        create: (context) => sl<ToggelDoctorStatusCubit>(),
-                      ),
-
-                      BlocProvider(
-                        create: (context) => sl<GetRepresentativeStatsCubit>(),
-                      ),
-
-                      BlocProvider(
-                        create: (context) =>
-                            sl<GetMedicalCentersCubit>()..getMedicalCenters(),
-                      ),
-
-                      BlocProvider(
-                        create: (context) => sl<DeleteMedicalCenterCubit>(),
-                      ),
-
-                      BlocProvider(
-                        create: (context) => sl<ToggleMedicalCenterStatusCubit>(),
-                      ),
-                    ],
-
-                    child: const MainPage(),
-                  )
-                : isPatient
-                ? MultiBlocProvider(
-                    providers: [
-                      BlocProvider(
-                        create: (context) =>
-                            sl<GetSpecialtiesCubit>()..getSpecialties(),
-                      ),
-                      BlocProvider(
-                        create: (context) =>
-                            sl<GetAppointmentsCubit>()..getAppointments(),
-                      ),
-                      BlocProvider(
-                        create: (context) => sl<CancelAppointmentCubit>(),
-                      ),
-                    ],
-                    child: const MainPage(),
-                  )
-                : MultiBlocProvider(
-                    providers: [
-                      BlocProvider(
-                        create: (context) => sl<GetDoctorHomeCubit>(),
-                      ),
-                      BlocProvider(
-                        create: (context) => sl<CloseClinicTodayCubit>(),
-                      ),
-                      BlocProvider(
-                        create: (context) => sl<ToggleClinicCubit>(),
-                      ),
-                      BlocProvider(
-                        create: (context) => sl<GetQueueManagementCubit>(),
-                      ),
-                      BlocProvider(
-                        create: (context) => sl<UpdateQueueStatusCubit>(),
-                      ),
-                    ],
-                    child: const MainPage(),
-                  ),
+            child: const MainPage(),
           );
         },
+      ),
+      GoRoute(
+        path: agentScreenRoute,
+        name: agentScreenRoute,
+        pageBuilder: (context, state) => buildAdaptivePage(
+          state: state,
+          child: BlocProvider(
+            create: (context) => sl<AnalyzeComplaintCubit>(),
+            child: const AIAgentScreen(),
+          ),
+        ),
       ),
       GoRoute(
         path: specialitiesScreenRoute,
