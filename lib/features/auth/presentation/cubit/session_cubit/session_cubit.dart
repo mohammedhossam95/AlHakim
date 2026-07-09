@@ -83,32 +83,46 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<void> logout() async {
-    final result = await _logoutUseCase(NoParams());
-    result.fold(
-      (failure) => log('Logout API failed: ${failure.message}'),
-      (_) {},
-    );
+    try {
+      final result = await _logoutUseCase(NoParams());
 
-    await secureStorage.clearAll();
+      result.fold(
+        (failure) => log('Logout API failed: ${failure.message}'),
+        (_) {},
+      );
 
-    final guestResult = await _saveSessionStatus(
-      SessionStatusParams(status: SessionStatus.guest),
-    );
-    guestResult.fold(
-      (failure) => log('SAVE GUEST SESSION FAILED: ${failure.message}'),
-      (_) {},
-    );
+      await sharedPreferences.removeUser();
+      await sharedPreferences.removeUserId();
+      await sharedPreferences.removeUserType();
 
-    await sharedPreferences.removeUser();
-    await sharedPreferences.removeUserId();
-    await sharedPreferences.removeUserType();
+      await secureStorage.clearAll();
 
-    emit(
-      const SessionState(
-        status: SessionStatus.guest,
-        userType: UserType.patient,
-        error: null,
-      ),
-    );
+      final guestResult = await _saveSessionStatus(
+        SessionStatusParams(status: SessionStatus.guest),
+      );
+
+      guestResult.fold(
+        (failure) => log('SAVE GUEST SESSION FAILED: ${failure.message}'),
+        (_) {},
+      );
+
+      emit(
+        const SessionState(
+          status: SessionStatus.guest,
+          userType: UserType.patient,
+          error: null,
+        ),
+      );
+    } catch (e) {
+      log('Logout failed unexpectedly: $e');
+
+      emit(
+        const SessionState(
+          status: SessionStatus.guest,
+          userType: UserType.patient,
+          error: null,
+        ),
+      );
+    }
   }
 }

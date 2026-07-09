@@ -14,7 +14,6 @@ import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get
 import 'package:alhakim/features/auth/presentation/cubit/get_setting/get_setting_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/resend_otp_cubit/resend_otp_cubit.dart';
-import 'package:alhakim/features/auth/presentation/cubit/send_code_cubit/send_code_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
 import 'package:alhakim/features/auth/presentation/screen/choose_user_type_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/complete_profile_screen.dart';
@@ -157,10 +156,8 @@ abstract class Routes {
       GoRoute(
         name: loginScreenRoute,
         path: loginScreenRoute,
-        pageBuilder: (context, state) => buildAdaptivePage(
-          state: state,
-          child: const LoginScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            buildAdaptivePage(state: state, child: const LoginScreen()),
       ),
 
       /// LoginScreen
@@ -371,10 +368,7 @@ abstract class Routes {
         path: mainPageRoute,
 
         pageBuilder: (context, state) {
-          return buildAdaptivePage(
-            state: state,
-            child: const MainPage(),
-          );
+          return buildAdaptivePage(state: state, child: const MainPage());
         },
       ),
       GoRoute(
