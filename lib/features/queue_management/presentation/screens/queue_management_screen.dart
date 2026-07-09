@@ -27,9 +27,12 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
   void initState() {
     super.initState();
 
-    context.read<GetQueueManagementCubit>().getQueueManagement(
-      doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GetQueueManagementCubit>().getQueueManagement(
+        doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
+      );
+    });
   }
 
   @override

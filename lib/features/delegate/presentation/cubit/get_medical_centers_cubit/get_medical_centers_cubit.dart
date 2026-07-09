@@ -12,6 +12,15 @@ class GetMedicalCentersCubit extends Cubit<GetMedicalCentersState> {
   GetMedicalCentersCubit({required this.usecase})
       : super(GetMedicalCentersInitial());
 
+  bool _hasLoaded = false;
+
+  Future<void> loadIfNeeded() async {
+    if (_hasLoaded) return;
+
+    _hasLoaded = true;
+    await getMedicalCenters();
+  }
+
   Future<void> getMedicalCenters() async {
     emit(GetMedicalCentersLoading());
 

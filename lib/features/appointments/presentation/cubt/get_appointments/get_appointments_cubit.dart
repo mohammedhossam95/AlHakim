@@ -12,6 +12,15 @@ class GetAppointmentsCubit extends Cubit<GetAppointmentsState> {
   GetAppointmentsCubit({required this.usecase})
     : super(GetAppointmentsInitial());
 
+  bool _hasLoaded = false;
+
+  Future<void> loadIfNeeded() async {
+    if (_hasLoaded) return;
+
+    _hasLoaded = true;
+    await getAppointments();
+  }
+
   Future<void> getAppointments() async {
     emit(GetAppointmentsLoading());
 

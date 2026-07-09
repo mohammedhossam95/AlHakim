@@ -11,6 +11,15 @@ class GetDoctorHomeCubit extends Cubit<GetDoctorHomeState> {
 
   GetDoctorHomeCubit({required this.usecase}) : super(GetDoctorHomeInitial());
 
+  bool _hasLoaded = false;
+
+  Future<void> loadIfNeeded() async {
+    if (_hasLoaded) return;
+
+    _hasLoaded = true;
+    await getDoctorHome();
+  }
+
   Future<void> getDoctorHome() async {
     emit(GetDoctorHomeLoading());
 

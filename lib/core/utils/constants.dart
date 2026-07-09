@@ -1,5 +1,3 @@
-// ignore_for_file: strict_top_level_inference
-
 import 'dart:developer';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -573,37 +571,27 @@ class Constants {
               Gaps.vGap10,
               Divider(color: colors.review),
               Gaps.vGap10,
-              Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: MyDefaultButton(
-                      height: 40.h,
-                      borderRadius: 20.r,
-                      color: colors.whiteColor,
-                      borderColor: colors.main,
-                      textColor: colors.main,
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      btnText: 'close',
-                    ),
-                  ),
-                  Gaps.hGap16,
-                  Expanded(
-                    flex: 2,
-                    child: MyDefaultButton(
-                      height: 40.h,
-                      borderRadius: 20.r,
-                      onPressed: () {
-                        if (onOkPressed != null) {
-                          onOkPressed();
-                        }
-                      },
-                      btnText: 'login',
-                    ),
-                  ),
-                ],
+
+              MyDefaultButton(
+                height: 40.h,
+                onPressed: () {
+                  if (onOkPressed != null) {
+                    onOkPressed();
+                  }
+                },
+                btnText: 'login',
+              ),
+              Gaps.vGap20,
+              MyDefaultButton(
+                height: 40.h,
+                color: colors.errorColor,
+                borderColor: colors.errorColor,
+                textColor: colors.whiteColor,
+                withDottedBorder: false,
+                btnText: 'close',
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
             ],
           ),
@@ -741,7 +729,7 @@ class Constants {
                       width: width * 0.7,
                       child: Text(
                         message,
-                        style: TextStyle(color: textColor),
+                        style: TextStyles.regular12(color: textColor),
                         maxLines: 2,
                       ),
                     ),
@@ -756,7 +744,7 @@ class Constants {
                     child: Center(
                       child: Text(
                         message,
-                        style: TextStyles.medium14(color: colors.textColor),
+                        style: TextStyles.regular12(color: textColor),
                         maxLines: 2,
                       ),
                     ),

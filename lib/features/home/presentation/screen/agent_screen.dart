@@ -1,7 +1,9 @@
 import 'dart:ui';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
@@ -14,6 +16,7 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '/core/utils/values/text_styles.dart';
 import '/core/widgets/back_button.dart';
@@ -37,6 +40,15 @@ class _AIAgentScreenState extends State<AIAgentScreen> {
 
   void _onAnalyzePressed() {
     final complaint = _complaintController.text.trim();
+    if (sessionCubit.state.status != SessionStatus.authenticated) {
+      Constants.showLoginWarningDialog(
+        context,
+        onOkPressed: () {
+          context.go(Routes.chooseUserTypeScreenRoute);
+        },
+      );
+      return;
+    }
     if (complaint.isEmpty) {
       Constants.showSnakToast(
         context: context,

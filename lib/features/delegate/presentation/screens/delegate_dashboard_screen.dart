@@ -25,7 +25,10 @@ class _DelegateDashboardScreenState extends State<DelegateDashboardScreen> {
   void initState() {
     super.initState();
 
-    context.read<GetRepresentativeStatsCubit>().getRepresentativeStats();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GetRepresentativeStatsCubit>().getRepresentativeStats();
+    });
   }
 
   @override

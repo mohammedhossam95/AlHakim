@@ -11,6 +11,15 @@ class GetQueueManagementCubit extends Cubit<GetQueueManagementState> {
   GetQueueManagementCubit({required this.usecase})
     : super(GetQueueManagementInitial());
 
+  bool _hasLoaded = false;
+
+  Future<void> loadIfNeeded({required String doctorId}) async {
+    if (_hasLoaded) return;
+
+    _hasLoaded = true;
+    await getQueueManagement(doctorId: doctorId);
+  }
+
   Future<void> getQueueManagement({required String doctorId}) async {
     emit(GetQueueManagementLoading());
 

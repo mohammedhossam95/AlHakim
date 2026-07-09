@@ -37,7 +37,10 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
       "schedule ${sharedPreferences.getAuth()?.doctor?.schedules.toString() ?? ''}",
     );
 
-    context.read<GetDoctorHomeCubit>().getDoctorHome();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GetDoctorHomeCubit>().getDoctorHome();
+    });
   }
 
   @override

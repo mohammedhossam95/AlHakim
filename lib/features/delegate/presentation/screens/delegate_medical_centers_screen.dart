@@ -29,7 +29,11 @@ class _DelegateMedicalCentersScreenState
   @override
   void initState() {
     super.initState();
-    context.read<GetMedicalCentersCubit>().getMedicalCenters();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GetMedicalCentersCubit>().getMedicalCenters();
+    });
   }
 
   @override

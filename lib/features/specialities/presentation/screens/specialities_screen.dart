@@ -16,8 +16,23 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
-class SpecialitiesScreen extends StatelessWidget {
+class SpecialitiesScreen extends StatefulWidget {
   const SpecialitiesScreen({super.key});
+
+  @override
+  State<SpecialitiesScreen> createState() => _SpecialitiesScreenState();
+}
+
+class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GetSpecialtiesCubit>().getSpecialties();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

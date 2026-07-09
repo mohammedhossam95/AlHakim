@@ -26,7 +26,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   void initState() {
     super.initState();
 
-    context.read<GetAppointmentsCubit>().getAppointments();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GetAppointmentsCubit>().getAppointments();
+    });
   }
 
   @override

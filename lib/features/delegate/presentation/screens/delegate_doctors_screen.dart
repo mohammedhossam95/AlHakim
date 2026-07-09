@@ -24,7 +24,10 @@ class _DelegateDoctorsScreenState extends State<DelegateDoctorsScreen> {
   void initState() {
     super.initState();
 
-    context.read<GetDoctorsCubit>().getDoctors();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GetDoctorsCubit>().getDoctors();
+    });
   }
 
   @override

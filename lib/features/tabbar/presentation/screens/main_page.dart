@@ -50,40 +50,17 @@ class _MainPageState extends State<MainPage> {
 
   List<Widget> _buildTabsFor(UserType role) {
     final settingsTab = BlocProvider(
-      create: (context) => ServiceLocator.instance<LogoutCubit>(),
+      create: (_) => ServiceLocator.instance<LogoutCubit>(),
       child: const SettingsScreen(),
     );
 
     return switch (role) {
       UserType.delegate => [
-        const DelegateDashboardScreen(),
-        const DelegateDoctorsScreen(),
-        const DelegateMedicalCentersScreen(),
-        settingsTab,
-      ],
-      UserType.patient => [
-        const SpecialitiesScreen(),
-        const AppointmentsScreen(),
-        settingsTab,
-      ],
-      UserType.doctor => [
-        ClinicHomeScreen(),
-        QueueManagementScreen(),
-        settingsTab,
-      ],
-    };
-  }
-
-  int _settingsTabIndex(UserType role) => role == UserType.delegate ? 3 : 2;
-
-  Widget _wrapWithRoleProviders({
-    required UserType role,
-    required Widget child,
-  }) {
-    switch (role) {
-      case UserType.delegate:
-        return MultiBlocProvider(
-          key: ValueKey('main-page-providers-${role.name}'),
+        BlocProvider(
+          create: (_) => ServiceLocator.instance<GetRepresentativeStatsCubit>(),
+          child: const DelegateDashboardScreen(),
+        ),
+        MultiBlocProvider(
           providers: [
             BlocProvider(
               create: (_) => ServiceLocator.instance<GetDoctorsCubit>(),
@@ -94,31 +71,33 @@ class _MainPageState extends State<MainPage> {
             BlocProvider(
               create: (_) => ServiceLocator.instance<ToggelDoctorStatusCubit>(),
             ),
-            BlocProvider(
-              create: (_) =>
-                  ServiceLocator.instance<GetRepresentativeStatsCubit>(),
-            ),
+          ],
+          child: const DelegateDoctorsScreen(),
+        ),
+        MultiBlocProvider(
+          providers: [
             BlocProvider(
               create: (_) => ServiceLocator.instance<GetMedicalCentersCubit>(),
             ),
             BlocProvider(
-              create: (_) =>
-                  ServiceLocator.instance<DeleteMedicalCenterCubit>(),
+              create: (_) => ServiceLocator.instance<DeleteMedicalCenterCubit>(),
             ),
             BlocProvider(
               create: (_) =>
                   ServiceLocator.instance<ToggleMedicalCenterStatusCubit>(),
             ),
           ],
-          child: child,
-        );
-      case UserType.patient:
-        return MultiBlocProvider(
-          key: ValueKey('main-page-providers-${role.name}'),
+          child: const DelegateMedicalCentersScreen(),
+        ),
+        settingsTab,
+      ],
+      UserType.patient => [
+        BlocProvider(
+          create: (_) => ServiceLocator.instance<GetSpecialtiesCubit>(),
+          child: const SpecialitiesScreen(),
+        ),
+        MultiBlocProvider(
           providers: [
-            BlocProvider(
-              create: (_) => ServiceLocator.instance<GetSpecialtiesCubit>(),
-            ),
             BlocProvider(
               create: (_) => ServiceLocator.instance<GetAppointmentsCubit>(),
             ),
@@ -126,11 +105,12 @@ class _MainPageState extends State<MainPage> {
               create: (_) => ServiceLocator.instance<CancelAppointmentCubit>(),
             ),
           ],
-          child: child,
-        );
-      case UserType.doctor:
-        return MultiBlocProvider(
-          key: ValueKey('main-page-providers-${role.name}'),
+          child: const AppointmentsScreen(),
+        ),
+        settingsTab,
+      ],
+      UserType.doctor => [
+        MultiBlocProvider(
           providers: [
             BlocProvider(
               create: (_) => ServiceLocator.instance<GetDoctorHomeCubit>(),
@@ -141,6 +121,11 @@ class _MainPageState extends State<MainPage> {
             BlocProvider(
               create: (_) => ServiceLocator.instance<ToggleClinicCubit>(),
             ),
+          ],
+          child: const ClinicHomeScreen(),
+        ),
+        MultiBlocProvider(
+          providers: [
             BlocProvider(
               create: (_) => ServiceLocator.instance<GetQueueManagementCubit>(),
             ),
@@ -148,10 +133,14 @@ class _MainPageState extends State<MainPage> {
               create: (_) => ServiceLocator.instance<UpdateQueueStatusCubit>(),
             ),
           ],
-          child: child,
-        );
-    }
+          child: const QueueManagementScreen(),
+        ),
+        settingsTab,
+      ],
+    };
   }
+
+  int _settingsTabIndex(UserType role) => role == UserType.delegate ? 3 : 2;
 
   @override
   void dispose() {
@@ -178,47 +167,43 @@ class _MainPageState extends State<MainPage> {
         final tabs = _buildTabsFor(role);
         // final isTeacherShell = role == UserType.doctor;
 
-        return _wrapWithRoleProviders(
-          role: role,
-          child: BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
-            listenWhen: (pre, current) => pre.index != current.index,
-            listener: (context, state) {},
-            builder: (context, state) {
-              final tabCount = tabs.length;
-              final displayIndex = state.index >= 0 && state.index < tabCount
-                  ? state.index
-                  : 0;
-              if (state.index != displayIndex && !_pendingBottomNavResync) {
-                _pendingBottomNavResync = true;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _pendingBottomNavResync = false;
-                  if (!context.mounted) return;
-                  context.read<BottomNavBarCubit>().changeCurrentScreen(
-                    index: displayIndex,
-                  );
-                });
-              }
-              return PopScope(
-                canPop: displayIndex == 0,
-                onPopInvokedWithResult: (didPop, result) {
-                  if (didPop) return;
-                  context.read<BottomNavBarCubit>().changeCurrentScreen(
-                    index: 0,
-                  );
-                },
-                child: Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  // ACCESSING THE SCREEN VIA CUBIT STATE
-                  body: PageStorage(bucket: bucket, child: tabs[displayIndex]),
-
-                  // floatingActionButton: _buildFab(),
-                  // floatingActionButtonLocation:
-                  //     FloatingActionButtonLocation.centerDocked,
-                  bottomNavigationBar: _buildBottomBar(context, displayIndex),
+        return BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
+          listenWhen: (pre, current) => pre.index != current.index,
+          listener: (context, state) {},
+          builder: (context, state) {
+            final tabCount = tabs.length;
+            final displayIndex = state.index >= 0 && state.index < tabCount
+                ? state.index
+                : 0;
+            if (state.index != displayIndex && !_pendingBottomNavResync) {
+              _pendingBottomNavResync = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _pendingBottomNavResync = false;
+                if (!context.mounted) return;
+                context.read<BottomNavBarCubit>().changeCurrentScreen(
+                  index: displayIndex,
+                );
+              });
+            }
+            return PopScope(
+              canPop: displayIndex == 0,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) return;
+                context.read<BottomNavBarCubit>().changeCurrentScreen(
+                  index: 0,
+                );
+              },
+              child: Scaffold(
+                resizeToAvoidBottomInset: false,
+                body: PageStorage(bucket: bucket, child: tabs[displayIndex]),
+                bottomNavigationBar: _buildBottomBar(
+                  context,
+                  displayIndex,
+                  role,
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -245,8 +230,11 @@ class _MainPageState extends State<MainPage> {
   // }
 
   // Bottom Navigation Bar UI
-  Widget _buildBottomBar(BuildContext context, int currentIndex) {
-    final role = sessionCubit.state.userType;
+  Widget _buildBottomBar(
+    BuildContext context,
+    int currentIndex,
+    UserType role,
+  ) {
     final settingsIndex = _settingsTabIndex(role);
 
     return Container(
@@ -274,25 +262,24 @@ class _MainPageState extends State<MainPage> {
             //     FontAwesomeIcons.house,
             //     "home".tr,
             //     currentIndex,
+            //     role,
             //   ),
             // ),
-            (sessionCubit.state.userType == UserType.patient)
+            role == UserType.patient
                 ? Expanded(
                     child: _navItem(
                       context,
                       0,
-
                       Icons.group,
                       "specialities_title".tr,
                       currentIndex,
                     ),
                   )
-                : (sessionCubit.state.userType == UserType.delegate)
+                : role == UserType.delegate
                 ? Expanded(
                     child: _navItem(
                       context,
                       0,
-
                       Icons.dashboard,
                       "dashboard".tr,
                       currentIndex,
@@ -309,7 +296,7 @@ class _MainPageState extends State<MainPage> {
                   ),
 
             // const SizedBox(width: 48), // Gap for FAB
-            sessionCubit.state.userType == UserType.delegate
+            role == UserType.delegate
                 ? Expanded(
                     child: _navItem(
                       context,
@@ -319,7 +306,7 @@ class _MainPageState extends State<MainPage> {
                       currentIndex,
                     ),
                   )
-                : sessionCubit.state.userType == UserType.patient
+                : role == UserType.patient
                 ? Expanded(
                     child: _navItem(
                       context,
@@ -379,23 +366,6 @@ class _MainPageState extends State<MainPage> {
       child: InkWell(
         onTap: () {
           context.read<BottomNavBarCubit>().changeCurrentScreen(index: index);
-          if (index == 1 && sessionCubit.state.userType == UserType.delegate) {
-            context.read<GetDoctorsCubit>().getDoctors();
-          }
-          if (index == 2 && sessionCubit.state.userType == UserType.delegate) {
-            context.read<GetMedicalCentersCubit>().getMedicalCenters();
-          }
-          if (index == 1 && sessionCubit.state.userType == UserType.patient) {
-            context.read<GetAppointmentsCubit>().getAppointments();
-          }
-          if (index == 1 && sessionCubit.state.userType == UserType.doctor) {
-            context.read<GetQueueManagementCubit>().getQueueManagement(
-              doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
-            );
-          }
-          if (index == 0 && sessionCubit.state.userType == UserType.doctor) {
-            context.read<GetDoctorHomeCubit>().getDoctorHome();
-          }
         },
         child: Padding(
           padding: const EdgeInsets.all(12.0),
