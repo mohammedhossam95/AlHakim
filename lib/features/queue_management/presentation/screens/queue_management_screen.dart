@@ -4,6 +4,7 @@ import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/queue_management/domain/entities/queue_management_entity.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
@@ -23,15 +24,25 @@ class QueueManagementScreen extends StatefulWidget {
 }
 
 class _QueueManagementScreenState extends State<QueueManagementScreen> {
+  String? _activeDoctorId(BuildContext context) {
+    return context.read<SessionCubit>().state.activeDoctorId;
+  }
+
+  void _loadQueue(BuildContext context) {
+    final doctorId = _activeDoctorId(context);
+    if (doctorId == null || doctorId.isEmpty) return;
+    context.read<GetQueueManagementCubit>().getQueueManagement(
+      doctorId: doctorId,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<GetQueueManagementCubit>().getQueueManagement(
-        doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
-      );
+      _loadQueue(context);
     });
   }
 
@@ -49,9 +60,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
         }
         if (state is UpdateQueueStatusSuccess) {
           Constants.hideLoading(context);
-          context.read<GetQueueManagementCubit>().getQueueManagement(
-            doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
-          );
+          _loadQueue(context);
           Constants.showSnakToast(
             context: context,
             type: 1,
@@ -77,9 +86,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
 
             if (result == true) {
               if (!context.mounted) return;
-              context.read<GetQueueManagementCubit>().getQueueManagement(
-                doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
-              );
+              _loadQueue(context);
             }
           },
 
@@ -621,19 +628,27 @@ class QueuePatientCard extends StatelessWidget {
               Expanded(
                 child: PopupMenuButton<String>(
                   onSelected: (value) async {
+                    final doctorId =
+                        context.read<SessionCubit>().state.activeDoctorId;
+                    if (doctorId == null || doctorId.isEmpty) return;
+
                     await context
                         .read<UpdateQueueStatusCubit>()
                         .updateQueueStatus(
-                          doctorId:
-                              sharedPreferences.getAuth()?.doctor?.id ?? '',
+                          doctorId: doctorId,
 
                           appointmentId: item.id ?? 0,
 
                           status: value,
                         );
                     if (!context.mounted) return;
+                    final activeDoctorId =
+                        context.read<SessionCubit>().state.activeDoctorId;
+                    if (activeDoctorId == null || activeDoctorId.isEmpty) {
+                      return;
+                    }
                     context.read<GetQueueManagementCubit>().getQueueManagement(
-                      doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
+                      doctorId: activeDoctorId,
                     );
                   },
 

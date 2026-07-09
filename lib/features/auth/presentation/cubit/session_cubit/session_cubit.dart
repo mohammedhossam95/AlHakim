@@ -1,8 +1,10 @@
 import 'dart:developer';
 
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/auth/domain/usecases/get_user_type_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/save_user_type_usecase.dart';
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,6 +36,43 @@ class SessionCubit extends Cubit<SessionState> {
   final SaveUserTypeUseCase _saveUserType;
   final LogoutUseCase _logoutUseCase;
 
+  SessionState _buildAuthenticatedState(UserType userType) {
+    if (userType != UserType.doctor) {
+      return SessionState(
+        status: SessionStatus.authenticated,
+        userType: userType,
+        error: null,
+      );
+    }
+
+    final auth = sharedPreferences.getAuth();
+    return _buildDoctorSessionState(auth);
+  }
+
+  SessionState _buildDoctorSessionState(AuthModel? auth) {
+    final isMedicalCenter = auth?.role == 'medical_center';
+
+    if (isMedicalCenter) {
+      return const SessionState(
+        status: SessionStatus.authenticated,
+        userType: UserType.doctor,
+        doctorAccountMode: DoctorAccountMode.medicalCenter,
+        activeDoctorId: null,
+        selectedDoctor: null,
+        error: null,
+      );
+    }
+
+    return SessionState(
+      status: SessionStatus.authenticated,
+      userType: UserType.doctor,
+      doctorAccountMode: DoctorAccountMode.singleDoctor,
+      activeDoctorId: auth?.doctor?.id,
+      selectedDoctor: null,
+      error: null,
+    );
+  }
+
   Future<void> resolveSession() async {
     final result = await _getSessionStatus(NoParams());
     result.fold(
@@ -60,7 +99,11 @@ class SessionCubit extends Cubit<SessionState> {
             );
           },
           (userType) {
-            emit(SessionState(status: status, userType: userType));
+            if (status == SessionStatus.authenticated) {
+              emit(_buildAuthenticatedState(userType));
+            } else {
+              emit(SessionState(status: status, userType: userType));
+            }
           },
         );
       },
@@ -79,7 +122,22 @@ class SessionCubit extends Cubit<SessionState> {
     await _saveSessionStatus(
       SessionStatusParams(status: SessionStatus.authenticated),
     );
-    emit(SessionState(status: SessionStatus.authenticated, userType: userType));
+    emit(_buildAuthenticatedState(userType));
+  }
+
+  void selectDoctorForMedicalCenter(DoctorEntity doctor) {
+    emit(
+      state.copyWith(
+        activeDoctorId: doctor.id,
+        selectedDoctor: doctor,
+      ),
+    );
+  }
+
+  void clearSelectedDoctor() {
+    if (state.doctorAccountMode != DoctorAccountMode.medicalCenter) return;
+
+    emit(state.copyWith(clearSelectedDoctor: true));
   }
 
   Future<void> logout() async {

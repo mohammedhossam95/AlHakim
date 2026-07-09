@@ -93,15 +93,25 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
           MapEntry("academic_degree", params.academicDegree!),
         );
       }
-
-      if (params.clinicPhone != null) {
-        formData.fields.add(MapEntry("clinic_phone", params.clinicPhone!));
+      if (params.secretaryCountryCode != null) {
+        formData.fields.add(
+          MapEntry("secretary_country_code", params.secretaryCountryCode!),
+        );
       }
 
       if (params.secretaryPhone != null) {
         formData.fields.add(
           MapEntry("secretary_phone", params.secretaryPhone!),
         );
+      }
+
+      if (params.clinicCountryCode != null) {
+        formData.fields.add(
+          MapEntry("clinic_country_code", params.clinicCountryCode!),
+        );
+      }
+      if (params.clinicPhone != null) {
+        formData.fields.add(MapEntry("clinic_phone", params.clinicPhone!));
       }
 
       if (params.minPatients != null) {
@@ -182,17 +192,6 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
                 "schedules[$i][slot_duration]",
                 schedule['slot_duration'].toString(),
               ),
-            );
-          }
-          if (params.secretaryCountryCode != null) {
-            formData.fields.add(
-              MapEntry("secretary_country_code", params.secretaryCountryCode!),
-            );
-          }
-
-          if (params.clinicCountryCode != null) {
-            formData.fields.add(
-              MapEntry("clinic_country_code", params.clinicCountryCode!),
             );
           }
         }

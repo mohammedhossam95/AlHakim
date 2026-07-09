@@ -32,6 +32,8 @@ enum AvailableTimes { anyDay, today, tomorrow }
 
 enum UserType { doctor, delegate, patient }
 
+enum DoctorAccountMode { singleDoctor, medicalCenter }
+
 enum Building { hospital, clinic }
 
 enum MyError { saerch, fourZeroFour, defaultError }

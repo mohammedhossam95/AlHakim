@@ -6,6 +6,7 @@ import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/quick_booking_cubit/quick_booking_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -351,11 +352,15 @@ class _QuickBookingScreenState extends State<QuickBookingScreen> {
                                 return;
                               }
 
+                              final doctorId =
+                                  context.read<SessionCubit>().state.activeDoctorId;
+                              if (doctorId == null || doctorId.isEmpty) {
+                                return;
+                              }
+
                               context.read<QuickBookingCubit>().quickBooking(
                                 params: QuickBookingParams(
-                                  doctorId:
-                                      sharedPreferences.getAuth()?.doctor?.id ??
-                                      '',
+                                  doctorId: doctorId,
 
                                   appointmentDate: dateController.text,
 

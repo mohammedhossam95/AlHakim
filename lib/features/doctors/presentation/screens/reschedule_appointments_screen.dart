@@ -7,6 +7,7 @@ import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/booking/domain/entities/schedule.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_appoinments_for_day_entity.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -38,9 +39,13 @@ class _RescheduleAppointmentsScreenState
   void initState() {
     super.initState();
 
-    availableDates = BookingDatesHelper.generateAvailableDates(
-      sharedPreferences.getAuth()?.doctor?.schedules ?? [],
-    );
+    final sessionState = sessionCubit.state;
+    final schedules =
+        sessionState.selectedDoctor?.schedules ??
+        sharedPreferences.getAuth()?.doctor?.schedules ??
+        [];
+
+    availableDates = BookingDatesHelper.generateAvailableDates(schedules);
 
     if (availableDates.isNotEmpty) {
       _getAppointments(availableDates.first);
@@ -48,9 +53,12 @@ class _RescheduleAppointmentsScreenState
   }
 
   void _getAppointments(AvailableBookingDate date) {
+    final doctorId = context.read<SessionCubit>().state.activeDoctorId;
+    if (doctorId == null || doctorId.isEmpty) return;
+
     context.read<GetDoctorAppoinmentsForDayCubit>().getDoctorAppoinmentsForDay(
       params: AppoinmentsParams(
-        doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
+        doctorId: doctorId,
 
         appointmentDate: DateFormat('yyyy-MM-dd').format(date.date),
       ),
@@ -673,9 +681,19 @@ class _RescheduleAppointmentsScreenState
                 height: 56.h,
 
                 onPressed: () {
+                  final doctorId =
+                      context.read<SessionCubit>().state.activeDoctorId;
+                  if (doctorId == null || doctorId.isEmpty) return;
+
+                  final sessionState = context.read<SessionCubit>().state;
+                  final schedules =
+                      sessionState.selectedDoctor?.schedules ??
+                      sharedPreferences.getAuth()?.doctor?.schedules ??
+                      [];
+
                   context.read<RescheduleCubit>().reschedule(
                     params: RescheduleParams(
-                      doctorId: sharedPreferences.getAuth()?.doctor?.id ?? '',
+                      doctorId: doctorId,
 
                       date: DateFormat('yyyy-MM-dd').format(selectedDate.date),
 
@@ -685,12 +703,9 @@ class _RescheduleAppointmentsScreenState
 
                       endTime: formatApiTime(endTime),
 
-                      slotDuration: sharedPreferences
-                          .getAuth()
-                          ?.doctor
-                          ?.schedules
-                          ?.first
-                          .slotDuration,
+                      slotDuration: schedules.isNotEmpty
+                          ? schedules.first.slotDuration
+                          : null,
                     ),
                   );
                 },

@@ -21,6 +21,7 @@ import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/ge
 import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
+import 'package:alhakim/features/doctors/presentation/screens/medical_center_doctors_selection_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
@@ -48,7 +49,9 @@ class _MainPageState extends State<MainPage> {
   final padding = EdgeInsets.symmetric(horizontal: 18, vertical: 12);
   double gap = 10;
 
-  List<Widget> _buildTabsFor(UserType role) {
+  List<Widget> _buildTabsFor(SessionState sessionState) {
+    final role = sessionState.userType;
+
     final settingsTab = BlocProvider(
       create: (_) => ServiceLocator.instance<LogoutCubit>(),
       child: const SettingsScreen(),
@@ -109,38 +112,66 @@ class _MainPageState extends State<MainPage> {
         ),
         settingsTab,
       ],
-      UserType.doctor => [
-        MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (_) => ServiceLocator.instance<GetDoctorHomeCubit>(),
-            ),
-            BlocProvider(
-              create: (_) => ServiceLocator.instance<CloseClinicTodayCubit>(),
-            ),
-            BlocProvider(
-              create: (_) => ServiceLocator.instance<ToggleClinicCubit>(),
-            ),
-          ],
-          child: const ClinicHomeScreen(),
-        ),
-        MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (_) => ServiceLocator.instance<GetQueueManagementCubit>(),
-            ),
-            BlocProvider(
-              create: (_) => ServiceLocator.instance<UpdateQueueStatusCubit>(),
-            ),
-          ],
-          child: const QueueManagementScreen(),
-        ),
-        settingsTab,
-      ],
+      UserType.doctor => _buildDoctorTabs(sessionState, settingsTab),
     };
   }
 
-  int _settingsTabIndex(UserType role) => role == UserType.delegate ? 3 : 2;
+  List<Widget> _buildDoctorTabs(
+    SessionState sessionState,
+    Widget settingsTab,
+  ) {
+    if (sessionState.doctorAccountMode == DoctorAccountMode.medicalCenter &&
+        sessionState.activeDoctorId == null) {
+      return [
+        BlocProvider(
+          create: (_) => ServiceLocator.instance<GetDoctorsCubit>(),
+          child: const MedicalCenterDoctorsSelectionScreen(),
+        ),
+        settingsTab,
+      ];
+    }
+
+    return [
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => ServiceLocator.instance<GetDoctorHomeCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => ServiceLocator.instance<CloseClinicTodayCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => ServiceLocator.instance<ToggleClinicCubit>(),
+          ),
+        ],
+        child: const ClinicHomeScreen(),
+      ),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => ServiceLocator.instance<GetQueueManagementCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => ServiceLocator.instance<UpdateQueueStatusCubit>(),
+          ),
+        ],
+        child: const QueueManagementScreen(),
+      ),
+      settingsTab,
+    ];
+  }
+
+  int _settingsTabIndex(SessionState sessionState) {
+    if (sessionState.userType == UserType.delegate) return 3;
+
+    if (sessionState.userType == UserType.doctor &&
+        sessionState.doctorAccountMode == DoctorAccountMode.medicalCenter &&
+        sessionState.activeDoctorId == null) {
+      return 1;
+    }
+
+    return 2;
+  }
 
   @override
   void dispose() {
@@ -161,11 +192,13 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SessionCubit, SessionState>(
-      buildWhen: (prev, curr) => prev.userType != curr.userType,
+      buildWhen: (prev, curr) =>
+          prev.userType != curr.userType ||
+          prev.status != curr.status ||
+          prev.doctorAccountMode != curr.doctorAccountMode ||
+          prev.activeDoctorId != curr.activeDoctorId,
       builder: (context, sessionState) {
-        final role = sessionState.userType;
-        final tabs = _buildTabsFor(role);
-        // final isTeacherShell = role == UserType.doctor;
+        final tabs = _buildTabsFor(sessionState);
 
         return BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
           listenWhen: (pre, current) => pre.index != current.index,
@@ -199,7 +232,7 @@ class _MainPageState extends State<MainPage> {
                 bottomNavigationBar: _buildBottomBar(
                   context,
                   displayIndex,
-                  role,
+                  sessionState,
                 ),
               ),
             );
@@ -215,36 +248,27 @@ class _MainPageState extends State<MainPage> {
     ).changeCurrentScreen(index: index);
   }
 
-  // Floating Action Button (The "Post" Button)
-  // Widget _buildFab() {
-  //   return FloatingActionButton(
-  //     backgroundColor: colors.main,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-  //     onPressed: () {
-  //       // if (!Constants.requireAuth(context)) return;
-  //       // ServiceLocator.instance<AddPostCubit>().resetFlow();
-  //       // context.pushNamed(Routes.addPostEntryRoute);
-  //     },
-  //     child: Icon(Icons.add, color: colors.whiteColor, size: 32.sp),
-  //   );
-  // }
-
-  // Bottom Navigation Bar UI
   Widget _buildBottomBar(
     BuildContext context,
     int currentIndex,
-    UserType role,
+    SessionState sessionState,
   ) {
-    final settingsIndex = _settingsTabIndex(role);
+    if (sessionState.userType == UserType.doctor &&
+        sessionState.doctorAccountMode == DoctorAccountMode.medicalCenter &&
+        sessionState.activeDoctorId == null) {
+      return _buildMedicalCenterSelectionBottomBar(context, currentIndex);
+    }
+
+    final role = sessionState.userType;
+    final settingsIndex = _settingsTabIndex(sessionState);
 
     return Container(
       decoration: BoxDecoration(
-        //color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: colors.textColor.withValues(alpha: 0.08),
             blurRadius: 12,
-            offset: const Offset(0, -4), // shadow goes UP
+            offset: const Offset(0, -4),
           ),
         ],
       ),
@@ -255,16 +279,6 @@ class _MainPageState extends State<MainPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // Expanded(
-            //   child: _navItem(
-            //     context,
-            //     0,
-            //     FontAwesomeIcons.house,
-            //     "home".tr,
-            //     currentIndex,
-            //     role,
-            //   ),
-            // ),
             role == UserType.patient
                 ? Expanded(
                     child: _navItem(
@@ -294,8 +308,6 @@ class _MainPageState extends State<MainPage> {
                       currentIndex,
                     ),
                   ),
-
-            // const SizedBox(width: 48), // Gap for FAB
             role == UserType.delegate
                 ? Expanded(
                     child: _navItem(
@@ -350,7 +362,51 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // Individual Nav Item that triggers the Cubit
+  Widget _buildMedicalCenterSelectionBottomBar(
+    BuildContext context,
+    int currentIndex,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: colors.textColor.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 12.0,
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Expanded(
+              child: _navItem(
+                context,
+                0,
+                Icons.group,
+                "doctors".tr,
+                currentIndex,
+              ),
+            ),
+            Expanded(
+              child: _navItem(
+                context,
+                1,
+                Icons.settings,
+                "settings".tr,
+                currentIndex,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _navItem(
     BuildContext context,
     int index,
@@ -362,7 +418,6 @@ class _MainPageState extends State<MainPage> {
     final Color color = isSelected ? colors.main : colors.lightTextColor;
 
     return SizedBox(
-      //height: 60,
       child: InkWell(
         onTap: () {
           context.read<BottomNavBarCubit>().changeCurrentScreen(index: index);

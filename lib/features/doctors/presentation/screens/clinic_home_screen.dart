@@ -7,10 +7,12 @@ import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_home_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
+import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,21 +41,31 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final doctorId = context.read<SessionCubit>().state.activeDoctorId;
+      if (doctorId == null || doctorId.isEmpty) return;
       context.read<GetDoctorHomeCubit>().getDoctorHome();
     });
   }
 
+  String? _activeDoctorId(BuildContext context) {
+    return context.read<SessionCubit>().state.activeDoctorId;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final sessionState = context.watch<SessionCubit>().state;
+    final displayDoctor =
+        sessionState.selectedDoctor ?? sharedPreferences.getAuth()?.doctor;
+
     return Scaffold(
       backgroundColor: colors.backGround,
 
       appBar: AppBar(
         title: Row(
           children: [
-            if (sharedPreferences.getAuth()?.doctor?.profileImage != null) ...[
+            if (displayDoctor?.profileImage != null) ...[
               DiffImage(
-                image: sharedPreferences.getAuth()?.doctor?.profileImage ?? '',
+                image: displayDoctor?.profileImage ?? '',
 
                 height: 40.h,
 
@@ -61,13 +73,25 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
               ),
               Gaps.hGap12,
             ],
-            Text(
-              "${"welcome".tr} ${sharedPreferences.getAuth()?.doctor?.name?.ar ?? ''}",
+            Expanded(
+              child: Text("${"welcome".tr} ${displayDoctor?.name?.ar ?? ''}"),
             ),
           ],
         ),
         automaticallyImplyLeading: false,
         centerTitle: false,
+        actions: [
+          if (sessionState.isMedicalCenterDoctorAccount &&
+              sessionState.activeDoctorId != null)
+            IconButton(
+              tooltip: 'doctors'.tr,
+              onPressed: () {
+                context.read<SessionCubit>().clearSelectedDoctor();
+                context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
+              },
+              icon: const Icon(Icons.swap_horiz),
+            ),
+        ],
       ),
 
       body: BlocBuilder<GetDoctorHomeCubit, GetDoctorHomeState>(
@@ -184,16 +208,13 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                                     : "open_clinic_desc".tr,
                                 onYesPressed: () async {
                                   if (!context.mounted) return;
+                                  final doctorId = _activeDoctorId(context);
+                                  if (doctorId == null || doctorId.isEmpty) {
+                                    return;
+                                  }
                                   context
                                       .read<ToggleClinicCubit>()
-                                      .toggleClinic(
-                                        doctorId:
-                                            sharedPreferences
-                                                .getAuth()
-                                                ?.doctor
-                                                ?.id ??
-                                            '',
-                                      );
+                                      .toggleClinic(doctorId: doctorId);
                                 },
                               );
                             },
@@ -233,15 +254,8 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
 
                           child: MyDefaultButton(
                             btnText: "close_clinic_today",
-
-                            borderRadius: 30,
-
-                            height: 54.h,
-
                             color: colors.whiteColor,
-
                             textColor: colors.errorColor,
-
                             borderColor: colors.errorColor,
                             onPressed: () async {
                               Constants.showConfirmDialog(
@@ -250,16 +264,13 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                                 content: "cancle_clinic_desc".tr,
                                 onYesPressed: () async {
                                   if (!context.mounted) return;
+                                  final doctorId = _activeDoctorId(context);
+                                  if (doctorId == null || doctorId.isEmpty) {
+                                    return;
+                                  }
                                   context
                                       .read<CloseClinicTodayCubit>()
-                                      .closeClinicToday(
-                                        doctorId:
-                                            sharedPreferences
-                                                .getAuth()
-                                                ?.doctor
-                                                ?.id ??
-                                            '',
-                                      );
+                                      .closeClinicToday(doctorId: doctorId);
                                 },
                               );
                             },
@@ -271,17 +282,10 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                       /// reschedule
                       MyDefaultButton(
                         btnText: "reschedule_clinic",
-
                         borderRadius: 30,
-
-                        height: 54.h,
-
                         color: colors.whiteColor,
-
                         textColor: colors.textColor,
-
                         borderColor: colors.main,
-
                         onPressed: () {
                           context.push(
                             Routes.rescheduleAppointmentsScreenRoute,
@@ -432,53 +436,38 @@ class DoctorStatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-
-      padding: EdgeInsets.all(18.w),
-
+      padding: EdgeInsets.all(8.r),
       decoration: BoxDecoration(
         color: colors.whiteColor,
-
         borderRadius: BorderRadius.circular(22.r),
       ),
 
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(16.w),
-
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
               color: color.withValues(alpha: .12),
-
               borderRadius: BorderRadius.circular(18.r),
             ),
-
             child: Icon(icon, color: color, size: 30.sp),
           ),
 
           Gaps.hGap16,
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 Text(title, style: TextStyles.medium18(color: colors.main)),
-
-                Gaps.vGap12,
-
                 Row(
                   children: [
                     Text(
                       value,
-
                       style: TextStyles.bold20(color: colors.textColor),
                     ),
-
                     Gaps.hGap8,
-
                     Text(
                       subtitle,
-
                       style: TextStyles.medium16(color: colors.lightTextColor),
                     ),
                   ],
