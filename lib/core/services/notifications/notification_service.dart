@@ -34,17 +34,18 @@ class NotificationService {
     await setupFlutterNotifications();
 
     // Get FCM token
-    // final token = await _messaging.getToken();
-    // print('FCM Token: $token');
+    final token = await _messaging.getToken();
+    log('FCM Token: $token');
   }
 
   Future<void> _requestPermission() async {
-    // ignore: unused_local_variable
+  
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
+    log('Permission settings: $settings');
   }
 
   Future<void> setupFlutterNotifications() async {

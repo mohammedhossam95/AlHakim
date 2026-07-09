@@ -131,9 +131,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
-
                             width: 82.w,
-
                             padding: EdgeInsets.symmetric(vertical: 8.h),
 
                             decoration: BoxDecoration(
@@ -152,7 +150,8 @@ class _BookingScreenState extends State<BookingScreen> {
 
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   DateFormat(
@@ -166,27 +165,19 @@ class _BookingScreenState extends State<BookingScreen> {
                                         : colors.lightTextColor,
                                   ),
                                 ),
-
-                                Gaps.vGap10,
-
                                 Text(
                                   "${date.day}",
-
                                   style: TextStyles.semiBold24(
                                     color: isSelected
                                         ? colors.whiteColor
                                         : colors.textColor,
                                   ),
                                 ),
-
-                                Gaps.vGap8,
-
                                 Text(
                                   DateFormat(
                                     'MMM',
                                     appLocalizations.locale?.languageCode,
                                   ).format(date),
-
                                   style: TextStyles.medium12(
                                     color: isSelected
                                         ? colors.whiteColor

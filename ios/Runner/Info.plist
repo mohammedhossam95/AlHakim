@@ -22,26 +22,39 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>FirebaseAuth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app-1-1062564717227-ios-5623991d3d44debfdacdee</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-  	<string>This app needs camera access to take photos for your profile and uploads.</string>
-    <key>NSMicrophoneUsageDescription</key>
-	<string>This app needs microphone access when you record a video.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app saves images you choose to export to your photo library.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library to choose images for your profile and content uploads.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs location access to get your current location for your profile and content uploads.</string>
+	<string>This app needs camera access to take photos for your profile and uploads.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs location access to get your current location for your profile and content uploads.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs location access to get your current location for your profile and content uploads.</string>
 	<key>NSLocationUsageDescription</key>
 	<string>This app needs location access to get your current location for your profile and content uploads.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs location access to get your current location for your profile and content uploads.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access when you record a video.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app saves images you choose to export to your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to choose images for your profile and content uploads.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

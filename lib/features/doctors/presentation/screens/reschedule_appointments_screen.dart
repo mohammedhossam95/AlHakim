@@ -47,9 +47,10 @@ class _RescheduleAppointmentsScreenState
 
     availableDates = BookingDatesHelper.generateAvailableDates(schedules);
 
-    if (availableDates.isNotEmpty) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || availableDates.isEmpty) return;
       _getAppointments(availableDates.first);
-    }
+    });
   }
 
   void _getAppointments(AvailableBookingDate date) {
@@ -115,6 +116,20 @@ class _RescheduleAppointmentsScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (availableDates.isEmpty) {
+      return Scaffold(
+        backgroundColor: colors.backGround,
+        appBar: AppBar(title: Text('reschedule_appointments'.tr)),
+        body: Center(
+          child: Text(
+            'noData'.tr,
+            style: TextStyles.medium16(color: colors.lightTextColor),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     final selectedDate = availableDates[selectedDateIndex];
 
     return BlocListener<RescheduleCubit, RescheduleState>(

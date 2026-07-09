@@ -13,13 +13,16 @@ class BookingDatesHelper {
     List<ScheduleEntity> schedules, {
     int limit = 7,
   }) {
+    if (schedules.isEmpty) return [];
+
     final List<AvailableBookingDate> result = [];
 
     final now = DateTime.now();
 
     int dayCounter = 0;
+    const maxDaySearch = 366;
 
-    while (result.length < limit) {
+    while (result.length < limit && dayCounter < maxDaySearch) {
       final date = now.add(Duration(days: dayCounter));
 
       /// convert flutter weekday
