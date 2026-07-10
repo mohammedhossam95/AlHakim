@@ -1,4 +1,7 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
+import 'package:alhakim/core/params/add_doctor_screen_args.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
@@ -11,6 +14,7 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class MedicalCenterDoctorsSelectionScreen extends StatefulWidget {
   const MedicalCenterDoctorsSelectionScreen({super.key});
@@ -22,6 +26,8 @@ class MedicalCenterDoctorsSelectionScreen extends StatefulWidget {
 
 class _MedicalCenterDoctorsSelectionScreenState
     extends State<MedicalCenterDoctorsSelectionScreen> {
+  int? _medicalCenterId;
+
   @override
   void initState() {
     super.initState();
@@ -31,13 +37,32 @@ class _MedicalCenterDoctorsSelectionScreenState
 
       final medicalCenter = sharedPreferences.getAuth()?.profile;
 
-      final medicalCenterId = medicalCenter?.id;
-      if (medicalCenterId == null) return;
+      _medicalCenterId = medicalCenter?.id;
+      if (_medicalCenterId == null) return;
 
       context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
-        medicalCenterId,
+        _medicalCenterId!,
       );
     });
+  }
+
+  Future<void> _openAddDoctorScreen() async {
+    if (_medicalCenterId == null) return;
+
+    final result = await context.push(
+      Routes.addDoctorScreenRoute,
+      extra: AddDoctorScreenArgs(
+        source: DoctorFormSource.medicalCenter,
+        medicalCenterId: _medicalCenterId,
+      ),
+    );
+
+    if (result == true) {
+      if (!mounted) return;
+      context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
+        _medicalCenterId!,
+      );
+    }
   }
 
   @override
@@ -47,6 +72,10 @@ class _MedicalCenterDoctorsSelectionScreenState
       appBar: AppBar(
         title: Text('doctors'.tr),
         automaticallyImplyLeading: false,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openAddDoctorScreen,
+        child: const Icon(Icons.add),
       ),
       body:
           BlocBuilder<

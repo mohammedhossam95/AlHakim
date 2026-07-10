@@ -142,6 +142,12 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         );
       }
 
+      if (params.medicalCenterId != null) {
+        formData.fields.add(
+          MapEntry("medical_center_id", params.medicalCenterId.toString()),
+        );
+      }
+
       if (params.price != null) {
         formData.fields.add(MapEntry("price", params.price!));
       }

@@ -995,51 +995,59 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                               ),
 
                               Gaps.vGap16,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child:
+                                        /// start time
+                                        GestureDetector(
+                                          onTap: () {
+                                            pickTime(item.startTimeController);
+                                          },
 
-                              /// start time
-                              GestureDetector(
-                                onTap: () {
-                                  pickTime(item.startTimeController);
-                                },
+                                          child: AbsorbPointer(
+                                            child: MyTextFormField(
+                                              controller:
+                                                  item.startTimeController,
 
-                                child: AbsorbPointer(
-                                  child: MyTextFormField(
-                                    controller: item.startTimeController,
+                                              hintText: "start_time".tr,
 
-                                    hintText: "start_time".tr,
+                                              prefixIcon: Icon(
+                                                Icons.access_time,
 
-                                    prefixIcon: Icon(
-                                      Icons.access_time,
+                                                color: colors.main,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                  ),
 
-                                      color: colors.main,
+                                  Gaps.vGap16,
+
+                                  /// end time
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        pickTime(item.endTimeController);
+                                      },
+
+                                      child: AbsorbPointer(
+                                        child: MyTextFormField(
+                                          controller: item.endTimeController,
+
+                                          hintText: "end_time".tr,
+
+                                          prefixIcon: Icon(
+                                            Icons.timer_off_outlined,
+
+                                            color: colors.main,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-
-                              Gaps.vGap16,
-
-                              /// end time
-                              GestureDetector(
-                                onTap: () {
-                                  pickTime(item.endTimeController);
-                                },
-
-                                child: AbsorbPointer(
-                                  child: MyTextFormField(
-                                    controller: item.endTimeController,
-
-                                    hintText: "end_time".tr,
-
-                                    prefixIcon: Icon(
-                                      Icons.timer_off_outlined,
-
-                                      color: colors.main,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
                               Gaps.vGap16,
 
                               /// slot duration

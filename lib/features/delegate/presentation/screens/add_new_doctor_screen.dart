@@ -1,10 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/params/add_doctor_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/country_code_widget.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
@@ -35,7 +34,14 @@ class DoctorScheduleModel {
 }
 
 class AddNewDoctorScreen extends StatefulWidget {
-  const AddNewDoctorScreen({super.key});
+  final DoctorFormSource source;
+  final int? medicalCenterId;
+
+  const AddNewDoctorScreen({
+    super.key,
+    this.source = DoctorFormSource.delegate,
+    this.medicalCenterId,
+  });
 
   @override
   State<AddNewDoctorScreen> createState() => _AddNewDoctorScreenState();
@@ -193,6 +199,9 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
       // );
 
       if (!context.mounted) return;
+      final isMedicalCenterSource =
+          widget.source == DoctorFormSource.medicalCenter;
+      if (!mounted) return;
       context.read<AddDoctorCubit>().addDoctor(
         AddDoctorParams(
           nameAr: _nameArController.text,
@@ -206,7 +215,12 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           secretaryPhone: secretaryPhone,
           minPatients: _minPatientsController.text,
           price: _priceController.text,
-          representativeCode: _representativeCodeController.text,
+          representativeCode: isMedicalCenterSource
+              ? null
+              : _representativeCodeController.text,
+          medicalCenterId: isMedicalCenterSource
+              ? widget.medicalCenterId
+              : null,
           profileImage: profileImage,
           license: licenseFile,
           schedules: schedules.map((e) {
@@ -378,7 +392,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       onSubmit: (_) {
                         FocusScope.of(context).requestFocus(_bioEnFocus);
                       },
-                      maxLines: 3,
                       hintText: "enter_doctor_bio".tr,
                       prefixIcon: Icon(Icons.info_outline, color: colors.main),
                     ),
@@ -398,7 +411,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                           context,
                         ).requestFocus(_professionalNumberFocus);
                       },
-                      maxLines: 3,
                       hintText: "enter_doctor_bio_en".tr,
                       prefixIcon: Icon(Icons.translate, color: colors.main),
                     ),
@@ -524,8 +536,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       ),
                     ),
 
-                    Gaps.vGap16,
-
                     // /// clinic phone
                     // buildLabel("clinic_phone".tr),
                     // Gaps.vGap8,
@@ -564,43 +574,46 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                     // ),
 
                     // Gaps.vGap16,
+                    if (widget.source == DoctorFormSource.delegate) ...[
+                      Gaps.vGap16,
 
-                    /// secretary phone
-                    buildLabel("clinic_phone".tr),
-                    Gaps.vGap8,
+                      /// secretary phone
+                      buildLabel("clinic_phone".tr),
+                      Gaps.vGap8,
 
-                    Row(
-                      children: [
-                        CountryCodeWidget(
-                          country: _selectedCountry,
-                          updateValue: (country) {
-                            setState(() {
-                              _selectedCountry = country;
-                            });
-                          },
-                        ),
-                        Gaps.hGap8,
-                        Expanded(
-                          flex: 5,
-                          child: MyTextFormField(
-                            controller: _secretaryPhoneController,
-                            focusNode: _secretaryPhoneFocus,
-                            textInputAction: TextInputAction.next,
-                            onSubmit: (_) {
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(_minPatientsFocus);
+                      Row(
+                        children: [
+                          CountryCodeWidget(
+                            country: _selectedCountry,
+                            updateValue: (country) {
+                              setState(() {
+                                _selectedCountry = country;
+                              });
                             },
-                            keyboardType: TextInputType.phone,
-                            hintText: "enter_secretary_phone".tr,
-                            prefixIcon: Icon(
-                              Icons.support_agent_outlined,
-                              color: colors.main,
+                          ),
+                          Gaps.hGap8,
+                          Expanded(
+                            flex: 5,
+                            child: MyTextFormField(
+                              controller: _secretaryPhoneController,
+                              focusNode: _secretaryPhoneFocus,
+                              textInputAction: TextInputAction.next,
+                              onSubmit: (_) {
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_minPatientsFocus);
+                              },
+                              keyboardType: TextInputType.phone,
+                              hintText: "enter_secretary_phone".tr,
+                              prefixIcon: Icon(
+                                Icons.support_agent_outlined,
+                                color: colors.main,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
 
                     Gaps.vGap16,
 
@@ -634,9 +647,13 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       focusNode: _priceFocus,
                       textInputAction: TextInputAction.next,
                       onSubmit: (_) {
-                        FocusScope.of(
-                          context,
-                        ).requestFocus(_representativeCodeFocus);
+                        if (widget.source == DoctorFormSource.delegate) {
+                          FocusScope.of(
+                            context,
+                          ).requestFocus(_representativeCodeFocus);
+                        } else {
+                          FocusScope.of(context).unfocus();
+                        }
                       },
                       keyboardType: TextInputType.number,
                       hintText: "enter_price".tr,
@@ -673,22 +690,24 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// representative code
-                    buildLabel("representative_code".tr),
-                    Gaps.vGap8,
+                    if (widget.source == DoctorFormSource.delegate) ...[
+                      /// representative code
+                      buildLabel("representative_code".tr),
+                      Gaps.vGap8,
 
-                    MyTextFormField(
-                      controller: _representativeCodeController,
-                      focusNode: _representativeCodeFocus,
-                      textInputAction: TextInputAction.done,
-                      hintText: "enter_representative_code".tr,
-                      prefixIcon: Icon(
-                        Icons.confirmation_number_outlined,
-                        color: colors.main,
+                      MyTextFormField(
+                        controller: _representativeCodeController,
+                        focusNode: _representativeCodeFocus,
+                        textInputAction: TextInputAction.done,
+                        hintText: "enter_representative_code".tr,
+                        prefixIcon: Icon(
+                          Icons.confirmation_number_outlined,
+                          color: colors.main,
+                        ),
                       ),
-                    ),
 
-                    Gaps.vGap24,
+                      Gaps.vGap24,
+                    ],
 
                     /// schedules
                     buildLabel("working_hours".tr),
@@ -816,51 +835,57 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                               ),
 
                               Gaps.vGap16,
+                              Row(
+                                children: [
+                                  /// start time
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        pickTime(item.startTimeController);
+                                      },
 
-                              /// start time
-                              GestureDetector(
-                                onTap: () {
-                                  pickTime(item.startTimeController);
-                                },
+                                      child: AbsorbPointer(
+                                        child: MyTextFormField(
+                                          controller: item.startTimeController,
 
-                                child: AbsorbPointer(
-                                  child: MyTextFormField(
-                                    controller: item.startTimeController,
+                                          hintText: "start_time".tr,
 
-                                    hintText: "start_time".tr,
+                                          prefixIcon: Icon(
+                                            Icons.access_time,
 
-                                    prefixIcon: Icon(
-                                      Icons.access_time,
-
-                                      color: colors.main,
+                                            color: colors.main,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
 
-                              Gaps.vGap16,
+                                  Gaps.vGap16,
 
-                              /// end time
-                              GestureDetector(
-                                onTap: () {
-                                  pickTime(item.endTimeController);
-                                },
+                                  /// end time
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        pickTime(item.endTimeController);
+                                      },
 
-                                child: AbsorbPointer(
-                                  child: MyTextFormField(
-                                    controller: item.endTimeController,
+                                      child: AbsorbPointer(
+                                        child: MyTextFormField(
+                                          controller: item.endTimeController,
 
-                                    hintText: "end_time".tr,
+                                          hintText: "end_time".tr,
 
-                                    prefixIcon: Icon(
-                                      Icons.timer_off_outlined,
+                                          prefixIcon: Icon(
+                                            Icons.timer_off_outlined,
 
-                                      color: colors.main,
+                                            color: colors.main,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-
                               Gaps.vGap16,
 
                               /// slot duration
@@ -882,6 +907,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                         );
                       },
                     ),
+                    Gaps.vGap10,
 
                     /// add new schedule
                     GestureDetector(

@@ -1,6 +1,7 @@
 import 'package:alhakim/config/routes/adaptive_route_page.dart';
 import 'package:alhakim/config/routes/navigator_observer.dart'
     show routeObserver;
+import 'package:alhakim/core/params/add_doctor_screen_args.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/core/utils/enums.dart';
@@ -178,13 +179,20 @@ abstract class Routes {
       GoRoute(
         path: addDoctorScreenRoute,
         name: addDoctorScreenRoute,
-        builder: (context, state) => MultiBlocProvider(
-          providers: [
-            BlocProvider(create: (context) => sl<GetSpecialtiesCubit>()),
-            BlocProvider(create: (context) => sl<AddDoctorCubit>()),
-          ],
-          child: const AddNewDoctorScreen(),
-        ),
+        builder: (context, state) {
+          final args = state.extra as AddDoctorScreenArgs?;
+
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => sl<GetSpecialtiesCubit>()),
+              BlocProvider(create: (context) => sl<AddDoctorCubit>()),
+            ],
+            child: AddNewDoctorScreen(
+              source: args?.source ?? DoctorFormSource.delegate,
+              medicalCenterId: args?.medicalCenterId,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: updateDoctorScreenRoute,
