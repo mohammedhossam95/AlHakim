@@ -18,6 +18,7 @@ import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_c
 import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_medical_center_doctors_cubit/get_medical_center_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
@@ -124,7 +125,8 @@ class _MainPageState extends State<MainPage> {
         sessionState.activeDoctorId == null) {
       return [
         BlocProvider(
-          create: (_) => ServiceLocator.instance<GetDoctorsCubit>(),
+          create: (_) =>
+              ServiceLocator.instance<GetMedicalCenterDoctorsCubit>(),
           child: const MedicalCenterDoctorsSelectionScreen(),
         ),
         settingsTab,

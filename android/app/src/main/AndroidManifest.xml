@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android 13+ (API 33) runtime notification permission -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Wake device briefly for high-priority FCM (optional but helpful) -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
     <application
         android:label="Al Hakim"
         android:name="${applicationName}"
@@ -20,15 +25,7 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
-            
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_icon"
-                android:resource="@mipmap/ic_launcher" />
 
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_channel_id"
-                android:value="@string/high_importance_channel" />
-                
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -40,6 +37,24 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+
+        <!-- FCM default channel (must match NotificationService.kHighImportanceChannelId) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/high_importance_channel" />
+
+        <!-- White/alpha icon recommended for status bar; launcher works as fallback -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/launcher_icon" />
+
+        <!-- Optional accent color for the system notification -->
+        <!--
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
+        -->
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

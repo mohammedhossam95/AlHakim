@@ -16,6 +16,7 @@ import 'package:dio/dio.dart';
 
 abstract class DoctorRemoteDataSource {
   Future<DoctorsRespModel> getDoctors();
+  Future<DoctorsRespModel> getRemoteMedicalCenterDoctors(int id);
   Future<BaseOneResponse> addDoctor(AddDoctorParams params);
   Future<BaseOneResponse> updateDoctor(AddDoctorParams params);
   Future<BaseOneResponse> deleteDoctor(String id);
@@ -36,6 +37,23 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       final endPoint = sessionCubit.state.userType == UserType.delegate
           ? '/representative/doctors'
           : '/doctors';
+      final response = await dioConsumer.get(endPoint);
+
+      if (response['status'] == true) {
+        return DoctorsRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DoctorsRespModel> getRemoteMedicalCenterDoctors(int id) async {
+    try {
+      final endPoint = '/medical-centers/$id/doctors';
+
       final response = await dioConsumer.get(endPoint);
 
       if (response['status'] == true) {

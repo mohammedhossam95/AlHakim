@@ -28,6 +28,21 @@ class DoctorRepositoryImpl implements DoctorRepository {
   }
 
   @override
+  Future<Either<Failure, BaseListResponse>> getMedicalCenterDoctors(
+    int id,
+  ) async {
+    try {
+      final result = await remoteDataSource.getRemoteMedicalCenterDoctors(id);
+
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, BaseOneResponse>> getDoctorHome() async {
     try {
       final result = await remoteDataSource.getDoctorHome();

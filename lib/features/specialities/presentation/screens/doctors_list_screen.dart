@@ -1,3 +1,4 @@
+import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/widgets/doctor_list_item.dart';
@@ -59,8 +60,11 @@ class _DoctorsListScreenState extends State<DoctorsListScreen> {
           }
 
           if (doctors.isEmpty) {
-            return const Center(
-              child: ErrorText(text: "لا يوجد دكاترة", width: 300),
+            return Center(
+              child: ErrorText(
+                width: ScreenUtil().screenWidth,
+                text: "no_registered_doctors".tr,
+              ),
             );
           }
 

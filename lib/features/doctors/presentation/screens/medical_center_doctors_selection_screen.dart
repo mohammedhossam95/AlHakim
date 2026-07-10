@@ -1,10 +1,11 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
+import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_medical_center_doctors_cubit/get_medical_center_doctors_cubit.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,15 @@ class _MedicalCenterDoctorsSelectionScreenState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<GetDoctorsCubit>().getDoctors();
+
+      final medicalCenter = sharedPreferences.getAuth()?.profile;
+
+      final medicalCenterId = medicalCenter?.id;
+      if (medicalCenterId == null) return;
+
+      context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
+        medicalCenterId,
+      );
     });
   }
 
@@ -39,37 +48,51 @@ class _MedicalCenterDoctorsSelectionScreenState
         title: Text('doctors'.tr),
         automaticallyImplyLeading: false,
       ),
-      body: BlocBuilder<GetDoctorsCubit, GetDoctorsState>(
-        builder: (context, state) {
-          if (state is GetDoctorsLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body:
+          BlocBuilder<
+            GetMedicalCenterDoctorsCubit,
+            GetMedicalCenterDoctorsState
+          >(
+            builder: (context, state) {
+              if (state is GetMedicalCenterDoctorsLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (state is GetDoctorsError) {
-            return Center(child: Text(state.message));
-          }
+              if (state is GetMedicalCenterDoctorsError) {
+                return Center(
+                  child: ErrorText(
+                    width: ScreenUtil().screenWidth,
+                    text: state.message,
+                  ),
+                );
+              }
 
-          if (state is GetDoctorsSuccess) {
-            final doctors = state.response.data as List<DoctorEntity>;
+              if (state is GetMedicalCenterDoctorsSuccess) {
+                final doctors = state.response.data as List<DoctorEntity>;
 
-            if (doctors.isEmpty) {
-              return const Center(child: Text('لا يوجد دكاترة'));
-            }
+                if (doctors.isEmpty) {
+                  return Center(
+                    child: ErrorText(
+                      width: ScreenUtil().screenWidth,
+                      text: "no_registered_doctors".tr,
+                    ),
+                  );
+                }
 
-            return ListView.separated(
-              padding: EdgeInsets.all(16.w),
-              itemCount: doctors.length,
-              separatorBuilder: (_, _) => Gaps.vGap12,
-              itemBuilder: (context, index) {
-                final doctor = doctors[index];
-                return _DoctorSelectionItem(doctor: doctor);
-              },
-            );
-          }
+                return ListView.separated(
+                  padding: EdgeInsets.all(16.w),
+                  itemCount: doctors.length,
+                  separatorBuilder: (_, _) => Gaps.vGap12,
+                  itemBuilder: (context, index) {
+                    final doctor = doctors[index];
+                    return _DoctorSelectionItem(doctor: doctor);
+                  },
+                );
+              }
 
-          return const SizedBox.shrink();
-        },
-      ),
+              return const SizedBox.shrink();
+            },
+          ),
     );
   }
 }

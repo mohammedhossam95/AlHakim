@@ -2,6 +2,7 @@ import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:alhakim/features/auth/domain/entities/verify_otp_entity.dart';
 import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
+import 'package:alhakim/features/doctors/data/models/profile_model.dart';
 
 class AuthRespModel extends BaseOneResponse {
   const AuthRespModel({super.status, super.message, super.data});
@@ -21,6 +22,7 @@ class AuthModel extends UserAuthEntity {
     super.role,
     super.user,
     super.doctor,
+    super.profile,
     super.nextStep,
   });
 
@@ -32,6 +34,9 @@ class AuthModel extends UserAuthEntity {
       doctor: json['doctor'] != null
           ? DoctorModel.fromJson(json['doctor'])
           : null,
+      profile: json['profile'] != null
+          ? ProfileModel.fromJson(json['profile'])
+          : null,
       nextStep: json['next_step'],
     );
   }
@@ -40,6 +45,9 @@ class AuthModel extends UserAuthEntity {
     "role": role,
     "user": user is UserModel ? (user as UserModel).toJson() : null,
     "doctor": doctor is DoctorModel ? (doctor as DoctorModel).toJson() : null,
+    "profile": profile is ProfileModel
+        ? (profile as ProfileModel).toJson()
+        : null,
   };
 }
 

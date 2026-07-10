@@ -466,5 +466,6 @@
   "minutes_count": "{count} minutes",
   "your_follow_up_doctor": "Your follow-up doctor",
   "call_clinic": "Call the clinic",
+  "no_registered_doctors": "No registered doctors",
   "position_ordinal": "({number})"
 }

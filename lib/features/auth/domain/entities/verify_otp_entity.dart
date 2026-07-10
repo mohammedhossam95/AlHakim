@@ -1,5 +1,6 @@
 import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/domain/entities/profile_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class UserAuthEntity extends Equatable {
@@ -7,6 +8,7 @@ class UserAuthEntity extends Equatable {
   final String? role;
   final UserEntity? user;
   final DoctorEntity? doctor;
+  final ProfileEntity? profile;
   final String? nextStep;
 
   const UserAuthEntity({
@@ -14,9 +16,10 @@ class UserAuthEntity extends Equatable {
     this.role,
     this.user,
     this.doctor,
+    this.profile,
     this.nextStep,
   });
 
   @override
-  List<Object?> get props => [token, role, user, doctor, nextStep];
+  List<Object?> get props => [token, role, user, doctor, profile, nextStep];
 }

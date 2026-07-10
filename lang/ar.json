@@ -465,5 +465,6 @@
   "minutes_count": "{count} دقيقة",
   "your_follow_up_doctor": "طبيبك المتابع",
   "call_clinic": "اتصال بالعيادة",
+  "no_registered_doctors": "لا يوجد أطباء مسجلون",
   "position_ordinal": "({number})"
 }

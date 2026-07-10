@@ -42,6 +42,7 @@ Future<void> main() async {
   sharedPreferences.clearSecureStorageOnFreshInstall();
   await DBHelper.initDB();
   await FavoriteDatabaseHelper.instance.database;
+  
 
   runApp(const App());
 }

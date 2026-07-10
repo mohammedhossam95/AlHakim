@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 enum OtpResultStatus { codeSent, autoVerified, verified }
 
@@ -46,7 +47,9 @@ class FirebaseOtpVerificationService implements OtpVerificationService {
   @override
   Future<OtpResult> sendOtp(String phoneNumber) async {
     final completer = Completer<OtpResult>();
-
+    if (kDebugMode) {
+      await _auth.setSettings(appVerificationDisabledForTesting: true);
+    }
     await _auth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
       timeout: const Duration(seconds: 90),
@@ -66,6 +69,10 @@ class FirebaseOtpVerificationService implements OtpVerificationService {
           'Phone verification failed: ${e.code} ${e.message}',
           name: 'FirebaseOtp',
         );
+        debugPrint('[FirebaseOtp] verificationFailed');
+        debugPrint('[FirebaseOtp] code: ${e.code}');
+        debugPrint('[FirebaseOtp] message: ${e.message}');
+        debugPrint('[FirebaseOtp] plugin: ${e.plugin}');
         if (!completer.isCompleted) {
           completer.completeError(_mapFirebaseError(e));
         }

@@ -1,5 +1,7 @@
+import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/delegate/presentation/widgets/doctor_item.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
@@ -109,14 +111,24 @@ class _DelegateDoctorsScreenState extends State<DelegateDoctorsScreen> {
             }
 
             if (state is GetDoctorsError) {
-              return Center(child: Text(state.message));
+              return Center(
+                child: ErrorText(
+                  width: ScreenUtil().screenWidth,
+                  text: state.message,
+                ),
+              );
             }
 
             if (state is GetDoctorsSuccess) {
               final doctors = state.response.data as List<DoctorEntity>;
 
               if (doctors.isEmpty) {
-                return const Center(child: Text("لا يوجد دكاترة"));
+                return Center(
+                  child: ErrorText(
+                    width: ScreenUtil().screenWidth,
+                    text: "no_registered_doctors".tr,
+                  ),
+                );
               }
 
               return ListView.separated(
