@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
@@ -40,16 +41,20 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
 
   Future<void> getDoctorHome() async {
     log("getDoctorHome");
-    final sessionState = context.read<SessionCubit>().state;
-    log("sessionState: ${sessionState.doctorAccountMode}");
-
-    final doctorId = sessionState.activeDoctorId;
+    final doctorId = _activeDoctorId(context);
     if (doctorId == null || doctorId.isEmpty) return;
     context.read<GetDoctorHomeCubit>().getDoctorHome(doctorId);
   }
 
   String? _activeDoctorId(BuildContext context) {
-    return context.read<SessionCubit>().state.activeDoctorId;
+    final sessionState = context.read<SessionCubit>().state;
+
+    if (sessionState.doctorAccountMode == DoctorAccountMode.singleDoctor) {
+      final auth = sharedPreferences.getAuth();
+      return auth?.doctor?.id;
+    }
+
+    return sessionState.activeDoctorId;
   }
 
   @override

@@ -27,19 +27,29 @@ class AuthModel extends UserAuthEntity {
   });
 
   factory AuthModel.fromJson(Map<String, dynamic> json) {
+    final role = json['role'];
+
     return AuthModel(
       token: json['token'],
-      role: json['role'],
+      role: role,
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
-      doctor: (json['role'] == 'doctor' && json['profile'] != null)
-          ? DoctorModel.fromJson(json['profile'])
+      doctor: role == 'doctor'
+          ? _parseDoctorFromJson(json)
           : null,
-      profile: (json['role'] == 'medical_center' && json['profile'] != null)
+      profile: role == 'medical_center' && json['profile'] != null
           ? ProfileModel.fromJson(json['profile'])
           : null,
       nextStep: json['next_step'],
     );
   }
+
+  static DoctorModel? _parseDoctorFromJson(Map<String, dynamic> json) {
+    // API returns doctor data under "profile"; local cache uses "doctor".
+    final doctorJson = json['doctor'] ?? json['profile'];
+    if (doctorJson == null) return null;
+    return DoctorModel.fromJson(doctorJson);
+  }
+
   Map<String, dynamic> toJson() => {
     "token": token,
     "role": role,

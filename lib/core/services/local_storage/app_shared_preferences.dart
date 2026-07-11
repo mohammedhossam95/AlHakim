@@ -197,10 +197,15 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
 
   @override
   Future<bool> saveAuth(AuthModel auth) {
-    return instance.setString(
-      _AppSharedPreferencesKeys.auth,
-      jsonEncode(auth.toJson()),
-    );
+    try {
+      return instance.setString(
+        _AppSharedPreferencesKeys.auth,
+        jsonEncode(auth.toJson()),
+      );
+    } catch (e) {
+      log('saveAuth error: $e');
+      throw Exception('saveAuth error: $e');
+    }
   }
 
   @override
