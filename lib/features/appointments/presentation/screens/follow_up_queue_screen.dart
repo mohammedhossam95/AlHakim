@@ -152,7 +152,6 @@ class _FollowUpQueueBody extends StatelessWidget {
     final yourNumber = _formatQueueNumber(queueStatus.yourQueueNumber);
     final examinedCurrent = _parseQueueNumber(queueStatus.currentQueueNumber);
     final examinedTotal = _parseQueueNumber(queueStatus.yourQueueNumber);
-    final doctorName = appointment.doctor?.name ?? '';
     final estimatedMinutes = queueStatus.estimatedWaitMinutes ?? 0;
     final showAlert = queueStatus.clinicStarted == true;
     final showSoonBanner =
@@ -164,7 +163,11 @@ class _FollowUpQueueBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (showAlert) ...[
-            _LiveAlertBanner(doctorName: doctorName),
+            _LiveAlertBanner(
+              doctorName: appLocalizations.isArLocale
+                  ? appointment.doctor?.name?.ar ?? ''
+                  : appointment.doctor?.name?.en ?? '',
+            ),
             Gaps.vGap16,
           ],
           _QueueStatusCard(
@@ -200,7 +203,9 @@ class _FollowUpQueueBody extends StatelessWidget {
                   icon: Icons.medical_services_outlined,
                   iconColor: colors.secondary,
                   label: 'your_follow_up_doctor'.tr,
-                  value: doctorName,
+                  value: appLocalizations.isArLocale
+                      ? appointment.doctor?.name?.ar ?? ''
+                      : appointment.doctor?.name?.en ?? '',
                   valueColor: colors.textColor,
                 ),
               ),

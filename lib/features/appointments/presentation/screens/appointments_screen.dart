@@ -216,7 +216,9 @@ class _AppointmentCard extends StatelessWidget {
 
                   children: [
                     Text(
-                      item.doctor?.name ?? '',
+                      appLocalizations.isArLocale
+                          ? item.doctor?.name?.ar ?? ''
+                          : item.doctor?.name?.en ?? '',
 
                       style: TextStyles.semiBold16(),
                     ),

@@ -39,21 +39,48 @@ class DoctorListItem extends StatelessWidget {
         children: [
           Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.r),
-                child: DiffImage(
-                  image: doctor.profileImage,
-                  width: 70.w,
-                  height: 70.w,
-                  isCircle: false,
-                  radius: 12.r,
-                  fitType: BoxFit.fill,
-                ),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  DiffImage(
+                    image: doctor.profileImage,
+                    width: 70.w,
+                    height: 70.w,
+                    userName: appLocalizations.isArLocale
+                        ? doctor.name?.ar ?? ''
+                        : doctor.name?.en ?? '',
+                    fitType: BoxFit.cover,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  if (doctor.isActive == true)
+                    Positioned(
+                      left: appLocalizations.isArLocale ? -5 : null,
+                      right: appLocalizations.isArLocale ? null : -5,
+                      bottom: -5,
+                      child: Container(
+                        width: 20.w,
+                        height: 20.w,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: colors.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.check_rounded,
+                            color: colors.whiteColor,
+                            size: 12.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              Gaps.hGap12,
+              Gaps.hGap8,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
                       appLocalizations.isArLocale
@@ -61,74 +88,40 @@ class DoctorListItem extends StatelessWidget {
                           : doctor.name?.en ?? '',
                       style: TextStyles.semiBold18(),
                     ),
-                    Gaps.vGap8,
                     Text(
                       doctor.specialty?.name ?? '',
                       style: TextStyles.medium14(color: colors.main),
                     ),
-                    Gaps.vGap4,
-                    if (doctor.location?.city != null)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: colors.lightTextColor,
-                          ),
-                          Gaps.hGap4,
-                          Expanded(
-                            child: Text(
-                              doctor.location?.city ?? '',
-                              style: TextStyles.medium12(
-                                color: colors.lightTextColor,
-                              ),
-                            ),
-                          ),
-                        ],
+                    if (doctor.bio != null)
+                      Text(
+                        appLocalizations.isArLocale
+                            ? doctor.bio?.ar ?? ''
+                            : doctor.bio?.en ?? '',
+                        maxLines: 2,
+                        style: TextStyles.medium14(
+                          color: colors.lightTextColor,
+                        ),
                       ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: doctor.isActive == true
-                      ? colors.secondary.withValues(alpha: .2)
-                      : colors.errorColor.withValues(alpha: .1),
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      doctor.isActive == true ? Icons.verified : Icons.close,
-                      size: 16,
-                      color: doctor.isActive == true
-                          ? colors.secondary
-                          : colors.errorColor,
-                    ),
-                    Gaps.hGap4,
-                    Text(
-                      doctor.isActive == true ? "موثق" : "غير مفعل",
-                      style: TextStyles.medium12(
-                        color: doctor.isActive == true
-                            ? colors.secondary
-                            : colors.errorColor,
-                      ),
-                    ),
                   ],
                 ),
               ),
             ],
           ),
           Gaps.vGap4,
-          if (doctor.bio != null)
-            Text(
-              appLocalizations.isArLocale
-                  ? doctor.bio?.ar ?? ''
-                  : doctor.bio?.en ?? '',
-              style: TextStyles.medium14(color: colors.lightTextColor),
+          if (doctor.location?.city != null)
+            Row(
+              children: [
+                Icon(Icons.location_on, size: 16, color: colors.lightTextColor),
+                Gaps.hGap4,
+                Expanded(
+                  child: Text(
+                    doctor.location?.city ?? '',
+                    style: TextStyles.medium12(color: colors.lightTextColor),
+                  ),
+                ),
+              ],
             ),
-          Gaps.vGap12,
+
           if (doctor.priceHidden == false)
             Row(
               children: [

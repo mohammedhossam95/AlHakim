@@ -129,12 +129,7 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   void selectDoctorForMedicalCenter(DoctorEntity doctor) {
-    emit(
-      state.copyWith(
-        activeDoctorId: doctor.id,
-        selectedDoctor: doctor,
-      ),
-    );
+    emit(state.copyWith(activeDoctorId: doctor.id, selectedDoctor: doctor));
   }
 
   void clearSelectedDoctor() {
@@ -143,15 +138,16 @@ class SessionCubit extends Cubit<SessionState> {
     emit(state.copyWith(clearSelectedDoctor: true));
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool noLogoutApi = false}) async {
     try {
-      final result = await _logoutUseCase(NoParams());
+      if (noLogoutApi == false) {
+        final result = await _logoutUseCase(NoParams());
 
-      result.fold(
-        (failure) => log('Logout API failed: ${failure.message}'),
-        (_) {},
-      );
-
+        result.fold(
+          (failure) => log('Logout API failed: ${failure.message}'),
+          (_) {},
+        );
+      }
       await sharedPreferences.removeUser();
       await sharedPreferences.removeUserId();
       await sharedPreferences.removeUserType();

@@ -67,7 +67,7 @@ class _AppState extends State<App> {
 
   Future<void> _handleLogout() async {
     try {
-      await sessionCubit.logout();
+      await sessionCubit.logout(noLogoutApi: true);
     } catch (e, st) {
       debugPrint('Logout error: $e\n$st');
     }
