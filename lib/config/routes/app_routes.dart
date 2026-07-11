@@ -189,7 +189,7 @@ abstract class Routes {
             ],
             child: AddNewDoctorScreen(
               source: args?.source ?? DoctorFormSource.delegate,
-              medicalCenterId: args?.medicalCenterId,
+              medicalCenterProfile: args?.medicalCenterProfile,
             ),
           );
         },

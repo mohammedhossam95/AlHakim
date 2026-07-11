@@ -26,8 +26,6 @@ class MedicalCenterDoctorsSelectionScreen extends StatefulWidget {
 
 class _MedicalCenterDoctorsSelectionScreenState
     extends State<MedicalCenterDoctorsSelectionScreen> {
-  int? _medicalCenterId;
-
   @override
   void initState() {
     super.initState();
@@ -35,32 +33,35 @@ class _MedicalCenterDoctorsSelectionScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      final medicalCenter = sharedPreferences.getAuth()?.profile;
-
-      _medicalCenterId = medicalCenter?.id;
-      if (_medicalCenterId == null) return;
+      final medicalCenterProfile =
+          context.read<SessionCubit>().state.userProfile;
+      if (medicalCenterProfile?.id == null) return;
 
       context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
-        _medicalCenterId!,
+        medicalCenterProfile!.id!,
       );
     });
   }
 
   Future<void> _openAddDoctorScreen() async {
-    if (_medicalCenterId == null) return;
+    final medicalCenterProfile =
+        context.read<SessionCubit>().state.userProfile;
+    if (medicalCenterProfile == null) return;
 
     final result = await context.push(
       Routes.addDoctorScreenRoute,
       extra: AddDoctorScreenArgs(
         source: DoctorFormSource.medicalCenter,
-        medicalCenterId: _medicalCenterId,
+        medicalCenterProfile: medicalCenterProfile,
       ),
     );
 
     if (result == true) {
       if (!mounted) return;
+      final profileId = medicalCenterProfile.id;
+      if (profileId == null) return;
       context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
-        _medicalCenterId!,
+        profileId,
       );
     }
   }

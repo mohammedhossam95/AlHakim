@@ -5,6 +5,7 @@ import 'package:alhakim/features/auth/domain/usecases/get_user_type_usecase.dart
 import 'package:alhakim/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/save_user_type_usecase.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/domain/entities/profile_entity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,12 +54,13 @@ class SessionCubit extends Cubit<SessionState> {
     final isMedicalCenter = auth?.role == 'medical_center';
 
     if (isMedicalCenter) {
-      return const SessionState(
+      return SessionState(
         status: SessionStatus.authenticated,
         userType: UserType.doctor,
         doctorAccountMode: DoctorAccountMode.medicalCenter,
         activeDoctorId: null,
         selectedDoctor: null,
+        userProfile: auth?.profile,
         error: null,
       );
     }
@@ -69,6 +71,7 @@ class SessionCubit extends Cubit<SessionState> {
       doctorAccountMode: DoctorAccountMode.singleDoctor,
       activeDoctorId: auth?.doctor?.id,
       selectedDoctor: null,
+      userProfile: null,
       error: null,
     );
   }

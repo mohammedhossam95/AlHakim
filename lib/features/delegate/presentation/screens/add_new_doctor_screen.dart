@@ -10,6 +10,7 @@ import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/doctors/domain/entities/profile_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/specialities/domain/entities/specialty_entity.dart';
 import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
@@ -35,12 +36,12 @@ class DoctorScheduleModel {
 
 class AddNewDoctorScreen extends StatefulWidget {
   final DoctorFormSource source;
-  final int? medicalCenterId;
+  final ProfileEntity? medicalCenterProfile;
 
   const AddNewDoctorScreen({
     super.key,
     this.source = DoctorFormSource.delegate,
-    this.medicalCenterId,
+    this.medicalCenterProfile,
   });
 
   @override
@@ -187,20 +188,41 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   void submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final secretaryPhone = await Constants.phoneParsing(
-        phone: _secretaryPhoneController.text,
-        countryCode: _selectedCountry.countryCode,
-        withCode: false,
-      );
-      // final clinicPhone = await Constants.phoneParsing(
-      //   phone: _clinicPhoneController.text,
-      //   countryCode: _selectedCountry.countryCode,
-      //   withCode: false,
-      // );
-
-      if (!context.mounted) return;
       final isMedicalCenterSource =
           widget.source == DoctorFormSource.medicalCenter;
+
+      if (isMedicalCenterSource && widget.medicalCenterProfile == null) {
+        Constants.showSnakToast(
+          context: context,
+          message: 'error_occurred'.tr,
+          type: 3,
+        );
+        return;
+      }
+
+      String? clinicPhone;
+      String? secretaryPhone;
+      String? clinicCountryCode;
+      String? secretaryCountryCode;
+
+      if (isMedicalCenterSource) {
+        final profile = widget.medicalCenterProfile!;
+        clinicPhone = profile.phone;
+        secretaryPhone = profile.phone;
+        clinicCountryCode = profile.countryCode;
+        secretaryCountryCode = profile.countryCode;
+      } else {
+        secretaryPhone = await Constants.phoneParsing(
+          phone: _secretaryPhoneController.text,
+          countryCode: _selectedCountry.countryCode,
+          withCode: false,
+        );
+        clinicPhone = secretaryPhone;
+        clinicCountryCode = "+${_selectedCountry.phoneCode}";
+        secretaryCountryCode = clinicCountryCode;
+      }
+
+      if (!context.mounted) return;
       if (!mounted) return;
       context.read<AddDoctorCubit>().addDoctor(
         AddDoctorParams(
@@ -211,7 +233,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           specialtyId: selectedSpeciality?.id,
           professionalRegistrationNumber: _professionalNumberController.text,
           academicDegree: _academicDegreeController.text,
-          clinicPhone: secretaryPhone,
+          clinicPhone: clinicPhone,
           secretaryPhone: secretaryPhone,
           minPatients: _minPatientsController.text,
           price: _priceController.text,
@@ -219,7 +241,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
               ? null
               : _representativeCodeController.text,
           medicalCenterId: isMedicalCenterSource
-              ? widget.medicalCenterId
+              ? widget.medicalCenterProfile?.id
               : null,
           profileImage: profileImage,
           license: licenseFile,
@@ -234,8 +256,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
               "slot_duration": e.slotDurationController.text,
             };
           }).toList(),
-          secretaryCountryCode: "+${_selectedCountry.phoneCode}",
-          clinicCountryCode: "+${_selectedCountry.phoneCode}",
+          secretaryCountryCode: secretaryCountryCode,
+          clinicCountryCode: clinicCountryCode,
           hidePrice: hidePrice,
         ),
       );
@@ -245,8 +267,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colors.backGround,
-
+      // backgroundColor: colors.backGround,
       appBar: AppBar(title: Text("add_doctor".tr)),
 
       body: BlocConsumer<AddDoctorCubit, AddDoctorState>(
@@ -276,14 +297,12 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
             key: _formKey,
 
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-
               child: Container(
                 padding: EdgeInsets.all(20.w),
 
                 decoration: BoxDecoration(
                   color: colors.whiteColor,
-                  borderRadius: BorderRadius.circular(20.r),
+                  // borderRadius: BorderRadius.circular(20.r),
                 ),
 
                 child: Column(
@@ -860,7 +879,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                                     ),
                                   ),
 
-                                  Gaps.vGap16,
+                                  Gaps.hGap16,
 
                                   /// end time
                                   Expanded(

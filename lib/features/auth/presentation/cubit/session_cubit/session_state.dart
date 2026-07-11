@@ -6,6 +6,7 @@ class SessionState extends Equatable {
   final DoctorAccountMode? doctorAccountMode;
   final String? activeDoctorId;
   final DoctorEntity? selectedDoctor;
+  final ProfileEntity? userProfile;
   final String? error;
 
   const SessionState({
@@ -14,6 +15,7 @@ class SessionState extends Equatable {
     this.doctorAccountMode,
     this.activeDoctorId,
     this.selectedDoctor,
+    this.userProfile,
     this.error,
   });
 
@@ -23,6 +25,7 @@ class SessionState extends Equatable {
       doctorAccountMode = null,
       activeDoctorId = null,
       selectedDoctor = null,
+      userProfile = null,
       error = null;
 
   bool get isDoctor => userType == UserType.doctor;
@@ -40,6 +43,7 @@ class SessionState extends Equatable {
     DoctorAccountMode? doctorAccountMode,
     String? activeDoctorId,
     DoctorEntity? selectedDoctor,
+    ProfileEntity? userProfile,
     String? error,
     bool clearSelectedDoctor = false,
   }) {
@@ -53,6 +57,7 @@ class SessionState extends Equatable {
       selectedDoctor: clearSelectedDoctor
           ? null
           : selectedDoctor ?? this.selectedDoctor,
+      userProfile: userProfile ?? this.userProfile,
       error: error,
     );
   }
@@ -64,6 +69,7 @@ class SessionState extends Equatable {
     doctorAccountMode,
     activeDoctorId,
     selectedDoctor,
+    userProfile,
     error,
   ];
 }
