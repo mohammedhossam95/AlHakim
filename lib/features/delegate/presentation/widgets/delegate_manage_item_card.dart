@@ -12,8 +12,6 @@ class DelegateManageItemCard extends StatelessWidget {
   final bool isActive;
   final String activeStatusText;
   final String inactiveStatusText;
-  final String activeBadgeText;
-  final String inactiveBadgeText;
   final String editLabel;
   final String toggleActiveLabel;
   final String toggleInactiveLabel;
@@ -31,8 +29,6 @@ class DelegateManageItemCard extends StatelessWidget {
     required this.isActive,
     required this.activeStatusText,
     required this.inactiveStatusText,
-    required this.activeBadgeText,
-    required this.inactiveBadgeText,
     required this.editLabel,
     required this.toggleActiveLabel,
     required this.toggleInactiveLabel,
@@ -45,8 +41,9 @@ class DelegateManageItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArLocale = appLocalizations.isArLocale;
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: colors.whiteColor,
         borderRadius: BorderRadius.circular(16.r),
@@ -56,16 +53,42 @@ class DelegateManageItemCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              DiffImage(
-                image: image,
-                width: 60.0.w,
-                height: 60.0.h,
-                userName: title,
-                isCircle: true,
-                fitType: BoxFit.cover,
-                borderRadius: BorderRadius.circular(12.r),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  DiffImage(
+                    image: image,
+                    width: 60.0.w,
+                    height: 60.0.h,
+                    userName: title,
+                    fitType: BoxFit.cover,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  if (isActive)
+                    Positioned(
+                      left: isArLocale ? -5 : null,
+                      right: isArLocale ? null : -5,
+                      bottom: -5,
+                      child: Container(
+                        width: 20.w,
+                        height: 20.w,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: colors.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.check_rounded,
+                            color: colors.whiteColor,
+                            size: 12.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              Gaps.hGap12,
+              Gaps.hGap8,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +98,7 @@ class DelegateManageItemCard extends StatelessWidget {
                       style: TextStyles.semiBold16(),
                       textAlign: TextAlign.right,
                     ),
-                    Gaps.vGap8,
+
                     Text(
                       subtitle,
                       style: TextStyles.medium13(color: colors.lightTextColor),
@@ -83,46 +106,16 @@ class DelegateManageItemCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Gaps.vGap8,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 8.w,
-                          height: 8.h,
-                          decoration: BoxDecoration(
-                            color: isActive ? colors.secondary : Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        Gaps.hGap6,
-                        Text(
-                          isActive ? activeStatusText : inactiveStatusText,
-                          style: TextStyles.medium12(
-                            color: isActive
-                                ? colors.secondary
-                                : colors.lightTextColor,
-                          ),
-                        ),
-                      ],
+
+                    Text(
+                      isActive ? activeStatusText : inactiveStatusText,
+                      style: TextStyles.medium12(
+                        color: isActive
+                            ? colors.secondary
+                            : colors.lightTextColor,
+                      ),
                     ),
                   ],
-                ),
-              ),
-              Gaps.hGap12,
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? colors.secondary.withValues(alpha: .15)
-                      : Colors.grey.withValues(alpha: .15),
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Text(
-                  isActive ? activeBadgeText : inactiveBadgeText,
-                  style: TextStyles.medium12(
-                    color: isActive ? colors.secondary : colors.lightTextColor,
-                  ),
                 ),
               ),
             ],

@@ -28,8 +28,6 @@ class MedicalCenterItem extends StatelessWidget {
       isActive: isActive,
       activeStatusText: 'center_active'.tr,
       inactiveStatusText: 'center_inactive'.tr,
-      activeBadgeText: 'active'.tr,
-      inactiveBadgeText: 'frozen'.tr,
       editLabel: 'update'.tr,
       toggleActiveLabel: 'freeze'.tr,
       toggleInactiveLabel: 'activate'.tr,

@@ -40,8 +40,6 @@ class DoctorItem extends StatelessWidget {
       isActive: isActive,
       activeStatusText: 'clinic_open'.tr,
       inactiveStatusText: 'clinic_closed'.tr,
-      activeBadgeText: 'active'.tr,
-      inactiveBadgeText: 'frozen'.tr,
       editLabel: 'update'.tr,
       toggleActiveLabel: 'freeze'.tr,
       toggleInactiveLabel: 'activate'.tr,
