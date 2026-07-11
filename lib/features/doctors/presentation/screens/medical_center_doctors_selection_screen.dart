@@ -39,7 +39,7 @@ class _MedicalCenterDoctorsSelectionScreenState
       if (medicalCenterProfile?.id == null) return;
 
       context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
-        medicalCenterProfile!.id!,
+        int.parse(medicalCenterProfile?.id ?? '0'),
       );
     });
   }
@@ -61,7 +61,7 @@ class _MedicalCenterDoctorsSelectionScreenState
       final profileId = medicalCenterProfile.id;
       if (profileId == null) return;
       context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
-        profileId,
+        int.parse(profileId),
       );
     }
   }

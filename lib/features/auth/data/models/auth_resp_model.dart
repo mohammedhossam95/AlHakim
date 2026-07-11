@@ -31,10 +31,10 @@ class AuthModel extends UserAuthEntity {
       token: json['token'],
       role: json['role'],
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
-      doctor: json['doctor'] != null
-          ? DoctorModel.fromJson(json['doctor'])
+      doctor: (json['role'] == 'doctor' && json['profile'] != null)
+          ? DoctorModel.fromJson(json['profile'])
           : null,
-      profile: json['profile'] != null
+      profile: (json['role'] == 'medical_center' && json['profile'] != null)
           ? ProfileModel.fromJson(json['profile'])
           : null,
       nextStep: json['next_step'],

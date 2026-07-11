@@ -16,7 +16,7 @@ class ProfileModel extends ProfileEntity {
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
-    id: json["id"],
+    id: json["id"]?.toString(),
     name: json["name"],
     description: json["description"],
     address: json["address"],

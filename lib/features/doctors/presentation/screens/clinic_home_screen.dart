@@ -32,23 +32,20 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
   void initState() {
     super.initState();
 
-    log("token ${sharedPreferences.getAuth()?.token ?? ''}");
-
-    log("id ${sharedPreferences.getAuth()?.doctor?.id.toString() ?? ''}");
-    log(
-      "schedule ${sharedPreferences.getAuth()?.doctor?.schedules.toString() ?? ''}",
-    );
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final doctorId = context.read<SessionCubit>().state.activeDoctorId;
-      if (doctorId == null || doctorId.isEmpty) return;
-      getDoctorHome(int.parse(doctorId));
+      getDoctorHome();
     });
   }
 
-  Future<void> getDoctorHome(int id) async {
-    context.read<GetDoctorHomeCubit>().getDoctorHome(id);
+  Future<void> getDoctorHome() async {
+    log("getDoctorHome");
+    final sessionState = context.read<SessionCubit>().state;
+    log("sessionState: ${sessionState.doctorAccountMode}");
+
+    final doctorId = sessionState.activeDoctorId;
+    if (doctorId == null || doctorId.isEmpty) return;
+    context.read<GetDoctorHomeCubit>().getDoctorHome(doctorId);
   }
 
   String? _activeDoctorId(BuildContext context) {
@@ -182,7 +179,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                                 message: toggleState.response.message,
                               );
 
-                              getDoctorHome(0);
+                              getDoctorHome();
                             }
                           },
                           child: MyDefaultButton(
@@ -248,7 +245,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                                 message: state.response.message ?? '',
                               );
 
-                              getDoctorHome(0);
+                              getDoctorHome();
                             }
                           },
 

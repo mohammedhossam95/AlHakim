@@ -23,7 +23,7 @@ abstract class DoctorRemoteDataSource {
   Future<BaseOneResponse> toggleDoctorStatus({required String id});
   Future<BaseOneResponse> closeClinicToday({required String doctorId});
   Future<BaseOneResponse> toggleClinic({required String doctorId});
-  Future<DoctorHomeRespModel> getDoctorHome(int id);
+  Future<DoctorHomeRespModel> getDoctorHome(String id);
   Future<DoctorAppoinmentsForDayRespModel> getDoctorAppoinmentsForDay({
     required AppoinmentsParams params,
   });
@@ -470,9 +470,9 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
   }
 
   @override
-  Future<DoctorHomeRespModel> getDoctorHome(int id) async {
+  Future<DoctorHomeRespModel> getDoctorHome(String id) async {
     try {
-      final response = await dioConsumer.get('/doctors/home/$id');
+      final response = await dioConsumer.get('/doctors/$id/home');
 
       if (response['status'] == true) {
         return DoctorHomeRespModel.fromJson(response);

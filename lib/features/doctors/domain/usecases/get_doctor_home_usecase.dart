@@ -4,13 +4,13 @@ import 'package:alhakim/core/usecases/usecase.dart';
 import 'package:alhakim/features/doctors/domain/repositories/doctor_repository.dart';
 import 'package:dartz/dartz.dart';
 
-class GetDoctorHomeUsecase implements UseCase<BaseOneResponse, int> {
+class GetDoctorHomeUsecase implements UseCase<BaseOneResponse, String> {
   final DoctorRepository repository;
 
   GetDoctorHomeUsecase({required this.repository});
 
   @override
-  Future<Either<Failure, BaseOneResponse>> call(int id) {
+  Future<Either<Failure, BaseOneResponse>> call(String id) {
     return repository.getDoctorHome(id);
   }
 }

@@ -12,14 +12,14 @@ class GetDoctorHomeCubit extends Cubit<GetDoctorHomeState> {
 
   bool _hasLoaded = false;
 
-  Future<void> loadIfNeeded(int id) async {
+  Future<void> loadIfNeeded(String id) async {
     if (_hasLoaded) return;
 
     _hasLoaded = true;
     await getDoctorHome(id);
   }
 
-  Future<void> getDoctorHome(int id) async {
+  Future<void> getDoctorHome(String id) async {
     emit(GetDoctorHomeLoading());
 
     final result = await usecase(id);

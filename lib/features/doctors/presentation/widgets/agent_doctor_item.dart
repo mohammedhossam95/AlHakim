@@ -45,35 +45,6 @@ class AgentDoctorItem extends StatelessWidget {
             fitType: BoxFit.cover,
           ),
 
-          // Container(
-          //   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-          //   decoration: BoxDecoration(
-          //     color: doctor.isActive == true
-          //         ? colors.secondary.withValues(alpha: .2)
-          //         : colors.errorColor.withValues(alpha: .1),
-          //     borderRadius: BorderRadius.circular(20.r),
-          //   ),
-          //   child: Row(
-          //     children: [
-          //       Icon(
-          //         doctor.isActive == true ? Icons.verified : Icons.close,
-          //         size: 16,
-          //         color: doctor.isActive == true
-          //             ? colors.secondary
-          //             : colors.errorColor,
-          //       ),
-          //       Gaps.hGap4,
-          //       Text(
-          //         doctor.isActive == true ? "موثق" : "غير مفعل",
-          //         style: TextStyles.medium12(
-          //           color: doctor.isActive == true
-          //               ? colors.secondary
-          //               : colors.errorColor,
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
           Text(
             appLocalizations.isArLocale
                 ? doctor.name?.ar ?? ''

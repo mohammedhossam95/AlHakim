@@ -1,6 +1,7 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
@@ -8,6 +9,7 @@ import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,6 +30,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+
+      final sessionState = context.read<SessionCubit>().state;
+
+      if (sessionState.status != SessionStatus.authenticated) return;
+
       context.read<GetAppointmentsCubit>().getAppointments();
     });
   }
@@ -283,7 +290,8 @@ class _AppointmentCard extends StatelessWidget {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          context.push(Routes.followUpQueueScreenRoute,
+                          context.push(
+                            Routes.followUpQueueScreenRoute,
                             extra: item,
                           );
                         },

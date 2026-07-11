@@ -241,7 +241,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
               ? null
               : _representativeCodeController.text,
           medicalCenterId: isMedicalCenterSource
-              ? widget.medicalCenterProfile?.id
+              ? int.parse(widget.medicalCenterProfile?.id ?? '0')
               : null,
           profileImage: profileImage,
           license: licenseFile,

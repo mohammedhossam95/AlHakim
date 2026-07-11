@@ -43,7 +43,7 @@ class DoctorRepositoryImpl implements DoctorRepository {
   }
 
   @override
-  Future<Either<Failure, BaseOneResponse>> getDoctorHome(int id) async {
+  Future<Either<Failure, BaseOneResponse>> getDoctorHome(String id) async {
     try {
       final result = await remoteDataSource.getDoctorHome(id);
 

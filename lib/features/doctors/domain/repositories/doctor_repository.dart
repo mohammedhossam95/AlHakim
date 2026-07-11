@@ -21,7 +21,7 @@ abstract class DoctorRepository {
   Future<Either<Failure, BaseOneResponse>> toggleClinic({
     required String doctorId,
   });
-  Future<Either<Failure, BaseOneResponse>> getDoctorHome(int id);
+  Future<Either<Failure, BaseOneResponse>> getDoctorHome(String id);
   Future<Either<Failure, BaseListResponse>> getDoctorAppoinmentsForDay({
     required AppoinmentsParams params,
   });
