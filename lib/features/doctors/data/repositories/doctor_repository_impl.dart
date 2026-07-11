@@ -43,9 +43,9 @@ class DoctorRepositoryImpl implements DoctorRepository {
   }
 
   @override
-  Future<Either<Failure, BaseOneResponse>> getDoctorHome() async {
+  Future<Either<Failure, BaseOneResponse>> getDoctorHome(int id) async {
     try {
-      final result = await remoteDataSource.getDoctorHome();
+      final result = await remoteDataSource.getDoctorHome(id);
 
       return Right(result);
     } on ServerException catch (e) {

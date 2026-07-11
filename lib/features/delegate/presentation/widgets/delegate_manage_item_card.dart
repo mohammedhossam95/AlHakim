@@ -46,7 +46,7 @@ class DelegateManageItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: colors.whiteColor,
         borderRadius: BorderRadius.circular(16.r),
@@ -60,9 +60,9 @@ class DelegateManageItemCard extends StatelessWidget {
                 image: image,
                 width: 60.0.w,
                 height: 60.0.h,
-                radius: 30.0.r,
                 userName: title,
                 isCircle: true,
+                fitType: BoxFit.cover,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               Gaps.hGap12,

@@ -67,7 +67,6 @@
   "sessionExpiredTitle": "Session Expired",
   "settings": "Settings",
   "settings_and_support": "Settings and Support",
-  "signIn": "Sign In",
   "support_and_help": "Support and Help",
   "tapBarItemMyAccount": "My Account",
   "tax_number": "Tax Number",
@@ -159,7 +158,7 @@
   "noـslidersـavailable": "No sliders available yet",
   "all": "All",
   "create_account_btn": "Create Account",
-  "login_btn": "Login",
+
   "no_account": "Don't have an account?",
   "sign_up": "Sign Up",
   "secure_access": "Secure Enterprise Access",

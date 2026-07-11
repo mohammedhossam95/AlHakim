@@ -6,6 +6,7 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '/features/settings/setting_injection.dart';
 import '/features/tabbar/tabbar_injection.dart';
@@ -51,9 +52,7 @@ class _AppState extends State<App> {
               TextButton(
                 onPressed: () async {
                   Navigator.of(dialogContext).pop();
-                  await secureStorage.removeDeviceToken();
-                  await secureStorage.clearAll();
-                  Routes.router.go(Routes.loginScreenRoute);
+                  await _handleLogout();
                   _isDialogShown = false;
                 },
                 child: Text('login'.tr),
@@ -64,6 +63,16 @@ class _AppState extends State<App> {
       );
       _isDialogShown = false;
     });
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await sessionCubit.logout();
+    } catch (e, st) {
+      debugPrint('Logout error: $e\n$st');
+    }
+    if (!mounted) return;
+    context.push(Routes.chooseUserTypeScreenRoute);
   }
 
   @override

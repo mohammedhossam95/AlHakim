@@ -209,24 +209,13 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 14.h,
                           crossAxisSpacing: 14.w,
-                          childAspectRatio: .88,
+                          childAspectRatio: .75,
                         ),
 
                         itemBuilder: (context, index) {
                           final item = specialities[index];
 
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(22.r),
-
-                            onTap: () {
-                              context.push(
-                                Routes.doctorsListScreenRoute,
-                                extra: item,
-                              );
-                            },
-
-                            child: SpecialityItem(item),
-                          );
+                          return SpecialityItem(item);
                         },
                       );
                     }

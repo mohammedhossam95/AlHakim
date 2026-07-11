@@ -2,11 +2,10 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/add_doctor_screen_args.dart';
 import 'package:alhakim/core/utils/enums.dart';
-import 'package:alhakim/core/utils/values/text_styles.dart';
-import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/widgets/doctor_item.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_medical_center_doctors_cubit/get_medical_center_doctors_cubit.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
@@ -33,8 +32,10 @@ class _MedicalCenterDoctorsSelectionScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      final medicalCenterProfile =
-          context.read<SessionCubit>().state.userProfile;
+      final medicalCenterProfile = context
+          .read<SessionCubit>()
+          .state
+          .userProfile;
       if (medicalCenterProfile?.id == null) return;
 
       context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
@@ -44,8 +45,7 @@ class _MedicalCenterDoctorsSelectionScreenState
   }
 
   Future<void> _openAddDoctorScreen() async {
-    final medicalCenterProfile =
-        context.read<SessionCubit>().state.userProfile;
+    final medicalCenterProfile = context.read<SessionCubit>().state.userProfile;
     if (medicalCenterProfile == null) return;
 
     final result = await context.push(
@@ -112,10 +112,21 @@ class _MedicalCenterDoctorsSelectionScreenState
                 return ListView.separated(
                   padding: EdgeInsets.all(16.w),
                   itemCount: doctors.length,
-                  separatorBuilder: (_, _) => Gaps.vGap12,
+                  separatorBuilder: (_, _) => Gaps.vGap18,
                   itemBuilder: (context, index) {
                     final doctor = doctors[index];
-                    return _DoctorSelectionItem(doctor: doctor);
+                    return DoctorItem(
+                      doctor: doctor,
+                      showActions: true,
+                      onTap: () {
+                        context
+                            .read<SessionCubit>()
+                            .selectDoctorForMedicalCenter(doctor);
+                        context.read<BottomNavBarCubit>().changeCurrentScreen(
+                          index: 0,
+                        );
+                      },
+                    );
                   },
                 );
               }
@@ -123,72 +134,6 @@ class _MedicalCenterDoctorsSelectionScreenState
               return const SizedBox.shrink();
             },
           ),
-    );
-  }
-}
-
-class _DoctorSelectionItem extends StatelessWidget {
-  final DoctorEntity doctor;
-
-  const _DoctorSelectionItem({required this.doctor});
-
-  @override
-  Widget build(BuildContext context) {
-    final name = appLocalizations.isArLocale
-        ? doctor.name?.ar ?? ''
-        : doctor.name?.en ?? '';
-
-    return InkWell(
-      onTap: () {
-        context.read<SessionCubit>().selectDoctorForMedicalCenter(doctor);
-        context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
-      },
-      borderRadius: BorderRadius.circular(16.r),
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: colors.whiteColor,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: colors.lightTextColor.withValues(alpha: .1),
-              blurRadius: 10,
-              offset: const Offset(0, 0),
-            ),
-          ],
-          border: Border.all(
-            color: colors.lightTextColor.withValues(alpha: .1),
-          ),
-        ),
-        child: Row(
-          children: [
-            DiffImage(
-              image: doctor.profileImage,
-              width: 56.w,
-              height: 56.w,
-              isCircle: true,
-              fitType: BoxFit.cover,
-            ),
-            Gaps.hGap12,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name, style: TextStyles.semiBold16()),
-                  if (doctor.specialty?.name != null) ...[
-                    Gaps.vGap4,
-                    Text(
-                      doctor.specialty!.name!,
-                      style: TextStyles.medium14(color: colors.main),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: colors.lightTextColor),
-          ],
-        ),
-      ),
     );
   }
 }

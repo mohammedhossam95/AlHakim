@@ -43,8 +43,12 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
       if (!mounted) return;
       final doctorId = context.read<SessionCubit>().state.activeDoctorId;
       if (doctorId == null || doctorId.isEmpty) return;
-      context.read<GetDoctorHomeCubit>().getDoctorHome();
+      getDoctorHome(int.parse(doctorId));
     });
+  }
+
+  Future<void> getDoctorHome(int id) async {
+    context.read<GetDoctorHomeCubit>().getDoctorHome(id);
   }
 
   String? _activeDoctorId(BuildContext context) {
@@ -178,9 +182,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                                 message: toggleState.response.message,
                               );
 
-                              context
-                                  .read<GetDoctorHomeCubit>()
-                                  .getDoctorHome();
+                              getDoctorHome(0);
                             }
                           },
                           child: MyDefaultButton(
@@ -246,9 +248,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                                 message: state.response.message ?? '',
                               );
 
-                              context
-                                  .read<GetDoctorHomeCubit>()
-                                  .getDoctorHome();
+                              getDoctorHome(0);
                             }
                           },
 
