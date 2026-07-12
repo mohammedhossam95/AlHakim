@@ -66,6 +66,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
   final _minPatientsController = TextEditingController();
   final _priceController = TextEditingController();
+  final _consultationPriceController = TextEditingController();
 
   final _representativeCodeController = TextEditingController();
 
@@ -83,9 +84,11 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
   final _minPatientsFocus = FocusNode();
   final _priceFocus = FocusNode();
+  final _consultationPriceFocus = FocusNode();
 
   final _representativeCodeFocus = FocusNode();
   bool hidePrice = false;
+  bool hideConsultationPrice = false;
 
   SpecialtyEntity? selectedSpeciality;
   final List<Map<String, dynamic>> weekDays = [
@@ -142,6 +145,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
     _minPatientsController.dispose();
     _priceController.dispose();
+    _consultationPriceController.dispose();
 
     _representativeCodeController.dispose();
 
@@ -159,6 +163,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
     _minPatientsFocus.dispose();
     _priceFocus.dispose();
+    _consultationPriceFocus.dispose();
 
     _representativeCodeFocus.dispose();
 
@@ -237,6 +242,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           secretaryPhone: secretaryPhone,
           minPatients: _minPatientsController.text,
           price: _priceController.text,
+          consultationPrice: _consultationPriceController.text,
           representativeCode: isMedicalCenterSource
               ? null
               : _representativeCodeController.text,
@@ -259,6 +265,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           secretaryCountryCode: secretaryCountryCode,
           clinicCountryCode: clinicCountryCode,
           hidePrice: hidePrice,
+          hideConsultationPrice: hideConsultationPrice,
         ),
       );
     }
@@ -657,51 +664,115 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// price
-                    buildLabel("price".tr),
-                    Gaps.vGap8,
-
-                    MyTextFormField(
-                      controller: _priceController,
-                      focusNode: _priceFocus,
-                      textInputAction: TextInputAction.next,
-                      onSubmit: (_) {
-                        if (widget.source == DoctorFormSource.delegate) {
-                          FocusScope.of(
-                            context,
-                          ).requestFocus(_representativeCodeFocus);
-                        } else {
-                          FocusScope.of(context).unfocus();
-                        }
-                      },
-                      keyboardType: TextInputType.number,
-                      hintText: "enter_price".tr,
-                      prefixIcon: Icon(
-                        Icons.payments_outlined,
-                        color: colors.main,
-                      ),
+                    /// price & consultation price
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("price".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _priceController,
+                                focusNode: _priceFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  FocusScope.of(
+                                    context,
+                                  ).requestFocus(_consultationPriceFocus);
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_price".tr,
+                                prefixIcon: Icon(
+                                  Icons.payments_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Gaps.hGap12,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("consultation_price".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _consultationPriceController,
+                                focusNode: _consultationPriceFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  if (widget.source ==
+                                      DoctorFormSource.delegate) {
+                                    FocusScope.of(
+                                      context,
+                                    ).requestFocus(_representativeCodeFocus);
+                                  } else {
+                                    FocusScope.of(context).unfocus();
+                                  }
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_consultation_price".tr,
+                                prefixIcon: Icon(
+                                  Icons.medical_services_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
 
                     Gaps.vGap8,
 
-                    /// description
-                    // buildLabel("hide_price_to_patients".tr),
-                    // Gaps.vGap8,
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Checkbox(
-                          activeColor: colors.main,
-                          value: hidePrice,
-                          onChanged: (value) {
-                            setState(() {
-                              hidePrice = value!;
-                            });
-                          },
-                        ),
                         Expanded(
-                          child: Text(
-                            "hide_price_to_patients_desc".tr,
-                            style: TextStyles.medium14(),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                activeColor: colors.main,
+                                value: hidePrice,
+                                onChanged: (value) {
+                                  setState(() {
+                                    hidePrice = value!;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "hide_price_to_patients_desc".tr,
+                                  style: TextStyles.medium14(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Gaps.hGap12,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                activeColor: colors.main,
+                                value: hideConsultationPrice,
+                                onChanged: (value) {
+                                  setState(() {
+                                    hideConsultationPrice = value!;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "hide_consultation_price_to_patients_desc".tr,
+                                  style: TextStyles.medium14(),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

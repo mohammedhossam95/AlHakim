@@ -30,6 +30,7 @@ class AIAgentScreen extends StatefulWidget {
 }
 
 class _AIAgentScreenState extends State<AIAgentScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _complaintController = TextEditingController();
 
   @override
@@ -39,6 +40,9 @@ class _AIAgentScreenState extends State<AIAgentScreen> {
   }
 
   void _onAnalyzePressed() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     final complaint = _complaintController.text.trim();
     if (sessionCubit.state.status != SessionStatus.authenticated) {
       Constants.showLoginWarningDialog(
@@ -46,14 +50,6 @@ class _AIAgentScreenState extends State<AIAgentScreen> {
         onOkPressed: () {
           context.go(Routes.chooseUserTypeScreenRoute);
         },
-      );
-      return;
-    }
-    if (complaint.isEmpty) {
-      Constants.showSnakToast(
-        context: context,
-        type: 3,
-        message: 'complaint_required'.tr,
       );
       return;
     }
@@ -125,6 +121,7 @@ class _AIAgentScreenState extends State<AIAgentScreen> {
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       _ComplaintInputCard(
+                        formKey: _formKey,
                         controller: _complaintController,
                         isLoading: isLoading,
                         onAnalyze: _onAnalyzePressed,
@@ -146,11 +143,13 @@ class _AIAgentScreenState extends State<AIAgentScreen> {
 }
 
 class _ComplaintInputCard extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
   final TextEditingController controller;
   final VoidCallback onAnalyze;
   final bool isLoading;
 
   const _ComplaintInputCard({
+    required this.formKey,
     required this.controller,
     required this.onAnalyze,
     required this.isLoading,
@@ -209,25 +208,37 @@ class _ComplaintInputCard extends StatelessWidget {
             ],
           ),
           Gaps.vGap24,
-          Stack(
-            children: [
-              MyTextFormField(
-                controller: controller,
-                hintText: 'complaint_hint'.tr,
-                maxLines: 6,
-                minLines: 6,
-                backgroundColor: const Color(0xffF3F4F6),
-              ),
-              Positioned(
-                bottom: 16.h,
-                left: 16.w,
-                child: Icon(
-                  Icons.edit_note_outlined,
-                  color: colors.main.withValues(alpha: 0.4),
-                  size: 24.sp,
+          Form(
+            key: formKey,
+            child: Stack(
+              children: [
+                MyTextFormField(
+                  controller: controller,
+                  hintText: 'complaint_hint'.tr,
+                  maxLines: 6,
+                  minLines: 6,
+                  backgroundColor: const Color(0xffF3F4F6),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'complaint_required'.tr;
+                    }
+                    if (value.length < 20) {
+                      return 'complaint_description_min_length'.tr;
+                    }
+                    return null;
+                  },
                 ),
-              ),
-            ],
+                Positioned(
+                  bottom: 20.h,
+                  left: 16.w,
+                  child: Icon(
+                    Icons.edit_note_outlined,
+                    color: colors.main.withValues(alpha: 0.4),
+                    size: 24.sp,
+                  ),
+                ),
+              ],
+            ),
           ),
           Gaps.vGap32,
           MyDefaultButton(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
@@ -7,10 +9,16 @@ import 'package:alhakim/core/widgets/country_code_widget.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
+import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,11 +37,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // bool isPatient = true;
   late Country _selectedCountry;
+  String? firebaseToken;
 
   @override
   void initState() {
     super.initState();
     getCountry();
+  }
+
+  void getFirebaseToken() async {
+    FirebaseMessaging.instance
+        .getToken()
+        .then((devicefcmToken) {
+          firebaseToken = devicefcmToken;
+        })
+        .catchError((e) {
+          firebaseToken = '';
+        });
   }
 
   @override
@@ -157,11 +177,59 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       Gaps.vGap30,
 
-                      FadeInDown(
-                        child: MyDefaultButton(
-                          btnText: "send_code",
+                      BlocListener<VerifyCodeCubit, VerifyCodeState>(
+                        listener: (context, state) {
+                          if (state is VerifyCodeLoaded) {
+                            Constants.showSnakToast(
+                              context: context,
+                              type: 1,
+                              message: state.response.message,
+                            );
+                            final data = state.response.data as AuthModel;
+                            sharedPreferences.saveAuth(data);
 
-                          onPressed: onSendCodePressed,
+                            if (data.token != null && data.token!.isNotEmpty) {
+                              secureStorage.saveAccessToken(data.token!);
+                            }
+
+                            context.read<SessionCubit>().loginSuccess(
+                              sessionCubit.state.userType,
+                            );
+
+                            switch (data.nextStep) {
+                              case "complete_profile":
+                                context.pushReplacementNamed(
+                                  Routes.completeProfileRegisterScreenRoute,
+                                );
+                                return;
+
+                              case "go_to_home":
+                              default:
+                                context
+                                    .read<BottomNavBarCubit>()
+                                    .changeCurrentScreen(index: 0);
+
+                                context.pushReplacementNamed(
+                                  Routes.mainPageRoute,
+                                );
+                                return;
+                            }
+                          }
+
+                          if (state is VerifyCodeError) {
+                            Constants.showSnakToast(
+                              context: context,
+                              type: 3,
+                              message: state.message,
+                            );
+                          }
+                        },
+                        child: FadeInDown(
+                          child: MyDefaultButton(
+                            btnText: "send_code",
+
+                            onPressed: onSendCodePressed,
+                          ),
                         ),
                       ),
                     ],
@@ -189,9 +257,14 @@ class _LoginScreenState extends State<LoginScreen> {
           phoneNumber: phone,
           countryCode: "+${_selectedCountry.phoneCode}",
           userType: sessionCubit.state.userType,
+          firebaseToken: firebaseToken,
         );
         if (!mounted) return;
-        context.push(Routes.otpAuthRoute, extra: params);
+        if (Platform.isIOS) {
+          BlocProvider.of<VerifyCodeCubit>(context).verifyCode(params);
+        } else {
+          context.push(Routes.otpAuthRoute, extra: params);
+        }
       }
 
       /// invalid phone

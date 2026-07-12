@@ -75,6 +75,13 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         MapEntry("price_hidden", params.hidePrice == true ? "1" : "0"),
       );
 
+      formData.fields.add(
+        MapEntry(
+          "consultation_price_hidden",
+          params.hideConsultationPrice == true ? "1" : "0",
+        ),
+      );
+
       if (params.nameEn != null) {
         formData.fields.add(MapEntry("translations[en][name]", params.nameEn!));
       }
@@ -150,6 +157,12 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
 
       if (params.price != null) {
         formData.fields.add(MapEntry("price", params.price!));
+      }
+
+      if (params.consultationPrice != null) {
+        formData.fields.add(
+          MapEntry("consultation_price", params.consultationPrice!),
+        );
       }
 
       if (params.profileImage != null) {
@@ -314,9 +327,23 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       if (params.price != null) {
         formData.fields.add(MapEntry("price", params.price!));
       }
+
+      if (params.consultationPrice != null) {
+        formData.fields.add(
+          MapEntry("consultation_price", params.consultationPrice!),
+        );
+      }
       if (params.hidePrice != null) {
         formData.fields.add(
           MapEntry("price_hidden", params.hidePrice == true ? "1" : "0"),
+        );
+      }
+      if (params.hideConsultationPrice != null) {
+        formData.fields.add(
+          MapEntry(
+            "consultation_price_hidden",
+            params.hideConsultationPrice == true ? "1" : "0",
+          ),
         );
       }
       if (params.profileImage != null) {

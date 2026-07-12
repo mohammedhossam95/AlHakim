@@ -157,8 +157,13 @@ abstract class Routes {
       GoRoute(
         name: loginScreenRoute,
         path: loginScreenRoute,
-        pageBuilder: (context, state) =>
-            buildAdaptivePage(state: state, child: const LoginScreen()),
+        pageBuilder: (context, state) => buildAdaptivePage(
+          state: state,
+          child: BlocProvider(
+            create: (_) => sl<VerifyCodeCubit>(),
+            child: const LoginScreen(),
+          ),
+        ),
       ),
 
       /// LoginScreen

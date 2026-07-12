@@ -5,9 +5,9 @@ import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/booking/domain/entities/schedule.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_appoinments_for_day_entity.dart';
-import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -218,7 +218,7 @@ class _RescheduleAppointmentsScreenState
                     Gaps.vGap24,
 
                     SizedBox(
-                      height: 110.h,
+                      height: ScreenUtil().screenHeight * 0.14,
 
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
@@ -244,7 +244,7 @@ class _RescheduleAppointmentsScreenState
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 250),
 
-                              width: 85.w,
+                              width: ScreenUtil().screenWidth * 0.2,
 
                               padding: EdgeInsets.symmetric(vertical: 12.h),
 
@@ -274,7 +274,7 @@ class _RescheduleAppointmentsScreenState
                                     ),
                                   ),
 
-                                  Gaps.vGap8,
+                                  Gaps.vGap2,
 
                                   Text(
                                     "${date.date.day}",
@@ -286,7 +286,7 @@ class _RescheduleAppointmentsScreenState
                                     ),
                                   ),
 
-                                  Gaps.vGap8,
+                                  Gaps.vGap2,
 
                                   Text(
                                     DateFormat(
@@ -317,12 +317,9 @@ class _RescheduleAppointmentsScreenState
               /// working hours
               Container(
                 width: double.infinity,
-
-                padding: EdgeInsets.all(18.w),
-
+                padding: EdgeInsets.all(8.r),
                 decoration: BoxDecoration(
                   color: colors.whiteColor,
-
                   borderRadius: BorderRadius.circular(24.r),
                 ),
 
@@ -332,126 +329,151 @@ class _RescheduleAppointmentsScreenState
                       children: [
                         Container(
                           padding: EdgeInsets.all(12.w),
-
                           decoration: BoxDecoration(
                             color: colors.main.withValues(alpha: .12),
-
                             borderRadius: BorderRadius.circular(14.r),
                           ),
-
                           child: Icon(Icons.access_time, color: colors.main),
                         ),
-
                         Gaps.hGap12,
-
                         Expanded(
                           child: Text(
                             "edit_working_hours".tr,
-
                             style: TextStyles.semiBold18(),
                           ),
                         ),
                       ],
                     ),
+                    Gaps.vGap16,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerRight,
 
-                    Gaps.vGap20,
-
-                    Align(
-                      alignment: Alignment.centerRight,
-
-                      child: Text("from_time".tr, style: TextStyles.medium14()),
-                    ),
-
-                    Gaps.vGap10,
-
-                    GestureDetector(
-                      onTap: () {
-                        pickTime(isStart: true);
-                      },
-
-                      child: Container(
-                        width: double.infinity,
-
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 18.w,
-
-                          vertical: 18.h,
-                        ),
-
-                        decoration: BoxDecoration(
-                          color: colors.backGround,
-
-                          borderRadius: BorderRadius.circular(18.r),
-                        ),
-
-                        child: Row(
-                          children: [
-                            Icon(Icons.access_time_rounded, color: colors.main),
-
-                            Gaps.hGap10,
-
-                            Expanded(
-                              child: Text(
-                                formatTime(startTime),
-
-                                style: TextStyles.medium15(),
+                                child: Text(
+                                  "from_time".tr,
+                                  style: TextStyles.medium14(),
+                                ),
                               ),
-                            ),
 
-                            Icon(Icons.restart_alt_rounded, color: colors.main),
-                          ],
-                        ),
-                      ),
-                    ),
+                              Gaps.vGap10,
 
-                    Gaps.vGap22,
+                              GestureDetector(
+                                onTap: () {
+                                  pickTime(isStart: true);
+                                },
 
-                    Align(
-                      alignment: Alignment.centerRight,
+                                child: Container(
+                                  width: double.infinity,
 
-                      child: Text("to_time".tr, style: TextStyles.medium14()),
-                    ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 18.w,
 
-                    Gaps.vGap10,
+                                    vertical: 18.h,
+                                  ),
 
-                    GestureDetector(
-                      onTap: () {
-                        pickTime(isStart: false);
-                      },
+                                  decoration: BoxDecoration(
+                                    color: colors.backGround,
 
-                      child: Container(
-                        width: double.infinity,
+                                    borderRadius: BorderRadius.circular(18.r),
+                                  ),
 
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 18.w,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time_rounded,
+                                        color: colors.main,
+                                      ),
 
-                          vertical: 18.h,
-                        ),
+                                      Gaps.hGap10,
 
-                        decoration: BoxDecoration(
-                          color: colors.backGround,
+                                      Expanded(
+                                        child: Text(
+                                          formatTime(startTime),
 
-                          borderRadius: BorderRadius.circular(18.r),
-                        ),
+                                          style: TextStyles.medium15(),
+                                        ),
+                                      ),
 
-                        child: Row(
-                          children: [
-                            Icon(Icons.access_time_rounded, color: colors.main),
-
-                            Gaps.hGap10,
-
-                            Expanded(
-                              child: Text(
-                                formatTime(endTime),
-
-                                style: TextStyles.medium15(),
+                                      Icon(
+                                        Icons.restart_alt_rounded,
+                                        color: colors.main,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
-
-                            Icon(Icons.restart_alt_rounded, color: colors.main),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
+                        Gaps.hGap8,
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.centerRight,
+
+                                child: Text(
+                                  "to_time".tr,
+                                  style: TextStyles.medium14(),
+                                ),
+                              ),
+
+                              Gaps.vGap10,
+
+                              GestureDetector(
+                                onTap: () {
+                                  pickTime(isStart: false);
+                                },
+
+                                child: Container(
+                                  width: double.infinity,
+
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 18.w,
+
+                                    vertical: 18.h,
+                                  ),
+
+                                  decoration: BoxDecoration(
+                                    color: colors.backGround,
+
+                                    borderRadius: BorderRadius.circular(18.r),
+                                  ),
+
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time_rounded,
+                                        color: colors.main,
+                                      ),
+
+                                      Gaps.hGap10,
+
+                                      Expanded(
+                                        child: Text(
+                                          formatTime(endTime),
+
+                                          style: TextStyles.medium15(),
+                                        ),
+                                      ),
+
+                                      Icon(
+                                        Icons.restart_alt_rounded,
+                                        color: colors.main,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -696,8 +718,10 @@ class _RescheduleAppointmentsScreenState
                 height: 56.h,
 
                 onPressed: () {
-                  final doctorId =
-                      context.read<SessionCubit>().state.activeDoctorId;
+                  final doctorId = context
+                      .read<SessionCubit>()
+                      .state
+                      .activeDoctorId;
                   if (doctorId == null || doctorId.isEmpty) return;
 
                   final sessionState = context.read<SessionCubit>().state;

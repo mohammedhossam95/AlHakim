@@ -24,11 +24,13 @@ class AddDoctorParams extends Equatable {
   final String? minPatients;
   final String? representativeCode;
   final String? price;
+  final String? consultationPrice;
 
   final File? profileImage;
   final File? license;
   final List<dynamic>? schedules;
   final bool? hidePrice;
+  final bool? hideConsultationPrice;
   final int? medicalCenterId;
 
   const AddDoctorParams({
@@ -45,12 +47,14 @@ class AddDoctorParams extends Equatable {
     this.minPatients,
     this.representativeCode,
     this.price,
+    this.consultationPrice,
     this.profileImage,
     this.license,
     this.schedules,
     this.clinicCountryCode,
     this.secretaryCountryCode,
     this.hidePrice,
+    this.hideConsultationPrice,
     this.medicalCenterId,
   });
 
@@ -69,12 +73,14 @@ class AddDoctorParams extends Equatable {
     minPatients,
     representativeCode,
     price,
+    consultationPrice,
     profileImage,
     license,
     schedules,
     clinicCountryCode,
     secretaryCountryCode,
     hidePrice,
+    hideConsultationPrice,
     medicalCenterId,
   ];
 }
