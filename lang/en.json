@@ -224,7 +224,7 @@
   "ai_engine_title": "AI engine to find your doctor",
   "ai_engine_desc": "Answer a few questions to suggest the best speciality or doctor for your case",
   "start_diagnosis": "Start diagnosis now",
-  "agent_title": "AI Agent",
+  "agent_title": "AI Medical Assistant",
   "complaint_description": "Complaint Description",
   "agent_desc": "Use AI to analyze the complaint and direct the patient",
   "complaint_hint": "Write here the complaint details...",
@@ -253,6 +253,9 @@
   "age": "Age",
   "enter_name": "Enter name",
   "birth_date": "Birth Date",
+  "month": "Month",
+  "day": "Day",
+  "year": "Year",
   "birth_date_hint": "DD / MM / YYYY",
   "relation": "Relation",
   "save": "Save",
@@ -436,6 +439,10 @@
   "height": "Height",
   "weight": "Weight",
   "blood_type": "Blood Type",
+  "gender": "Gender",
+  "male": "Male",
+  "female": "Female",
+  "select_gender": "Select gender",
   "enter_first_name": "Enter first name",
   "enter_last_name": "Enter last name",
   "select_birth_date": "Select birth date",
@@ -470,5 +477,6 @@
   "your_follow_up_doctor": "Your follow-up doctor",
   "call_clinic": "Call the clinic",
   "no_registered_doctors": "No registered doctors",
-  "position_ordinal": "({number})"
+  "position_ordinal": "({number})",
+  "ai_assistant_disclaimer": "Reminder: All suggestions provided are from an AI assistant. Visiting a specialist doctor and taking the appropriate medication based on their instructions is essential."
 }

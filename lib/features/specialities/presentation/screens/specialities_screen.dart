@@ -278,7 +278,7 @@ class _BannerCard extends StatelessWidget {
               ),
               Gaps.hGap6,
               Text(
-                "ai_engine_title".tr,
+                "agent_title".tr,
                 style: TextStyles.semiBold18(color: colors.whiteColor),
               ),
             ],

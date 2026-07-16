@@ -222,7 +222,7 @@
   "ai_engine_title": "المحرك الذكي لتحديد طبيبك",
   "ai_engine_desc": "أجب عن بعض الأسئلة لنقترح عليك التخصص أو الطبيب الأنسب لحالتك",
   "start_diagnosis": "ابدأ الفحص الآن",
-  "agent_title": "المحرك الذكي",
+  "agent_title": "المساعد الطبي الذكي",
   "complaint_description": "وصف شكوى المريض",
   "agent_desc": "استخدم الذكاء الاصطناعي لتحليل الحالة وتوجيه المريض",
   "complaint_hint": "اكتب هنا تفاصيل الشكوى...",
@@ -251,6 +251,9 @@
   "age": "العمر",
   "enter_name": "ادخل الاسم",
   "birth_date": "تاريخ الميلاد",
+  "month": "الشهر",
+  "day": "اليوم",
+  "year": "السنة",
   "birth_date_hint": "يوم / شهر / سنة",
   "relation": "صلة القرابة",
   "save": "حفظ",
@@ -434,6 +437,10 @@
   "height": "الطول",
   "weight": "الوزن",
   "blood_type": "فصيلة الدم",
+  "gender": "النوع",
+  "male": "ذكر",
+  "female": "أنثى",
+  "select_gender": "اختر النوع",
   "enter_first_name": "ادخل الاسم الأول",
   "enter_last_name": "ادخل الاسم الأخير",
   "select_birth_date": "اختر تاريخ الميلاد",
@@ -468,5 +475,6 @@
   "your_follow_up_doctor": "طبيبك المتابع",
   "call_clinic": "اتصال بالعيادة",
   "no_registered_doctors": "لا يوجد أطباء مسجلون",
-  "position_ordinal": "({number})"
+  "position_ordinal": "({number})",
+  "ai_assistant_disclaimer": "تذكير: كل ما تم تقديمه هو اقتراحات من مساعد ذكاء اصطناعي. لا غنى عن زيارة الطبيب المختص وأخذ الدواء المناسب بناءً على توجيهاته."
 }

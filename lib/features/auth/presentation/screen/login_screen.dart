@@ -106,23 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      /// logo
-                      CircleAvatar(
-                        radius: 40.r,
-                        backgroundColor: colors.main,
-                        child: Icon(
-                          Icons.medical_services_outlined,
-                          color: colors.whiteColor,
-                          size: 30,
-                        ),
-                      ),
-
-                      Gaps.vGap16,
-
-                      Text(
-                        "Al-Hakim",
-                        style: TextStyles.semiBold20(color: colors.main),
-                      ),
+                      Image.asset("assets/images/logo2.png", height: 150.h),
 
                       Gaps.vGap16,
 
@@ -132,8 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         textAlign: TextAlign.start,
                       ),
 
-                      Gaps.vGap8,
-
+                      // Gaps.vGap8,
                       Text(
                         "login_subtitle".tr,
                         style: TextStyles.medium14(

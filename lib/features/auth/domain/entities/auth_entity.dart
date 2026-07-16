@@ -25,6 +25,7 @@ class UserEntity extends Equatable {
   final String? tall;
   final String? weight;
   final String? bloodType;
+  final String? gender;
   final String? location;
 
   const UserEntity({
@@ -40,6 +41,7 @@ class UserEntity extends Equatable {
     this.tall,
     this.weight,
     this.bloodType,
+    this.gender,
     this.location,
   });
 
@@ -57,6 +59,7 @@ class UserEntity extends Equatable {
     tall,
     weight,
     bloodType,
+    gender,
     location,
   ];
 }
