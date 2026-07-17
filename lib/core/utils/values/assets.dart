@@ -11,7 +11,7 @@ class ImgAssets {
 
   static const String imagesLightMode = 'assets/images/light-mode.png';
 
-  static const String logo = 'assets/images/alhakim_logo.png';
+  static const String logo = 'assets/images/logo.png';
   static const String homeDiscount = 'assets/images/homeDiscount.png';
   static const String catsDiscount = 'assets/images/categoriesDiscount.png';
   static const String balanceRocket = 'assets/images/rocket.png';

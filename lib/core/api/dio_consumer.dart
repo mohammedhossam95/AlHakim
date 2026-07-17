@@ -22,7 +22,11 @@ abstract class ApiConstants {
 }
 
 abstract class DioConsumer {
-  Future<dynamic> get(String path, {Map<String, dynamic>? queryParameters});
+  Future<dynamic> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  });
 
   Future<dynamic> post(
     String path, {
@@ -140,11 +144,19 @@ class DioConsumerImpl implements DioConsumer {
   }
 
   @override
-  Future get(String path, {Map<String, dynamic>? queryParameters}) async {
+  Future get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) async {
     try {
       Log.i('[GET][$path], params: ${queryParameters.toString()}');
       await _handleAccessTokenHeader();
-      final response = await client.get(path, queryParameters: queryParameters);
+      final response = await client.get(
+        path,
+        queryParameters: queryParameters,
+        options: headers == null ? null : Options(headers: headers),
+      );
       Log.i('[GET][$path], response: ${response.data.toString()}');
       return response.data;
     } on SocketException {
