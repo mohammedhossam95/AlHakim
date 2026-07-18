@@ -1,5 +1,4 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
-import 'package:alhakim/core/utils/values/assets.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
@@ -249,17 +248,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         children: [
           Gaps.vGap8,
-          Image.asset(ImgAssets.logo, width: 80.w, height: 80.h),
-          if (registrationNumber != null && registrationNumber.isNotEmpty) ...[
-            Gaps.vGap8,
-            Text(
-              '${'commercial_registration'.tr}: $registrationNumber',
-              style: TextStyles.medium10(
-                color: colors.lightTextColor.withValues(alpha: 0.8),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          Image.asset(
+            "assets/images/logo_horizontal.png",
+            fit: BoxFit.scaleDown,
+            width: 300.w,
+            height: 80.h,
+          ),
+
           Gaps.vGap10,
           if (links.isNotEmpty)
             Wrap(
@@ -278,12 +273,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   )
                   .toList(),
             ),
+          if (registrationNumber != null && registrationNumber.isNotEmpty) ...[
+            Gaps.vGap10,
+            Text(
+              '${'commercial_registration'.tr}: $registrationNumber',
+              style: TextStyles.semiBold14(color: colors.lightTextColor),
+              textAlign: TextAlign.center,
+            ),
+          ],
           Gaps.vGap10,
           Text(
             'all_rights_reserved'.tr,
-            style: TextStyles.medium10(
-              color: colors.lightTextColor.withValues(alpha: 0.5),
-            ),
+            style: TextStyles.semiBold14(color: colors.lightTextColor),
           ),
           Gaps.vGap54,
           Gaps.vGap54,
