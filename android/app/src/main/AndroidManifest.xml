@@ -7,7 +7,7 @@
     <application
         android:label="Al Hakim"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -46,7 +46,7 @@
         <!-- White/alpha icon recommended for status bar; launcher works as fallback -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/launcher_icon" />
+            android:resource="@mipmap/ic_launcher" />
 
         <!-- Optional accent color for the system notification -->
         <!--

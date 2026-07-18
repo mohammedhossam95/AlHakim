@@ -1,5 +1,6 @@
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
+import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/log_utils.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
@@ -164,8 +165,12 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   @override
   Future<AppSettingRespModel> getAppSetting() async {
     try {
-      final dynamic response = await dioConsumer.get('/get_settings');
-      if (response['success'] == true) {
+      final headers = await Constants.getAppConfigHeaders();
+      final dynamic response = await dioConsumer.get(
+        '/app-config',
+        headers: headers,
+      );
+      if (response['status'] == true) {
         return AppSettingRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');

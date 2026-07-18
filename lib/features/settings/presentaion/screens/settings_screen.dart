@@ -1,14 +1,20 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/utils/values/assets.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
+import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/settings/domain/entity/app_setting_entity.dart';
+import 'package:alhakim/features/settings/presentaion/cubit/app_setting_cubit/app_setting_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/custom_app_bar.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/language_setting_widget.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/profile_widget.dart';
 import 'package:alhakim/injection_container.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '/config/routes/app_routes.dart';
@@ -28,7 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    // context.read<AppSettingCubit>().getAppsetting();
+    context.read<AppSettingCubit>().getAppsetting();
   }
 
   @override
@@ -176,29 +182,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 },
                                 btnText: 'login',
                               ),
+                              Gaps.vGap25,
                             ],
                           ),
 
-                    // BlocBuilder<AppSettingCubit, AppSettingState>(
-                    //   builder: (context, state) {
-                    //     if (state is AppSettingLoading) {
-                    //       return Center(child: CircularProgressIndicator());
-                    //     }
-                    //     if (state is AppSettingLoaded) {
-                    //       final settings =
-                    //           state.resp.data as List<AppSettingsEntity>;
-                    //       return FadeInUp(
-                    //         child: _buildAppInfoSection(settings),
-                    //       );
-                    //     }
-                    //     if (state is AppSettingError) {
-                    //       return ErrorText(
-                    //         width: ScreenUtil().screenWidth * 0.6,
-                    //       );
-                    //     }
-                    //     return const SizedBox.shrink();
-                    //   },
-                    // ),
+                    BlocBuilder<AppSettingCubit, AppSettingState>(
+                      builder: (context, state) {
+                        if (state is AppSettingLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (state is AppSettingLoaded) {
+                          final config = state.resp.data as AppConfigEntity?;
+                          if (config == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return FadeInUp(child: _buildAppInfoSection(config));
+                        }
+                        if (state is AppSettingError) {
+                          return ErrorText(
+                            width: ScreenUtil().screenWidth * 0.6,
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
                   ]),
                 ),
               ),
@@ -231,127 +240,105 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Widget _buildAppInfoSection(List<AppSettingsEntity> settings) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-  //     child: Column(
-  //       children: [
-  //         Gaps.vGap8,
-  //         Image.asset(ImgAssets.logo, width: 80.w, height: 80.h),
-  // Text(
-  //   settings.appName ?? '',
-  //   style: TextStyles.medium10(
-  //     color: colors.lightTextColor.withValues(alpha: 0.8),
-  //   ),
-  //   textAlign: TextAlign.center,
-  // ),
-  // Gaps.vGap10,
-  // Social Media Icons Row
-  // Wrap(
-  //   alignment: WrapAlignment.center,
-  //   children: [
-  //     _socialIcon(
-  //       FontAwesomeIcons.tiktok,
-  //       settings.tiktok,
-  //       onTap: () => Constants.launchURL(settings.tiktok!),
-  //     ),
-  //     _socialIcon(
-  //       FontAwesomeIcons.instagram,
-  //       settings.instagram,
-  //       onTap: () => Constants.launchURL(settings.instagram!),
-  //     ),
-  //     _socialIcon(
-  //       FontAwesomeIcons.facebook,
-  //       settings.facebook,
-  //       onTap: () => Constants.launchURL(settings.facebook!),
-  //     ),
-  //     _socialIcon(
-  //       FontAwesomeIcons.whatsapp,
-  //       settings.whatsapp,
-  //       onTap: () =>
-  //           Constants.launchURL("https://wa.me/${settings.whatsapp}"),
-  //     ),
+  Widget _buildAppInfoSection(AppConfigEntity config) {
+    final links = config.externalLinks ?? [];
+    final registrationNumber = config.business?.commercialRegistrationNumber;
 
-  //     _socialIcon(
-  //       Icons.email,
-  //       settings.support,
-  //       onTap: () => Constants.launchURL("mailto:${settings.support}"),
-  //     ),
-  //     _socialIcon(
-  //       FontAwesomeIcons.xTwitter,
-  //       settings.twitter,
-  //       onTap: () {
-  //         if (settings.twitter != null) {
-  //           Constants.launchURL(settings.twitter!);
-  //         }
-  //       },
-  //     ),
-  //     _socialIcon(
-  //       FontAwesomeIcons.snapchat,
-  //       settings.snapchat,
-  //       onTap: () {
-  //         if (settings.snapchat != null) {
-  //           Constants.launchURL(settings.snapchat!);
-  //         }
-  //       },
-  //     ),
-  //     _socialIcon(
-  //       FontAwesomeIcons.youtube,
-  //       settings.youtube,
-  //       onTap: () {
-  //         if (settings.snapchat != null) {
-  //           Constants.launchURL(settings.youtube!);
-  //         }
-  //       },
-  //     ),
-  //     _socialIcon(
-  //       FontAwesomeIcons.linkedin,
-  //       settings.linkedIn,
-  //       onTap: () {
-  //         if (settings.snapchat != null) {
-  //           Constants.launchURL(settings.linkedIn!);
-  //         }
-  //       },
-  //     ),
-  //   ],
-  // ),
-  //         Gaps.vGap10,
-  //         Text(
-  //           'all_rights_reserved'.tr,
-  //           style: TextStyles.medium10(
-  //             color: colors.lightTextColor.withValues(alpha: 0.5),
-  //           ),
-  //         ),
-  //         Gaps.vGap54,
-  //         Gaps.vGap54,
-  //       ],
-  //     ),
-  //   );
-  // }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          Gaps.vGap8,
+          Image.asset(ImgAssets.logo, width: 80.w, height: 80.h),
+          if (registrationNumber != null && registrationNumber.isNotEmpty) ...[
+            Gaps.vGap8,
+            Text(
+              '${'commercial_registration'.tr}: $registrationNumber',
+              style: TextStyles.medium10(
+                color: colors.lightTextColor.withValues(alpha: 0.8),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          Gaps.vGap10,
+          if (links.isNotEmpty)
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: links
+                  .map(
+                    (link) => _socialIcon(
+                      _iconForLink(link.icon ?? link.name),
+                      link.url,
+                      onTap: () {
+                        if (link.url != null && link.url!.isNotEmpty) {
+                          Constants.launchURL(link.url!);
+                        }
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+          Gaps.vGap10,
+          Text(
+            'all_rights_reserved'.tr,
+            style: TextStyles.medium10(
+              color: colors.lightTextColor.withValues(alpha: 0.5),
+            ),
+          ),
+          Gaps.vGap54,
+          Gaps.vGap54,
+        ],
+      ),
+    );
+  }
 
-  // Widget _socialIcon(
-  //   IconData icon,
-  //   String? value, {
-  //   required VoidCallback onTap,
-  // }) {
-  //   if (value == null || value.isEmpty) return const SizedBox.shrink();
+  IconData _iconForLink(String? key) {
+    switch (key?.toLowerCase()) {
+      case 'facebook':
+        return FontAwesomeIcons.facebook;
+      case 'instagram':
+        return FontAwesomeIcons.instagram;
+      case 'tiktok':
+        return FontAwesomeIcons.tiktok;
+      case 'twitter':
+      case 'x':
+        return FontAwesomeIcons.xTwitter;
+      case 'whatsapp':
+        return FontAwesomeIcons.whatsapp;
+      case 'snapchat':
+        return FontAwesomeIcons.snapchat;
+      case 'youtube':
+        return FontAwesomeIcons.youtube;
+      case 'linkedin':
+        return FontAwesomeIcons.linkedin;
+      default:
+        return FontAwesomeIcons.link;
+    }
+  }
 
-  //   return Padding(
-  //     padding: EdgeInsets.symmetric(horizontal: 6.w),
-  //     child: InkWell(
-  //       onTap: onTap,
-  //       child: Container(
-  //         padding: EdgeInsets.all(6.r),
-  //         margin: EdgeInsets.only(top: 2.h),
-  //         decoration: BoxDecoration(
-  //           shape: BoxShape.circle,
-  //           color: Colors.grey.withValues(alpha: 0.1),
-  //         ),
-  //         child: Icon(icon, size: 22.sp, color: Colors.black87),
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget _socialIcon(
+    IconData icon,
+    String? value, {
+    required VoidCallback onTap,
+  }) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6.w),
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.all(6.r),
+          margin: EdgeInsets.only(top: 2.h),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.grey.withValues(alpha: 0.1),
+          ),
+          child: Icon(icon, size: 22.sp, color: Colors.black87),
+        ),
+      ),
+    );
+  }
 
   Future<void> _handleLogout() async {
     if (!mounted) return;
@@ -374,27 +361,3 @@ class _SettingsScreenState extends State<SettingsScreen> {
     context.go(Routes.initialRoute);
   }
 }
-
-// extension AppSettingsListX on List<AppSettingsEntity> {
-//   // Helper to find value by key safely
-//   String? _get(String key) {
-//     try {
-//       return firstWhere((element) => element.key == key).value;
-//     } catch (_) {
-//       return null; // Return null if key is not found
-//     }
-//   }
-
-  // // Define getters for each field used in your UI
-  // String? get appName => _get('name');
-  // String? get tiktok => _get('tiktok');
-  // String? get instagram => _get('instagram');
-  // String? get facebook => _get('facebook');
-  // String? get whatsapp =>
-  //     _get('phone'); // Based on your JSON, phone is the whatsapp
-  // String? get twitter => _get('twitter');
-  // String? get snapchat => _get('snapchat');
-  // String? get support => _get('email');
-  // String? get youtube => _get('youtube');
-  // String? get linkedIn => _get('linkedin');
-// }

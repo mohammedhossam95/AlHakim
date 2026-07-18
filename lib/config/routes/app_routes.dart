@@ -12,7 +12,6 @@ import 'package:alhakim/features/appointments/presentation/screens/follow_up_que
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get_countries_cubit.dart';
-import 'package:alhakim/features/auth/presentation/cubit/get_setting/get_setting_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/resend_otp_cubit/resend_otp_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
@@ -50,6 +49,7 @@ import 'package:alhakim/features/home/presentation/screen/agent_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/quick_booking_cubit/quick_booking_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/quick_booking_screen.dart';
+import 'package:alhakim/features/settings/presentaion/cubit/app_setting_cubit/app_setting_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/update_user_profile_cubit/update_user_profile_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/screens/edit_profile_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/static_page_content_screen.dart';
@@ -147,7 +147,7 @@ abstract class Routes {
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
           child: BlocProvider(
-            create: (context) => sl<GetSettingCubit>()..getSetting(),
+            create: (context) => sl<AppSettingCubit>()..getAppsetting(),
             child: SplashScreen(),
           ),
         ),

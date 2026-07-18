@@ -240,7 +240,37 @@ class _ComplaintInputCard extends StatelessWidget {
               ],
             ),
           ),
-          Gaps.vGap32,
+          Gaps.vGap24,
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: colors.warning.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: colors.warning.withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: colors.textColor,
+                  size: 20.sp,
+                ),
+                Gaps.hGap8,
+                Expanded(
+                  child: Text(
+                    'ai_assistant_disclaimer'.tr,
+                    style: TextStyles.semiBold12(color: colors.textColor)
+                        .copyWith(height: 1.5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Gaps.vGap16,
           MyDefaultButton(
             isLoading: isLoading,
             onPressed: isLoading ? null : onAnalyze,

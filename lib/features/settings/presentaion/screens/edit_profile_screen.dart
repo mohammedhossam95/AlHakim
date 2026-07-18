@@ -3,11 +3,13 @@ import 'dart:developer';
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/core/widgets/split_date_picker.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/update_user_profile_cubit/update_user_profile_cubit.dart';
@@ -34,12 +36,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final locationController = TextEditingController();
   final firstNameFocus = FocusNode();
   final lastNameFocus = FocusNode();
-  final birthDateFocus = FocusNode();
   final heightFocus = FocusNode();
   final weightFocus = FocusNode();
   final locationFocus = FocusNode();
 
   String? selectedBloodType;
+  String? selectedGender;
   late UserEntity user;
 
   final List<String> bloodTypes = [
@@ -53,6 +55,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     'O-',
   ];
 
+  final List<Map<String, String>> genders = [
+    {'value': 'male', 'labelKey': 'male'},
+    {'value': 'female', 'labelKey': 'female'},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     weightController.text = user.weight ?? '';
     locationController.text = user.location ?? '';
     selectedBloodType = user.bloodType;
+    selectedGender = user.gender;
   }
 
   @override
@@ -76,7 +84,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     locationController.dispose();
     firstNameFocus.dispose();
     lastNameFocus.dispose();
-    birthDateFocus.dispose();
     heightFocus.dispose();
     weightFocus.dispose();
     locationFocus.dispose();
@@ -127,6 +134,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     tall: updatedUser.tall,
                     weight: updatedUser.weight,
                     bloodType: updatedUser.bloodType,
+                    gender: updatedUser.gender,
                     location: updatedUser.location,
                   ),
                 ),
@@ -147,34 +155,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// First Name
-                Text("first_name".tr, style: TextStyles.semiBold14()),
-
-                Gaps.vGap8,
-
-                MyTextFormField(
-                  controller: firstNameController,
-                  focusNode: firstNameFocus,
-                  hintText: "enter_first_name".tr,
-                  // validatorType: ValidatorType.name,
-                  backgroundColor: colors.main.withValues(alpha: .1),
-                  prefixIcon: Icon(Icons.person_outline, color: colors.main),
-                ),
-
-                Gaps.vGap16,
-
-                /// Last Name
-                Text("last_name".tr, style: TextStyles.semiBold14()),
-
-                Gaps.vGap8,
-
-                MyTextFormField(
-                  controller: lastNameController,
-                  focusNode: lastNameFocus,
-                  hintText: "enter_last_name".tr,
-                  // validatorType: ValidatorType.name,
-                  backgroundColor: colors.main.withValues(alpha: .1),
-                  prefixIcon: Icon(Icons.person_outline, color: colors.main),
+                /// First Name + Last Name
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("first_name".tr, style: TextStyles.semiBold14()),
+                          Gaps.vGap8,
+                          MyTextFormField(
+                            controller: firstNameController,
+                            focusNode: firstNameFocus,
+                            hintText: "enter_first_name".tr,
+                            validatorType: ValidatorType.standard,
+                            backgroundColor: colors.main.withValues(alpha: .1),
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              color: colors.main,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Gaps.hGap12,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("last_name".tr, style: TextStyles.semiBold14()),
+                          Gaps.vGap8,
+                          MyTextFormField(
+                            controller: lastNameController,
+                            focusNode: lastNameFocus,
+                            hintText: "enter_last_name".tr,
+                            validatorType: ValidatorType.standard,
+                            backgroundColor: colors.main.withValues(alpha: .1),
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              color: colors.main,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
 
                 Gaps.vGap16,
@@ -184,118 +210,187 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                 Gaps.vGap8,
 
-                MyTextFormField(
-                  controller: birthDateController,
-                  focusNode: birthDateFocus,
-                  readOnly: true,
-                  hintText: "select_birth_date".tr,
-                  backgroundColor: colors.main.withValues(alpha: .1),
-                  prefixIcon: Icon(
-                    Icons.calendar_month_outlined,
-                    color: colors.main,
-                  ),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                      initialDate: DateTime.now(),
-                    );
-
-                    if (date != null) {
-                      birthDateController.text =
-                          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                    }
-                  },
-                ),
+                SplitDatePicker(controller: birthDateController),
 
                 Gaps.vGap16,
 
-                /// Height
-                Text("height".tr, style: TextStyles.semiBold14()),
-
-                Gaps.vGap8,
-
-                MyTextFormField(
-                  controller: heightController,
-                  focusNode: heightFocus,
-                  hintText: "enter_height".tr,
-                  keyboardType: TextInputType.number,
-                  backgroundColor: colors.main.withValues(alpha: .1),
-                  prefixIcon: Icon(Icons.height, color: colors.main),
-                ),
-
-                Gaps.vGap16,
-
-                /// Weight
-                Text("weight".tr, style: TextStyles.semiBold14()),
-
-                Gaps.vGap8,
-
-                MyTextFormField(
-                  controller: weightController,
-                  focusNode: weightFocus,
-                  hintText: "enter_weight".tr,
-                  keyboardType: TextInputType.number,
-                  backgroundColor: colors.main.withValues(alpha: .1),
-                  prefixIcon: Icon(
-                    Icons.monitor_weight_outlined,
-                    color: colors.main,
-                  ),
-                ),
-
-                Gaps.vGap16,
-
-                /// Blood Type
-                Text("blood_type".tr),
-
-                Gaps.vGap8,
-
-                DropdownButtonFormField<String>(
-                  initialValue: selectedBloodType,
-                  decoration: InputDecoration(
-                    label: Text("select_blood_type".tr),
-                    labelStyle: TextStyles.semiBold12(),
-                    prefixIcon: Icon(
-                      Icons.bloodtype_outlined,
-                      color: colors.main,
+                /// Height + Weight
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("height".tr, style: TextStyles.semiBold14()),
+                          Gaps.vGap8,
+                          MyTextFormField(
+                            controller: heightController,
+                            focusNode: heightFocus,
+                            hintText: "enter_height".tr,
+                            keyboardType: TextInputType.number,
+                            validatorType: ValidatorType.numbersOnly,
+                            backgroundColor: colors.main.withValues(alpha: .1),
+                            prefixIcon: Icon(Icons.height, color: colors.main),
+                          ),
+                        ],
+                      ),
                     ),
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    filled: true,
-                    fillColor: colors.main.withValues(alpha: .1),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                      borderSide: BorderSide.none,
+                    Gaps.hGap12,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("weight".tr, style: TextStyles.semiBold14()),
+                          Gaps.vGap8,
+                          MyTextFormField(
+                            controller: weightController,
+                            focusNode: weightFocus,
+                            hintText: "enter_weight".tr,
+                            keyboardType: TextInputType.number,
+                            validatorType: ValidatorType.numbersOnly,
+                            backgroundColor: colors.main.withValues(alpha: .1),
+                            prefixIcon: Icon(
+                              Icons.monitor_weight_outlined,
+                              color: colors.main,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  items: bloodTypes
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedBloodType = value;
-                    });
-                  },
+                  ],
                 ),
 
                 Gaps.vGap16,
+
+                /// Gender + Blood Type
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("gender".tr, style: TextStyles.semiBold14()),
+                          Gaps.vGap8,
+                          DropdownButtonFormField<String>(
+                            initialValue: selectedGender,
+                            validator: (value) {
+                              if (value == null) {
+                                return "select_gender".tr;
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 12.h,
+                              ),
+                              label: Text("select_gender".tr),
+                              labelStyle: TextStyles.semiBold12(),
+                              prefixIcon: Icon(
+                                Icons.wc_outlined,
+                                color: colors.main,
+                              ),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              filled: true,
+                              fillColor: colors.main.withValues(alpha: .1),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.r),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            items: genders
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e['value'],
+                                    child: Text(e['labelKey']!.tr),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedGender = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Gaps.hGap12,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("blood_type".tr, style: TextStyles.semiBold14()),
+                          Gaps.vGap8,
+                          DropdownButtonFormField<String>(
+                            initialValue: selectedBloodType,
+                            validator: (value) {
+                              if (value == null) {
+                                return "select_blood_type".tr;
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 12.h,
+                              ),
+                              label: Text("select_blood_type".tr),
+                              labelStyle: TextStyles.semiBold12(),
+                              prefixIcon: Icon(
+                                Icons.bloodtype_outlined,
+                                color: colors.main,
+                              ),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              filled: true,
+                              fillColor: colors.main.withValues(alpha: .1),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.r),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            items: bloodTypes
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(e),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedBloodType = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Gaps.vGap16,
 
                 /// Location
-                Text("location".tr, style: TextStyles.semiBold14()),
+                // Text("location".tr, style: TextStyles.semiBold14()),
 
-                Gaps.vGap8,
+                // Gaps.vGap8,
 
-                MyTextFormField(
-                  controller: locationController,
-                  focusNode: locationFocus,
-                  hintText: "enter_location".tr,
-                  backgroundColor: colors.main.withValues(alpha: .1),
-                  prefixIcon: Icon(
-                    Icons.location_on_outlined,
-                    color: colors.main,
-                  ),
-                ),
-
+                // MyTextFormField(
+                //   controller: locationController,
+                //   focusNode: locationFocus,
+                //   hintText: "enter_location".tr,
+                //   validatorType: ValidatorType.standard,
+                //   backgroundColor: colors.main.withValues(alpha: .1),
+                //   prefixIcon: Icon(
+                //     Icons.location_on_outlined,
+                //     color: colors.main,
+                //   ),
+                // ),
                 Gaps.vGap40,
 
                 BlocBuilder<UpdateUserProfileCubit, UpdateUserProfileState>(
@@ -307,6 +402,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                             onPressed: () {
                               if (!_formKey.currentState!.validate()) {
+                                return;
+                              }
+
+                              if (selectedGender == null) {
+                                Constants.showSnakToast(
+                                  context: context,
+                                  type: 3,
+                                  message: "select_gender".tr,
+                                );
                                 return;
                               }
 
@@ -329,6 +433,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       tall: heightController.text,
                                       weight: weightController.text,
                                       bloodType: selectedBloodType!,
+                                      gender: selectedGender!,
                                       location: locationController.text,
                                     ),
                                   );

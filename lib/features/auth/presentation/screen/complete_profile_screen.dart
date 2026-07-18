@@ -5,6 +5,7 @@ import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/assets.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
+import 'package:alhakim/core/widgets/split_date_picker.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -185,30 +186,7 @@ class _CompleteProfileRegisterScreenState
 
                   Gaps.vGap8,
 
-                  MyTextFormField(
-                    controller: birthDateController,
-                    focusNode: birthDateFocus,
-                    readOnly: true,
-                    hintText: "select_birth_date".tr,
-                    // backgroundColor: colors.main.withValues(alpha: .1),
-                    prefixIcon: Icon(
-                      Icons.calendar_month_outlined,
-                      color: colors.main,
-                    ),
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                        initialDate: DateTime.now(),
-                      );
-
-                      if (date != null) {
-                        birthDateController.text =
-                            "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-                      }
-                    },
-                  ),
+                  SplitDatePicker(controller: birthDateController),
 
                   Gaps.vGap16,
 

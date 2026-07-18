@@ -28,5 +28,5 @@ abstract class SettingRepo {
   Future<Either<Failure, BaseOneResponse>> getStaticPageContent(
     StaticPageType type,
   );
-  Future<Either<Failure, BaseListResponse>> getAppSetting();
+  Future<Either<Failure, BaseOneResponse>> getAppSetting();
 }

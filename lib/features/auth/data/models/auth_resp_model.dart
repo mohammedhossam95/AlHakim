@@ -75,6 +75,7 @@ class UserModel extends UserEntity {
     super.tall,
     super.weight,
     super.bloodType,
+    super.gender,
     super.location,
   });
 
@@ -92,6 +93,7 @@ class UserModel extends UserEntity {
       tall: json['tall'],
       weight: json['weight'],
       bloodType: json['blood_type'],
+      gender: json['gender'],
       location: json['location'],
     );
   }
@@ -108,6 +110,7 @@ class UserModel extends UserEntity {
     "tall": tall,
     "weight": weight,
     "blood_type": bloodType,
+    "gender": gender,
     "location": location,
   };
 }

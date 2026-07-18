@@ -219,6 +219,17 @@ class Constants {
     }
   }
 
+  static Future<Map<String, String>> getAppConfigHeaders() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final platform = Platform.isIOS
+        ? 'ios'
+        : Platform.isAndroid
+        ? 'android'
+        : 'unknown';
+
+    return {'Platform': platform, 'App-Version': packageInfo.version};
+  }
+
   static Future<String> getIPAddress() async {
     String ipAddress = 'Unknown';
 
@@ -947,61 +958,63 @@ class Constants {
         SessionStatus.authenticated;
   }
 
+  static Color getBackgroundColorBySlug(String slug) {
+    switch (slug) {
+      // التخصصات العامة والأكثر شعبية (درجات الأزرق المريحة)
+      case 'general-medicine':
+        return const Color(0xFFE3F2FD); // أزرق سماوي فاتح جداً
+      case 'pediatrics':
+        return const Color(0xFFFFF3E0); // برتقالي باستيل دافئ ومبهج للأطفال
+      case 'dentistry':
+        return const Color(0xE0F7FAFF); // فيروزي فاتح منعش ونظيف
 
+      // تخصصات الباطنة والأعضاء (درجات هادئة وعميقة)
+      case 'internal-medicine-gastroenterology':
+        return const Color(0xFFE8F5E9); // أخضر عشبي خفيف جداً مريح للمعدة
+      case 'obstetrics-gynecology':
+        return const Color(0xFFFCE4EC); // وردي باستيل ناعم خاص بالنساء
+      case 'orthopedics':
+        return const Color(0xFFECEFF1); // رمادي فاتح كالجبس أو العظام
+      case 'dermatology':
+        return const Color(0xFFFFF8E1); // بيج ناعم يرمز للجلد والبشرة
 
-static Color getBackgroundColorBySlug(String slug) {
-  switch (slug) {
-    // التخصصات العامة والأكثر شعبية (درجات الأزرق المريحة)
-    case 'general-medicine':
-      return const Color(0xFFE3F2FD); // أزرق سماوي فاتح جداً
-    case 'pediatrics':
-      return const Color(0xFFFFF3E0); // برتقالي باستيل دافئ ومبهج للأطفال
-    case 'dentistry':
-      return const Color(0xE0F7FAFF); // فيروزي فاتح منعش ونظيف
+      // الحواس والأعصاب (ألوان باردة لتقليل التوتر)
+      case 'ent-otolaryngology':
+        return const Color(0xFFF3E5F5); // لافندر/بنفسجي هادئ جداً
+      case 'ophthalmology':
+        return const Color(0xFFE0F2F1); // تيل (Teal) فاتح جداً مريح للعين
+      case 'psychiatry':
+        return const Color(0xFFE0F7FA); // أزرق مائل للخضرة مهدئ نفسياً
+      case 'neurology':
+        return const Color(0xFFEDE7F6); // بنفسجي فاتح عميق يرمز للمخ والأعصاب
 
-    // تخصصات الباطنة والأعضاء (درجات هادئة وعميقة)
-    case 'internal-medicine-gastroenterology':
-      return const Color(0xFFE8F5E9); // أخضر عشبي خفيف جداً مريح للمعدة
-    case 'obstetrics-gynecology':
-      return const Color(0xFFFCE4EC); // وردي باستيل ناعم خاص بالنساء
-    case 'orthopedics':
-      return const Color(0xFFECEFF1); // رمادي فاتح كالجبس أو العظام
-    case 'dermatology':
-      return const Color(0xFFFFF8E1); // بيج ناعم يرمز للجلد والبشرة
+      // التخصصات الدقيقة والحرجة (ألوان مميزة ووقورة)
+      case 'urology':
+        return const Color(0xFFE1F5FE); // أزرق مائي خفيف جداً
+      case 'cardiology-cardiovascular-surgery':
+        return const Color(
+          0xFFFFEBEE,
+        ); // أحمر باستيل خفيف جداً (مناسب للقلب دون إثارة ذعر)
+      case 'endocrinology':
+        return const Color(0xFFF9FBF7); // أوف وايت / أخضر مصفر هادئ
+      case 'oncology':
+        return const Color(0xFFF1F8E9); // أخضر هادئ جداً يبعث على الأمل والنقاء
+      case 'plastic-surgery':
+        return const Color(0xFFFFF0F5); // روز فاتح تجميلي (Lavender Blush)
 
-    // الحواس والأعصاب (ألوان باردة لتقليل التوتر)
-    case 'ent-otolaryngology':
-      return const Color(0xFFF3E5F5); // لافندر/بنفسجي هادئ جداً
-    case 'ophthalmology':
-      return const Color(0xFFE0F2F1); // تيل (Teal) فاتح جداً مريح للعين
-    case 'psychiatry':
-      return const Color(0xFFE0F7FA); // أزرق مائل للخضرة مهدئ نفسياً
-    case 'neurology':
-      return const Color(0xFFEDE7F6); // بنفسجي فاتح عميق يرمز للمخ والأعصاب
+      // الطوارئ والطب النووي
+      case 'emergency-medicine':
+        return const Color(0xFFFFE0B2); // برتقالي فاتح للتنبيه السريع دون فزع
+      case 'nuclear-medicine':
+        return const Color(
+          0xFFFFFDE7,
+        ); // أصفر ليموني خفيف جداً يرمز للأشعة والنووي
 
-    // التخصصات الدقيقة والحرجة (ألوان مميزة ووقورة)
-    case 'urology':
-      return const Color(0xFFE1F5FE); // أزرق مائي خفيف جداً
-    case 'cardiology-cardiovascular-surgery':
-      return const Color(0xFFFFEBEE); // أحمر باستيل خفيف جداً (مناسب للقلب دون إثارة ذعر)
-    case 'endocrinology':
-      return const Color(0xFFF9FBF7); // أوف وايت / أخضر مصفر هادئ
-    case 'oncology':
-      return const Color(0xFFF1F8E9); // أخضر هادئ جداً يبعث على الأمل والنقاء
-    case 'plastic-surgery':
-      return const Color(0xFFFFF0F5); // روز فاتح تجميلي (Lavender Blush)
-
-    // الطوارئ والطب النووي
-    case 'emergency-medicine':
-      return const Color(0xFFFFE0B2); // برتقالي فاتح للتنبيه السريع دون فزع
-    case 'nuclear-medicine':
-      return const Color(0xFFFFFDE7); // أصفر ليموني خفيف جداً يرمز للأشعة والنووي
-
-    // الـ Default في حال لم يتم العثور على الـ slug
-    default:
-      return const Color(0xFFCFD8DC); // رمادي مزرق وقور ومحايد (BlueGrey)
+      // الـ Default في حال لم يتم العثور على الـ slug
+      default:
+        return const Color(0xFFCFD8DC); // رمادي مزرق وقور ومحايد (BlueGrey)
+    }
   }
-}
 }
 
 abstract class ArabicNumeric {

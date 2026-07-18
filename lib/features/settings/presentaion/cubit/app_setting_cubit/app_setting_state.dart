@@ -8,14 +8,18 @@ abstract class AppSettingState extends Equatable {
 }
 
 class AppSettingInitial extends AppSettingState {}
+
 class AppSettingLoading extends AppSettingState {
   final bool isLoading;
 
   const AppSettingLoading({required this.isLoading});
+
+  @override
+  List<Object> get props => [isLoading];
 }
 
 class AppSettingLoaded extends AppSettingState {
-  final BaseListResponse resp;
+  final BaseOneResponse resp;
 
   const AppSettingLoaded({required this.resp});
 
@@ -31,4 +35,3 @@ class AppSettingError extends AppSettingState {
   @override
   List<Object> get props => [message];
 }
-

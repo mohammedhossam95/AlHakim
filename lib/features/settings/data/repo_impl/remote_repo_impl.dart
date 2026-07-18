@@ -123,16 +123,16 @@ class SettingRemoteRepoImpl extends SettingRepo {
   }
 
   @override
-  Future<Either<Failure, BaseListResponse>> getAppSetting() async {
+  Future<Either<Failure, BaseOneResponse>> getAppSetting() async {
     try {
-      final BaseListResponse response = await settingRemoteDataSource
+      final BaseOneResponse response = await settingRemoteDataSource
           .getAppSetting();
-      return Right<Failure, BaseListResponse>(response);
+      return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
       log.Log.e(
         '[getApp Setting] [${error.runtimeType.toString()}] ---- ${error.message}',
       );
-      return Left<Failure, BaseListResponse>(error.toFailure());
+      return Left<Failure, BaseOneResponse>(error.toFailure());
     }
   }
 }

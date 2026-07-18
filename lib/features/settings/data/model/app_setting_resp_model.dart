@@ -1,90 +1,88 @@
-import 'package:alhakim/core/base_classes/base_list_response.dart';
+import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/settings/domain/entity/app_setting_entity.dart';
 
-class AppSettingRespModel extends BaseListResponse {
-  const AppSettingRespModel({super.success, super.data, super.message});
+class AppSettingRespModel extends BaseOneResponse {
+  const AppSettingRespModel({super.status, super.message, super.data});
 
   factory AppSettingRespModel.fromJson(Map<String, dynamic> json) {
     return AppSettingRespModel(
-      success: json['success'],
+      status: json['status'],
       message: json['message'],
-      data: json['data'] != null
-          ? (json['data'] as List)
-                .map((item) => AppSettingsModel.fromJson(item))
-                .toList()
-          : [],
+      data: json['data'] == null
+          ? null
+          : AppConfigModel.fromJson(json['data']),
     );
   }
 }
 
-class AppSettingsModel extends AppSettingsEntity {
-  const AppSettingsModel({
-    super.id,
-    super.key,
-    super.value,
-    super.appName,
-    super.contactEmail,
-    super.contactPhone,
-    super.whatsapp,
-    super.facebook,
-    super.instagram,
-    super.tiktok,
-    super.twitter,
-    super.snapchat,
-    super.returnDays,
-    super.deliveryPeriod,
-    super.simpleAbout,
-    super.taxNumber,
-    super.image,
-    super.favIco,
-    super.defaultLang,
+class AppConfigModel extends AppConfigEntity {
+  const AppConfigModel({
+    super.update,
+    super.business,
+    super.externalLinks,
   });
 
-  factory AppSettingsModel.fromJson(Map<String, dynamic> json) {
-    return AppSettingsModel(
-      id: json['id'] as int?,
-      key: json['key'],
-      value: json['value'],
-      appName: json['app_name'] as String?,
-      contactEmail: json['contact_email'] as String?,
-      contactPhone: json['contact_phone'] as String?,
-      whatsapp: json['whatsapp'] as String?,
-      facebook: json['facebook'] as String?,
-      instagram: json['instagram'] as String?,
-      tiktok: json['tiktok'] as String?,
-      twitter: json['twitter'] as String?,
-      snapchat: json['snapchat'] as String?,
-      returnDays: json['return_days'] as int?,
-      deliveryPeriod: json['delivery_period'] as String?,
-      simpleAbout: json['simple_about'] as String?,
-      taxNumber: json['tax_number']?.toString(),
-      image: json['image'] as String?,
-      favIco: json['fav_ico'] as String?,
-      defaultLang: json['default_lang'] as int?,
+  factory AppConfigModel.fromJson(Map<String, dynamic> json) {
+    return AppConfigModel(
+      update: json['update'] == null
+          ? null
+          : AppUpdateModel.fromJson(json['update']),
+      business: json['business'] == null
+          ? null
+          : AppBusinessModel.fromJson(json['business']),
+      externalLinks: json['external_links'] == null
+          ? []
+          : List<ExternalLinkModel>.from(
+              (json['external_links'] as List).map(
+                (x) => ExternalLinkModel.fromJson(x),
+              ),
+            ),
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'key': key,
-      'value': value,
-      'app_name': appName,
-      'contact_email': contactEmail,
-      'contact_phone': contactPhone,
-      'whatsapp': whatsapp,
-      'facebook': facebook,
-      'instagram': instagram,
-      'tiktok': tiktok,
-      'twitter': twitter,
-      'snapchat': snapchat,
-      'return_days': returnDays,
-      'delivery_period': deliveryPeriod,
-      'simple_about': simpleAbout,
-      'tax_number': taxNumber,
-      'image': image,
-      'fav_ico': favIco,
-      'default_lang': defaultLang,
-    };
+class AppUpdateModel extends AppUpdateEntity {
+  const AppUpdateModel({
+    super.type,
+    super.latestVersion,
+    super.minimumSupportedVersion,
+    super.storeUrl,
+  });
+
+  factory AppUpdateModel.fromJson(Map<String, dynamic> json) {
+    return AppUpdateModel(
+      type: json['type']?.toString(),
+      latestVersion: json['latest_version']?.toString(),
+      minimumSupportedVersion:
+          json['minimum_supported_version']?.toString(),
+      storeUrl: json['store_url']?.toString(),
+    );
+  }
+}
+
+class AppBusinessModel extends AppBusinessEntity {
+  const AppBusinessModel({super.commercialRegistrationNumber});
+
+  factory AppBusinessModel.fromJson(Map<String, dynamic> json) {
+    return AppBusinessModel(
+      commercialRegistrationNumber:
+          json['commercial_registration_number']?.toString(),
+    );
+  }
+}
+
+class ExternalLinkModel extends ExternalLinkEntity {
+  const ExternalLinkModel({
+    super.name,
+    super.icon,
+    super.url,
+  });
+
+  factory ExternalLinkModel.fromJson(Map<String, dynamic> json) {
+    return ExternalLinkModel(
+      name: json['name']?.toString(),
+      icon: json['icon']?.toString(),
+      url: json['url']?.toString(),
+    );
   }
 }
