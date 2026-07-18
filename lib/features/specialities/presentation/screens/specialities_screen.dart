@@ -87,8 +87,7 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
               ),
               Gaps.vGap10,
 
-              // /  search
-              // _SearchField(),
+              ///  search field
               Gaps.vGap16,
 
               /// banner
