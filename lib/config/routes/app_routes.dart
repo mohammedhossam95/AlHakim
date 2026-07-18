@@ -147,7 +147,7 @@ abstract class Routes {
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
           child: BlocProvider(
-            create: (context) => sl<AppSettingCubit>()..getAppsetting(),
+            create: (context) => sl<AppSettingCubit>(),
             child: SplashScreen(),
           ),
         ),

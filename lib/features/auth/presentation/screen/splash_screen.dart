@@ -1,4 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
 import 'dart:developer';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
@@ -27,6 +26,15 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool _forceUpdateShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      BlocProvider.of<AppSettingCubit>(context).getAppsetting();
+    });
+  }
 
   Future<void> _continueToApp() async {
     await context.read<SessionCubit>().resolveSession();
@@ -91,15 +99,17 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 children: [
                   const Spacer(flex: 3),
-                  FadeIn(
-                    child: Padding(
-                      padding: const EdgeInsets.all(40.0),
-                      child: Image.asset(
-                        'assets/images/logo2.png',
-                        height: 200.h,
-                      ),
-                    ),
-                  ),
+
+                  // FadeIn(
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(40.0),
+                  //     child: Image.asset(
+                  //       'assets/images/logo2.png',
+                  //       height: 200.h,
+                  //     ),
+                  //   ),
+                  // ),
+                  LogoIcon(),
                   const Spacer(flex: 3),
                   InkWell(
                     onTap: () {
@@ -137,14 +147,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   curve: Curves.easeIn,
                   child: Padding(
                     padding: const EdgeInsets.all(40.0),
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/images/logo2.png',
-                          height: 200.h,
-                        ),
-                      ],
-                    ),
+                    child: LogoIcon(),
                   ),
                 ),
                 const Spacer(flex: 3),
@@ -180,6 +183,48 @@ class _SplashScreenState extends State<SplashScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+class LogoIcon extends StatelessWidget {
+  const LogoIcon({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 1. الأيقونة - Elastic scale + fade
+        // ElasticIn(
+        //   duration: const Duration(milliseconds: 1000),
+        //   child: Image.asset('assets/images/alhakim_icon.png', width: 130),
+        // ),
+        ElasticIn(
+          duration: const Duration(milliseconds: 1000),
+          child: Image.asset('assets/images/alhakim_icon.png', width: 130)
+              .spin(duration: const Duration(milliseconds: 1500))
+              .fadeIn(duration: const Duration(milliseconds: 1400)),
+        ),
+        const SizedBox(height: 24),
+
+        // 2. Alhakim الإنجليزي
+        FadeInUp(
+          delay: const Duration(milliseconds: 700),
+          duration: const Duration(milliseconds: 600),
+          child: Image.asset('assets/images/alhakim_en.png', width: 220),
+        ),
+        const SizedBox(height: 8),
+
+        // 3. الحكيم بالعربي
+        FadeInUp(
+          delay: const Duration(milliseconds: 1000),
+          duration: const Duration(milliseconds: 600),
+          child: Image.asset('assets/images/alhakim_ar.png', width: 220),
+        ),
+      ],
     );
   }
 }
