@@ -42,9 +42,11 @@ import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/search_doctors_cubit/search_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_doctor_cubit/update_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
 import 'package:alhakim/features/doctors/presentation/screens/reschedule_appointments_screen.dart';
+import 'package:alhakim/features/doctors/presentation/screens/search_doctors_screen.dart';
 import 'package:alhakim/features/home/presentation/screen/agent_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/quick_booking_cubit/quick_booking_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
@@ -113,6 +115,7 @@ abstract class Routes {
 
   static const String specialitiesScreenRoute = '/specialitiesScreen';
   static const String doctorsListScreenRoute = '/doctorsListScreen';
+  static const String searchDoctorsScreenRoute = '/searchDoctorsScreen';
   static const String bookingScreenRoute = '/bookingScreen';
   static const String familyMembersScreenRoute = '/familyMembersScreen';
   static const String addFamilyMemberScreenRoute = '/addFamilyMemberScreen';
@@ -414,6 +417,17 @@ abstract class Routes {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: searchDoctorsScreenRoute,
+        name: searchDoctorsScreenRoute,
+        pageBuilder: (context, state) => buildAdaptivePage(
+          state: state,
+          child: BlocProvider(
+            create: (context) => sl<SearchDoctorsCubit>(),
+            child: SearchDoctorsScreen(initialQuery: state.extra as String?),
+          ),
+        ),
       ),
       GoRoute(
         path: bookingScreenRoute,

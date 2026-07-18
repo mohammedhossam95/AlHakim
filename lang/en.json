@@ -80,7 +80,7 @@
   "login": "Login",
   "arabic": "Arabic",
   "english": "English",
-  "search": "Search items, cars, electronics...",
+  "search": "Search for doctor or specialty...",
   "deliver_to": "Deliver to",
   "select_address": "Select delivery address",
   "office": "Office",
@@ -479,6 +479,7 @@
   "your_follow_up_doctor": "Your follow-up doctor",
   "call_clinic": "Call the clinic",
   "no_registered_doctors": "No registered doctors",
+  "no_search_results": "No search results",
   "position_ordinal": "({number})",
   "ai_assistant_disclaimer": "Reminder: All suggestions provided are from an AI assistant. Visiting a specialist doctor and taking the appropriate medication based on their instructions is essential."
 }

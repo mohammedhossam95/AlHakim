@@ -2,6 +2,7 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
@@ -24,6 +25,8 @@ class SpecialitiesScreen extends StatefulWidget {
 }
 
 class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +35,12 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
       if (!mounted) return;
       context.read<GetSpecialtiesCubit>().getSpecialties();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -88,6 +97,35 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
               Gaps.vGap10,
 
               ///  search field
+              Container(
+                decoration: BoxDecoration(
+                  color: colors.whiteColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.main.withValues(alpha: .1),
+                      blurRadius: 10.r,
+                      offset: Offset(0, 10.h),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: MyTextFormField(
+                  controller: _searchController,
+                  backgroundColor: colors.whiteColor,
+                  hintText: 'search_speciality'.tr,
+                  prefixIcon: Icon(Icons.search, color: colors.main),
+                  textInputAction: TextInputAction.search,
+                  onSubmit: (value) {
+                    final query = value.trim();
+                    if (query.isEmpty) return;
+
+                    context.push(
+                      Routes.searchDoctorsScreenRoute,
+                      extra: query, // أو arguments حسب الراوتر اللي بتستخدمه
+                    );
+                  },
+                ),
+              ),
               Gaps.vGap16,
 
               /// banner
@@ -230,18 +268,7 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
   }
 }
 
-// class _SearchField extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MyTextFormField(
-//       hintText: "search_speciality".tr,
-//       prefixIcon: Icon(Icons.search, color: colors.main),
-
-//       textInputAction: TextInputAction.search,
-//       controller: TextEditingController(),
-//     );
-//   }
-// }
+// Search field navigates to SearchDoctorsScreen
 
 class _BannerCard extends StatelessWidget {
   const _BannerCard();

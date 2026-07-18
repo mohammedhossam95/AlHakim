@@ -15,9 +15,15 @@ class DoctorRepositoryImpl implements DoctorRepository {
   DoctorRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, BaseListResponse>> getDoctors() async {
+  Future<Either<Failure, BaseListResponse>> getDoctors({
+    String? search,
+    int? perPage,
+  }) async {
     try {
-      final result = await remoteDataSource.getDoctors();
+      final result = await remoteDataSource.getDoctors(
+        search: search,
+        perPage: perPage,
+      );
 
       return Right(result);
     } on ServerException catch (e) {

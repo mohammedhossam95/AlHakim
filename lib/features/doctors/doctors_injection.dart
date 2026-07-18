@@ -9,6 +9,7 @@ import 'package:alhakim/features/doctors/domain/usecases/get_doctor_home_usecase
 import 'package:alhakim/features/doctors/domain/usecases/get_doctors_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/get_medical_center_doctors_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/reschedule_usecase.dart';
+import 'package:alhakim/features/doctors/domain/usecases/search_doctors_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/toggle_clinic_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/toggle_doctor_status_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/update_doctor_usecase.dart';
@@ -20,6 +21,7 @@ import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubi
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_medical_center_doctors_cubit/get_medical_center_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/search_doctors_cubit/search_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_doctor_cubit/update_doctor_cubit.dart';
@@ -30,6 +32,7 @@ final _sl = ServiceLocator.instance;
 Future<void> initDoctorsFeatureInjection() async {
   /// cubit
   _sl.registerFactory(() => GetDoctorsCubit(usecase: _sl()));
+  _sl.registerFactory(() => SearchDoctorsCubit(usecase: _sl()));
   _sl.registerFactory(() => GetMedicalCenterDoctorsCubit(usecase: _sl()));
   _sl.registerFactory(() => AddDoctorCubit(usecase: _sl()));
   _sl.registerFactory(() => UpdateDoctorCubit(usecase: _sl()));
@@ -57,6 +60,7 @@ Future<void> initDoctorsFeatureInjection() async {
   _sl.registerLazySingleton(() => CloseClinicTodayUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => DeleteDoctorUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => GetDoctorsUsecase(repository: _sl()));
+  _sl.registerLazySingleton(() => SearchDoctorsUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => RescheduleUsecase(repository: _sl()));
 
   /// repo

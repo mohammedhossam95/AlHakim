@@ -15,7 +15,7 @@ import 'package:alhakim/injection_container.dart';
 import 'package:dio/dio.dart';
 
 abstract class DoctorRemoteDataSource {
-  Future<DoctorsRespModel> getDoctors();
+  Future<DoctorsRespModel> getDoctors({String? search, int? perPage});
   Future<DoctorsRespModel> getRemoteMedicalCenterDoctors(int id);
   Future<BaseOneResponse> addDoctor(AddDoctorParams params);
   Future<BaseOneResponse> updateDoctor(AddDoctorParams params);
@@ -32,12 +32,18 @@ abstract class DoctorRemoteDataSource {
 
 class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
   @override
-  Future<DoctorsRespModel> getDoctors() async {
+  Future<DoctorsRespModel> getDoctors({String? search, int? perPage}) async {
     try {
       final endPoint = sessionCubit.state.userType == UserType.delegate
           ? '/representative/doctors'
           : '/doctors';
-      final response = await dioConsumer.get(endPoint);
+      final response = await dioConsumer.get(
+        endPoint,
+        queryParameters: {
+          'per_page': ?perPage,
+          if (search != null && search.isNotEmpty) 'search': search,
+        },
+      );
 
       if (response['status'] == true) {
         return DoctorsRespModel.fromJson(response);
