@@ -3,6 +3,7 @@ import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
+import 'package:alhakim/features/settings/domain/use_case/params/get_hospital_emergency_params.dart';
 import 'package:dartz/dartz.dart';
 
 import '/core/base_classes/base_one_response.dart';
@@ -133,6 +134,22 @@ class SettingRemoteRepoImpl extends SettingRepo {
         '[getApp Setting] [${error.runtimeType.toString()}] ---- ${error.message}',
       );
       return Left<Failure, BaseOneResponse>(error.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, BaseListResponse>> getHospitalEmergencyNumbers({
+    required GetHospitalEmergencyParams params,
+  }) async {
+    try {
+      final BaseListResponse response = await settingRemoteDataSource
+          .getHospitalEmergencyNumbers(params);
+      return Right<Failure, BaseListResponse>(response);
+    } on AppException catch (error) {
+      log.Log.e(
+        '[getHospitalEmergencyNumbers] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, BaseListResponse>(error.toFailure());
     }
   }
 }

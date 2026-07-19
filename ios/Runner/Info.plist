@@ -43,6 +43,8 @@
 	<array>
 		<string>tel</string>
 		<string>telprompt</string>
+		<string>comgooglemaps</string>
+		<string>comgooglemapsurl</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to take photos for your profile and uploads.</string>

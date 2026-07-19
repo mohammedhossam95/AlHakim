@@ -17,11 +17,9 @@ class FollowUpQueueShimmer extends StatelessWidget {
         padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
-            _box(height: 90.h, radius: 16.r),
+            _box(height: 150.h, radius: 15.r),
             Gaps.vGap16,
-            _box(height: 260.h, radius: 20.r),
-            Gaps.vGap16,
-            _box(height: 80.h, radius: 16.r),
+            _box(height: 70.h, radius: 16.r),
             Gaps.vGap16,
             Row(
               children: [

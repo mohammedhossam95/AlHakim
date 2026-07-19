@@ -6,7 +6,9 @@ import 'package:alhakim/core/utils/log_utils.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/app_setting_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/common_questions_resp_model.dart';
+import 'package:alhakim/features/settings/data/model/hospital_emergency_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/static_page_content_resp_model.dart';
+import 'package:alhakim/features/settings/domain/use_case/params/get_hospital_emergency_params.dart';
 import 'package:dio/dio.dart';
 
 import '/core/error/exceptions.dart';
@@ -28,6 +30,9 @@ abstract class SettingRemoteDataSource {
   Future<CommonQuestionsRespModel> getCommonQuestions();
   Future<StaticPageContentRespModel> getStaticPageContent(StaticPageType type);
   Future<AppSettingRespModel> getAppSetting();
+  Future<HospitalEmergencyRespModel> getHospitalEmergencyNumbers(
+    GetHospitalEmergencyParams params,
+  );
 }
 
 class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
@@ -172,6 +177,24 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
       );
       if (response['status'] == true) {
         return AppSettingRespModel.fromJson(response);
+      }
+      throw ServerException(message: response['message'] ?? '');
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<HospitalEmergencyRespModel> getHospitalEmergencyNumbers(
+    GetHospitalEmergencyParams params,
+  ) async {
+    try {
+      final dynamic response = await dioConsumer.get(
+        '/hospital-emergency-numbers',
+        queryParameters: params.toQuery(),
+      );
+      if (response['status'] == true) {
+        return HospitalEmergencyRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');
     } catch (error) {

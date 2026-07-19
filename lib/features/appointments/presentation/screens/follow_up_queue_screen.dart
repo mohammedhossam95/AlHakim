@@ -1,18 +1,25 @@
-import 'dart:async';
-
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/shimmer/follow_up_queue_shimmer.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/domain/entities/queue_status_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
+import 'package:alhakim/features/home/domain/entity/slider_entity.dart';
+import 'package:alhakim/features/home/presentation/widgets/slider_part.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+const _dummySliders = [
+  SliderEntity(id: 1, image: 'assets/images/alhakim_en.png'),
+  SliderEntity(id: 2, image: 'assets/images/alhakim_ar.png'),
+  SliderEntity(id: 3, image: 'assets/images/logo_horizontal.png'),
+];
 
 class FollowUpQueueScreen extends StatefulWidget {
   final AppointmentEntity appointment;
@@ -27,7 +34,6 @@ class _FollowUpQueueScreenState extends State<FollowUpQueueScreen> {
   @override
   void initState() {
     super.initState();
-
     _fetchQueueStatus();
   }
 
@@ -72,9 +78,7 @@ class _FollowUpQueueScreenState extends State<FollowUpQueueScreen> {
             }
 
             return RefreshIndicator(
-              onRefresh: () async {
-                await _fetchQueueStatus();
-              },
+              onRefresh: _fetchQueueStatus,
               child: _FollowUpQueueBody(
                 appointment: widget.appointment,
                 queueStatus: queueStatus,
@@ -98,187 +102,254 @@ class _FollowUpQueueBody extends StatelessWidget {
     required this.queueStatus,
   });
 
-  String _formatQueueNumber(String? value) {
+  bool get _clinicStarted => queueStatus.clinicStarted == true;
+
+  bool get _showSoonBanner =>
+      queueStatus.isCurrent == true || (queueStatus.patientsAhead ?? 0) <= 3;
+
+  String get _doctorName => appLocalizations.isArLocale
+      ? appointment.doctor?.name?.ar ?? ''
+      : appointment.doctor?.name?.en ?? '';
+
+  Future<void> _callClinic() async {
+    final phone = appointment.doctor?.clinicPhone;
+    if (phone == null || phone.isEmpty) return;
+    await Constants.makePhoneCall('20$phone');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_clinicStarted) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(16.w),
+        children: [
+          const _OffersSliderSection(),
+          Gaps.vGap24,
+          const _ClinicNotStartedAlert(),
+        ],
+      );
+    }
+
+    final queueData = _QueueUiData.from(
+      appointment: appointment,
+      queueStatus: queueStatus,
+    );
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      children: [
+        const _OffersSliderSection(),
+        Gaps.vGap16,
+
+        _AppointmentReferenceRow(
+          statusLabel: queueData.statusLabel,
+          statusColor: queueData.statusColor,
+          appointmentNumber: queueData.appointmentNumber,
+        ),
+        Gaps.vGap16,
+        _ClinicStartedBanner(doctorName: _doctorName),
+        Gaps.vGap16,
+        _CurrentQueueCard(currentNumber: queueData.currentNumber),
+
+        Gaps.vGap16,
+        _QueueInfoRow(
+          yourNumber: queueData.yourNumber,
+          showSoonBanner: _showSoonBanner,
+          patientsAhead: queueStatus.patientsAhead ?? 0,
+          positionText: queueData.positionText,
+        ),
+
+        Gaps.vGap16,
+        _EstimatedWaitCard(minutes: queueStatus.estimatedWaitMinutes ?? 0),
+        Gaps.vGap16,
+        _DoctorInfoCard(
+          doctorName: _doctorName,
+          specialty: appointment.doctor?.specialty?.name ?? '',
+          image: appointment.doctor?.profileImage ?? '',
+        ),
+
+        Gaps.vGap24,
+        _CallClinicButton(onTap: _callClinic),
+        Gaps.vGap24,
+      ],
+    );
+  }
+}
+
+class _QueueUiData {
+  final String currentNumber;
+  final String yourNumber;
+  final String positionText;
+  final String appointmentNumber;
+  final String statusLabel;
+  final Color statusColor;
+
+  const _QueueUiData({
+    required this.currentNumber,
+    required this.yourNumber,
+    required this.positionText,
+    required this.appointmentNumber,
+    required this.statusLabel,
+    required this.statusColor,
+  });
+
+  factory _QueueUiData.from({
+    required AppointmentEntity appointment,
+    required QueueStatusEntity queueStatus,
+  }) {
+    final statusStyle = _AppointmentStatusStyle.of(appointment.status);
+
+    return _QueueUiData(
+      currentNumber: _QueueFormatter.formatNumber(
+        queueStatus.currentQueueNumber,
+      ),
+      yourNumber: _QueueFormatter.formatNumber(queueStatus.yourQueueNumber),
+      positionText: _QueueFormatter.positionText(queueStatus.patientsAhead),
+      appointmentNumber: '#${appointment.id ?? '--'}',
+      statusLabel: statusStyle.label,
+      statusColor: statusStyle.color,
+    );
+  }
+}
+
+class _QueueFormatter {
+  static String formatNumber(String? value) {
     if (value == null || value.isEmpty) return '--';
     final number = int.tryParse(value);
     if (number == null) return value;
     return number.toString().padLeft(2, '0');
   }
 
-  int _parseQueueNumber(String? value) {
-    return int.tryParse(value ?? '') ?? 0;
-  }
-
-  // String _arabicOrdinal(int number) {
-  //   const ordinals = {
-  //     1: 'الأول',
-  //     2: 'الثاني',
-  //     3: 'الثالث',
-  //     4: 'الرابع',
-  //     5: 'الخامس',
-  //     6: 'السادس',
-  //     7: 'السابع',
-  //     8: 'الثامن',
-  //     9: 'التاسع',
-  //     10: 'العاشر',
-  //   };
-  //   return ordinals[number] ?? number.toString();
-  // }
-
-  String _positionText() {
-    final position = (queueStatus.patientsAhead ?? 0) + 1;
+  static String positionText(int? patientsAhead) {
     return 'position_ordinal'.trParams({
-      // 'ordinal': _arabicOrdinal(position),
-      'number': position.toString(),
+      'number': ((patientsAhead ?? 0) + 1).toString(),
     });
-  }
-
-  double _progressValue() {
-    final current = _parseQueueNumber(queueStatus.currentQueueNumber);
-    final goal = _parseQueueNumber(queueStatus.yourQueueNumber);
-    if (goal <= 0) return 0;
-    return (current / goal).clamp(0.0, 1.0);
-  }
-
-  Future<void> _callClinic() async {
-    final phone = appointment.doctor?.clinicPhone;
-    if (phone == null || phone.isEmpty) return;
-    await Constants.makePhoneCall("${"20"}$phone");
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final currentNumber = _formatQueueNumber(queueStatus.currentQueueNumber);
-    final yourNumber = _formatQueueNumber(queueStatus.yourQueueNumber);
-    final examinedCurrent = _parseQueueNumber(queueStatus.currentQueueNumber);
-    final examinedTotal = _parseQueueNumber(queueStatus.yourQueueNumber);
-    final estimatedMinutes = queueStatus.estimatedWaitMinutes ?? 0;
-    final showAlert = queueStatus.clinicStarted == true;
-    final showSoonBanner =
-        queueStatus.isCurrent == true || (queueStatus.patientsAhead ?? 0) <= 3;
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (showAlert) ...[
-            _LiveAlertBanner(
-              doctorName: appLocalizations.isArLocale
-                  ? appointment.doctor?.name?.ar ?? ''
-                  : appointment.doctor?.name?.en ?? '',
-            ),
-            Gaps.vGap16,
-          ],
-          _QueueStatusCard(
-            currentNumber: currentNumber,
-            yourNumber: yourNumber,
-            positionText: _positionText(),
-            showSoonBanner: showSoonBanner,
-          ),
-          Gaps.vGap16,
-          _TurnProgressSection(
-            examinedCurrent: examinedCurrent,
-            examinedTotal: examinedTotal,
-            progressValue: _progressValue(),
-            yourNumber: yourNumber,
-          ),
-          Gaps.vGap16,
-          Row(
-            children: [
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.hourglass_bottom_rounded,
-                  iconColor: colors.main,
-                  label: 'estimated_time'.tr,
-                  value: 'minutes_count'.trParams({
-                    'count': estimatedMinutes.toString(),
-                  }),
-                  valueColor: colors.main,
-                ),
-              ),
-              Gaps.hGap12,
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.medical_services_outlined,
-                  iconColor: colors.secondary,
-                  label: 'your_follow_up_doctor'.tr,
-                  value: appLocalizations.isArLocale
-                      ? appointment.doctor?.name?.ar ?? ''
-                      : appointment.doctor?.name?.en ?? '',
-                  valueColor: colors.textColor,
-                ),
-              ),
-            ],
-          ),
-          Gaps.vGap24,
-          GestureDetector(
-            onTap: _callClinic,
-            child: Container(
-              height: 52.h,
-              decoration: BoxDecoration(
-                color: colors.main,
-                borderRadius: BorderRadius.circular(30.r),
-              ),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.phone, color: colors.whiteColor, size: 20.sp),
-                  Gaps.hGap8,
-                  Text(
-                    'call_clinic'.tr,
-                    style: TextStyles.semiBold16(color: colors.whiteColor),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
-class _LiveAlertBanner extends StatelessWidget {
-  final String doctorName;
+class _AppointmentStatusStyle {
+  final String label;
+  final Color color;
 
-  const _LiveAlertBanner({required this.doctorName});
+  const _AppointmentStatusStyle({required this.label, required this.color});
+
+  static _AppointmentStatusStyle of(String? status) {
+    switch (status?.toLowerCase().trim()) {
+      case 'confirmed':
+        return _AppointmentStatusStyle(
+          label: 'confirmed'.tr,
+          color: colors.success,
+        );
+      case 'arrived':
+        return _AppointmentStatusStyle(label: 'arrived'.tr, color: colors.main);
+      case 'entered':
+        return _AppointmentStatusStyle(
+          label: 'entered'.tr,
+          color: colors.subTextColor,
+        );
+      case 'rescheduled':
+        return _AppointmentStatusStyle(
+          label: 'rescheduled'.tr,
+          color: colors.review,
+        );
+      case 'completed':
+        return _AppointmentStatusStyle(
+          label: 'completed'.tr,
+          color: colors.success,
+        );
+      case 'cancelled':
+        return _AppointmentStatusStyle(
+          label: 'cancelled'.tr,
+          color: colors.errorColor,
+        );
+      default:
+        return _AppointmentStatusStyle(
+          label: status?.tr ?? status ?? '',
+          color: colors.lightTextColor,
+        );
+    }
+  }
+}
+
+class _ClinicNotStartedAlert extends StatelessWidget {
+  const _ClinicNotStartedAlert();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: colors.secondary.withValues(alpha: 0.12),
+        color: colors.whiteColor,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: colors.textColor.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Gaps.vGap16,
+          Icon(Icons.schedule_rounded, color: colors.error, size: 56.sp),
+          Gaps.vGap16,
+          Text(
+            'clinic_not_started_title'.tr,
+            style: TextStyles.semiBold18(color: colors.textColor),
+            textAlign: TextAlign.center,
+          ),
+          Gaps.vGap12,
+          Text(
+            'clinic_not_started_message'.tr,
+            style: TextStyles.regular14(color: colors.lightTextColor),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OffersSliderSection extends StatelessWidget {
+  const _OffersSliderSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SliderPart(list: _dummySliders);
+  }
+}
+
+class _ClinicStartedBanner extends StatelessWidget {
+  final String doctorName;
+
+  const _ClinicStartedBanner({required this.doctorName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: colors.success.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border(
-          right: BorderSide(color: colors.secondary, width: 4.w),
-        ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.notifications_active_outlined,
-            color: colors.secondary,
-            size: 24.sp,
+          Container(
+            width: 10.w,
+            height: 10.w,
+            decoration: BoxDecoration(
+              color: colors.success,
+              shape: BoxShape.circle,
+            ),
           ),
           Gaps.hGap12,
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'live_alert'.tr,
-                  style: TextStyles.semiBold16(color: colors.secondary),
-                ),
-                Gaps.vGap4,
-                Text(
-                  'doctor_started_examination'.trParams({'doctor': doctorName}),
-                  style: TextStyles.regular14(color: colors.secondary),
-                ),
-              ],
+            child: Text(
+              'doctor_started_examination'.trParams({'doctor': doctorName}),
+              style: TextStyles.medium14(color: colors.success),
             ),
           ),
         ],
@@ -287,22 +358,61 @@ class _LiveAlertBanner extends StatelessWidget {
   }
 }
 
-class _QueueStatusCard extends StatelessWidget {
-  final String currentNumber;
-  final String yourNumber;
-  final String positionText;
-  final bool showSoonBanner;
+class _AppointmentReferenceRow extends StatelessWidget {
+  final String statusLabel;
+  final Color statusColor;
+  final String appointmentNumber;
 
-  const _QueueStatusCard({
-    required this.currentNumber,
-    required this.yourNumber,
-    required this.positionText,
-    required this.showSoonBanner,
+  const _AppointmentReferenceRow({
+    required this.statusLabel,
+    required this.statusColor,
+    required this.appointmentNumber,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'appointment_number'.tr,
+              style: TextStyles.medium12(color: colors.lightTextColor),
+            ),
+            Gaps.vGap4,
+            Text(
+              appointmentNumber,
+              style: TextStyles.semiBold18(color: colors.main),
+            ),
+          ],
+        ),
+        const Spacer(),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: statusColor.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Text(
+            statusLabel,
+            style: TextStyles.medium12(color: statusColor),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CurrentQueueCard extends StatelessWidget {
+  final String currentNumber;
+
+  const _CurrentQueueCard({required this.currentNumber});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
       decoration: BoxDecoration(
         color: colors.whiteColor,
@@ -323,211 +433,242 @@ class _QueueStatusCard extends StatelessWidget {
           ),
           Gaps.vGap8,
           Text(currentNumber, style: TextStyles.semiBold40(color: colors.main)),
-          Gaps.vGap4,
-          Text(
-            'current_clinic_turn'.tr,
-            style: TextStyles.medium14(color: colors.lightTextColor),
-          ),
-          Gaps.vGap16,
-          Divider(color: colors.lightBackGroundColor, height: 1),
-          Gaps.vGap16,
-          Row(
-            children: [
-              Expanded(
-                child: _QueueInfoColumn(
-                  label: 'your_queue_number'.tr,
-                  value: yourNumber,
-                  valueColor: colors.secondary,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 48.h,
-                color: colors.lightBackGroundColor,
-              ),
-              Expanded(
-                child: _QueueInfoColumn(
-                  label: 'your_position_in_list'.tr,
-                  value: positionText,
-                  valueColor: colors.textColor,
-                ),
-              ),
-            ],
-          ),
-          if (showSoonBanner) ...[
-            Gaps.vGap16,
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-              decoration: BoxDecoration(
-                color: colors.main.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 8.w,
-                    height: 8.w,
-                    decoration: BoxDecoration(
-                      color: colors.main,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Gaps.hGap8,
-                  Flexible(
-                    child: Text(
-                      'please_be_at_clinic_soon'.tr,
-                      style: TextStyles.medium14(color: colors.main),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
+          Gaps.vGap12,
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+            decoration: BoxDecoration(
+              color: colors.main.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20.r),
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'under_examination'.tr,
+                  style: TextStyles.medium12(color: colors.main),
+                ),
+                Gaps.hGap8,
+                Container(
+                  width: 8.w,
+                  height: 8.w,
+                  decoration: BoxDecoration(
+                    color: colors.main,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _QueueInfoColumn extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color valueColor;
-
-  const _QueueInfoColumn({
-    required this.label,
-    required this.value,
-    required this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyles.medium12(color: colors.lightTextColor),
-          textAlign: TextAlign.center,
-        ),
-        Gaps.vGap8,
-        Text(
-          value,
-          style: TextStyles.semiBold18(color: valueColor),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-}
-
-class _TurnProgressSection extends StatelessWidget {
-  final int examinedCurrent;
-  final int examinedTotal;
-  final double progressValue;
+class _QueueInfoRow extends StatelessWidget {
   final String yourNumber;
+  final bool showSoonBanner;
+  final int patientsAhead;
+  final String positionText;
 
-  const _TurnProgressSection({
-    required this.examinedCurrent,
-    required this.examinedTotal,
-    required this.progressValue,
+  const _QueueInfoRow({
     required this.yourNumber,
+    required this.showSoonBanner,
+    required this.patientsAhead,
+    required this.positionText,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('turn_progress'.tr, style: TextStyles.semiBold16()),
-            Text(
-              'examined_count'.trParams({
-                'current': examinedCurrent.toString(),
-                'total': examinedTotal.toString(),
-              }),
-              style: TextStyles.medium12(color: colors.lightTextColor),
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+            decoration: BoxDecoration(
+              color: colors.main,
+              borderRadius: BorderRadius.circular(16.r),
             ),
-          ],
-        ),
-        Gaps.vGap12,
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8.r),
-          child: LinearProgressIndicator(
-            value: progressValue,
-            minHeight: 10.h,
-            backgroundColor: colors.lightBackGroundColor,
-            valueColor: AlwaysStoppedAnimation<Color>(colors.main),
+            child: Column(
+              children: [
+                Text(
+                  'your_queue_number'.tr,
+                  style: TextStyles.medium12(color: colors.whiteColor),
+                  textAlign: TextAlign.center,
+                ),
+                Gaps.vGap12,
+                Text(
+                  yourNumber,
+                  style: TextStyles.semiBold40(color: colors.whiteColor),
+                ),
+              ],
+            ),
           ),
         ),
-        Gaps.vGap8,
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '01',
-              style: TextStyles.medium12(color: colors.lightTextColor),
+        Gaps.hGap12,
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: colors.whiteColor,
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            Text(
-              'the_beginning'.tr,
-              style: TextStyles.medium12(color: colors.lightTextColor),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.hourglass_bottom_rounded,
+                  color: colors.main,
+                  size: 28.sp,
+                ),
+                Gaps.vGap12,
+                Text(
+                  showSoonBanner
+                      ? 'you_will_be_called_soon'.tr
+                      : 'your_position_in_list'.tr,
+                  style: TextStyles.medium14(color: colors.textColor),
+                  textAlign: TextAlign.center,
+                ),
+                Gaps.vGap8,
+                Text(
+                  showSoonBanner
+                      ? 'patients_ahead_of_you'.trParams({
+                          'count': patientsAhead.toString(),
+                        })
+                      : positionText,
+                  style: TextStyles.medium12(color: colors.lightTextColor),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            Text(
-              'your_goal'.trParams({'number': yourNumber}),
-              style: TextStyles.semiBold14(color: colors.secondary),
-            ),
-          ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final String value;
-  final Color valueColor;
+class _EstimatedWaitCard extends StatelessWidget {
+  final int minutes;
 
-  const _InfoCard({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.value,
-    required this.valueColor,
+  const _EstimatedWaitCard({required this.minutes});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: colors.whiteColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44.w,
+            height: 44.w,
+            decoration: BoxDecoration(
+              color: colors.main.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.access_time_rounded, color: colors.main),
+          ),
+          Gaps.hGap12,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'expected_waiting_time'.tr,
+                style: TextStyles.medium12(color: colors.lightTextColor),
+              ),
+              Gaps.vGap4,
+              Text(
+                'minutes_count'.trParams({'count': minutes.toString()}),
+                style: TextStyles.semiBold16(color: colors.textColor),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Icon(Icons.chevron_left, color: colors.lightTextColor, size: 22.sp),
+        ],
+      ),
+    );
+  }
+}
+
+class _DoctorInfoCard extends StatelessWidget {
+  final String doctorName;
+  final String specialty;
+  final String image;
+
+  const _DoctorInfoCard({
+    required this.doctorName,
+    required this.specialty,
+    required this.image,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 18.h),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: colors.whiteColor,
         borderRadius: BorderRadius.circular(16.r),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Icon(icon, color: iconColor, size: 28.sp),
-          Gaps.vGap10,
-          Text(
-            label,
-            style: TextStyles.medium12(color: colors.lightTextColor),
-            textAlign: TextAlign.center,
+          DiffImage(image: image, width: 52.w, height: 52.w, isCircle: true),
+          Gaps.hGap12,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  doctorName,
+                  style: TextStyles.semiBold16(color: colors.textColor),
+                ),
+                if (specialty.isNotEmpty) ...[
+                  Gaps.vGap4,
+                  Text(
+                    specialty,
+                    style: TextStyles.medium12(color: colors.lightTextColor),
+                  ),
+                ],
+              ],
+            ),
           ),
-          Gaps.vGap8,
-          Text(
-            value,
-            style: TextStyles.semiBold16(color: valueColor),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Icon(Icons.info_outline, color: colors.main, size: 22.sp),
         ],
+      ),
+    );
+  }
+}
+
+class _CallClinicButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _CallClinicButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 52.h,
+        decoration: BoxDecoration(
+          color: colors.main,
+          borderRadius: BorderRadius.circular(30.r),
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'call_clinic'.tr,
+              style: TextStyles.semiBold16(color: colors.whiteColor),
+            ),
+            Gaps.hGap8,
+            Icon(Icons.phone, color: colors.whiteColor, size: 20.sp),
+          ],
+        ),
       ),
     );
   }

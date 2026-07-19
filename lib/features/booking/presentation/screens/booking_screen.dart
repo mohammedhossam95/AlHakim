@@ -105,90 +105,86 @@ class _BookingScreenState extends State<BookingScreen> {
                   Gaps.vGap20,
 
                   /// dates
-                  SizedBox(
-                    height: 120.h,
-
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-
-                      itemCount: availableDates.length,
-
-                      separatorBuilder: (_, _) => Gaps.hGap12,
-
-                      itemBuilder: (context, index) {
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(availableDates.length, (index) {
                         final bookingDate = availableDates[index];
-
                         final date = bookingDate.date;
-
                         final isSelected = selectedDateIndex == index;
+                        final isLast = index == availableDates.length - 1;
 
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedDateIndex = index;
-                            });
-                          },
-
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            width: 82.w,
-                            padding: EdgeInsets.symmetric(vertical: 8.h),
-
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? colors.main
-                                  : colors.whiteColor,
-
-                              borderRadius: BorderRadius.circular(22.r),
-
-                              border: Border.all(
+                        return Padding(
+                          padding: EdgeInsetsDirectional.only(
+                            end: isLast ? 0 : 12.w,
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedDateIndex = index;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 20.w,
+                                vertical: 10.h,
+                              ),
+                              decoration: BoxDecoration(
                                 color: isSelected
                                     ? colors.main
-                                    : colors.main.withValues(alpha: .08),
+                                    : colors.whiteColor,
+                                borderRadius: BorderRadius.circular(22.r),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? colors.main
+                                      : colors.main.withValues(alpha: .08),
+                                ),
                               ),
-                            ),
-
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  DateFormat(
-                                    'EEE',
-                                    appLocalizations.locale?.languageCode,
-                                  ).format(date),
-
-                                  style: TextStyles.medium14(
-                                    color: isSelected
-                                        ? colors.whiteColor
-                                        : colors.lightTextColor,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    DateFormat(
+                                      'EEE',
+                                      appLocalizations.locale?.languageCode,
+                                    ).format(date),
+                                    style: TextStyles.medium14(
+                                      color: isSelected
+                                          ? colors.whiteColor
+                                          : colors.lightTextColor,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                ),
-                                Text(
-                                  "${date.day}",
-                                  style: TextStyles.semiBold24(
-                                    color: isSelected
-                                        ? colors.whiteColor
-                                        : colors.textColor,
+                                  Gaps.vGap4,
+                                  Text(
+                                    '${date.day}',
+                                    style: TextStyles.semiBold24(
+                                      color: isSelected
+                                          ? colors.whiteColor
+                                          : colors.textColor,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                ),
-                                Text(
-                                  DateFormat(
-                                    'MMM',
-                                    appLocalizations.locale?.languageCode,
-                                  ).format(date),
-                                  style: TextStyles.medium12(
-                                    color: isSelected
-                                        ? colors.whiteColor
-                                        : colors.lightTextColor,
+                                  Gaps.vGap4,
+                                  Text(
+                                    DateFormat(
+                                      'MMM',
+                                      appLocalizations.locale?.languageCode,
+                                    ).format(date),
+                                    style: TextStyles.medium12(
+                                      color: isSelected
+                                          ? colors.whiteColor
+                                          : colors.lightTextColor,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
-                      },
+                      }),
                     ),
                   ),
                   Gaps.vGap20,

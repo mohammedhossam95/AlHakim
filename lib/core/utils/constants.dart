@@ -907,6 +907,30 @@ class Constants {
   //     throw 'Could not launch ${uri.toString()}';
   //   }
   // }
+
+  /// Opens Google Maps app for [lat]/[lng].
+  static Future<void> openGoogleMaps({
+    required double lat,
+    required double lng,
+  }) async {
+    final Uri appUri = Platform.isIOS
+        ? Uri.parse('comgooglemaps://?q=$lat,$lng')
+        : Uri.parse('google.navigation:q=$lat,$lng&mode=d');
+    final Uri webUri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+    );
+
+    try {
+      if (await canLaunchUrl(appUri)) {
+        await launchUrl(appUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   static String getInitials(String fullName) {
     if (fullName.trim().isEmpty) return '';
 
