@@ -147,6 +147,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, BaseOneResponse>> checkAccount(
+    AuthParams params,
+  ) async {
+    try {
+      final response = await remote.checkAccount(params: params);
+      return Right<Failure, BaseOneResponse>(response);
+    } on AppException catch (error) {
+      Log.e(
+        '[checkAccount] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, BaseOneResponse>(error.toFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, AuthRespModel>> completeProfile({
     required CompleteProfileParams params,
   }) async {

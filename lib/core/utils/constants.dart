@@ -466,19 +466,15 @@ class Constants {
                       child: ElasticInLeft(
                         child: MyDefaultButton(
                           height: 42.h,
-
+                          withDottedBorder: false,
                           onPressed: () {
                             Navigator.pop(dialogContext, false);
                           },
 
                           btnText: noText,
-
                           color: noButtonColor ?? colors.whiteColor,
-
                           borderColor: noButtonColor ?? colors.main,
-
                           textColor: colors.main,
-
                           textStyle:
                               noTextStyle ??
                               TextStyles.medium14(color: colors.main),

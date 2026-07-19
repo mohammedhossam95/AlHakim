@@ -24,6 +24,9 @@ class DoctorEntity extends Equatable {
   final String? minPatients;
   final String? representativeCode;
   final bool? priceHidden;
+  final String? consultationPrice;
+  final bool? consultationPriceHidden;
+  final List<MedicalCenter>? medicalCenters;
 
   const DoctorEntity({
     this.id,
@@ -49,6 +52,9 @@ class DoctorEntity extends Equatable {
     this.representativeCode,
     this.priceHidden,
     this.secretaryCountryCode,
+    this.consultationPrice,
+    this.consultationPriceHidden,
+    this.medicalCenters,
   });
 
   @override
@@ -76,6 +82,9 @@ class DoctorEntity extends Equatable {
     representativeCode,
     priceHidden,
     secretaryCountryCode,
+    consultationPrice,
+    consultationPriceHidden,
+    medicalCenters,
   ];
 }
 
@@ -204,5 +213,51 @@ class ScheduleEntity extends Equatable {
     startTime,
     endTime,
     slotDuration,
+  ];
+}
+
+class MedicalCenter extends Equatable {
+  final int? id;
+  final String? name;
+  final String? description;
+  final String? address;
+  final String? countryCode;
+  final String? phone;
+  final String? email;
+  final String? logo;
+  final String? cover;
+  final bool? isActive;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  const MedicalCenter({
+    this.id,
+    this.name,
+    this.description,
+    this.address,
+    this.countryCode,
+    this.phone,
+    this.email,
+    this.logo,
+    this.cover,
+    this.isActive,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  @override
+  List<Object?> get props => [
+    id,
+    name,
+    description,
+    address,
+    countryCode,
+    phone,
+    email,
+    logo,
+    cover,
+    isActive,
+    createdAt,
+    updatedAt,
   ];
 }

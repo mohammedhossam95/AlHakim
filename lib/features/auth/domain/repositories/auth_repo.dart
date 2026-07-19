@@ -29,6 +29,7 @@ abstract class AuthRepository {
   Future<Either<Failure, BaseOneResponse>> loginRepo(AuthParams params);
   Future<Either<Failure, BaseOneResponse>> verifyCode(AuthParams params);
   Future<Either<Failure, BaseOneResponse>> checkPhoneVerified(AuthParams params);
+  Future<Either<Failure, BaseOneResponse>> checkAccount(AuthParams params);
   Future<Either<Failure, BaseOneResponse>> register(AuthParams params);
   Future<Either<Failure, BaseOneResponse>> sendCode(AuthParams params);
   Future<Either<Failure, void>> logout();

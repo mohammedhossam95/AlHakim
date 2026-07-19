@@ -1,7 +1,9 @@
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
+import 'package:alhakim/features/auth/data/models/check_account_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/cities_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/countries_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/delete_user_account_resp_model.dart';
@@ -15,6 +17,7 @@ abstract class AuthRemoteDataSource {
   Future<AuthRespModel> register({required AuthParams params});
   Future<AuthRespModel> verifyCode({required AuthParams params});
   Future<AuthRespModel> checkRemotePhoneVerified({required AuthParams params});
+  Future<CheckAccountRespModel> checkAccount({required AuthParams params});
   Future<SendOtpRespModel> sendOtp(AuthParams params);
   Future<SendOtpRespModel> resendOtp(AuthParams params);
   Future<void> logout();
@@ -115,6 +118,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (response['status'] == true) {
         return AuthRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<CheckAccountRespModel> checkAccount({
+    required AuthParams params,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        '/auth/check-account',
+        formData: FormData.fromMap({
+          'country_code': params.countryCode,
+          'phone_number': params.phoneNumber,
+          'role': params.userType == UserType.doctor
+              ? 'doctor'
+              : params.userType == UserType.delegate
+              ? 'representative'
+              : 'patient',
+        }),
+      );
+
+      if (response['status'] == true) {
+        return CheckAccountRespModel.fromJson(response);
       }
 
       throw ServerException(message: response['message'] ?? '');

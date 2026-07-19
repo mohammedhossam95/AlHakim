@@ -7,6 +7,7 @@ import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/notifications/presentation/cubits/notifications_count_cubit/notifications_count_cubit.dart';
 import 'package:alhakim/features/specialities/domain/entities/specialty_entity.dart';
 import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
 import 'package:alhakim/features/specialities/presentation/widgets/speciality_item.dart';
@@ -83,14 +84,74 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
 
                   const Spacer(),
 
-                  Container(
-                    padding: EdgeInsets.all(10.w),
+                  BlocProvider(
+                    create: (_) =>
+                        ServiceLocator.instance<NotificationsCountCubit>()
+                          ..fGetCount(),
+                    child:
+                        BlocBuilder<
+                          NotificationsCountCubit,
+                          NotificationsCountState
+                        >(
+                          builder: (context, countState) {
+                            final unreadCount =
+                                countState is NotificationsCountSuccessState
+                                ? countState.unreadCount
+                                : 0;
 
-                    decoration: BoxDecoration(
-                      color: colors.main.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                    child: Icon(Icons.notifications_none, color: colors.main),
+                            return InkWell(
+                              onTap: () {
+                                context.push(Routes.notificationsScreenRoute);
+                              },
+                              borderRadius: BorderRadius.circular(14.r),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(10.w),
+                                    decoration: BoxDecoration(
+                                      color: colors.main.withValues(alpha: .12),
+                                      borderRadius: BorderRadius.circular(14.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.notifications_none,
+                                      color: colors.main,
+                                    ),
+                                  ),
+                                  if (unreadCount > 0)
+                                    Positioned(
+                                      top: -2.h,
+                                      right: -2.w,
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 5.w,
+                                          vertical: 1.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colors.errorColor,
+                                          borderRadius: BorderRadius.circular(
+                                            10.r,
+                                          ),
+                                        ),
+                                        constraints: BoxConstraints(
+                                          minWidth: 16.w,
+                                        ),
+                                        child: Text(
+                                          unreadCount > 99
+                                              ? '99+'
+                                              : '$unreadCount',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyles.bold10(
+                                            color: colors.whiteColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                   ),
                 ],
               ),

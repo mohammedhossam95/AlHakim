@@ -48,6 +48,8 @@
   "noData": "No Data Available",
   "no_favorites": "No Favorites Yet.",
   "notifications": "Notifications",
+  "mark_all_as_read": "Mark all as read",
+  "no_notifications": "No notifications yet",
   "orders": "orders",
   "our_branches": "Our Branches",
   "password_reset_success": "Password has been reset successfully",
@@ -481,5 +483,7 @@
   "no_registered_doctors": "No registered doctors",
   "no_search_results": "No search results",
   "position_ordinal": "({number})",
+  "consultation_price_text": "Consultation Price",
+  "examination_price": "Examination Price",
   "ai_assistant_disclaimer": "Reminder: All suggestions provided are from an AI assistant. Visiting a specialist doctor and taking the appropriate medication based on their instructions is essential."
 }

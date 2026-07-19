@@ -1,3 +1,4 @@
+import 'package:alhakim/features/auth/domain/usecases/check_account_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/complete_profile_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/delete_user_account_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/get_all_cities_use_case.dart';
@@ -11,6 +12,7 @@ import 'package:alhakim/features/auth/domain/usecases/resend_otp_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/save_user_type_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/send_code_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/verify_code_use_case.dart';
+import 'package:alhakim/features/auth/presentation/cubit/check_account_cubit/check_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
@@ -40,6 +42,9 @@ Future<void> initAuthFeatureInjection() async {
   _sl.registerFactory<LoginCubit>(() => LoginCubit(loginUseCase: _sl()));
   _sl.registerFactory<VerifyCodeCubit>(
     () => VerifyCodeCubit(verifyCodeUseCase: _sl()),
+  );
+  _sl.registerFactory<CheckAccountCubit>(
+    () => CheckAccountCubit(checkAccountUseCase: _sl()),
   );
   _sl.registerFactory<SendCodeCubit>(
     () => SendCodeCubit(sendCodeUseCase: _sl()),
@@ -103,6 +108,9 @@ Future<void> initAuthFeatureInjection() async {
   );
   _sl.registerLazySingleton<VerifyCodeUseCase>(
     () => VerifyCodeUseCase(repository: _sl()),
+  );
+  _sl.registerLazySingleton<CheckAccountUseCase>(
+    () => CheckAccountUseCase(repository: _sl()),
   );
   _sl.registerLazySingleton<SendCodeUseCase>(
     () => SendCodeUseCase(repository: _sl()),

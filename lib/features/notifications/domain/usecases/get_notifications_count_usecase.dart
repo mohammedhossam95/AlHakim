@@ -1,17 +1,20 @@
+import 'package:alhakim/core/error/failures.dart';
+import 'package:alhakim/core/usecases/usecase.dart';
+import 'package:alhakim/features/notifications/domain/entities/app_notification_entity.dart';
+import 'package:alhakim/features/notifications/domain/repositories/notifications_repo.dart';
 import 'package:dartz/dartz.dart';
 
-import '/core/base_classes/base_one_response.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../repositories/notifications_repo.dart';
-
-class NotificationsCountUseCase extends UseCase<BaseOneResponse, NoParams> {
+class NotificationsCountUseCase extends UseCase<int, NoParams> {
   final NotificationsRepository repository;
 
   NotificationsCountUseCase({required this.repository});
 
   @override
-  Future<Either<Failure, BaseOneResponse>> call(NoParams params) async {
-    return await repository.getNotificationsCount(params: params);
+  Future<Either<Failure, int>> call(NoParams params) async {
+    final result = await repository.getNotifications(params: params);
+    return result.map(
+      (List<AppNotification> notifications) =>
+          notifications.where((notification) => !notification.isRead).length,
+    );
   }
 }
