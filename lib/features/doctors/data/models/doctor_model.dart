@@ -42,6 +42,9 @@ class DoctorModel extends DoctorEntity {
     super.representativeCode,
     super.priceHidden,
     super.secretaryCountryCode,
+    super.consultationPrice,
+    super.consultationPriceHidden,
+    super.medicalCenters,
   });
 
   factory DoctorModel.fromJson(Map<String, dynamic> json) {
@@ -104,6 +107,13 @@ class DoctorModel extends DoctorEntity {
       representativeCode: json['representative_code'],
 
       secretaryCountryCode: json['secretary_country_code'],
+      consultationPrice: json['consultation_price'],
+      consultationPriceHidden: json['consultation_price_hidden'],
+      medicalCenters: json['medical_centers'] != null
+          ? (json['medical_centers'] as List)
+                .map((e) => MedicalCenterModel.fromJson(e))
+                .toList()
+          : [],
     );
   }
 
@@ -325,5 +335,50 @@ class ScheduleModel extends ScheduleEntity {
     "start_time": startTime,
     "end_time": endTime,
     "slot_duration": slotDuration,
+  };
+}
+
+class MedicalCenterModel extends MedicalCenter {
+  const MedicalCenterModel({
+    super.id,
+    super.name,
+    super.description,
+    super.address,
+    super.countryCode,
+    super.phone,
+    super.email,
+    super.logo,
+    super.cover,
+    super.isActive,
+    super.createdAt,
+    super.updatedAt,
+  });
+
+  factory MedicalCenterModel.fromJson(Map<String, dynamic> json) {
+    return MedicalCenterModel(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      address: json['address'],
+      countryCode: json['country_code'],
+      phone: json['phone'],
+      email: json['email'],
+      logo: json['logo'],
+      cover: json['cover'],
+      isActive: json['is_active'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "description": description,
+    "address": address,
+    "country_code": countryCode,
+    "phone": phone,
+    "email": email,
+    "logo": logo,
+    "cover": cover,
+    "is_active": isActive,
   };
 }

@@ -1,3 +1,4 @@
+import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
@@ -122,15 +123,48 @@ class DoctorListItem extends StatelessWidget {
               ],
             ),
 
-          if (doctor.priceHidden == false)
-            Row(
-              children: [
-                Text(
-                  "${doctor.price ?? ''} ج.م / كشف",
-                  style: TextStyles.semiBold16(color: colors.main),
-                ),
-              ],
+          if (doctor.priceHidden == false && doctor.price != "0.00")
+            Text(
+              "${"examination_price".tr} ${doctor.price ?? ''} ${"egp".tr}",
+              style: TextStyles.medium14(color: colors.main),
             ),
+
+          if (doctor.consultationPriceHidden == false &&
+              doctor.consultationPrice != "0.00")
+            Text(
+              "${"consultation_price_text".tr} ${doctor.consultationPrice ?? ''} ${"egp".tr}",
+              style: TextStyles.medium14(color: colors.main),
+            ),
+          Gaps.vGap16,
+          if (doctor.medicalCenters != null &&
+              doctor.medicalCenters!.isNotEmpty) ...[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: colors.main.withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(30.r),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  DiffImage(
+                    image: doctor.medicalCenters?.first.logo ?? '',
+                    width: 30.w,
+                    height: 30.w,
+                    isCircle: true,
+                    fitType: BoxFit.cover,
+                    userName: doctor.medicalCenters?.first.name ?? '',
+                  ),
+                  Gaps.hGap8,
+                  Text(
+                    doctor.medicalCenters?.first.name ?? '',
+                    style: TextStyles.medium14(color: colors.main),
+                  ),
+                ],
+              ),
+            ),
+          ],
           Gaps.vGap16,
           MyDefaultButton(
             onPressed: () {

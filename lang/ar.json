@@ -47,6 +47,8 @@
   "noData": "لا يوجد بيانات حاليا",
   "no_favorites": "لا توجد عناصر مفضلة بعد.",
   "notifications": "الإشعارات",
+  "mark_all_as_read": "تحديد الكل كمقروء",
+  "no_notifications": "لا توجد إشعارات حالياً",
   "orders": "الطلبات",
   "our_branches": "فروعنا",
   "password_reset_success": "تم إعادة تعيين كلمة المرور بنجاح",
@@ -495,5 +497,7 @@
   "no_registered_doctors": "لا يوجد أطباء مسجلون",
   "no_search_results": "لا توجد نتائج بحث",
   "position_ordinal": "({number})",
+  "consultation_price_text": "سعر الاستشارة",
+  "examination_price": "سعر الكشف",
   "ai_assistant_disclaimer": "تذكير: كل ما تم تقديمه هو اقتراحات من مساعد ذكاء اصطناعي. لا غنى عن زيارة الطبيب المختص وأخذ الدواء المناسب بناءً على توجيهاته."
 }

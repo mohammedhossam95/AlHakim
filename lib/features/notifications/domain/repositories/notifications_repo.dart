@@ -1,13 +1,19 @@
+import 'package:alhakim/core/error/failures.dart';
+import 'package:alhakim/core/usecases/usecase.dart';
+import 'package:alhakim/features/notifications/domain/entities/app_notification_entity.dart';
+import 'package:alhakim/features/notifications/domain/usecases/params/mark_notification_as_read_params.dart';
 import 'package:dartz/dartz.dart';
 
-import '/core/base_classes/base_one_response.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-
 abstract class NotificationsRepository {
-  Future<Either<Failure, BaseOneResponse>> getNotificationsCount(
-      {required NoParams params});
+  Future<Either<Failure, List<AppNotification>>> getNotifications({
+    required NoParams params,
+  });
 
-  Future<Either<Failure, BaseOneResponse>> getNotifications(
-      {required NoParams params});
+  Future<Either<Failure, String>> markNotificationAsRead({
+    required MarkNotificationAsReadParams params,
+  });
+
+  Future<Either<Failure, String>> markAllNotificationsAsRead({
+    required NoParams params,
+  });
 }

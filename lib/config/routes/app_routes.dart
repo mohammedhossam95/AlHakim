@@ -9,6 +9,7 @@ import 'package:alhakim/features/appointments/domain/entities/appointment_entity
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
+import 'package:alhakim/features/auth/presentation/cubit/check_account_cubit/check_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get_countries_cubit.dart';
@@ -175,8 +176,11 @@ abstract class Routes {
         path: loginScreenRoute,
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
-          child: BlocProvider(
-            create: (_) => sl<VerifyCodeCubit>(),
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => sl<VerifyCodeCubit>()),
+              BlocProvider(create: (_) => sl<CheckAccountCubit>()),
+            ],
             child: const LoginScreen(),
           ),
         ),
