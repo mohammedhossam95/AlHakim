@@ -529,17 +529,31 @@ class QueuePatientCard extends StatelessWidget {
                       item.patient?.kinship == null
                           ? item.patient?.fullPatientName ?? ''
                           : item.patient?.fullName ?? '',
-
                       style: TextStyles.semiBold18(),
                     ),
 
                     Gaps.vGap8,
 
-                    Text(
-                      item.patient?.kinship == null
-                          ? item.patient?.phoneNumber ?? ''
-                          : item.bookedBy?.phoneNumber ?? '',
-                      style: TextStyles.medium12(color: colors.lightTextColor),
+                    InkWell(
+                      onTap: () {
+                        final isPatient = item.patient?.kinship == null;
+                        final countryCode = isPatient
+                            ? item.patient?.countryCode ?? ''
+                            : item.bookedBy?.countryCode ?? '';
+                        final phoneNumber = isPatient
+                            ? item.patient?.phoneNumber ?? ''
+                            : item.bookedBy?.phoneNumber ?? '';
+                        if (phoneNumber.isEmpty) return;
+                        Constants.makePhoneCall('$countryCode$phoneNumber');
+                      },
+                      child: Text(
+                        item.patient?.kinship == null
+                            ? "${item.patient?.countryCode ?? ''}${item.patient?.phoneNumber ?? ''}"
+                            : "${item.bookedBy?.countryCode ?? ''}${item.bookedBy?.phoneNumber ?? ''}",
+                        style: TextStyles.medium12(
+                          color: colors.lightTextColor,
+                        ),
+                      ),
                     ),
                   ],
                 ),
