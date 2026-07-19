@@ -293,69 +293,6 @@ class _DelegateDashboardScreenState extends State<DelegateDashboardScreen> {
                         ),
                       ],
                     ),
-
-                    // Gaps.vGap20,
-
-                    // /// appointments
-                    // _DashboardSection(
-                    //   title: "appointments_statistics".tr,
-
-                    //   icon: Icons.calendar_month_outlined,
-
-                    //   color: colors.secondary,
-
-                    //   items: [
-                    //     _DashboardItem(
-                    //       title: "total_appointments".tr,
-
-                    //       value: "${stats?.appointments?.total ?? 0}",
-
-                    //       icon: Icons.calendar_today_outlined,
-
-                    //       color: colors.main,
-                    //     ),
-
-                    //     _DashboardItem(
-                    //       title: "pending_appointments".tr,
-
-                    //       value: "${stats?.appointments?.pending ?? 0}",
-
-                    //       icon: Icons.schedule_outlined,
-
-                    //       color: colors.textColor,
-                    //     ),
-
-                    //     _DashboardItem(
-                    //       title: "confirmed_appointments".tr,
-
-                    //       value: "${stats?.appointments?.confirmed ?? 0}",
-
-                    //       icon: Icons.check_circle_outline,
-
-                    //       color: colors.success,
-                    //     ),
-
-                    //     _DashboardItem(
-                    //       title: "cancelled_appointments".tr,
-
-                    //       value: "${stats?.appointments?.cancelled ?? 0}",
-
-                    //       icon: Icons.cancel_outlined,
-
-                    //       color: colors.errorColor,
-                    //     ),
-
-                    //     _DashboardItem(
-                    //       title: "completed_appointments".tr,
-
-                    //       value: "${stats?.appointments?.completed ?? 0}",
-
-                    //       icon: Icons.task_alt_outlined,
-
-                    //       color: colors.secondary,
-                    //     ),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),
