@@ -284,9 +284,14 @@ class Constants {
   }
 
   static Future<void> makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    final cleaned = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    if (cleaned.isEmpty) return;
+
+    final Uri launchUri = Uri(scheme: 'tel', path: cleaned);
     try {
-      await launchUrl(launchUri);
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+      }
     } catch (e) {
       throw 'Could not launch $launchUri';
     }

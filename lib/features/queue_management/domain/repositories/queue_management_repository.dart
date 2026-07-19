@@ -14,6 +14,9 @@ abstract class QueueManagementRepository {
     required int appointmentId,
     required String status,
   });
+  Future<Either<Failure, BaseOneResponse>> notifyExamination({
+    required String appointmentId,
+  });
   Future<Either<Failure, BaseOneResponse>> quickBooking({
     required QuickBookingParams params,
   });

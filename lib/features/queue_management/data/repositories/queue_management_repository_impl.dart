@@ -64,4 +64,21 @@ class QueueManagementRepositoryImpl implements QueueManagementRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> notifyExamination({
+    required String appointmentId,
+  }) async {
+    try {
+      final result = await remoteDataSource.notifyExamination(
+        appointmentId: appointmentId,
+      );
+
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

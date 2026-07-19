@@ -7,6 +7,7 @@ import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/queue_management/domain/entities/queue_management_entity.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/cubit/notify_examination_cubit/notify_examination_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -53,28 +54,49 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
       appLocalizations.isArLocale ? 'ar' : 'en',
     ).format(DateTime.now());
 
-    return BlocListener<UpdateQueueStatusCubit, UpdateQueueStatusState>(
-      listener: (context, state) {
-        if (state is UpdateQueueStatusLoading) {
-          Constants.showLoading(context);
-        }
-        if (state is UpdateQueueStatusSuccess) {
-          Constants.hideLoading(context);
-          _loadQueue(context);
-          Constants.showSnakToast(
-            context: context,
-            type: 1,
-            message: state.response.message,
-          );
-        } else if (state is UpdateQueueStatusError) {
-          Constants.hideLoading(context);
-          Constants.showSnakToast(
-            context: context,
-            type: 3,
-            message: state.message,
-          );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<UpdateQueueStatusCubit, UpdateQueueStatusState>(
+          listener: (context, state) {
+            if (state is UpdateQueueStatusLoading) {
+              Constants.showLoading(context);
+            }
+            if (state is UpdateQueueStatusSuccess) {
+              Constants.hideLoading(context);
+              _loadQueue(context);
+              Constants.showSnakToast(
+                context: context,
+                type: 1,
+                message: state.response.message,
+              );
+            } else if (state is UpdateQueueStatusError) {
+              Constants.hideLoading(context);
+              Constants.showSnakToast(
+                context: context,
+                type: 3,
+                message: state.message,
+              );
+            }
+          },
+        ),
+        BlocListener<NotifyExaminationCubit, NotifyExaminationState>(
+          listener: (context, state) {
+            if (state is NotifyExaminationSuccess) {
+              Constants.showSnakToast(
+                context: context,
+                type: 1,
+                message: state.response.message,
+              );
+            } else if (state is NotifyExaminationError) {
+              Constants.showSnakToast(
+                context: context,
+                type: 3,
+                message: state.message,
+              );
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: colors.backGround,
 
@@ -610,7 +632,6 @@ class QueuePatientCard extends StatelessWidget {
                     color: colors.lightTextColor,
                   ),
                   Gaps.hGap10,
-
                   Text(
                     item.bookedBy?.fullPatientName ?? '',
                     style: TextStyles.medium12(color: colors.lightTextColor),
@@ -625,11 +646,8 @@ class QueuePatientCard extends StatelessWidget {
             ),
           ],
           Gaps.vGap20,
-
           Gaps.line,
-
           Gaps.vGap20,
-
           Row(
             children: [
               Expanded(
@@ -639,25 +657,46 @@ class QueuePatientCard extends StatelessWidget {
                   color: colors.main,
 
                   onTap: () {
-                    Constants.makePhoneCall(item.patient?.phoneNumber ?? '');
+                    final isPatient = item.patient?.kinship == null;
+                    final countryCode = isPatient
+                        ? item.patient?.countryCode ?? ''
+                        : item.bookedBy?.countryCode ?? '';
+                    final phoneNumber = isPatient
+                        ? item.patient?.phoneNumber ?? ''
+                        : item.bookedBy?.phoneNumber ?? '';
+                    if (phoneNumber.isEmpty) return;
+                    Constants.makePhoneCall('$countryCode$phoneNumber');
                   },
                 ),
               ),
 
               Gaps.hGap12,
-
               Expanded(
-                child: QueueActionButton(
-                  icon: Icons.volume_up_outlined,
+                child:
+                    BlocBuilder<NotifyExaminationCubit, NotifyExaminationState>(
+                      builder: (context, state) {
+                        final appointmentId = (item.id ?? 0).toString();
+                        final isLoading =
+                            state is NotifyExaminationLoading &&
+                            state.appointmentId == appointmentId;
 
-                  color: colors.main,
-
-                  isSelected: true,
-
-                  onTap: () {},
-                ),
+                        return QueueActionButton(
+                          icon: Icons.notification_important_outlined,
+                          color: colors.main,
+                          isSelected: true,
+                          isLoading: isLoading,
+                          onTap: () {
+                            if (isLoading) return;
+                            context
+                                .read<NotifyExaminationCubit>()
+                                .notifyExamination(
+                                  appointmentId: appointmentId,
+                                );
+                          },
+                        );
+                      },
+                    ),
               ),
-
               Gaps.hGap12,
 
               Expanded(
@@ -806,6 +845,8 @@ class QueueActionButton extends StatelessWidget {
 
   final bool isSelected;
 
+  final bool isLoading;
+
   final VoidCallback onTap;
 
   const QueueActionButton({
@@ -814,12 +855,13 @@ class QueueActionButton extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.isSelected = false,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
 
       child: Container(
         height: 52.h,
@@ -832,7 +874,18 @@ class QueueActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
         ),
 
-        child: Icon(icon, color: color),
+        child: Center(
+          child: isLoading
+              ? SizedBox(
+                  width: 22.w,
+                  height: 22.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: color,
+                  ),
+                )
+              : Icon(icon, color: color),
+        ),
       ),
     );
   }

@@ -24,6 +24,7 @@ import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
 import 'package:alhakim/features/doctors/presentation/screens/medical_center_doctors_selection_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/cubit/notify_examination_cubit/notify_examination_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/settings_screen.dart';
@@ -155,6 +156,9 @@ class _MainPageState extends State<MainPage> {
           ),
           BlocProvider(
             create: (_) => ServiceLocator.instance<UpdateQueueStatusCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => ServiceLocator.instance<NotifyExaminationCubit>(),
           ),
         ],
         child: const QueueManagementScreen(),

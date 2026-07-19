@@ -219,13 +219,16 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
                         },
                       );
                     } else if (state is GetSpecialtiesError) {
-                      return Center(
-                        child: ErrorText(
-                          width: 300.w,
-                          text: state.message,
-                          onRetry: () => context
-                              .read<GetSpecialtiesCubit>()
-                              .getSpecialties(),
+                      return SizedBox(
+                        height: 150.h,
+                        child: Center(
+                          child: ErrorText(
+                            width: 100.w,
+                            text: state.message,
+                            onRetry: () => context
+                                .read<GetSpecialtiesCubit>()
+                                .getSpecialties(),
+                          ),
                         ),
                       );
                     } else if (state is GetSpecialtiesSuccess) {

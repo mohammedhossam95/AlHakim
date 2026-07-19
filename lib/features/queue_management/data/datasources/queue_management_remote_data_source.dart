@@ -15,6 +15,7 @@ abstract class QueueManagementRemoteDataSource {
     required int appointmentId,
     required String status,
   });
+  Future<BaseOneResponse> notifyExamination({required String appointmentId});
   Future<QuickBookingRespModel> quickBooking({
     required QuickBookingParams params,
   });
@@ -73,6 +74,29 @@ class QueueManagementRemoteDataSourceImpl
         '/doctors/$doctorId/queue-management/$appointmentId/status',
 
         formData: FormData.fromMap({"_method": "PATCH", "status": status}),
+      );
+
+      if (response['status'] == true) {
+        return BaseOneResponse(
+          status: response['status'],
+          message: response['message'],
+          data: response['data'],
+        );
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> notifyExamination({
+    required String appointmentId,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        '/appointments/$appointmentId/notify-examination',
       );
 
       if (response['status'] == true) {
