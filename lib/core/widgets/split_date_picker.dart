@@ -75,11 +75,10 @@ class _SplitDatePickerState extends State<SplitDatePicker> {
         "$selectedYear-${selectedMonth.toString().padLeft(2, '0')}-${selectedDay.toString().padLeft(2, '0')}";
   }
 
-  InputDecoration _dropdownDecoration(String label) {
+  InputDecoration get _dropdownDecoration {
     return InputDecoration(
-      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-      hintText: label,
-      hintStyle: TextStyles.semiBold12(color: colors.lightTextColor),
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
       floatingLabelBehavior: FloatingLabelBehavior.never,
       filled: true,
       fillColor: colors.main.withValues(alpha: .1),
@@ -108,29 +107,72 @@ class _SplitDatePickerState extends State<SplitDatePicker> {
     return null;
   }
 
+  Widget _fitText(String text, {TextStyle? style}) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerStart,
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        style: style ?? TextStyles.medium12(color: colors.lightTextColor),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required Key? key,
+    required int? value,
+    required String hint,
+    required List<int> values,
+    required ValueChanged<int?> onChanged,
+    String Function(int value)? labelBuilder,
+  }) {
+    String labelOf(int v) =>
+        labelBuilder?.call(v) ?? v.toString().padLeft(2, '0');
+
+    return DropdownButtonFormField<int>(
+      key: key,
+      initialValue: value != null && values.contains(value) ? value : null,
+      isExpanded: true,
+      isDense: true,
+      decoration: _dropdownDecoration,
+      iconSize: 18.sp,
+      icon: Icon(Icons.keyboard_arrow_down, color: colors.lightTextColor),
+      hint: _fitText(hint),
+      validator: _validateDate,
+      selectedItemBuilder: (context) {
+        return values
+            .map(
+              (v) => Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: _fitText(labelOf(v), style: TextStyles.medium14()),
+              ),
+            )
+            .toList();
+      },
+      items: values
+          .map(
+            (v) => DropdownMenuItem(
+              value: v,
+              child: Text(labelOf(v), style: TextStyles.medium14()),
+            ),
+          )
+          .toList(),
+      onChanged: onChanged,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          flex: 3,
-          child: DropdownButtonFormField<int>(
-            initialValue: selectedMonth,
-            isExpanded: true,
-            decoration: _dropdownDecoration('month'.tr),
-            icon: Icon(Icons.keyboard_arrow_down, color: colors.lightTextColor),
-            validator: _validateDate,
-            items: List.generate(12, (i) => i + 1)
-                .map(
-                  (m) => DropdownMenuItem(
-                    value: m,
-                    child: Text(
-                      m.toString().padLeft(2, '0'),
-                      style: TextStyles.medium14(),
-                    ),
-                  ),
-                )
-                .toList(),
+          child: _buildDropdown(
+            key: null,
+            value: selectedMonth,
+            hint: 'month'.tr,
+            values: List.generate(12, (i) => i + 1),
             onChanged: (value) {
               setState(() {
                 selectedMonth = value;
@@ -141,28 +183,11 @@ class _SplitDatePickerState extends State<SplitDatePicker> {
         ),
         Gaps.hGap8,
         Expanded(
-          flex: 2,
-          child: DropdownButtonFormField<int>(
+          child: _buildDropdown(
             key: ValueKey('day_${selectedYear}_${selectedMonth}_$selectedDay'),
-            initialValue:
-                selectedDay != null && daysInSelectedMonth.contains(selectedDay)
-                ? selectedDay
-                : null,
-            isExpanded: true,
-            decoration: _dropdownDecoration('day'.tr),
-            icon: Icon(Icons.keyboard_arrow_down, color: colors.lightTextColor),
-            validator: _validateDate,
-            items: daysInSelectedMonth
-                .map(
-                  (d) => DropdownMenuItem(
-                    value: d,
-                    child: Text(
-                      d.toString().padLeft(2, '0'),
-                      style: TextStyles.medium14(),
-                    ),
-                  ),
-                )
-                .toList(),
+            value: selectedDay,
+            hint: 'day'.tr,
+            values: daysInSelectedMonth,
             onChanged: (value) {
               setState(() {
                 selectedDay = value;
@@ -173,21 +198,12 @@ class _SplitDatePickerState extends State<SplitDatePicker> {
         ),
         Gaps.hGap8,
         Expanded(
-          flex: 3,
-          child: DropdownButtonFormField<int>(
-            initialValue: selectedYear,
-            isExpanded: true,
-            decoration: _dropdownDecoration('year'.tr),
-            icon: Icon(Icons.keyboard_arrow_down, color: colors.lightTextColor),
-            validator: _validateDate,
-            items: years
-                .map(
-                  (y) => DropdownMenuItem(
-                    value: y,
-                    child: Text(y.toString(), style: TextStyles.medium14()),
-                  ),
-                )
-                .toList(),
+          child: _buildDropdown(
+            key: null,
+            value: selectedYear,
+            hint: 'year'.tr,
+            values: years,
+            labelBuilder: (y) => y.toString(),
             onChanged: (value) {
               setState(() {
                 selectedYear = value;

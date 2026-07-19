@@ -5,6 +5,7 @@ import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/core/widgets/split_date_picker.dart';
 import 'package:alhakim/features/booking/domain/entities/kinship_entity.dart';
 import 'package:alhakim/features/booking/presentation/cubit/add_family_member_cubit/add_family_member_cubit.dart';
 import 'package:alhakim/features/booking/presentation/cubit/get_kinships_cubit/get_kinships_cubit.dart';
@@ -100,38 +101,15 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
 
                   Gaps.vGap8,
 
-                  MyTextFormField(
+                  SplitDatePicker(
                     controller: _birthDateController,
-
-                    hintText: "birth_date_hint".tr,
-
-                    readOnly: true,
-
+                    firstYear: 1950,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "birth_date_hint".tr;
                       }
 
                       return null;
-                    },
-
-                    prefixIcon: Icon(Icons.calendar_today, color: colors.main),
-
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-
-                        initialDate: DateTime.now(),
-
-                        firstDate: DateTime(1950),
-
-                        lastDate: DateTime.now(),
-                      );
-
-                      if (picked != null) {
-                        _birthDateController.text =
-                            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
-                      }
                     },
                   ),
 

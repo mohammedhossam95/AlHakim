@@ -52,6 +52,7 @@ import 'package:alhakim/features/queue_management/presentation/cubit/quick_booki
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/quick_booking_screen.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/app_setting_cubit/app_setting_cubit.dart';
+import 'package:alhakim/features/settings/presentaion/cubit/get_hospital_emergency_cubit/get_hospital_emergency_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/update_user_profile_cubit/update_user_profile_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/screens/edit_profile_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/static_page_content_screen.dart';
@@ -75,6 +76,7 @@ import '../../features/notifications/presentation/screens/notification_screen.da
 import '../../features/settings/presentaion/cubit/get_user_profile_cubit/get_user_profile_cubit.dart';
 import '../../features/settings/presentaion/screens/change_password_screen.dart';
 import '../../features/settings/presentaion/screens/contact_us_screen.dart';
+import '../../features/settings/presentaion/screens/emergency_screen.dart';
 import '../../features/tabbar/presentation/screens/main_page.dart';
 
 abstract class Routes {
@@ -112,7 +114,7 @@ abstract class Routes {
   static const String staticPageScreenRoute = '/StaticPageScreen';
   static const String favoritesScreenRoute = '/favoritesScreen';
   static const String userProfileScreenRoute = '/userProfileScreen';
-
+  static const String emergencyScreenRoute = '/emergencyScreen';
   static const String specialitiesScreenRoute = '/specialitiesScreen';
   static const String doctorsListScreenRoute = '/doctorsListScreen';
   static const String searchDoctorsScreenRoute = '/searchDoctorsScreen';
@@ -144,6 +146,17 @@ abstract class Routes {
     initialLocation: initialRoute,
     observers: [routeObserver],
     routes: [
+      GoRoute(
+        name: emergencyScreenRoute,
+        path: emergencyScreenRoute,
+        pageBuilder: (context, state) => buildAdaptivePage(
+          state: state,
+          child: BlocProvider(
+            create: (_) => sl<GetHospitalEmergencyCubit>(),
+            child: const EmergencyScreen(),
+          ),
+        ),
+      ),
       GoRoute(
         name: initialRoute,
         path: initialRoute,

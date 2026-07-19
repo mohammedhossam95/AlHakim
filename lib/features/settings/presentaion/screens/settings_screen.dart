@@ -108,6 +108,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: 'settings_and_support'.tr,
                       child: Column(
                         children: [
+                          if (sessionState.status ==
+                              SessionStatus.authenticated) ...[
+                            ProfileWidet(
+                              title: 'emergency'.tr,
+                              icon: SvgAssets.emergencyIcon,
+                              onTap: () {
+                                context.push(Routes.emergencyScreenRoute);
+                              },
+                            ),
+                          ],
                           ProfileWidet(
                             title: 'language'.tr,
                             icon: SvgAssets.languageIcon,
