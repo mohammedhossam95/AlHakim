@@ -57,15 +57,49 @@ class QueueUserModel extends QueueUserEntity {
     super.lastName,
     super.phoneNumber,
     super.countryCode,
+    super.fullName,
+    super.birthDate,
+    super.kinship,
   });
 
   factory QueueUserModel.fromJson(Map<String, dynamic> json) {
     return QueueUserModel(
       id: json['id'],
       firstName: json['first_name'],
+
       lastName: json['last_name'],
+
       phoneNumber: json['phone_number'],
       countryCode: json['country_code'],
+      fullName: json['full_name'],
+      birthDate: json['birth_date'],
+      kinship: json['kinship'] != null
+          ? KinshipModel.fromJson(json['kinship'])
+          : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'first_name': firstName,
+      'last_name': lastName,
+      'phone_number': phoneNumber,
+      'country_code': countryCode,
+      'full_name': fullName,
+      'birth_date': birthDate,
+      'kinship': kinship != null ? (kinship as KinshipModel).toJson() : null,
+    };
+  }
+}
+
+class KinshipModel extends KinshipEntity {
+  const KinshipModel({super.value, super.label});
+
+  factory KinshipModel.fromJson(Map<String, dynamic> json) {
+    return KinshipModel(value: json['value'], label: json['label']);
+  }
+  Map<String, dynamic> toJson() {
+    return {'value': value, 'label': label};
   }
 }

@@ -40,6 +40,9 @@ class QueueUserEntity extends Equatable {
   final String? lastName;
   final String? phoneNumber;
   final String? countryCode;
+  final String? fullName;
+  final String? birthDate;
+  final KinshipEntity? kinship;
 
   const QueueUserEntity({
     this.id,
@@ -47,9 +50,12 @@ class QueueUserEntity extends Equatable {
     this.lastName,
     this.phoneNumber,
     this.countryCode,
+    this.fullName,
+    this.birthDate,
+    this.kinship,
   });
 
-  String get fullName => "${firstName ?? ''} ${lastName ?? ''}";
+  String get fullPatientName => "${firstName ?? ''} ${lastName ?? ''}";
 
   @override
   List<Object?> get props => [
@@ -58,5 +64,18 @@ class QueueUserEntity extends Equatable {
     lastName,
     phoneNumber,
     countryCode,
+    fullName,
+    birthDate,
+    kinship,
   ];
+}
+
+class KinshipEntity extends Equatable {
+  final String? value;
+  final String? label;
+
+  const KinshipEntity({this.value, this.label});
+
+  @override
+  List<Object?> get props => [value, label];
 }

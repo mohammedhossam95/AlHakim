@@ -478,27 +478,20 @@ class QueuePatientCard extends StatelessWidget {
           if (isCurrent) ...[
             Container(
               width: double.infinity,
-
               padding: EdgeInsets.symmetric(vertical: 10.h),
-
               decoration: BoxDecoration(
                 color: colors.main,
-
                 borderRadius: BorderRadius.circular(14.r),
               ),
 
               child: Text(
                 "current_role".tr,
-
                 textAlign: TextAlign.center,
-
                 style: TextStyles.semiBold14(color: colors.whiteColor),
               ),
             ),
-
             Gaps.vGap16,
           ],
-
           Row(
             children: [
               Container(
@@ -514,15 +507,11 @@ class QueuePatientCard extends StatelessWidget {
                   children: [
                     Text(
                       "role".tr,
-
                       style: TextStyles.medium12(color: colors.lightTextColor),
                     ),
-
                     Gaps.vGap4,
-
                     Text(
                       item.queuePosition ?? '',
-
                       style: TextStyles.bold20(color: colors.main),
                     ),
                   ],
@@ -537,7 +526,9 @@ class QueuePatientCard extends StatelessWidget {
 
                   children: [
                     Text(
-                      item.patient?.fullName ?? '',
+                      item.patient?.kinship == null
+                          ? item.patient?.fullPatientName ?? ''
+                          : item.patient?.fullName ?? '',
 
                       style: TextStyles.semiBold18(),
                     ),
@@ -545,8 +536,9 @@ class QueuePatientCard extends StatelessWidget {
                     Gaps.vGap8,
 
                     Text(
-                      item.patient?.phoneNumber ?? '',
-
+                      item.patient?.kinship == null
+                          ? item.patient?.phoneNumber ?? ''
+                          : item.bookedBy?.phoneNumber ?? '',
                       style: TextStyles.medium12(color: colors.lightTextColor),
                     ),
                   ],
@@ -588,7 +580,36 @@ class QueuePatientCard extends StatelessWidget {
               ),
             ],
           ),
+          Gaps.vGap10,
+          if (item.patient?.kinship != null) ...[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: colors.main.withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.person_outline,
+                    size: 16.sp,
+                    color: colors.lightTextColor,
+                  ),
+                  Gaps.hGap10,
 
+                  Text(
+                    item.bookedBy?.fullPatientName ?? '',
+                    style: TextStyles.medium12(color: colors.lightTextColor),
+                  ),
+                  Spacer(),
+                  Text(
+                    item.patient?.kinship?.label ?? '',
+                    style: TextStyles.medium12(color: colors.lightTextColor),
+                  ),
+                ],
+              ),
+            ),
+          ],
           Gaps.vGap20,
 
           Gaps.line,
@@ -628,8 +649,10 @@ class QueuePatientCard extends StatelessWidget {
               Expanded(
                 child: PopupMenuButton<String>(
                   onSelected: (value) async {
-                    final doctorId =
-                        context.read<SessionCubit>().state.activeDoctorId;
+                    final doctorId = context
+                        .read<SessionCubit>()
+                        .state
+                        .activeDoctorId;
                     if (doctorId == null || doctorId.isEmpty) return;
 
                     await context
@@ -642,8 +665,10 @@ class QueuePatientCard extends StatelessWidget {
                           status: value,
                         );
                     if (!context.mounted) return;
-                    final activeDoctorId =
-                        context.read<SessionCubit>().state.activeDoctorId;
+                    final activeDoctorId = context
+                        .read<SessionCubit>()
+                        .state
+                        .activeDoctorId;
                     if (activeDoctorId == null || activeDoctorId.isEmpty) {
                       return;
                     }

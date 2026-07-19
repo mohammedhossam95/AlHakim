@@ -9,7 +9,14 @@ sealed class GetSpecialtyDoctorsState extends Equatable {
 
 final class GetSpecialtyDoctorsInitial extends GetSpecialtyDoctorsState {}
 
-final class GetSpecialtyDoctorsLoading extends GetSpecialtyDoctorsState {}
+final class GetSpecialtyDoctorsLoading extends GetSpecialtyDoctorsState {
+  final BaseListResponse? previousResponse;
+
+  const GetSpecialtyDoctorsLoading({this.previousResponse});
+
+  @override
+  List<Object?> get props => [previousResponse];
+}
 
 final class GetSpecialtyDoctorsSuccess extends GetSpecialtyDoctorsState {
   final BaseListResponse response;

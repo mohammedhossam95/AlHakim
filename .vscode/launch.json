@@ -1,0 +1,47 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "alhakim (iPhone 11 Pro Max)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "F6670852-B9F0-442D-99BA-54B51A67B2B3"
+        },
+        {
+            "name": "alhakim (CPH1907)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "69f4dba"
+        },
+        {
+            "name": "alhakim",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "alhakim (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "alhakim (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "alhakim (iPhone + CPH1907)",
+            "configurations": [
+                "alhakim (iPhone 11 Pro Max)",
+                "alhakim (CPH1907)"
+            ],
+            "stopAll": true
+        }
+    ]
+}
