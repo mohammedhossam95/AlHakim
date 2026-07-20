@@ -8,18 +8,11 @@ import 'package:alhakim/core/widgets/shimmer/follow_up_queue_shimmer.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/domain/entities/queue_status_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
-import 'package:alhakim/features/home/domain/entity/slider_entity.dart';
 import 'package:alhakim/features/home/presentation/widgets/slider_part.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-const _dummySliders = [
-  SliderEntity(id: 1, image: 'assets/images/alhakim_en.png'),
-  SliderEntity(id: 2, image: 'assets/images/alhakim_ar.png'),
-  SliderEntity(id: 3, image: 'assets/images/logo_horizontal.png'),
-];
 
 class FollowUpQueueScreen extends StatefulWidget {
   final AppointmentEntity appointment;
@@ -102,7 +95,7 @@ class _FollowUpQueueBody extends StatelessWidget {
     required this.queueStatus,
   });
 
-  bool get _clinicStarted => queueStatus.clinicStarted == true;
+  bool get _clinicOpen => queueStatus.clinicOpen == true;
 
   bool get _showSoonBanner =>
       queueStatus.isCurrent == true || (queueStatus.patientsAhead ?? 0) <= 3;
@@ -112,19 +105,26 @@ class _FollowUpQueueBody extends StatelessWidget {
       : appointment.doctor?.name?.en ?? '';
 
   Future<void> _callClinic() async {
-    final phone = appointment.doctor?.clinicPhone;
-    if (phone == null || phone.isEmpty) return;
-    await Constants.makePhoneCall('20$phone');
+    final phone =
+        appointment.doctor?.clinicPhone ??
+        appointment.doctor?.medicalCenters?.first.phone ??
+        "";
+    final countryCode =
+        appointment.doctor?.secretaryCountryCode ??
+        appointment.doctor?.medicalCenters?.first.countryCode ??
+        "20";
+    if (countryCode.isEmpty || phone.isEmpty) return;
+    await Constants.makePhoneCall('$countryCode$phone');
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_clinicStarted) {
+    if (!_clinicOpen) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(16.w),
         children: [
-          const _OffersSliderSection(),
+          _OffersSliderSection(ads: queueStatus.ads ?? []),
           Gaps.vGap24,
           const _ClinicNotStartedAlert(),
         ],
@@ -140,7 +140,7 @@ class _FollowUpQueueBody extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       children: [
-        const _OffersSliderSection(),
+        _OffersSliderSection(ads: queueStatus.ads ?? []),
         Gaps.vGap16,
 
         _AppointmentReferenceRow(
@@ -314,11 +314,12 @@ class _ClinicNotStartedAlert extends StatelessWidget {
 }
 
 class _OffersSliderSection extends StatelessWidget {
-  const _OffersSliderSection();
+  final List<Ad> ads;
+  const _OffersSliderSection({required this.ads});
 
   @override
   Widget build(BuildContext context) {
-    return const SliderPart(list: _dummySliders);
+    return SliderPart(list: ads);
   }
 }
 
@@ -348,7 +349,7 @@ class _ClinicStartedBanner extends StatelessWidget {
           Gaps.hGap12,
           Expanded(
             child: Text(
-              'doctor_started_examination'.trParams({'doctor': doctorName}),
+              'doctor_started_examination'.tr,
               style: TextStyles.medium14(color: colors.success),
             ),
           ),
@@ -413,7 +414,7 @@ class _CurrentQueueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: colors.whiteColor,
         borderRadius: BorderRadius.circular(20.r),
@@ -431,9 +432,9 @@ class _CurrentQueueCard extends StatelessWidget {
             'current_status'.tr,
             style: TextStyles.medium14(color: colors.lightTextColor),
           ),
-          Gaps.vGap8,
+
           Text(currentNumber, style: TextStyles.semiBold40(color: colors.main)),
-          Gaps.vGap12,
+
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
@@ -484,7 +485,7 @@ class _QueueInfoRow extends StatelessWidget {
       children: [
         Expanded(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: colors.main,
               borderRadius: BorderRadius.circular(16.r),
@@ -496,7 +497,7 @@ class _QueueInfoRow extends StatelessWidget {
                   style: TextStyles.medium12(color: colors.whiteColor),
                   textAlign: TextAlign.center,
                 ),
-                Gaps.vGap12,
+                Gaps.vGap8,
                 Text(
                   yourNumber,
                   style: TextStyles.semiBold40(color: colors.whiteColor),
@@ -508,7 +509,7 @@ class _QueueInfoRow extends StatelessWidget {
         Gaps.hGap12,
         Expanded(
           child: Container(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: colors.whiteColor,
               borderRadius: BorderRadius.circular(16.r),

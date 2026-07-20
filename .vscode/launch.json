@@ -11,6 +11,12 @@
             "deviceId": "F6670852-B9F0-442D-99BA-54B51A67B2B3"
         },
         {
+            "name": "alhakim (iPhone 17 Pro)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "9A6AC1F6-78FF-4EB4-8ECD-F61642B70639"
+        },
+        {
             "name": "alhakim (CPH1907)",
             "request": "launch",
             "type": "dart",
@@ -36,10 +42,10 @@
     ],
     "compounds": [
         {
-            "name": "alhakim (iPhone + CPH1907)",
+            "name": "alhakim (iPhone)",
             "configurations": [
                 "alhakim (iPhone 11 Pro Max)",
-                "alhakim (CPH1907)"
+                "alhakim (iPhone 17 Pro)"
             ],
             "stopAll": true
         }

@@ -21,12 +21,14 @@ class QueueStatusModel extends QueueStatusEntity {
     super.status,
     super.isCurrent,
     super.clinicStarted,
+    super.clinicOpen,
     super.isMissedTurn,
     super.yourQueueNumber,
     super.currentQueueNumber,
     super.patientsAhead,
     super.slotDuration,
     super.estimatedWaitMinutes,
+    super.ads,
   });
 
   factory QueueStatusModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class QueueStatusModel extends QueueStatusEntity {
       appointmentId: json['appointment_id'],
       status: json['status']?.toString(),
       isCurrent: json['is_current'],
+      clinicOpen: json['clinic_open'],
       clinicStarted: json['clinic_started'],
       isMissedTurn: json['is_missed_turn'],
       yourQueueNumber: json['your_queue_number']?.toString(),
@@ -41,6 +44,19 @@ class QueueStatusModel extends QueueStatusEntity {
       patientsAhead: json['patients_ahead'],
       slotDuration: json['slot_duration'],
       estimatedWaitMinutes: json['estimated_wait_minutes'],
+      ads: json['ads'] != null
+          ? (json['ads'] as List).map((e) => AdModel.fromJson(e)).toList()
+          : null,
     );
   }
+}
+
+class AdModel extends Ad {
+  const AdModel({super.id, super.photo, super.link});
+
+  factory AdModel.fromJson(Map<String, dynamic> json) {
+    return AdModel(id: json['id'], photo: json['photo'], link: json['link']);
+  }
+
+  Map<String, dynamic> toJson() => {"id": id, "photo": photo, "link": link};
 }

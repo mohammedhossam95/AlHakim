@@ -14,18 +14,7 @@ class HomeRepoImpl extends HomeRepo {
   final HomeRemoteDatasource remote;
 
   HomeRepoImpl({required this.remote});
-  @override
-  Future<Either<Failure, BaseListResponse>> getHomeBannars() async {
-    try {
-      final result = await remote.getHomeBanners();
-      return Right<Failure, BaseListResponse>(result);
-    } on AppException catch (error) {
-      Log.e(
-        '[homeBannares][${error.runtimeType.toString()}]--- ${error.message}',
-      );
-      return Left<Failure, BaseListResponse>(error.toFailure());
-    }
-  }
+
 
   @override
   Future<Either<Failure, BaseListResponse>> getListAds(AdsParams params) async {

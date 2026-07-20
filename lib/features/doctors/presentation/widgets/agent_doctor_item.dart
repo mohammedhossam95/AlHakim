@@ -91,10 +91,10 @@ class AgentDoctorItem extends StatelessWidget {
             rightIcon: true,
             iconData: Icons.call,
             btnText:
-                "${doctor.secretaryCountryCode ?? "20"}${doctor.secretaryPhone}",
+                "${doctor.secretaryCountryCode ?? doctor.medicalCenters?.first.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenters?.first.phone ?? ""}",
             onPressed: () {
               Constants.makePhoneCall(
-                "${doctor.secretaryCountryCode ?? "20"}${doctor.secretaryPhone}",
+                "${doctor.secretaryCountryCode ?? doctor.medicalCenters?.first.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenters?.first.phone ?? ""}",
               );
             },
           ),

@@ -1,7 +1,7 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/widgets/diff_img.dart'; // Adjust path
 import 'package:alhakim/core/widgets/gaps.dart';
-import 'package:alhakim/features/home/domain/entity/slider_entity.dart';
+import 'package:alhakim/features/appointments/domain/entities/queue_status_entity.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,7 +10,7 @@ import '../../../../injection_container.dart'; // Adjust path
 
 class SliderPart extends StatefulWidget {
   const SliderPart({super.key, required this.list});
-  final List<SliderEntity> list;
+  final List<Ad> list;
 
   @override
   State<SliderPart> createState() => _SliderPartState();
@@ -19,21 +19,21 @@ class SliderPart extends StatefulWidget {
 class _SliderPartState extends State<SliderPart> {
   int initIndex = 0;
 
-  void _handleSliderNavigation(BuildContext context, SliderEntity slider) {
-    if (slider.redirectType == null) return;
+  void _handleSliderNavigation(BuildContext context, Ad slider) {
+    // if (slider.redirectType == null) return;
 
-    switch (slider.redirectType) {
-      case 'product':
-        if (slider.redirectTypeId != null) {}
-        break;
+    // switch (slider.redirectType) {
+    //   case 'product':
+    //     if (slider.redirectTypeId != null) {}
+    //     break;
 
-      case 'category':
-        if (slider.redirectTypeId != null) {}
-        break;
+    //   case 'category':
+    //     if (slider.redirectTypeId != null) {}
+    //     break;
 
-      default:
-        debugPrint('Unknown redirect type: ${slider.redirectType}');
-    }
+    //   default:
+    //     debugPrint('Unknown redirect type: ${slider.redirectType}');
+    // }
   }
 
   @override
@@ -58,6 +58,7 @@ class _SliderPartState extends State<SliderPart> {
             viewportFraction: 0.82,
             autoPlay: true,
             enlargeCenterPage: true,
+
             autoPlayCurve: Curves.fastOutSlowIn,
           ),
           items: widget.list.map((slider) {
@@ -65,7 +66,7 @@ class _SliderPartState extends State<SliderPart> {
               onTap: () => _handleSliderNavigation(context, slider),
               borderRadius: BorderRadius.circular(15.r),
               child: DiffImage(
-                image: slider.image,
+                image: slider.photo ?? '',
                 fitType: BoxFit.fill,
                 width: 1.sw,
                 radius: 15.r,

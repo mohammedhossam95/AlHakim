@@ -472,7 +472,7 @@
   "hide_consultation_price_to_patients_desc": "عند تفعيل هذا الخيار سيتم إخفاء سعر الاستشارة عن المرضى.",
   "follow_up_appointment": "متابعة الدور",
   "live_alert": "تنبيه مباشر",
-  "doctor_started_examination": "الدكتور {doctor} بدأ الكشف الآن. يرجى الاستعداد.",
+  "doctor_started_examination": "الدكتور بدأ الكشف الآن. يرجى الاستعداد.",
   "current_status": "الوضع الحالي",
   "current_clinic_turn": "الدور الحالي بالعيادة",
   "your_queue_number": "رقم دورك الخاص",
