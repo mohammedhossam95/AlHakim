@@ -1,7 +1,6 @@
 import 'package:alhakim/features/home/data/models/analyze_complaint_request.dart';
 import 'package:alhakim/features/home/data/models/analyze_complaint_response_model.dart';
 import 'package:alhakim/features/home/data/models/get_ads_resp_model.dart';
-import 'package:alhakim/features/home/data/models/home_banners_resp_model.dart';
 import 'package:alhakim/features/home/domain/entity/ads_entity.dart';
 
 import '/core/api/dio_consumer.dart';
@@ -9,7 +8,6 @@ import '/core/error/exceptions.dart';
 import '/injection_container.dart';
 
 abstract class HomeRemoteDatasource {
-  Future<HomeBannersRespModel> getHomeBanners();
   Future<AllAdsRespModel> getListAds(AdsParams params);
   Future<AnalyzeComplaintResponse> analyzeComplaint(
     AnalyzeComplaintRequest request,
@@ -17,20 +15,6 @@ abstract class HomeRemoteDatasource {
 }
 
 class HomeRemoteDatasourceImpl implements HomeRemoteDatasource {
-  @override
-  Future<HomeBannersRespModel> getHomeBanners() async {
-    try {
-      final dynamic response = await dioConsumer.get('/get/list/banners');
-
-      if (response['success'] == true || response['status'] == 200) {
-        return HomeBannersRespModel.fromJson(response);
-      }
-      throw ServerException(message: response['message'] ?? '');
-    } catch (error) {
-      rethrow;
-    }
-  }
-
   @override
   Future<AllAdsRespModel> getListAds(AdsParams params) async {
     try {

@@ -189,13 +189,13 @@ class DoctorListItem extends StatelessWidget {
             textColor: colors.main,
             onPressed: () {
               Constants.makePhoneCall(
-                "${doctor.secretaryCountryCode ?? "20"}${doctor.secretaryPhone}",
+                "${doctor.secretaryCountryCode ?? doctor.medicalCenters?.first.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenters?.first.phone ?? ""}",
               );
             },
             localeText: true,
             svgAsset: SvgAssets.callIcon,
             btnText:
-                "${doctor.secretaryCountryCode ?? "20"}${doctor.secretaryPhone}",
+                "${doctor.secretaryCountryCode ?? doctor.medicalCenters?.first.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenters?.first.phone ?? ""}",
           ),
           Gaps.vGap10,
         ],

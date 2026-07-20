@@ -124,25 +124,27 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
           MapEntry("academic_degree", params.academicDegree!),
         );
       }
-      if (params.secretaryCountryCode != null) {
-        formData.fields.add(
-          MapEntry("secretary_country_code", params.secretaryCountryCode!),
-        );
-      }
+      if (params.medicalCenterId == null) {
+        if (params.secretaryCountryCode != null) {
+          formData.fields.add(
+            MapEntry("secretary_country_code", params.secretaryCountryCode!),
+          );
+        }
 
-      if (params.secretaryPhone != null) {
-        formData.fields.add(
-          MapEntry("secretary_phone", params.secretaryPhone!),
-        );
-      }
+        if (params.secretaryPhone != null) {
+          formData.fields.add(
+            MapEntry("secretary_phone", params.secretaryPhone!),
+          );
+        }
 
-      if (params.clinicCountryCode != null) {
-        formData.fields.add(
-          MapEntry("clinic_country_code", params.clinicCountryCode!),
-        );
-      }
-      if (params.clinicPhone != null) {
-        formData.fields.add(MapEntry("clinic_phone", params.clinicPhone!));
+        if (params.clinicCountryCode != null) {
+          formData.fields.add(
+            MapEntry("clinic_country_code", params.clinicCountryCode!),
+          );
+        }
+        if (params.clinicPhone != null) {
+          formData.fields.add(MapEntry("clinic_phone", params.clinicPhone!));
+        }
       }
 
       if (params.minPatients != null) {

@@ -7,7 +7,6 @@ import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
-import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
 import 'package:alhakim/features/auth/presentation/cubit/check_account_cubit/check_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
@@ -123,7 +122,6 @@ abstract class Routes {
   static const String familyMembersScreenRoute = '/familyMembersScreen';
   static const String addFamilyMemberScreenRoute = '/addFamilyMemberScreen';
   static const String chooseUserTypeScreenRoute = '/ChooseUserTypeScreen';
-  static const String appointmentsScreenRoute = '/AppointmentsScreenRoute';
   static const String delegateDoctorsScreenRoute =
       '/DelegateDoctorsScreenRoute';
   static const String addDoctorScreenRoute = '/AddDoctorScreenRoute';
@@ -332,12 +330,6 @@ abstract class Routes {
           create: (context) => sl<QuickBookingCubit>(),
           child: const QuickBookingScreen(),
         ),
-      ),
-
-      GoRoute(
-        path: appointmentsScreenRoute,
-        name: appointmentsScreenRoute,
-        builder: (context, state) => const AppointmentsScreen(),
       ),
 
       GoRoute(

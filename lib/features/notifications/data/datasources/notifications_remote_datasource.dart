@@ -43,6 +43,7 @@ class NotificationsRemoteDataSourceImpl
       final encodedId = Uri.encodeComponent(params.notificationId);
       final dynamic response = await dioConsumer.post(
         '${ApiConstants.getNotifications}/$encodedId/read',
+        body: {'_method': 'Patch'},
       );
 
       if (response['status'] == true) {
@@ -59,6 +60,7 @@ class NotificationsRemoteDataSourceImpl
     try {
       final dynamic response = await dioConsumer.post(
         ApiConstants.markAllNotificationsAsRead,
+        body: {'_method': 'Patch'},
       );
 
       if (response['status'] == true) {
