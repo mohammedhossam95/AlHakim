@@ -152,4 +152,18 @@ class SettingRemoteRepoImpl extends SettingRepo {
       return Left<Failure, BaseListResponse>(error.toFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, BaseListResponse>> getEmergencyCategories() async {
+    try {
+      final BaseListResponse response = await settingRemoteDataSource
+          .getEmergencyCategories();
+      return Right<Failure, BaseListResponse>(response);
+    } on AppException catch (error) {
+      log.Log.e(
+        '[getEmergencyCategories] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, BaseListResponse>(error.toFailure());
+    }
+  }
 }

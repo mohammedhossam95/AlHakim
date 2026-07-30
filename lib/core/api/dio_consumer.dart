@@ -21,6 +21,8 @@ abstract class ApiConstants {
   static const String analyzeComplaint = '/complaints/analyze';
   static const String getNotifications = '/notifications';
   static const String markAllNotificationsAsRead = '/notifications/read-all';
+  static const String hospitalEmergencyNumbers = '/hospital-emergency-numbers';
+  static const String emergencyNumberCategories = '/emergency-number-categories';
 }
 
 abstract class DioConsumer {

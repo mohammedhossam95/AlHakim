@@ -110,17 +110,32 @@ class _ChooseUserTypeScreenState extends State<ChooseUserTypeScreen> {
                       Gaps.hGap8,
                       Expanded(
                         child: UserTypeCardWidget(
-                          title: 'delegate_account'.tr,
-                          description: 'delegate_account_description'.tr,
+                          title: 'emergency'.tr,
+                          description: 'emergency_description'.tr,
                           userType: UserType.delegate,
-                          isSelected: _selectedUserType == UserType.delegate,
+                          // isSelected: _selectedUserType == UserType.delegate,
+                          // isProminent: true,
                           onTap: () {
-                            setState(() {
-                              _selectedUserType = UserType.delegate;
-                            });
+                            context.push(Routes.emergencyScreenRoute);
+                            // setState(() {
+                            //   _selectedUserType = UserType.delegate;
+                            // });
                           },
                         ),
                       ),
+                      // Expanded(
+                      //   child: UserTypeCardWidget(
+                      //     title: 'delegate_account'.tr,
+                      //     description: 'delegate_account_description'.tr,
+                      //     userType: UserType.delegate,
+                      //     isSelected: _selectedUserType == UserType.delegate,
+                      //     onTap: () {
+                      //       setState(() {
+                      //         _selectedUserType = UserType.delegate;
+                      //       });
+                      //     },
+                      //   ),
+                      // ),
                     ],
                   ),
                   Gaps.vGap20,

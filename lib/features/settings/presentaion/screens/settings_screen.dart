@@ -108,16 +108,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: 'settings_and_support'.tr,
                       child: Column(
                         children: [
-                          if (sessionState.status ==
-                              SessionStatus.authenticated) ...[
-                            ProfileWidet(
-                              title: 'emergency'.tr,
-                              icon: SvgAssets.emergencyIcon,
-                              onTap: () {
-                                context.push(Routes.emergencyScreenRoute);
-                              },
-                            ),
-                          ],
+                          // if (sessionState.status ==
+                          //     SessionStatus.authenticated) ...[
+                          //   ProfileWidet(
+                          //     title: 'emergency'.tr,
+                          //     icon: SvgAssets.emergencyIcon,
+                          //     onTap: () {
+                          //       context.push(Routes.emergencyScreenRoute);
+                          //     },
+                          //   ),
+                          // ],
                           ProfileWidet(
                             title: 'language'.tr,
                             icon: SvgAssets.languageIcon,
@@ -167,6 +167,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
                             },
                           ),
+                          if (sessionState.status == SessionStatus.guest)
+                            ProfileWidet(
+                              title: 'login_as_delegate'.tr,
+                              icon: SvgAssets.user,
+                              onTap: () {
+                                final session = BlocProvider.of<SessionCubit>(
+                                  context,
+                                );
+                                session.setUserType(UserType.delegate);
+                                context.pushNamed(Routes.loginScreenRoute);
+                              },
+                            ),
                         ],
                       ),
                     ),
@@ -272,7 +284,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: links
                   .map(
                     (link) => _socialIcon(
-                      _iconForLink(link.icon ?? link.name),
+                      FaIcon(_iconForLink(link.icon ?? link.name)),
                       link.url,
                       onTap: () {
                         if (link.url != null && link.url!.isNotEmpty) {
@@ -303,7 +315,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  IconData _iconForLink(String? key) {
+  FaIconData _iconForLink(String? key) {
     switch (key?.toLowerCase()) {
       case 'facebook':
         return FontAwesomeIcons.facebook;
@@ -328,7 +340,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _socialIcon(
-    IconData icon,
+    FaIcon icon,
     String? value, {
     required VoidCallback onTap,
   }) {
@@ -345,7 +357,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             shape: BoxShape.circle,
             color: Colors.grey.withValues(alpha: 0.1),
           ),
-          child: Icon(icon, size: 22.sp, color: Colors.black87),
+          child: icon,
         ),
       ),
     );

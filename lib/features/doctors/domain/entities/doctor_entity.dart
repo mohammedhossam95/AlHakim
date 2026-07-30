@@ -151,8 +151,8 @@ class LanguageEntity extends Equatable {
 class DoctorSpecialtyEntity extends Equatable {
   final int? id;
   final String? icon;
-  final String? isActive;
-  final String? sortOrder;
+  final int? isActive;
+  final int? sortOrder;
   final String? name;
   final String? slug;
   final bool? hasChildren;
