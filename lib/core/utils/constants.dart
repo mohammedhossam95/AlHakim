@@ -297,6 +297,21 @@ class Constants {
     }
   }
 
+  /// Opens WhatsApp chat for [phoneNumber] (digits only, no leading +).
+  static Future<void> openWhatsApp(String phoneNumber) async {
+    final cleaned = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    if (cleaned.isEmpty) return;
+
+    final Uri launchUri = Uri.parse('https://wa.me/$cleaned');
+    try {
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      throw 'Could not launch $launchUri';
+    }
+  }
+
   static picker.Country egyptCountryPicker = picker.Country(
     phoneCode: '20',
     countryCode: 'EG',
