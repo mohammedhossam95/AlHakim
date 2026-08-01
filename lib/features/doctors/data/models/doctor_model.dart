@@ -361,6 +361,8 @@ class MedicalCenterModel extends MedicalCenter {
     super.logo,
     super.cover,
     super.isActive,
+    super.latitude,
+    super.longitude,
     super.createdAt,
     super.updatedAt,
   });
@@ -377,6 +379,8 @@ class MedicalCenterModel extends MedicalCenter {
       logo: json['logo'],
       cover: json['cover'],
       isActive: json['is_active'],
+      latitude: json['latitude']?.toString(),
+      longitude: json['longitude']?.toString(),
     );
   }
 
@@ -391,5 +395,7 @@ class MedicalCenterModel extends MedicalCenter {
     "logo": logo,
     "cover": cover,
     "is_active": isActive,
+    "latitude": latitude,
+    "longitude": longitude,
   };
 }

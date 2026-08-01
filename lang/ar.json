@@ -130,6 +130,8 @@
   "show_phone": "إظهار رقمي",
   "hide_phone": "إخفاء رقمي",
   "location": "الموقع",
+  "call": "اتصال",
+  "share": "مشاركة",
   "select_location": "حدد موقعك",
   "select_location_hint": "الرياض، حي الملقا",
   "location_not_found": "لم يتم العثور على الموقع",

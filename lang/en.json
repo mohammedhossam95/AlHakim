@@ -130,6 +130,8 @@
   "show_phone": "Show Number",
   "hide_phone": "Hide Number",
   "location": "Location",
+  "call": "Call",
+  "share": "Share",
   "select_location": "Select Location",
   "select_location_hint": "Riyadh, Al Malqa",
   "location_not_found": "Location not found",

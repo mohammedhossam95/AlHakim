@@ -239,6 +239,8 @@ class MedicalCenter extends Equatable {
   final String? logo;
   final String? cover;
   final bool? isActive;
+  final String? latitude;
+  final String? longitude;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -253,6 +255,8 @@ class MedicalCenter extends Equatable {
     this.logo,
     this.cover,
     this.isActive,
+    this.latitude,
+    this.longitude,
     this.createdAt,
     this.updatedAt,
   });
@@ -269,6 +273,8 @@ class MedicalCenter extends Equatable {
     logo,
     cover,
     isActive,
+    latitude,
+    longitude,
     createdAt,
     updatedAt,
   ];
