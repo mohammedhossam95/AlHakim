@@ -191,7 +191,7 @@ class _MainPageState extends State<MainPage> {
       return 1;
     }
 
-    return 3;
+    return 2;
   }
 
   @override
@@ -259,12 +259,6 @@ class _MainPageState extends State<MainPage> {
         );
       },
     );
-  }
-
-  void onTapped(int index) {
-    BlocProvider.of<BottomNavBarCubit>(
-      context,
-    ).changeCurrentScreen(index: index);
   }
 
   Widget _buildBottomBar(
