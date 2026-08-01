@@ -568,7 +568,7 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       final response = await dioConsumer.get(
         '/doctors/${params.doctorId}/appointments',
 
-        queryParameters: {"appointment_date": params.appointmentDate},
+        queryParameters: {"date": params.appointmentDate},
       );
 
       if (response['status'] == true) {
