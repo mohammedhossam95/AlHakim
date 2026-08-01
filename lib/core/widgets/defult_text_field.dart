@@ -33,6 +33,7 @@ class MyTextFormField extends StatelessWidget {
   final bool readOnly;
   final TextInputType? keyboardType;
   final bool arLang;
+  final TextDirection? textDirection;
   final TextInputAction? textInputAction;
   final TextAlign textAlign;
   final Color? backgroundColor;
@@ -65,6 +66,7 @@ class MyTextFormField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.arLang = false,
+    this.textDirection,
     this.textInputAction,
     this.backgroundColor,
     this.inputFormatters,
@@ -89,7 +91,8 @@ class MyTextFormField extends StatelessWidget {
       maxLines: maxLines ?? 1,
       minLines: minLines,
 
-      textDirection: arLang ? TextDirection.rtl : null,
+      textDirection:
+          textDirection ?? (arLang ? TextDirection.rtl : null),
       keyboardType: keyboardType,
       textInputAction: textInputAction ?? TextInputAction.done,
       validator: validatorType != null

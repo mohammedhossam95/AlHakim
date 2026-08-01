@@ -10,10 +10,24 @@ class DoctorsRespModel extends BaseListResponse {
 
       message: json['message'],
 
-      data: json['data'] != null
-          ? (json['data'] as List).map((e) => DoctorModel.fromJson(e)).toList()
-          : [],
+      data: _parseDoctorsList(json['data']),
     );
+  }
+
+  static List<DoctorModel> _parseDoctorsList(dynamic raw) {
+    if (raw is List) {
+      return raw
+          .whereType<Map>()
+          .map((e) => DoctorModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+    if (raw is Map && raw['data'] is List) {
+      return (raw['data'] as List)
+          .whereType<Map>()
+          .map((e) => DoctorModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+    return [];
   }
 }
 
@@ -49,17 +63,21 @@ class DoctorModel extends DoctorEntity {
     super.whatsappCountryCode,
     super.latitude,
     super.longitude,
+    super.license,
   });
 
   factory DoctorModel.fromJson(Map<String, dynamic> json) {
+    final location = json['location'] != null
+        ? LocationModel.fromJson(json['location'])
+        : null;
     return DoctorModel(
-      id: json['id'],
+      id: json['id']?.toString(),
 
-      name: json['name'] != null ? NameModel.fromJson(json['name']) : null,
+      name: NameModel.maybeFromJson(json['name']),
 
-      bio: json['bio'] != null ? BioModel.fromJson(json['bio']) : null,
+      bio: BioModel.maybeFromJson(json['bio']),
 
-      price: json['price'],
+      price: json['price']?.toString(),
       priceHidden: json['price_hidden'],
 
       rating: json['rating'] != null
@@ -70,9 +88,7 @@ class DoctorModel extends DoctorEntity {
 
       isClinicOpen: json['is_clinic_open'],
 
-      location: json['location'] != null
-          ? LocationModel.fromJson(json['location'])
-          : null,
+      location: location,
 
       professionalRegistrationNumber: json['professional_registration_number'],
 
@@ -106,12 +122,12 @@ class DoctorModel extends DoctorEntity {
 
       updatedAt: json['updated_at'],
 
-      minPatients: json['min_patients'].toString(),
+      minPatients: json['min_patients']?.toString(),
 
       representativeCode: json['representative_code'],
 
       secretaryCountryCode: json['secretary_country_code'],
-      consultationPrice: json['consultation_price'],
+      consultationPrice: json['consultation_price']?.toString(),
       consultationPriceHidden: json['consultation_price_hidden'],
 
       medicalCenter: json['medical_center'] != null
@@ -119,8 +135,9 @@ class DoctorModel extends DoctorEntity {
           : null,
       whatsappNumber: json['whatsapp_number'],
       whatsappCountryCode: json['whatsapp_country_code'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
+      latitude: (json['latitude'] ?? location?.latitude)?.toString(),
+      longitude: (json['longitude'] ?? location?.longitude)?.toString(),
+      license: json['license']?.toString(),
     );
   }
 
@@ -180,6 +197,7 @@ class DoctorModel extends DoctorEntity {
     "whatsapp_country_code": whatsappCountryCode,
     "latitude": latitude,
     "longitude": longitude,
+    "license": license,
   };
 }
 
@@ -187,7 +205,27 @@ class NameModel extends NameEntity {
   const NameModel({super.en, super.ar});
 
   factory NameModel.fromJson(Map<String, dynamic> json) {
-    return NameModel(en: json['en'], ar: json['ar']);
+    return NameModel(
+      en: json['en']?.toString(),
+      ar: json['ar']?.toString(),
+    );
+  }
+
+  static NameModel? maybeFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      final text = value.trim();
+      if (text.isEmpty) return null;
+      return NameModel(en: text, ar: text);
+    }
+    if (value is Map) {
+      final map = Map<String, dynamic>.from(value);
+      return NameModel(
+        en: (map['en'] ?? map['EN'] ?? map['english'])?.toString(),
+        ar: (map['ar'] ?? map['AR'] ?? map['arabic'])?.toString(),
+      );
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() => {"en": en, "ar": ar};
@@ -197,7 +235,27 @@ class BioModel extends BioEntity {
   const BioModel({super.en, super.ar});
 
   factory BioModel.fromJson(Map<String, dynamic> json) {
-    return BioModel(en: json['en'], ar: json['ar']);
+    return BioModel(
+      en: json['en']?.toString(),
+      ar: json['ar']?.toString(),
+    );
+  }
+
+  static BioModel? maybeFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      final text = value.trim();
+      if (text.isEmpty) return null;
+      return BioModel(en: text, ar: text);
+    }
+    if (value is Map) {
+      final map = Map<String, dynamic>.from(value);
+      return BioModel(
+        en: (map['en'] ?? map['EN'] ?? map['english'])?.toString(),
+        ar: (map['ar'] ?? map['AR'] ?? map['arabic'])?.toString(),
+      );
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() => {"en": en, "ar": ar};

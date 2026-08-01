@@ -31,6 +31,7 @@ class DoctorEntity extends Equatable {
   final String? whatsappCountryCode;
   final String? latitude;
   final String? longitude;
+  final String? license;
 
   const DoctorEntity({
     this.id,
@@ -63,6 +64,7 @@ class DoctorEntity extends Equatable {
     this.whatsappCountryCode,
     this.latitude,
     this.longitude,
+    this.license,
   });
 
   @override
@@ -97,6 +99,7 @@ class DoctorEntity extends Equatable {
     whatsappCountryCode,
     latitude,
     longitude,
+    license,
   ];
 }
 

@@ -52,6 +52,9 @@ class AddNewDoctorScreen extends StatefulWidget {
 
 class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   LatLng? selectedLocation;
+  String? selectedCity;
+  String? selectedDistrict;
+  String? selectedStreet;
 
   final _formKey = GlobalKey<FormState>();
   final List<DoctorScheduleModel> schedules = [DoctorScheduleModel()];
@@ -139,6 +142,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   void initState() {
     super.initState();
     getCountry();
+    _representativeCodeController.text =
+        sharedPreferences.getAuth()?.user?.referralCode ?? '';
     context.read<GetSpecialtiesCubit>().getSpecialties();
   }
 
@@ -201,6 +206,30 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
         licenseFile = File(result.files.single.path!);
       });
     }
+  }
+
+  Future<void> _pickLocation() async {
+    final result =
+        await context.pushNamed(
+              Routes.myMapViewRoute,
+              extra: {
+                'location': selectedLocation ?? LatLng(30.0444, 31.2357),
+                'onChanged': (LatLng pos) {},
+              },
+            )
+            as Map<String, dynamic>?;
+    if (result == null || !mounted) return;
+
+    final LatLng location = result['location'] as LatLng;
+    final String address = result['address'] as String? ?? '';
+    selectedLocation = location;
+    selectedCity = result['city'] as String?;
+    selectedDistrict = result['district'] as String?;
+    selectedStreet = result['street'] as String?;
+    _locationController.text = address.isNotEmpty
+        ? address
+        : '${location.latitude}, ${location.longitude}';
+    setState(() {});
   }
 
   void submit() async {
@@ -268,6 +297,9 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           whatsappCountryCode: whatsappCountryCode,
           latitude: selectedLocation?.latitude.toString(),
           longitude: selectedLocation?.longitude.toString(),
+          city: selectedCity,
+          district: selectedDistrict,
+          street: selectedStreet,
           minPatients: _minPatientsController.text,
           price: _priceController.text,
           consultationPrice: _consultationPriceController.text,
@@ -404,31 +436,11 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       focusNode: _nameArFocus,
                       textInputAction: TextInputAction.next,
                       onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_nameEnFocus);
+                        FocusScope.of(context).requestFocus(_bioArFocus);
                       },
                       hintText: "enter_doctor_name".tr,
                       prefixIcon: Icon(
                         Icons.person_outline,
-                        color: colors.main,
-                      ),
-                    ),
-
-                    Gaps.vGap16,
-
-                    /// en name
-                    buildLabel("doctor_name_en".tr),
-                    Gaps.vGap8,
-
-                    MyTextFormField(
-                      controller: _nameEnController,
-                      focusNode: _nameEnFocus,
-                      textInputAction: TextInputAction.next,
-                      onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_bioArFocus);
-                      },
-                      hintText: "enter_doctor_name_en".tr,
-                      prefixIcon: Icon(
-                        Icons.badge_outlined,
                         color: colors.main,
                       ),
                     ),
@@ -444,11 +456,32 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       focusNode: _bioArFocus,
                       textInputAction: TextInputAction.next,
                       onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_bioEnFocus);
+                        FocusScope.of(context).requestFocus(_nameEnFocus);
                       },
                       maxLines: 3,
                       hintText: "enter_doctor_bio".tr,
-                      prefixIcon: Icon(Icons.info_outline, color: colors.main),
+                      // prefixIcon: Icon(Icons.info_outline, color: colors.main),
+                    ),
+                    Gaps.vGap16,
+
+                    /// en name
+                    buildLabel("doctor_name_en".tr),
+                    Gaps.vGap8,
+
+                    MyTextFormField(
+                      controller: _nameEnController,
+                      focusNode: _nameEnFocus,
+                      textInputAction: TextInputAction.next,
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.left,
+                      onSubmit: (_) {
+                        FocusScope.of(context).requestFocus(_bioEnFocus);
+                      },
+                      hintText: "enter_doctor_name_en".tr,
+                      prefixIcon: Icon(
+                        Icons.person_outline,
+                        color: colors.main,
+                      ),
                     ),
 
                     Gaps.vGap16,
@@ -461,6 +494,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       controller: _bioEnController,
                       focusNode: _bioEnFocus,
                       textInputAction: TextInputAction.next,
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.left,
                       onSubmit: (_) {
                         FocusScope.of(
                           context,
@@ -468,7 +503,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       },
                       maxLines: 3,
                       hintText: "enter_doctor_bio_en".tr,
-                      prefixIcon: Icon(Icons.translate, color: colors.main),
+                      // prefixIcon: Icon(Icons.translate, color: colors.main),
                     ),
 
                     Gaps.vGap16,
@@ -619,7 +654,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                               onSubmit: (_) {
                                 FocusScope.of(
                                   context,
-                                ).requestFocus(_minPatientsFocus);
+                                ).requestFocus(_whatsappNumberFocus);
                               },
                               keyboardType: TextInputType.phone,
                               hintText: "enter_secretary_phone".tr,
@@ -631,45 +666,43 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                           ),
                         ],
                       ),
-
-                      Gaps.vGap16,
-
-                      /// whatsapp phone
-                      buildLabel("whatsapp_number".tr),
-                      Gaps.vGap8,
-
-                      Row(
-                        children: [
-                          CountryCodeWidget(
-                            country: _whatsappCountry,
-                            updateValue: (country) {
-                              setState(() {
-                                _whatsappCountry = country;
-                              });
-                            },
-                          ),
-                          Gaps.hGap8,
-                          Expanded(
-                            flex: 5,
-                            child: MyTextFormField(
-                              controller: _whatsappNumberController,
-                              focusNode: _whatsappNumberFocus,
-                              textInputAction: TextInputAction.next,
-                              onSubmit: (_) {
-                                FocusScope.of(
-                                  context,
-                                ).requestFocus(_minPatientsFocus);
-                              },
-                              keyboardType: TextInputType.phone,
-                              hintText: "enter_whatsapp_number".tr,
-                              prefixIcon: Icon(Icons.phone, color: colors.main),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      Gaps.vGap16,
                     ],
+
+                    Gaps.vGap16,
+
+                    /// whatsapp phone
+                    buildLabel("whatsapp_number".tr),
+                    Gaps.vGap8,
+
+                    Row(
+                      children: [
+                        CountryCodeWidget(
+                          country: _whatsappCountry,
+                          updateValue: (country) {
+                            setState(() {
+                              _whatsappCountry = country;
+                            });
+                          },
+                        ),
+                        Gaps.hGap8,
+                        Expanded(
+                          flex: 5,
+                          child: MyTextFormField(
+                            controller: _whatsappNumberController,
+                            focusNode: _whatsappNumberFocus,
+                            textInputAction: TextInputAction.next,
+                            onSubmit: (_) {
+                              FocusScope.of(
+                                context,
+                              ).requestFocus(_minPatientsFocus);
+                            },
+                            keyboardType: TextInputType.phone,
+                            hintText: "enter_whatsapp_number".tr,
+                            prefixIcon: Icon(Icons.phone, color: colors.main),
+                          ),
+                        ),
+                      ],
+                    ),
 
                     Gaps.vGap16,
 
@@ -828,6 +861,76 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
                       Gaps.vGap24,
                     ],
+                    // Gaps.vGap20,
+
+                    /// license
+                    buildLabel("upload_license".tr),
+                    Gaps.vGap10,
+
+                    GestureDetector(
+                      onTap: pickLicenseFile,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 16.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.main.withValues(alpha: .05),
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: colors.main.withValues(alpha: .15),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.upload_file, color: colors.main),
+                            Gaps.hGap10,
+                            Expanded(
+                              child: Text(
+                                licenseFile != null
+                                    ? licenseFile!.path.split('/').last
+                                    : "choose_license_file".tr,
+                                style: TextStyles.medium14(
+                                  color: licenseFile != null
+                                      ? colors.textColor
+                                      : colors.lightTextColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    Gaps.vGap20,
+                    buildLabel("location".tr),
+                    Gaps.vGap10,
+                    MyTextFormField(
+                      controller: _locationController,
+                      backgroundColor: colors.whiteColor,
+                      onTap: _pickLocation,
+                      hintText: _isLoadingLocation
+                          ? 'Getting location...'
+                          : 'select_location'.tr,
+                      readOnly: true,
+                      prefixIcon: _isLoadingLocation
+                          ? Padding(
+                              padding: EdgeInsets.all(12.r),
+                              child: SizedBox(
+                                width: 20.w,
+                                height: 20.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              onPressed: _pickLocation,
+                              icon: Icon(Icons.location_on_outlined),
+                            ),
+                    ),
+                    Gaps.vGap20,
 
                     /// schedules
                     buildLabel("working_hours".tr),
@@ -1070,120 +1173,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       ),
                     ),
 
-                    Gaps.vGap20,
-
-                    /// license
-                    buildLabel("upload_license".tr),
-                    Gaps.vGap10,
-
-                    GestureDetector(
-                      onTap: pickLicenseFile,
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 16.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colors.main.withValues(alpha: .05),
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: colors.main.withValues(alpha: .15),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.upload_file, color: colors.main),
-                            Gaps.hGap10,
-                            Expanded(
-                              child: Text(
-                                licenseFile != null
-                                    ? licenseFile!.path.split('/').last
-                                    : "choose_license_file".tr,
-                                style: TextStyles.medium14(
-                                  color: licenseFile != null
-                                      ? colors.textColor
-                                      : colors.lightTextColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    Gaps.vGap20,
-                    buildLabel("location".tr),
-                    Gaps.vGap10,
-                    MyTextFormField(
-                      controller: _locationController,
-                      backgroundColor: colors.whiteColor,
-                      onTap: () async {
-                        final result =
-                            await context.pushNamed(
-                                  Routes.myMapViewRoute,
-                                  extra: {
-                                    'location':
-                                        selectedLocation ??
-                                        LatLng(30.0444, 31.2357),
-                                    'onChanged': (LatLng pos) {},
-                                  },
-                                )
-                                as Map<String, dynamic>?;
-                        if (result != null) {
-                          final LatLng location = result['location'] as LatLng;
-                          final String address =
-                              result['address'] as String? ?? '';
-                          selectedLocation = location;
-                          _locationController.text = address.isNotEmpty
-                              ? address
-                              : '${location.latitude}, ${location.longitude}';
-                          setState(() {});
-                        }
-                      },
-                      hintText: _isLoadingLocation
-                          ? 'Getting location...'
-                          : 'select_location'.tr,
-                      readOnly: true,
-                      prefixIcon: _isLoadingLocation
-                          ? Padding(
-                              padding: EdgeInsets.all(12.r),
-                              child: SizedBox(
-                                width: 20.w,
-                                height: 20.h,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            )
-                          : IconButton(
-                              onPressed: () async {
-                                final result =
-                                    await context.pushNamed(
-                                          Routes.myMapViewRoute,
-                                          extra: {
-                                            'location':
-                                                selectedLocation ??
-                                                LatLng(30.0444, 31.2357),
-                                            'onChanged': (LatLng pos) {},
-                                          },
-                                        )
-                                        as Map<String, dynamic>?;
-                                if (result != null) {
-                                  final LatLng location =
-                                      result['location'] as LatLng;
-                                  final String address =
-                                      result['address'] as String? ?? '';
-                                  selectedLocation = location;
-                                  _locationController.text = address.isNotEmpty
-                                      ? address
-                                      : '${location.latitude}, ${location.longitude}';
-                                  setState(() {});
-                                }
-                              },
-                              icon: Icon(Icons.location_on_outlined),
-                            ),
-                    ),
                     Gaps.vGap30,
 
                     /// button
