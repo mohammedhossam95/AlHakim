@@ -504,9 +504,15 @@
   "position_ordinal": "({number})",
   "consultation_price_text": "Consultation Price",
   "examination_price": "Examination Price",
-  "ai_assistant_disclaimer": "Reminder: All suggestions provided are from an AI assistant. Visiting a specialist doctor and taking the appropriate medication based on their instructions is essential."
-,"login_as_delegate": "Login as delegate",
-"emergency_description" :"All emergency in ElSadat",
-"enter_whatsapp_number" : "Enter whatsApp number",
-"whatsapp_number" : "WhatsApp number"
+  "ai_assistant_disclaimer": "Reminder: All suggestions provided are from an AI assistant. Visiting a specialist doctor and taking the appropriate medication based on their instructions is essential.",
+  "login_as_delegate": "Login as delegate",
+  "emergency_description": "All emergency in ElSadat",
+  "enter_whatsapp_number": "Enter whatsApp number",
+  "whatsapp_number": "WhatsApp number",
+  "searchUnavailable": "Search is currently unavailable",
+  "searchFailed": "Search failed, please try again later",
+  "selectPosition": "Select your current location",
+  "searchForPlace": "Search for a place",
+  "noResultsFound": "No results found",
+  "gettingAddress": "Getting address"
 }

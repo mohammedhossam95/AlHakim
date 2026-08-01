@@ -1119,7 +1119,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       controller: _locationController,
                       backgroundColor: colors.whiteColor,
                       onTap: () async {
-                        final location =
+                        final result =
                             await context.pushNamed(
                                   Routes.myMapViewRoute,
                                   extra: {
@@ -1129,11 +1129,15 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                                     'onChanged': (LatLng pos) {},
                                   },
                                 )
-                                as LatLng?;
-                        if (location != null) {
+                                as Map<String, dynamic>?;
+                        if (result != null) {
+                          final LatLng location = result['location'] as LatLng;
+                          final String address =
+                              result['address'] as String? ?? '';
                           selectedLocation = location;
-                          _locationController.text =
-                              '${location.latitude}, ${location.longitude}';
+                          _locationController.text = address.isNotEmpty
+                              ? address
+                              : '${location.latitude}, ${location.longitude}';
                           setState(() {});
                         }
                       },
@@ -1154,7 +1158,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                             )
                           : IconButton(
                               onPressed: () async {
-                                final location =
+                                final result =
                                     await context.pushNamed(
                                           Routes.myMapViewRoute,
                                           extra: {
@@ -1164,11 +1168,16 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                                             'onChanged': (LatLng pos) {},
                                           },
                                         )
-                                        as LatLng?;
-                                if (location != null) {
+                                        as Map<String, dynamic>?;
+                                if (result != null) {
+                                  final LatLng location =
+                                      result['location'] as LatLng;
+                                  final String address =
+                                      result['address'] as String? ?? '';
                                   selectedLocation = location;
-                                  _locationController.text =
-                                      '${location.latitude}, ${location.longitude}';
+                                  _locationController.text = address.isNotEmpty
+                                      ? address
+                                      : '${location.latitude}, ${location.longitude}';
                                   setState(() {});
                                 }
                               },

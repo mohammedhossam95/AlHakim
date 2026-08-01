@@ -507,5 +507,12 @@
   "login_as_delegate": "التسجيل كمندوب",
   "emergency_description" : "جميع طوارئ السادات",
   "whatsapp_number" : "رقم الواتساب",
-  "enter_whatsapp_number" : "ادخل رقم الواتساب"
+  "enter_whatsapp_number" : "ادخل رقم الواتساب",
+  "searchUnavailable" : "البحث غير متاح حاليا",
+  "searchFailed" : "فشل البحث، يرجى المحاولة لاحقاً",
+  "selectPosition" : "اختر موقعك الحالي",
+  "searchForPlace" : "ابحث عن مكان",
+  "noResultsFound" : "لم يتم العثور على نتائج",
+  "gettingAddress" : "جاري الحصول على العنوان"
+  
 }

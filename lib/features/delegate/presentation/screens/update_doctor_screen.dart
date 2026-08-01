@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/add_doctor_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
@@ -22,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DoctorScheduleModel {
   int? dayOfWeek;
@@ -72,12 +74,14 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   // final _clinicPhoneController = TextEditingController();
 
   final _secretaryPhoneController = TextEditingController();
+  final _whatsappNumberController = TextEditingController();
 
   final _minPatientsController = TextEditingController();
 
   final _priceController = TextEditingController();
 
   final _representativeCodeController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
 
   /// Focus Nodes
   final _nameArFocus = FocusNode();
@@ -93,6 +97,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   // final _clinicPhoneFocus = FocusNode();
 
   final _secretaryPhoneFocus = FocusNode();
+  final _whatsappNumberFocus = FocusNode();
 
   final _minPatientsFocus = FocusNode();
 
@@ -101,6 +106,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _representativeCodeFocus = FocusNode();
 
   SpecialtyEntity? selectedSpeciality;
+  LatLng? selectedLocation;
+  final bool _isLoadingLocation = false;
 
   File? profileImage;
   File? licenseFile;
@@ -143,12 +150,30 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     // _clinicPhoneController.text = widget.doctor.clinicPhone ?? '';
 
     _secretaryPhoneController.text = widget.doctor.secretaryPhone ?? '';
+    _whatsappNumberController.text = widget.doctor.whatsappNumber ?? '';
+    if (widget.doctor.whatsappCountryCode != null &&
+        widget.doctor.whatsappCountryCode!.isNotEmpty) {
+      try {
+        _whatsappCountry = CountryParser.parsePhoneCode(
+          widget.doctor.whatsappCountryCode!.replaceAll('+', ''),
+        );
+      } catch (_) {
+        // keep default country if the stored code can't be parsed
+      }
+    }
 
     _minPatientsController.text = widget.doctor.minPatients ?? '';
 
     _priceController.text = widget.doctor.price ?? '';
     hidePrice = widget.doctor.priceHidden ?? false;
     _representativeCodeController.text = widget.doctor.representativeCode ?? '';
+
+    final lat = double.tryParse(widget.doctor.latitude ?? '');
+    final lng = double.tryParse(widget.doctor.longitude ?? '');
+    if (lat != null && lng != null) {
+      selectedLocation = LatLng(lat, lng);
+      _locationController.text = '$lat, $lng';
+    }
 
     if (widget.doctor.schedules != null &&
         widget.doctor.schedules!.isNotEmpty) {
@@ -172,8 +197,10 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   }
 
   late Country _selectedCountry;
+  late Country _whatsappCountry;
   void getCountry() {
     _selectedCountry = CountryParser.parsePhoneCode('20');
+    _whatsappCountry = CountryParser.parsePhoneCode('20');
   }
 
   @override
@@ -191,6 +218,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     // _clinicPhoneController.dispose();
 
     _secretaryPhoneController.dispose();
+    _whatsappNumberController.dispose();
 
     _minPatientsController.dispose();
 
@@ -211,6 +239,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     // _clinicPhoneFocus.dispose();
 
     _secretaryPhoneFocus.dispose();
+    _whatsappNumberFocus.dispose();
 
     _minPatientsFocus.dispose();
 
@@ -252,6 +281,18 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     //   countryCode: _selectedCountry.countryCode,
     //   withCode: false,
     // );
+
+    String? whatsappNumber;
+    String? whatsappCountryCode;
+    if (_whatsappNumberController.text.isNotEmpty) {
+      whatsappNumber = await Constants.phoneParsing(
+        phone: _whatsappNumberController.text,
+        countryCode: _whatsappCountry.countryCode,
+        withCode: false,
+      );
+      whatsappCountryCode = "+${_whatsappCountry.phoneCode}";
+    }
+
     if (!context.mounted) return;
     context.read<UpdateDoctorCubit>().updateDoctor(
       params: AddDoctorParams(
@@ -272,6 +313,12 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         clinicPhone: secretaryPhone,
 
         secretaryPhone: secretaryPhone,
+
+        whatsappNumber: whatsappNumber,
+        whatsappCountryCode: whatsappCountryCode,
+
+        latitude: selectedLocation?.latitude.toString(),
+        longitude: selectedLocation?.longitude.toString(),
 
         minPatients: _minPatientsController.text,
 
@@ -664,51 +711,6 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                       ),
                     ),
 
-                    // Gaps.vGap16,
-
-                    /// clinic phone
-                    // buildLabel("clinic_phone".tr),
-
-                    // Gaps.vGap8,
-
-                    // Row(
-                    //   children: [
-                    //     CountryCodeWidget(
-                    //       country: _selectedCountry,
-                    //       updateValue: (country) {
-                    //         setState(() {
-                    //           _selectedCountry = country;
-                    //         });
-                    //       },
-                    //     ),
-                    //     Gaps.hGap8,
-                    //     Expanded(
-                    //       flex: 5,
-                    //       child: MyTextFormField(
-                    //         controller: _clinicPhoneController,
-
-                    //         focusNode: _clinicPhoneFocus,
-
-                    //         textInputAction: TextInputAction.next,
-
-                    //         onSubmit: (_) {
-                    //           FocusScope.of(
-                    //             context,
-                    //           ).requestFocus(_secretaryPhoneFocus);
-                    //         },
-
-                    //         keyboardType: TextInputType.phone,
-
-                    //         hintText: "enter_clinic_phone".tr,
-
-                    //         prefixIcon: Icon(
-                    //           Icons.local_hospital_outlined,
-                    //           color: colors.main,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                     Gaps.vGap16,
 
                     /// secretary phone
@@ -739,7 +741,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                             onSubmit: (_) {
                               FocusScope.of(
                                 context,
-                              ).requestFocus(_minPatientsFocus);
+                              ).requestFocus(_whatsappNumberFocus);
                             },
 
                             keyboardType: TextInputType.phone,
@@ -750,6 +752,49 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                               Icons.support_agent_outlined,
                               color: colors.main,
                             ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    Gaps.vGap16,
+
+                    /// whatsapp phone
+                    buildLabel("whatsapp_number".tr),
+
+                    Gaps.vGap8,
+
+                    Row(
+                      children: [
+                        CountryCodeWidget(
+                          country: _whatsappCountry,
+                          updateValue: (country) {
+                            setState(() {
+                              _whatsappCountry = country;
+                            });
+                          },
+                        ),
+                        Gaps.hGap8,
+                        Expanded(
+                          flex: 5,
+                          child: MyTextFormField(
+                            controller: _whatsappNumberController,
+
+                            focusNode: _whatsappNumberFocus,
+
+                            textInputAction: TextInputAction.next,
+
+                            onSubmit: (_) {
+                              FocusScope.of(
+                                context,
+                              ).requestFocus(_minPatientsFocus);
+                            },
+
+                            keyboardType: TextInputType.phone,
+
+                            hintText: "enter_whatsapp_number".tr,
+
+                            prefixIcon: Icon(Icons.phone, color: colors.main),
                           ),
                         ),
                       ],
@@ -1161,6 +1206,81 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                           ],
                         ),
                       ),
+                    ),
+
+                    Gaps.vGap20,
+
+                    /// location
+                    buildLabel("location".tr),
+                    Gaps.vGap10,
+                    MyTextFormField(
+                      controller: _locationController,
+                      backgroundColor: colors.whiteColor,
+                      onTap: () async {
+                        final result =
+                            await context.pushNamed(
+                                  Routes.myMapViewRoute,
+                                  extra: {
+                                    'location':
+                                        selectedLocation ??
+                                        LatLng(30.0444, 31.2357),
+                                    'onChanged': (LatLng pos) {},
+                                  },
+                                )
+                                as Map<String, dynamic>?;
+                        if (result != null) {
+                          final LatLng location = result['location'] as LatLng;
+                          final String address =
+                              result['address'] as String? ?? '';
+                          selectedLocation = location;
+                          _locationController.text = address.isNotEmpty
+                              ? address
+                              : '${location.latitude}, ${location.longitude}';
+                          setState(() {});
+                        }
+                      },
+                      hintText: _isLoadingLocation
+                          ? 'Getting location...'
+                          : 'select_location'.tr,
+                      readOnly: true,
+                      prefixIcon: _isLoadingLocation
+                          ? Padding(
+                              padding: EdgeInsets.all(12.r),
+                              child: SizedBox(
+                                width: 20.w,
+                                height: 20.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              onPressed: () async {
+                                final result =
+                                    await context.pushNamed(
+                                          Routes.myMapViewRoute,
+                                          extra: {
+                                            'location':
+                                                selectedLocation ??
+                                                LatLng(30.0444, 31.2357),
+                                            'onChanged': (LatLng pos) {},
+                                          },
+                                        )
+                                        as Map<String, dynamic>?;
+                                if (result != null) {
+                                  final LatLng location =
+                                      result['location'] as LatLng;
+                                  final String address =
+                                      result['address'] as String? ?? '';
+                                  selectedLocation = location;
+                                  _locationController.text = address.isNotEmpty
+                                      ? address
+                                      : '${location.latitude}, ${location.longitude}';
+                                  setState(() {});
+                                }
+                              },
+                              icon: Icon(Icons.location_on_outlined),
+                            ),
                     ),
 
                     Gaps.vGap24,

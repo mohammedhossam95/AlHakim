@@ -20,7 +20,7 @@
         <!-- Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC6uFrSXBvUCsDEHaacsURGssFDt4eb7mo" />
+            android:value='AIzaSyCrPBIVbCvB3xIUG3SFNu9PGCpwV5cOdc8'/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
