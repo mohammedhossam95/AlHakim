@@ -9,6 +9,9 @@ import 'package:alhakim/features/booking/presentation/cubit/add_family_member_cu
 import 'package:alhakim/features/booking/presentation/cubit/book_appointment_cubit/book_appointment_cubit.dart';
 import 'package:alhakim/features/booking/presentation/cubit/get_family_members_cubit/get_family_members_cubit.dart';
 import 'package:alhakim/features/booking/presentation/cubit/get_kinships_cubit/get_kinships_cubit.dart';
+import 'package:alhakim/features/booking/domain/usecases/delete_family_member_usecase.dart';
+import 'package:alhakim/features/booking/domain/usecases/update_family_member_usecase.dart';
+import 'package:alhakim/features/booking/presentation/cubit/delete_family_member_cubit/delete_family_member_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 
 final _sl = ServiceLocator.instance;
@@ -19,7 +22,10 @@ Future<void> initBookingFeatureInjection() async {
 
   _sl.registerFactory(() => GetFamilyMembersCubit(usecase: _sl()));
 
-  _sl.registerFactory(() => AddFamilyMemberCubit(usecase: _sl()));
+  _sl.registerFactory(
+    () => AddFamilyMemberCubit(addUsecase: _sl(), updateUsecase: _sl()),
+  );
+  _sl.registerFactory(() => DeleteFamilyMemberCubit(usecase: _sl()));
   _sl.registerFactory(() => BookAppointmentCubit(usecase: _sl()));
 
   /// usecases
@@ -28,6 +34,8 @@ Future<void> initBookingFeatureInjection() async {
   _sl.registerLazySingleton(() => GetFamilyMembersUsecase(repository: _sl()));
 
   _sl.registerLazySingleton(() => AddFamilyMemberUsecase(repository: _sl()));
+  _sl.registerLazySingleton(() => UpdateFamilyMemberUsecase(repository: _sl()));
+  _sl.registerLazySingleton(() => DeleteFamilyMemberUsecase(repository: _sl()));
 
   _sl.registerLazySingleton(() => GetKinshipsUsecase(repository: _sl()));
 

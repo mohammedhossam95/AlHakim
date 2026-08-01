@@ -22,8 +22,10 @@ import 'package:alhakim/features/auth/presentation/screen/otp_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/register_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/reset_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/splash_screen.dart';
+import 'package:alhakim/features/booking/domain/entities/family_member_entity.dart';
 import 'package:alhakim/features/booking/presentation/cubit/add_family_member_cubit/add_family_member_cubit.dart';
 import 'package:alhakim/features/booking/presentation/cubit/book_appointment_cubit/book_appointment_cubit.dart';
+import 'package:alhakim/features/booking/presentation/cubit/delete_family_member_cubit/delete_family_member_cubit.dart';
 import 'package:alhakim/features/booking/presentation/cubit/get_family_members_cubit/get_family_members_cubit.dart';
 import 'package:alhakim/features/booking/presentation/cubit/get_kinships_cubit/get_kinships_cubit.dart';
 import 'package:alhakim/features/booking/presentation/screens/add_family_member_screen.dart';
@@ -36,6 +38,7 @@ import 'package:alhakim/features/delegate/presentation/cubit/update_medical_cent
 import 'package:alhakim/features/delegate/presentation/screens/add_new_doctor_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/add_new_medical_center_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_screen.dart';
+import 'package:alhakim/features/delegate/presentation/screens/my_map_view_widget.dart';
 import 'package:alhakim/features/delegate/presentation/screens/update_doctor_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/update_medical_center_screen.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
@@ -52,6 +55,7 @@ import 'package:alhakim/features/queue_management/presentation/cubit/quick_booki
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/quick_booking_screen.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/app_setting_cubit/app_setting_cubit.dart';
+import 'package:alhakim/features/settings/presentaion/cubit/get_emergency_categories_cubit/get_emergency_categories_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/get_hospital_emergency_cubit/get_hospital_emergency_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/update_user_profile_cubit/update_user_profile_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/screens/edit_profile_screen.dart';
@@ -66,6 +70,7 @@ import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
 import '../../features/auth/presentation/screen/phone_entry_screen.dart';
@@ -148,11 +153,15 @@ abstract class Routes {
       GoRoute(
         name: emergencyScreenRoute,
         path: emergencyScreenRoute,
+
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
-          child: BlocProvider(
-            create: (_) => sl<GetHospitalEmergencyCubit>(),
-            child: const EmergencyScreen(),
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => sl<GetHospitalEmergencyCubit>()),
+              BlocProvider(create: (_) => sl<GetEmergencyCategoriesCubit>()),
+            ],
+            child: const EmergencyScreen(isInTabBar: false),
           ),
         ),
       ),
@@ -272,6 +281,24 @@ abstract class Routes {
               create: (context) => sl<CompleteProfileCubit>(),
               child: CompleteProfileRegisterScreen(),
             ),
+          );
+        },
+      ),
+      GoRoute(
+        path: myMapViewRoute,
+        name: myMapViewRoute,
+        builder: (context, state) {
+          // Expecting state.extra to be a map with 'location' and 'onChanged'
+          final map = state.extra as Map<String, dynamic>?;
+
+          final LatLng initialLocation =
+              map?['location'] as LatLng? ?? LatLng(30.0444, 31.2357);
+          final LocationCallback? onChanged =
+              map?['onChanged'] as LocationCallback?;
+
+          return MyMapView(
+            location: initialLocation,
+            onLocationChanged: onChanged ?? (pos) {},
           );
         },
       ),
@@ -458,8 +485,11 @@ abstract class Routes {
         name: familyMembersScreenRoute,
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
-          child: BlocProvider(
-            create: (context) => sl<GetFamilyMembersCubit>(),
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => sl<GetFamilyMembersCubit>()),
+              BlocProvider(create: (context) => sl<DeleteFamilyMemberCubit>()),
+            ],
             child: const FamilyMembersScreen(),
           ),
         ),
@@ -467,16 +497,19 @@ abstract class Routes {
       GoRoute(
         path: addFamilyMemberScreenRoute,
         name: addFamilyMemberScreenRoute,
-        pageBuilder: (context, state) => buildAdaptivePage(
-          state: state,
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (context) => sl<GetKinshipsCubit>()),
-              BlocProvider(create: (context) => sl<AddFamilyMemberCubit>()),
-            ],
-            child: const AddFamilyMemberScreen(),
-          ),
-        ),
+        pageBuilder: (context, state) {
+          final member = state.extra as FamilyMemberEntity?;
+          return buildAdaptivePage(
+            state: state,
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => sl<GetKinshipsCubit>()),
+                BlocProvider(create: (context) => sl<AddFamilyMemberCubit>()),
+              ],
+              child: AddFamilyMemberScreen(member: member),
+            ),
+          );
+        },
       ),
 
       /// Edit Profile

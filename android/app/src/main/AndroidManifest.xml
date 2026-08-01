@@ -3,11 +3,24 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Wake device briefly for high-priority FCM (optional but helpful) -->
     <uses-permission android:name="android.permission.VIBRATE"/>
+ <queries>
+    <intent>
+      <action android:name="android.intent.action.SENDTO" />
+      <data android:scheme="mailto" />
+    </intent>
+  </queries>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
         android:label="Al Hakim"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Google Maps -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value='AIzaSyCrPBIVbCvB3xIUG3SFNu9PGCpwV5cOdc8'/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

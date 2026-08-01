@@ -33,4 +33,5 @@ abstract class SettingRepo {
   Future<Either<Failure, BaseListResponse>> getHospitalEmergencyNumbers({
     required GetHospitalEmergencyParams params,
   });
+  Future<Either<Failure, BaseListResponse>> getEmergencyCategories();
 }

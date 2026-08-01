@@ -1,11 +1,13 @@
 import 'package:alhakim/features/settings/domain/use_case/get_app_setting_usecase.dart';
 import 'package:alhakim/features/settings/domain/use_case/get_common_questions_use_case.dart';
+import 'package:alhakim/features/settings/domain/use_case/get_emergency_categories_usecase.dart';
 import 'package:alhakim/features/settings/domain/use_case/get_hospital_emergency_usecase.dart';
 import 'package:alhakim/features/settings/domain/use_case/get_static_page_content_usecase.dart';
 import 'package:alhakim/features/settings/domain/use_case/get_user_profile_use_case.dart';
 import 'package:alhakim/features/settings/domain/use_case/update_user_profile_use_case.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/app_setting_cubit/app_setting_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/common_question_cubit/common_questions_cubit.dart';
+import 'package:alhakim/features/settings/presentaion/cubit/get_emergency_categories_cubit/get_emergency_categories_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/get_hospital_emergency_cubit/get_hospital_emergency_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/get_user_profile_cubit/get_user_profile_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/static_page_content_cubit/static_page_content_cubit.dart';
@@ -47,6 +49,9 @@ Future<void> initsettingFeatureInjection() async {
   _sl.registerFactory<GetHospitalEmergencyCubit>(
     () => GetHospitalEmergencyCubit(usecase: _sl()),
   );
+  _sl.registerFactory<GetEmergencyCategoriesCubit>(
+    () => GetEmergencyCategoriesCubit(usecase: _sl()),
+  );
 
   ///-> UseCases
   _sl.registerLazySingleton<SettingUseCase>(() => SettingUseCase(_sl()));
@@ -71,6 +76,9 @@ Future<void> initsettingFeatureInjection() async {
   );
   _sl.registerLazySingleton<GetHospitalEmergencyUsecase>(
     () => GetHospitalEmergencyUsecase(repository: _sl()),
+  );
+  _sl.registerLazySingleton<GetEmergencyCategoriesUsecase>(
+    () => GetEmergencyCategoriesUsecase(repository: _sl()),
   );
   // Repository
   _sl.registerLazySingleton<SettingRepo>(

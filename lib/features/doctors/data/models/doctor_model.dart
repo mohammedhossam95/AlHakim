@@ -45,6 +45,10 @@ class DoctorModel extends DoctorEntity {
     super.consultationPrice,
     super.consultationPriceHidden,
     super.medicalCenters,
+    super.whatsappNumber,
+    super.whatsappCountryCode,
+    super.latitude,
+    super.longitude,
   });
 
   factory DoctorModel.fromJson(Map<String, dynamic> json) {
@@ -114,6 +118,10 @@ class DoctorModel extends DoctorEntity {
                 .map((e) => MedicalCenterModel.fromJson(e))
                 .toList()
           : [],
+      whatsappNumber: json['whatsapp_number'],
+      whatsappCountryCode: json['whatsapp_country_code'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
     );
   }
 
@@ -169,6 +177,10 @@ class DoctorModel extends DoctorEntity {
     "updated_at": updatedAt,
     "price_hidden": priceHidden,
     "secretary_country_code": secretaryCountryCode,
+    "whatsapp_number": whatsappNumber,
+    "whatsapp_country_code": whatsappCountryCode,
+    "latitude": latitude,
+    "longitude": longitude,
   };
 }
 

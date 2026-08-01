@@ -1,3 +1,4 @@
+import 'package:alhakim/core/api/dio_consumer.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
@@ -6,6 +7,7 @@ import 'package:alhakim/core/utils/log_utils.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/app_setting_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/common_questions_resp_model.dart';
+import 'package:alhakim/features/settings/data/model/emergency_category_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/hospital_emergency_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/static_page_content_resp_model.dart';
 import 'package:alhakim/features/settings/domain/use_case/params/get_hospital_emergency_params.dart';
@@ -33,6 +35,7 @@ abstract class SettingRemoteDataSource {
   Future<HospitalEmergencyRespModel> getHospitalEmergencyNumbers(
     GetHospitalEmergencyParams params,
   );
+  Future<EmergencyCategoryRespModel> getEmergencyCategories();
 }
 
 class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
@@ -190,11 +193,26 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   ) async {
     try {
       final dynamic response = await dioConsumer.get(
-        '/hospital-emergency-numbers',
+        ApiConstants.hospitalEmergencyNumbers,
         queryParameters: params.toQuery(),
       );
       if (response['status'] == true) {
         return HospitalEmergencyRespModel.fromJson(response);
+      }
+      throw ServerException(message: response['message'] ?? '');
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<EmergencyCategoryRespModel> getEmergencyCategories() async {
+    try {
+      final dynamic response = await dioConsumer.get(
+        ApiConstants.emergencyNumberCategories,
+      );
+      if (response['status'] == true) {
+        return EmergencyCategoryRespModel.fromJson(response);
       }
       throw ServerException(message: response['message'] ?? '');
     } catch (error) {

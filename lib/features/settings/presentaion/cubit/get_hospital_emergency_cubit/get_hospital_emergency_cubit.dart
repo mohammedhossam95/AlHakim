@@ -15,11 +15,16 @@ class GetHospitalEmergencyCubit extends Cubit<GetHospitalEmergencyState> {
   Future<void> getHospitalEmergencyNumbers({
     int? perPage,
     String? search,
+    int? categoryId,
   }) async {
     emit(GetHospitalEmergencyLoading());
 
     final result = await usecase(
-      GetHospitalEmergencyParams(perPage: perPage, search: search),
+      GetHospitalEmergencyParams(
+        perPage: perPage,
+        search: search,
+        categoryId: categoryId,
+      ),
     );
 
     result.fold(

@@ -19,12 +19,16 @@ class AddDoctorParams extends Equatable {
   final String? clinicCountryCode;
 
   final String? secretaryPhone;
+  final String? whatsappNumber;
+  final String? whatsappCountryCode;
   final String? secretaryCountryCode;
 
   final String? minPatients;
   final String? representativeCode;
   final String? price;
   final String? consultationPrice;
+  final String? latitude;
+  final String? longitude;
 
   final File? profileImage;
   final File? license;
@@ -56,6 +60,10 @@ class AddDoctorParams extends Equatable {
     this.hidePrice,
     this.hideConsultationPrice,
     this.medicalCenterId,
+    this.whatsappNumber,
+    this.whatsappCountryCode,
+    this.latitude,
+    this.longitude,
   });
 
   @override
@@ -82,5 +90,9 @@ class AddDoctorParams extends Equatable {
     hidePrice,
     hideConsultationPrice,
     medicalCenterId,
+    whatsappNumber,
+    whatsappCountryCode,
+    latitude,
+    longitude,
   ];
 }

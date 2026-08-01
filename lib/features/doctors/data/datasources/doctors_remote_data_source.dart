@@ -173,6 +173,26 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         );
       }
 
+      if (params.whatsappCountryCode != null) {
+        formData.fields.add(
+          MapEntry("whatsapp_country_code", params.whatsappCountryCode!),
+        );
+      }
+
+      if (params.whatsappNumber != null) {
+        formData.fields.add(
+          MapEntry("whatsapp_number", params.whatsappNumber!),
+        );
+      }
+
+      if (params.latitude != null) {
+        formData.fields.add(MapEntry("latitude", params.latitude!));
+      }
+
+      if (params.longitude != null) {
+        formData.fields.add(MapEntry("longitude", params.longitude!));
+      }
+
       if (params.profileImage != null) {
         final compressedImage = await Constants.getCompressedFile(
           params.profileImage!,
@@ -341,6 +361,27 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
           MapEntry("consultation_price", params.consultationPrice!),
         );
       }
+
+      if (params.whatsappCountryCode != null) {
+        formData.fields.add(
+          MapEntry("whatsapp_country_code", params.whatsappCountryCode!),
+        );
+      }
+
+      if (params.whatsappNumber != null) {
+        formData.fields.add(
+          MapEntry("whatsapp_number", params.whatsappNumber!),
+        );
+      }
+
+      if (params.latitude != null) {
+        formData.fields.add(MapEntry("latitude", params.latitude!));
+      }
+
+      if (params.longitude != null) {
+        formData.fields.add(MapEntry("longitude", params.longitude!));
+      }
+
       if (params.hidePrice != null) {
         formData.fields.add(
           MapEntry("price_hidden", params.hidePrice == true ? "1" : "0"),

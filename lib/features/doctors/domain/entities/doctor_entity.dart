@@ -27,6 +27,10 @@ class DoctorEntity extends Equatable {
   final String? consultationPrice;
   final bool? consultationPriceHidden;
   final List<MedicalCenter>? medicalCenters;
+  final String? whatsappNumber;
+  final String? whatsappCountryCode;
+  final String? latitude;
+  final String? longitude;
 
   const DoctorEntity({
     this.id,
@@ -55,6 +59,10 @@ class DoctorEntity extends Equatable {
     this.consultationPrice,
     this.consultationPriceHidden,
     this.medicalCenters,
+    this.whatsappNumber,
+    this.whatsappCountryCode,
+    this.latitude,
+    this.longitude,
   });
 
   @override
@@ -85,6 +93,10 @@ class DoctorEntity extends Equatable {
     consultationPrice,
     consultationPriceHidden,
     medicalCenters,
+    whatsappNumber,
+    whatsappCountryCode,
+    latitude,
+    longitude,
   ];
 }
 
@@ -151,8 +163,8 @@ class LanguageEntity extends Equatable {
 class DoctorSpecialtyEntity extends Equatable {
   final int? id;
   final String? icon;
-  final String? isActive;
-  final String? sortOrder;
+  final int? isActive;
+  final int? sortOrder;
   final String? name;
   final String? slug;
   final bool? hasChildren;

@@ -27,6 +27,9 @@ import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_m
 import 'package:alhakim/features/queue_management/presentation/cubit/notify_examination_cubit/notify_examination_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
+import 'package:alhakim/features/settings/presentaion/cubit/get_emergency_categories_cubit/get_emergency_categories_cubit.dart';
+import 'package:alhakim/features/settings/presentaion/cubit/get_hospital_emergency_cubit/get_hospital_emergency_cubit.dart';
+import 'package:alhakim/features/settings/presentaion/screens/emergency_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/settings_screen.dart';
 import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
 import 'package:alhakim/features/specialities/presentation/screens/specialities_screen.dart';
@@ -85,7 +88,8 @@ class _MainPageState extends State<MainPage> {
               create: (_) => ServiceLocator.instance<GetMedicalCentersCubit>(),
             ),
             BlocProvider(
-              create: (_) => ServiceLocator.instance<DeleteMedicalCenterCubit>(),
+              create: (_) =>
+                  ServiceLocator.instance<DeleteMedicalCenterCubit>(),
             ),
             BlocProvider(
               create: (_) =>
@@ -112,16 +116,27 @@ class _MainPageState extends State<MainPage> {
           ],
           child: const AppointmentsScreen(),
         ),
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) =>
+                  ServiceLocator.instance<GetHospitalEmergencyCubit>(),
+            ),
+            BlocProvider(
+              create: (context) =>
+                  ServiceLocator.instance<GetEmergencyCategoriesCubit>(),
+            ),
+          ],
+          child: const EmergencyScreen(isInTabBar: true),
+        ),
+
         settingsTab,
       ],
       UserType.doctor => _buildDoctorTabs(sessionState, settingsTab),
     };
   }
 
-  List<Widget> _buildDoctorTabs(
-    SessionState sessionState,
-    Widget settingsTab,
-  ) {
+  List<Widget> _buildDoctorTabs(SessionState sessionState, Widget settingsTab) {
     if (sessionState.doctorAccountMode == DoctorAccountMode.medicalCenter &&
         sessionState.activeDoctorId == null) {
       return [
@@ -176,7 +191,7 @@ class _MainPageState extends State<MainPage> {
       return 1;
     }
 
-    return 2;
+    return 3;
   }
 
   @override
@@ -228,9 +243,7 @@ class _MainPageState extends State<MainPage> {
               canPop: displayIndex == 0,
               onPopInvokedWithResult: (didPop, result) {
                 if (didPop) return;
-                context.read<BottomNavBarCubit>().changeCurrentScreen(
-                  index: 0,
-                );
+                context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
               },
               child: Scaffold(
                 resizeToAvoidBottomInset: false,
@@ -343,6 +356,17 @@ class _MainPageState extends State<MainPage> {
                       currentIndex,
                     ),
                   ),
+            role == UserType.patient
+                ? Expanded(
+                    child: _navItem(
+                      context,
+                      2,
+                      Icons.health_and_safety_outlined,
+                      "emergency".tr,
+                      currentIndex,
+                    ),
+                  )
+                : const SizedBox.shrink(),
             if (role == UserType.delegate)
               Expanded(
                 child: _navItem(

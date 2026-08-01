@@ -4,8 +4,8 @@ class SpecialtyEntity extends Equatable {
   final int? id;
   final String? icon;
   final SpecialtyEntity? mainSpecialty;
-  final String? isActive;
-  final String? sortOrder;
+  final int? isActive;
+  final int? sortOrder;
   final String? name;
   final String? slug;
   final bool? hasChildren;
@@ -29,16 +29,16 @@ class SpecialtyEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        icon,
-        mainSpecialty,
-        isActive,
-        sortOrder,
-        name,
-        slug,
-        hasChildren,
-        doctorsCount,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    icon,
+    mainSpecialty,
+    isActive,
+    sortOrder,
+    name,
+    slug,
+    hasChildren,
+    doctorsCount,
+    createdAt,
+    updatedAt,
+  ];
 }

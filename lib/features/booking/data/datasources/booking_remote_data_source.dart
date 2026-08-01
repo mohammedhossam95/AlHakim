@@ -1,4 +1,5 @@
 import 'package:alhakim/core/error/exceptions.dart';
+import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/booking/data/models/appointment_booking_model.dart';
 import 'package:alhakim/features/booking/data/models/family_member_model.dart';
 import 'package:alhakim/features/booking/data/models/kinship_model.dart';
@@ -14,6 +15,12 @@ abstract class BookingRemoteDataSource {
     required String birthDate,
     required String kinship,
   });
+  Future<AddFamilyMemberRespModel> updateFamilyMember({
+    required String id,
+    required String fullName,
+    required String birthDate,
+  });
+  Future<BaseOneResponse> deleteFamilyMember({required String id});
   Future<AppointmentBookingRespModel> bookAppointment({
     required String doctorId,
     required String appointmentDate,
@@ -71,6 +78,46 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
 
       if (response['status'] == true) {
         return AddFamilyMemberRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AddFamilyMemberRespModel> updateFamilyMember({
+    required String id,
+    required String fullName,
+    required String birthDate,
+  }) async {
+    try {
+      final response = await dioConsumer.patch(
+        '/family-members/$id',
+        body: {
+          'full_name': fullName,
+          'birth_date': birthDate,
+        },
+      );
+
+      if (response['status'] == true) {
+        return AddFamilyMemberRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> deleteFamilyMember({required String id}) async {
+    try {
+      final response = await dioConsumer.delete('/family-members/$id');
+
+      if (response['status'] == true) {
+        return BaseOneResponse.fromJson(response);
       }
 
       throw ServerException(message: response['message'] ?? '');
