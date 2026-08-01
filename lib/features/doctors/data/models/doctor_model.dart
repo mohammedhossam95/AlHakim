@@ -44,7 +44,7 @@ class DoctorModel extends DoctorEntity {
     super.secretaryCountryCode,
     super.consultationPrice,
     super.consultationPriceHidden,
-    super.medicalCenters,
+    super.medicalCenter,
     super.whatsappNumber,
     super.whatsappCountryCode,
     super.latitude,
@@ -113,11 +113,10 @@ class DoctorModel extends DoctorEntity {
       secretaryCountryCode: json['secretary_country_code'],
       consultationPrice: json['consultation_price'],
       consultationPriceHidden: json['consultation_price_hidden'],
-      medicalCenters: json['medical_centers'] != null
-          ? (json['medical_centers'] as List)
-                .map((e) => MedicalCenterModel.fromJson(e))
-                .toList()
-          : [],
+
+      medicalCenter: json['medical_center'] != null
+          ? MedicalCenterModel.fromJson(json['medical_center'])
+          : null,
       whatsappNumber: json['whatsapp_number'],
       whatsappCountryCode: json['whatsapp_country_code'],
       latitude: json['latitude'],

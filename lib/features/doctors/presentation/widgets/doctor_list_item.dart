@@ -136,8 +136,7 @@ class DoctorListItem extends StatelessWidget {
               style: TextStyles.medium14(color: colors.main),
             ),
           Gaps.vGap16,
-          if (doctor.medicalCenters != null &&
-              doctor.medicalCenters!.isNotEmpty) ...[
+          if (doctor.medicalCenter != null) ...[
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               decoration: BoxDecoration(
@@ -149,16 +148,16 @@ class DoctorListItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   DiffImage(
-                    image: doctor.medicalCenters?.first.logo ?? '',
+                    image: doctor.medicalCenter?.logo ?? '',
                     width: 30.w,
                     height: 30.w,
                     isCircle: true,
                     fitType: BoxFit.cover,
-                    userName: doctor.medicalCenters?.first.name ?? '',
+                    userName: doctor.medicalCenter?.name ?? '',
                   ),
                   Gaps.hGap8,
                   Text(
-                    doctor.medicalCenters?.first.name ?? '',
+                    doctor.medicalCenter?.name ?? '',
                     style: TextStyles.medium14(color: colors.main),
                   ),
                 ],
@@ -189,13 +188,13 @@ class DoctorListItem extends StatelessWidget {
             textColor: colors.main,
             onPressed: () {
               Constants.makePhoneCall(
-                "${doctor.secretaryCountryCode ?? doctor.medicalCenters?.first.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenters?.first.phone ?? ""}",
+                "${doctor.secretaryCountryCode ?? doctor.medicalCenter?.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenter?.phone ?? ""}",
               );
             },
             localeText: true,
             svgAsset: SvgAssets.callIcon,
             btnText:
-                "${doctor.secretaryCountryCode ?? doctor.medicalCenters?.first.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenters?.first.phone ?? ""}",
+                "${doctor.secretaryCountryCode ?? doctor.medicalCenter?.countryCode ?? "20"}${doctor.secretaryPhone ?? doctor.medicalCenter?.phone ?? ""}",
           ),
           Gaps.vGap10,
         ],

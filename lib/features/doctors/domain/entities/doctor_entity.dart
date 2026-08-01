@@ -26,7 +26,7 @@ class DoctorEntity extends Equatable {
   final bool? priceHidden;
   final String? consultationPrice;
   final bool? consultationPriceHidden;
-  final List<MedicalCenter>? medicalCenters;
+  final MedicalCenter? medicalCenter;
   final String? whatsappNumber;
   final String? whatsappCountryCode;
   final String? latitude;
@@ -58,7 +58,7 @@ class DoctorEntity extends Equatable {
     this.secretaryCountryCode,
     this.consultationPrice,
     this.consultationPriceHidden,
-    this.medicalCenters,
+    this.medicalCenter,
     this.whatsappNumber,
     this.whatsappCountryCode,
     this.latitude,
@@ -92,7 +92,7 @@ class DoctorEntity extends Equatable {
     secretaryCountryCode,
     consultationPrice,
     consultationPriceHidden,
-    medicalCenters,
+    medicalCenter,
     whatsappNumber,
     whatsappCountryCode,
     latitude,

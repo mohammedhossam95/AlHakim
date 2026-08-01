@@ -107,11 +107,11 @@ class _FollowUpQueueBody extends StatelessWidget {
   Future<void> _callClinic() async {
     final phone =
         appointment.doctor?.clinicPhone ??
-        appointment.doctor?.medicalCenters?.first.phone ??
+        appointment.doctor?.medicalCenter?.phone ??
         "";
     final countryCode =
         appointment.doctor?.secretaryCountryCode ??
-        appointment.doctor?.medicalCenters?.first.countryCode ??
+        appointment.doctor?.medicalCenter?.countryCode ??
         "20";
     if (countryCode.isEmpty || phone.isEmpty) return;
     await Constants.makePhoneCall('$countryCode$phone');
