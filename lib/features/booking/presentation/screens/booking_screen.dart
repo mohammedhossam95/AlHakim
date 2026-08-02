@@ -272,10 +272,8 @@ class _BookingScreenState extends State<BookingScreen> {
                                 Text(
                                   DateFormat(
                                     'EEEE, d MMM yyyy',
-
                                     appLocalizations.locale?.languageCode,
                                   ).format(selectedBooking.date),
-
                                   style: TextStyles.medium14(),
                                 ),
                               ],
@@ -354,7 +352,6 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
 
                 Gaps.vGap18,
-
                 BookingOptionItem(
                   index: 0,
                   selectedIndex: selectedIndex,
@@ -370,9 +367,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     });
                   },
                 ),
-
                 Gaps.vGap16,
-
                 selectedFamilyMember != null
                     ? Container(
                         padding: EdgeInsets.all(16.w),
@@ -471,26 +466,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           }
                         },
                       ),
-
-                // Gaps.vGap16,
-
-                // BookingOptionItem(
-                //   index: 2,
-                //   selectedIndex: selectedIndex,
-                //   title: "other_person".tr,
-                //   desc: "other_person_desc".tr,
-                //   icon: Icons.person_add_alt_1,
-
-                //   onTap: () {
-                //     setState(() {
-                //       selectedIndex = 2;
-                //     });
-
-                //     context.push(Routes.addFamilyMemberScreenRoute);
-                //   },
-                // ),
                 Gaps.vGap30,
-
                 /// confirm button
                 BlocConsumer<BookAppointmentCubit, BookAppointmentState>(
                   listener: (context, state) {
