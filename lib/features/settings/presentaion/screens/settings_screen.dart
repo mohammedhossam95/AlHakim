@@ -108,6 +108,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: 'settings_and_support'.tr,
                       child: Column(
                         children: [
+                          if (sessionState.status == SessionStatus.guest)
+                            ProfileWidet(
+                              title: 'login_as_delegate'.tr,
+                              icon: SvgAssets.user,
+                              onTap: () {
+                                final session = BlocProvider.of<SessionCubit>(
+                                  context,
+                                );
+                                session.setUserType(UserType.delegate);
+                                context.pushNamed(Routes.loginScreenRoute);
+                              },
+                            ),
                           // if (sessionState.status ==
                           //     SessionStatus.authenticated) ...[
                           //   ProfileWidet(
@@ -167,18 +179,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
                             },
                           ),
-                          if (sessionState.status == SessionStatus.guest)
-                            ProfileWidet(
-                              title: 'login_as_delegate'.tr,
-                              icon: SvgAssets.user,
-                              onTap: () {
-                                final session = BlocProvider.of<SessionCubit>(
-                                  context,
-                                );
-                                session.setUserType(UserType.delegate);
-                                context.pushNamed(Routes.loginScreenRoute);
-                              },
-                            ),
                         ],
                       ),
                     ),
