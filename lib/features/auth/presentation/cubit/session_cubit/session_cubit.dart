@@ -101,8 +101,24 @@ class SessionCubit extends Cubit<SessionState> {
               ),
             );
           },
-          (userType) {
+          (userType) async {
             if (status == SessionStatus.authenticated) {
+              final hasToken = await _ensureAccessToken();
+              if (!hasToken) {
+                log(
+                  'SESSION AUTHENTICATED BUT ACCESS TOKEN MISSING → guest',
+                );
+                await _saveSessionStatus(
+                  const SessionStatusParams(status: SessionStatus.guest),
+                );
+                emit(
+                  SessionState(
+                    status: SessionStatus.guest,
+                    userType: userType,
+                  ),
+                );
+                return;
+              }
               emit(_buildAuthenticatedState(userType));
             } else {
               emit(SessionState(status: status, userType: userType));
@@ -111,6 +127,22 @@ class SessionCubit extends Cubit<SessionState> {
         );
       },
     );
+  }
+
+  /// Ensures SecureStorage has the Bearer token. Restores from cached auth
+  /// if needed. Returns false when no token is available at all.
+  Future<bool> _ensureAccessToken() async {
+    final existing = await secureStorage.getAccessToken();
+    if (existing != null && existing.isNotEmpty) return true;
+
+    final cachedToken = sharedPreferences.getAuth()?.token;
+    if (cachedToken != null && cachedToken.isNotEmpty) {
+      await secureStorage.saveAccessToken(cachedToken);
+      log('ACCESS TOKEN RESTORED FROM CACHED AUTH');
+      return true;
+    }
+
+    return false;
   }
 
   Future<void> setUserType(UserType userType) async {
@@ -148,11 +180,15 @@ class SessionCubit extends Cubit<SessionState> {
           (_) {},
         );
       }
+      await sharedPreferences.removeAuth();
       await sharedPreferences.removeUser();
       await sharedPreferences.removeUserId();
       await sharedPreferences.removeUserType();
 
       await secureStorage.clearAll();
+      // Prevent next cold start from treating this as a fresh install and
+      // wiping a future login token.
+      await sharedPreferences.markSecureStorageReady();
 
       final guestResult = await _saveSessionStatus(
         SessionStatusParams(status: SessionStatus.guest),

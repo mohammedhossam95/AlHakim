@@ -111,7 +111,16 @@ class DioConsumerImpl implements DioConsumer {
   }
 
   Future<void> _handleAccessTokenHeader() async {
-    final String? accessToken = await secureStorage.getAccessToken();
+    String? accessToken = await secureStorage.getAccessToken();
+
+    // Fallback: restore from cached auth if SecureStorage was wiped unexpectedly.
+    if (accessToken == null || accessToken.isEmpty) {
+      final cachedToken = sharedPreferences.getAuth()?.token;
+      if (cachedToken != null && cachedToken.isNotEmpty) {
+        await secureStorage.saveAccessToken(cachedToken);
+        accessToken = cachedToken;
+      }
+    }
 
     if (accessToken != null && accessToken.isNotEmpty) {
       client.options.headers[HttpHeaders.authorizationHeader] =

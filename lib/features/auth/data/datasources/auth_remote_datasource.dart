@@ -209,10 +209,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await dioConsumer.post(endpoint);
 
       if (response['status'] == true) {
-        await secureStorage.clearAll();
-
-        await sharedPreferences.clearAll();
-
+        // Local session/token cleanup is owned by SessionCubit.logout.
+        // Do NOT clearAll() prefs here — it wipes markers like
+        // secure_storage_ready / language and causes the next cold start
+        // to delete a freshly saved access token.
         return;
       }
 
