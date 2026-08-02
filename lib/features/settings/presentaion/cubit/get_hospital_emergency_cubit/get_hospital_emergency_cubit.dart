@@ -10,11 +10,11 @@ class GetHospitalEmergencyCubit extends Cubit<GetHospitalEmergencyState> {
   final GetHospitalEmergencyUsecase usecase;
 
   GetHospitalEmergencyCubit({required this.usecase})
-      : super(GetHospitalEmergencyInitial());
+    : super(GetHospitalEmergencyInitial());
 
   Future<void> getHospitalEmergencyNumbers({
     int? perPage,
-    String? search,
+    String? hospitalName,
     int? categoryId,
   }) async {
     emit(GetHospitalEmergencyLoading());
@@ -22,7 +22,7 @@ class GetHospitalEmergencyCubit extends Cubit<GetHospitalEmergencyState> {
     final result = await usecase(
       GetHospitalEmergencyParams(
         perPage: perPage,
-        search: search,
+        hospitalName: hospitalName,
         categoryId: categoryId,
       ),
     );

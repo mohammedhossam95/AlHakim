@@ -274,13 +274,15 @@
   "relation": "Relation",
   "save": "Save",
   "choose_account_type": "Choose your account type",
-  "choose_account_type_description": "You can now choose whether the account is for a patient, doctor, or delegate",
+  "choose_account_type_description": "You can now choose whether the account is for a patient or a doctor",
   "patient_account": "Patient",
   "patient_account_description": "Browse doctors and book appointments",
   "doctor_account": "Doctor",
   "delegate_account": "Delegate",
-  "doctor_account_description": "Manage appointments and treat patients",
+  "doctor_account_description": "Manage clinic and follow up with patients",
   "delegate_account_description": "Register doctors and medical centers and manage them",
+  "emergency_banner_title": "Emergency & nearby hospitals",
+  "emergency_banner_subtitle": "Instant access in urgent cases",
   "appointments": "Appointments",
   "upcoming": "Upcoming",
   "previous": "Previous",
@@ -516,5 +518,6 @@
   "selectPosition": "Select your current location",
   "searchForPlace": "Search for a place",
   "noResultsFound": "No results found",
+  
   "gettingAddress": "Getting address"
 }

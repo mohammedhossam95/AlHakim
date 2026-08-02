@@ -46,52 +46,342 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
     super.dispose();
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     backgroundColor: colors.backGround,
+
+  //     body: SafeArea(
+  //       child: Padding(
+  //         padding: EdgeInsets.symmetric(horizontal: 16.w),
+  //         child: Column(
+  //           children: [
+  //             Row(
+  //               children: [
+  //                 DiffImage(
+  //                   image: sharedPreferences.getAuth()?.user?.profilePhotoUrl,
+
+  //                   height: 60,
+  //                   width: 60,
+  //                   isCircle: true,
+
+  //                   userName: "${sharedPreferences.getAuth()?.user?.firstName}",
+  //                 ),
+
+  //                 Gaps.hGap12,
+
+  //                 Text(
+  //                   "welcome".tr,
+
+  //                   style: TextStyles.medium14(color: colors.lightTextColor),
+  //                 ),
+
+  //                 Gaps.hGap4,
+
+  //                 Text(
+  //                   sharedPreferences.getAuth()?.user?.firstName ?? '',
+
+  //                   style: TextStyles.semiBold14(),
+  //                 ),
+
+  //                 const Spacer(),
+
+  //                 BlocBuilder<SessionCubit, SessionState>(
+  //                   builder: (context, sessionState) {
+  //                     if (sessionState.status != SessionStatus.authenticated) {
+  //                       return const SizedBox.shrink();
+  //                     }
+
+  //                     return BlocProvider(
+  //                       create: (_) =>
+  //                           ServiceLocator.instance<NotificationsCountCubit>()
+  //                             ..fGetCount(),
+  //                       child:
+  //                           BlocBuilder<
+  //                             NotificationsCountCubit,
+  //                             NotificationsCountState
+  //                           >(
+  //                             builder: (context, countState) {
+  //                               final unreadCount =
+  //                                   countState
+  //                                       is NotificationsCountSuccessState
+  //                                   ? countState.unreadCount
+  //                                   : 0;
+
+  //                               return InkWell(
+  //                                 onTap: () {
+  //                                   context.push(
+  //                                     Routes.notificationsScreenRoute,
+  //                                   );
+  //                                 },
+  //                                 borderRadius: BorderRadius.circular(14.r),
+  //                                 child: Stack(
+  //                                   clipBehavior: Clip.none,
+  //                                   children: [
+  //                                     Container(
+  //                                       padding: EdgeInsets.all(10.w),
+  //                                       decoration: BoxDecoration(
+  //                                         color: colors.main.withValues(
+  //                                           alpha: .12,
+  //                                         ),
+  //                                         borderRadius: BorderRadius.circular(
+  //                                           14.r,
+  //                                         ),
+  //                                       ),
+  //                                       child: Icon(
+  //                                         Icons.notifications_none,
+  //                                         color: colors.main,
+  //                                       ),
+  //                                     ),
+  //                                     if (unreadCount > 0)
+  //                                       Positioned(
+  //                                         top: -2.h,
+  //                                         right: -2.w,
+  //                                         child: Container(
+  //                                           padding: EdgeInsets.symmetric(
+  //                                             horizontal: 5.w,
+  //                                             vertical: 1.h,
+  //                                           ),
+  //                                           decoration: BoxDecoration(
+  //                                             color: colors.errorColor,
+  //                                             borderRadius:
+  //                                                 BorderRadius.circular(10.r),
+  //                                           ),
+  //                                           constraints: BoxConstraints(
+  //                                             minWidth: 16.w,
+  //                                           ),
+  //                                           child: Text(
+  //                                             unreadCount > 99
+  //                                                 ? '99+'
+  //                                                 : '$unreadCount',
+  //                                             textAlign: TextAlign.center,
+  //                                             style: TextStyles.bold10(
+  //                                               color: colors.whiteColor,
+  //                                             ),
+  //                                           ),
+  //                                         ),
+  //                                       ),
+  //                                   ],
+  //                                 ),
+  //                               );
+  //                             },
+  //                           ),
+  //                     );
+  //                   },
+  //                 ),
+  //               ],
+  //             ),
+  //             Gaps.vGap10,
+
+  //             ///  search field
+  //             Container(
+  //               decoration: BoxDecoration(
+  //                 color: colors.whiteColor,
+  //                 boxShadow: [
+  //                   BoxShadow(
+  //                     color: colors.main.withValues(alpha: .1),
+  //                     blurRadius: 10.r,
+  //                     offset: Offset(0, 10.h),
+  //                   ),
+  //                 ],
+  //                 borderRadius: BorderRadius.circular(10.r),
+  //               ),
+  //               child: MyTextFormField(
+  //                 controller: _searchController,
+  //                 backgroundColor: colors.whiteColor,
+  //                 hintText: 'search_speciality'.tr,
+  //                 prefixIcon: Icon(Icons.search, color: colors.main),
+  //                 textInputAction: TextInputAction.search,
+  //                 onSubmit: (value) {
+  //                   final query = value.trim();
+  //                   if (query.isEmpty) return;
+
+  //                   context.push(
+  //                     Routes.searchDoctorsScreenRoute,
+  //                     extra: query, // أو arguments حسب الراوتر اللي بتستخدمه
+  //                   );
+  //                 },
+  //               ),
+  //             ),
+  //             Gaps.vGap16,
+
+  //             /// banner
+  //             _BannerCard(),
+  //             Gaps.vGap16,
+
+  //             /// header
+  //             Row(
+  //               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //               children: [
+  //                 Text("all_specialities".tr, style: TextStyles.semiBold16()),
+  //                 // Text(
+  //                 //   "see_all".tr,
+  //                 //   style: TextStyles.medium14(color: colors.main),
+  //                 // ),
+  //               ],
+  //             ),
+
+  //             Gaps.vGap16,
+
+  //             /// grid
+  //             Expanded(
+  //               child: BlocBuilder<GetSpecialtiesCubit, GetSpecialtiesState>(
+  //                 builder: (context, state) {
+  //                   if (state is GetSpecialtiesLoading) {
+  //                     return GridView.builder(
+  //                       physics: const NeverScrollableScrollPhysics(),
+  //                       itemCount: 6,
+
+  //                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //                         crossAxisCount: 2,
+  //                         mainAxisSpacing: 14.h,
+  //                         crossAxisSpacing: 14.w,
+  //                         childAspectRatio: .88,
+  //                       ),
+
+  //                       itemBuilder: (context, index) {
+  //                         return Shimmer.fromColors(
+  //                           baseColor: Colors.grey.shade300,
+  //                           highlightColor: Colors.grey.shade100,
+  //                           child: Container(
+  //                             padding: EdgeInsets.all(14.w),
+
+  //                             decoration: BoxDecoration(
+  //                               color: colors.whiteColor,
+  //                               borderRadius: BorderRadius.circular(22.r),
+  //                             ),
+
+  //                             child: Column(
+  //                               mainAxisAlignment: MainAxisAlignment.center,
+  //                               children: [
+  //                                 /// image shimmer
+  //                                 Container(
+  //                                   height: 70.h,
+  //                                   width: 70.w,
+
+  //                                   decoration: BoxDecoration(
+  //                                     color: colors.whiteColor,
+  //                                     shape: BoxShape.circle,
+  //                                   ),
+  //                                 ),
+
+  //                                 Gaps.vGap16,
+
+  //                                 /// title shimmer
+  //                                 Container(
+  //                                   height: 12.h,
+  //                                   width: 90.w,
+
+  //                                   decoration: BoxDecoration(
+  //                                     color: colors.whiteColor,
+  //                                     borderRadius: BorderRadius.circular(20.r),
+  //                                   ),
+  //                                 ),
+
+  //                                 Gaps.vGap10,
+
+  //                                 Container(
+  //                                   height: 10.h,
+  //                                   width: 60.w,
+
+  //                                   decoration: BoxDecoration(
+  //                                     color: colors.whiteColor,
+  //                                     borderRadius: BorderRadius.circular(20.r),
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                           ),
+  //                         );
+  //                       },
+  //                     );
+  //                   } else if (state is GetSpecialtiesError) {
+  //                     return SizedBox(
+  //                       height: 150.h,
+  //                       child: Center(
+  //                         child: ErrorText(
+  //                           width: 100.w,
+  //                           text: state.message,
+  //                           onRetry: () => context
+  //                               .read<GetSpecialtiesCubit>()
+  //                               .getSpecialties(),
+  //                         ),
+  //                       ),
+  //                     );
+  //                   } else if (state is GetSpecialtiesSuccess) {
+  //                     final List<SpecialtyEntity> specialities =
+  //                         state.response.data as List<SpecialtyEntity>;
+
+  //                     if (specialities.isEmpty) {
+  //                       return Center(
+  //                         child: ErrorText(width: 300.w, text: "noData".tr),
+  //                       );
+  //                     }
+  //                     return GridView.builder(
+  //                       padding: EdgeInsets.only(bottom: 20.h),
+
+  //                       itemCount: specialities.length,
+
+  //                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //                         crossAxisCount: 2,
+  //                         mainAxisSpacing: 14.h,
+  //                         crossAxisSpacing: 14.w,
+  //                         childAspectRatio: .75,
+  //                       ),
+
+  //                       itemBuilder: (context, index) {
+  //                         final item = specialities[index];
+
+  //                         return SpecialityItem(item);
+  //                       },
+  //                     );
+  //                   }
+  //                   return Container();
+  //                 },
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colors.backGround,
-
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Column(
             children: [
+              /// welcome row - ثابت فوق مش بيسكرول
               Row(
                 children: [
                   DiffImage(
                     image: sharedPreferences.getAuth()?.user?.profilePhotoUrl,
-
                     height: 60,
                     width: 60,
                     isCircle: true,
-
                     userName: "${sharedPreferences.getAuth()?.user?.firstName}",
                   ),
-
                   Gaps.hGap12,
-
                   Text(
                     "welcome".tr,
-
                     style: TextStyles.medium14(color: colors.lightTextColor),
                   ),
-
                   Gaps.hGap4,
-
                   Text(
                     sharedPreferences.getAuth()?.user?.firstName ?? '',
-
                     style: TextStyles.semiBold14(),
                   ),
-
                   const Spacer(),
-
                   BlocBuilder<SessionCubit, SessionState>(
                     builder: (context, sessionState) {
                       if (sessionState.status != SessionStatus.authenticated) {
                         return const SizedBox.shrink();
                       }
-
                       return BlocProvider(
                         create: (_) =>
                             ServiceLocator.instance<NotificationsCountCubit>()
@@ -103,8 +393,7 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
                             >(
                               builder: (context, countState) {
                                 final unreadCount =
-                                    countState
-                                        is NotificationsCountSuccessState
+                                    countState is NotificationsCountSuccessState
                                     ? countState.unreadCount
                                     : 0;
 
@@ -171,173 +460,183 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
                   ),
                 ],
               ),
+
               Gaps.vGap10,
 
-              ///  search field
-              Container(
-                decoration: BoxDecoration(
-                  color: colors.whiteColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.main.withValues(alpha: .1),
-                      blurRadius: 10.r,
-                      offset: Offset(0, 10.h),
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: MyTextFormField(
-                  controller: _searchController,
-                  backgroundColor: colors.whiteColor,
-                  hintText: 'search_speciality'.tr,
-                  prefixIcon: Icon(Icons.search, color: colors.main),
-                  textInputAction: TextInputAction.search,
-                  onSubmit: (value) {
-                    final query = value.trim();
-                    if (query.isEmpty) return;
-
-                    context.push(
-                      Routes.searchDoctorsScreenRoute,
-                      extra: query, // أو arguments حسب الراوتر اللي بتستخدمه
-                    );
-                  },
-                ),
-              ),
-              Gaps.vGap16,
-
-              /// banner
-              _BannerCard(),
-              Gaps.vGap16,
-
-              /// header
-              Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("all_specialities".tr, style: TextStyles.semiBold16()),
-                  // Text(
-                  //   "see_all".tr,
-                  //   style: TextStyles.medium14(color: colors.main),
-                  // ),
-                ],
-              ),
-
-              Gaps.vGap16,
-
-              /// grid
+              /// من هنا لتحت كله جوه CustomScrollView (أداء أفضل، lazy building حقيقي)
               Expanded(
-                child: BlocBuilder<GetSpecialtiesCubit, GetSpecialtiesState>(
-                  builder: (context, state) {
-                    if (state is GetSpecialtiesLoading) {
-                      return GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: 6,
-
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 14.h,
-                          crossAxisSpacing: 14.w,
-                          childAspectRatio: .88,
+                child: CustomScrollView(
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  slivers: [
+                    /// search field
+                    SliverToBoxAdapter(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colors.whiteColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.main.withValues(alpha: .1),
+                              blurRadius: 10.r,
+                              offset: Offset(0, 10.h),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
+                        child: MyTextFormField(
+                          controller: _searchController,
+                          backgroundColor: colors.whiteColor,
+                          hintText: 'search_speciality'.tr,
+                          prefixIcon: Icon(Icons.search, color: colors.main),
+                          textInputAction: TextInputAction.search,
+                          onSubmit: (value) {
+                            final query = value.trim();
+                            if (query.isEmpty) return;
 
-                        itemBuilder: (context, index) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.grey.shade300,
-                            highlightColor: Colors.grey.shade100,
-                            child: Container(
-                              padding: EdgeInsets.all(14.w),
+                            context.push(
+                              Routes.searchDoctorsScreenRoute,
+                              extra: query,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
 
-                              decoration: BoxDecoration(
-                                color: colors.whiteColor,
-                                borderRadius: BorderRadius.circular(22.r),
-                              ),
+                    SliverToBoxAdapter(child: Gaps.vGap16),
 
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  /// image shimmer
-                                  Container(
-                                    height: 70.h,
-                                    width: 70.w,
+                    /// banner
+                    const SliverToBoxAdapter(child: _BannerCard()),
 
-                                    decoration: BoxDecoration(
-                                      color: colors.whiteColor,
-                                      shape: BoxShape.circle,
-                                    ),
+                    SliverToBoxAdapter(child: Gaps.vGap16),
+
+                    /// header
+                    SliverToBoxAdapter(
+                      child: Row(
+                        children: [
+                          Text(
+                            "all_specialities".tr,
+                            style: TextStyles.semiBold16(),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SliverToBoxAdapter(child: Gaps.vGap16),
+
+                    /// grid - lazy sliver
+                    BlocBuilder<GetSpecialtiesCubit, GetSpecialtiesState>(
+                      builder: (context, state) {
+                        if (state is GetSpecialtiesLoading) {
+                          return SliverGrid.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 14.h,
+                                  crossAxisSpacing: 14.w,
+                                  childAspectRatio: .88,
+                                ),
+                            itemCount: 6,
+                            itemBuilder: (context, index) {
+                              return Shimmer.fromColors(
+                                baseColor: Colors.grey.shade300,
+                                highlightColor: Colors.grey.shade100,
+                                child: Container(
+                                  padding: EdgeInsets.all(14.w),
+                                  decoration: BoxDecoration(
+                                    color: colors.whiteColor,
+                                    borderRadius: BorderRadius.circular(22.r),
                                   ),
-
-                                  Gaps.vGap16,
-
-                                  /// title shimmer
-                                  Container(
-                                    height: 12.h,
-                                    width: 90.w,
-
-                                    decoration: BoxDecoration(
-                                      color: colors.whiteColor,
-                                      borderRadius: BorderRadius.circular(20.r),
-                                    ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        height: 70.h,
+                                        width: 70.w,
+                                        decoration: BoxDecoration(
+                                          color: colors.whiteColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      Gaps.vGap16,
+                                      Container(
+                                        height: 12.h,
+                                        width: 90.w,
+                                        decoration: BoxDecoration(
+                                          color: colors.whiteColor,
+                                          borderRadius: BorderRadius.circular(
+                                            20.r,
+                                          ),
+                                        ),
+                                      ),
+                                      Gaps.vGap10,
+                                      Container(
+                                        height: 10.h,
+                                        width: 60.w,
+                                        decoration: BoxDecoration(
+                                          color: colors.whiteColor,
+                                          borderRadius: BorderRadius.circular(
+                                            20.r,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-
-                                  Gaps.vGap10,
-
-                                  Container(
-                                    height: 10.h,
-                                    width: 60.w,
-
-                                    decoration: BoxDecoration(
-                                      color: colors.whiteColor,
-                                      borderRadius: BorderRadius.circular(20.r),
-                                    ),
-                                  ),
-                                ],
+                                ),
+                              );
+                            },
+                          );
+                        } else if (state is GetSpecialtiesError) {
+                          return SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 150.h,
+                              child: Center(
+                                child: ErrorText(
+                                  width: 100.w,
+                                  text: state.message,
+                                  onRetry: () => context
+                                      .read<GetSpecialtiesCubit>()
+                                      .getSpecialties(),
+                                ),
                               ),
                             ),
                           );
-                        },
-                      );
-                    } else if (state is GetSpecialtiesError) {
-                      return SizedBox(
-                        height: 150.h,
-                        child: Center(
-                          child: ErrorText(
-                            width: 100.w,
-                            text: state.message,
-                            onRetry: () => context
-                                .read<GetSpecialtiesCubit>()
-                                .getSpecialties(),
-                          ),
-                        ),
-                      );
-                    } else if (state is GetSpecialtiesSuccess) {
-                      final List<SpecialtyEntity> specialities =
-                          state.response.data as List<SpecialtyEntity>;
+                        } else if (state is GetSpecialtiesSuccess) {
+                          final List<SpecialtyEntity> specialities =
+                              state.response.data as List<SpecialtyEntity>;
 
-                      if (specialities.isEmpty) {
-                        return Center(
-                          child: ErrorText(width: 300.w, text: "noData".tr),
-                        );
-                      }
-                      return GridView.builder(
-                        padding: EdgeInsets.only(bottom: 20.h),
+                          if (specialities.isEmpty) {
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                child: ErrorText(
+                                  width: 300.w,
+                                  text: "noData".tr,
+                                ),
+                              ),
+                            );
+                          }
+                          return SliverGrid.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 14.h,
+                                  crossAxisSpacing: 14.w,
+                                  childAspectRatio: .75,
+                                ),
+                            itemCount: specialities.length,
+                            itemBuilder: (context, index) {
+                              final item = specialities[index];
+                              return SpecialityItem(item);
+                            },
+                          );
+                        }
+                        return const SliverToBoxAdapter(child: SizedBox());
+                      },
+                    ),
 
-                        itemCount: specialities.length,
-
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 14.h,
-                          crossAxisSpacing: 14.w,
-                          childAspectRatio: .75,
-                        ),
-
-                        itemBuilder: (context, index) {
-                          final item = specialities[index];
-
-                          return SpecialityItem(item);
-                        },
-                      );
-                    }
-                    return Container();
-                  },
+                    /// مساحة آخر السكرول
+                    SliverToBoxAdapter(child: Gaps.vGap20),
+                  ],
                 ),
               ),
             ],

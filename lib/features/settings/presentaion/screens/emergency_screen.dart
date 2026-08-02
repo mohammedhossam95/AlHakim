@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/shimmer/hospital_emergency_shimmer.dart';
@@ -24,6 +27,8 @@ class EmergencyScreen extends StatefulWidget {
 
 class _EmergencyScreenState extends State<EmergencyScreen> {
   int? _selectedCategoryId;
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -32,16 +37,37 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     _fetchHospitals();
   }
 
-  void _fetchHospitals({int? categoryId}) {
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _fetchHospitals({int? categoryId, String? hospitalName}) {
     context.read<GetHospitalEmergencyCubit>().getHospitalEmergencyNumbers(
       categoryId: categoryId,
+      hospitalName: hospitalName,
     );
+  }
+
+  void _onSearchChanged(String? value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 450), () {
+      _fetchHospitals(
+        categoryId: _selectedCategoryId,
+        hospitalName: (value ?? '').trim(),
+      );
+    });
   }
 
   void _onCategorySelected(int? categoryId) {
     if (_selectedCategoryId == categoryId) return;
     setState(() => _selectedCategoryId = categoryId);
-    _fetchHospitals(categoryId: categoryId);
+    _fetchHospitals(
+      categoryId: categoryId,
+      hospitalName: _searchController.text.trim(),
+    );
   }
 
   List<EmergencyCategoryEntity> _activeCategories(
@@ -71,6 +97,31 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               ),
             ),
             Gaps.vGap8,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors.whiteColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.main.withValues(alpha: .1),
+                      blurRadius: 10.r,
+                      offset: Offset(0, 10.h),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: MyTextFormField(
+                  controller: _searchController,
+                  backgroundColor: colors.whiteColor,
+                  hintText: 'searchForPlace'.tr,
+                  prefixIcon: Icon(Icons.search, color: colors.main),
+                  textInputAction: TextInputAction.search,
+                  onChanged: _onSearchChanged,
+                ),
+              ),
+            ),
+            Gaps.vGap12,
             BlocBuilder<
               GetEmergencyCategoriesCubit,
               GetEmergencyCategoriesState
@@ -113,6 +164,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                 );
               },
             ),
+
             Gaps.vGap20,
             Expanded(
               child:
@@ -132,7 +184,10 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                             width: 300.w,
                             text: state.message,
                             onRetry: () {
-                              _fetchHospitals(categoryId: _selectedCategoryId);
+                              _fetchHospitals(
+                                categoryId: _selectedCategoryId,
+                                hospitalName: _searchController.text.trim(),
+                              );
                             },
                           ),
                         );
@@ -156,7 +211,10 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                       return RefreshIndicator(
                         color: colors.main,
                         onRefresh: () async {
-                          _fetchHospitals(categoryId: _selectedCategoryId);
+                          _fetchHospitals(
+                            categoryId: _selectedCategoryId,
+                            hospitalName: _searchController.text.trim(),
+                          );
                         },
                         child: ListView.separated(
                           padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 24.h),

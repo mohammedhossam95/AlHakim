@@ -26,4 +26,8 @@ class AppStrings {
   static const String unAuthorizedFailure = 'Unauthenticated.';
   static const String tokenFailure = 'Token has expired';
   static const String mapKey = "AIzaSyCMoPZ9uP5G7r5fm2vHe63qBWnP79Xlyuo";
+  static const String androidDownloadLink =
+      'https://play.google.com/store/apps/details?id=com.sharaftech.alhakim&hl=ar';
+  static const String iOSdownloadLink =
+      'https://apps.apple.com/us/app/alhakim/id6754492909';
 }
