@@ -2,6 +2,7 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/core/utils/share_builder.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
@@ -65,12 +66,18 @@ class DoctorListItem extends StatelessWidget {
   }
 
   Future<void> _shareDoctor() async {
-    final specialty = doctor.specialty?.name ?? '';
-    final shareText = specialty.isEmpty
-        ? _doctorDisplayName
-        : '$_doctorDisplayName - $specialty';
-    if (shareText.trim().isEmpty) return;
-    await SharePlus.instance.share(ShareParams(text: shareText));
+    // final specialty = doctor.specialty?.name ?? '';
+    // final shareText = specialty.isEmpty
+    //     ? _doctorDisplayName
+    //     : '$_doctorDisplayName - $specialty';
+    // if (shareText.trim().isEmpty) return;
+    // await SharePlus.instance.share(ShareParams(text: shareText));
+    await SharePlus.instance.share(
+      ShareParams(
+        text: ShareTextBuilder.buildDoctorShareText(doctor),
+        subject: 'مشاركة بيانات دكتور - تطبيق الحكيم',
+      ),
+    );
   }
 
   @override

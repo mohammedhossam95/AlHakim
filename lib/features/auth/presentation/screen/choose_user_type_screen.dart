@@ -1,13 +1,14 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/enums.dart';
-import 'package:alhakim/core/utils/values/assets.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
+import 'package:alhakim/core/widgets/back_button.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/auth/presentation/widgets/user_type_card_widget.dart';
 import 'package:alhakim/injection_container.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,7 +27,10 @@ class _ChooseUserTypeScreenState extends State<ChooseUserTypeScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedUserType = sessionCubit.state.userType;
+    final currentType = sessionCubit.state.userType;
+    _selectedUserType = currentType == UserType.doctor
+        ? UserType.doctor
+        : UserType.patient;
   }
 
   @override
@@ -34,123 +38,175 @@ class _ChooseUserTypeScreenState extends State<ChooseUserTypeScreen> {
     return Scaffold(
       backgroundColor: colors.backGround,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Illustration section
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      colors.secondary.withValues(alpha: 0.3),
-                      colors.backGround,
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    ImgAssets.chooseUserTypeImage,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            children: [
+              Gaps.vGap8,
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: context.canPop()
+                    ? const CustomBackButton()
+                    : SizedBox(height: 32.h, width: 32.w),
               ),
-            ),
-            Gaps.vGap32,
-            // Text section
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
+              Gaps.vGap16,
+              // ElasticIn(
+              //   duration: const Duration(milliseconds: 1000),
+              //   child: Image.asset(
+              //     'assets/images/alhakim_icon.png',
+              //     width: 130,
+              //   ).fadeIn(duration: const Duration(milliseconds: 1400)),
+              // ),
+              ElasticIn(
+                duration: const Duration(milliseconds: 1000),
+                child: Image.asset(
+                  'assets/images/alhakim_icon.png',
+                  width: 120,
+                ).fadeIn(duration: const Duration(milliseconds: 1400)),
+              ),
+              const SizedBox(height: 24),
+
+              // 2. Alhakim الإنجليزي
+              FadeInUp(
+                delay: const Duration(milliseconds: 700),
+                duration: const Duration(milliseconds: 600),
+                child: Image.asset('assets/images/alhakim_en.png', width: 120),
+              ),
+              const SizedBox(height: 8),
+
+              // // 3. الحكيم بالعربي
+              // FadeInUp(
+              //   delay: const Duration(milliseconds: 1000),
+              //   duration: const Duration(milliseconds: 600),
+              //   child: Image.asset('assets/images/alhakim_ar.png', width: 220),
+              // ),
+              Gaps.vGap24,
+              _EmergencyBanner(
+                onTap: () => context.push(Routes.emergencyScreenRoute),
+              ),
+              Gaps.vGap24,
+              Text(
+                'choose_account_type'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyles.semiBold18(color: colors.textColor),
+              ),
+              Gaps.vGap8,
+              Text(
+                'choose_account_type_description'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyles.medium14(color: colors.lightTextColor),
+              ),
+              Gaps.vGap20,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'choose_account_type'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyles.semiBold16(color: colors.textColor),
-                  ),
-                  Gaps.vGap8,
-                  Text(
-                    'choose_account_type_description'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyles.regular14(
-                      color: colors.textColor.withValues(alpha: 0.7),
+                  Expanded(
+                    child: UserTypeCardWidget(
+                      title: 'patient_account'.tr,
+                      description: 'patient_account_description'.tr,
+                      userType: UserType.patient,
+                      icon: Icons.person_outline_rounded,
+                      isSelected: _selectedUserType == UserType.patient,
+                      onTap: () {
+                        setState(() {
+                          _selectedUserType = UserType.patient;
+                        });
+                      },
                     ),
                   ),
-                  Gaps.vGap20,
+                  Gaps.hGap8,
+                  Expanded(
+                    child: UserTypeCardWidget(
+                      title: 'doctor_account'.tr,
+                      description: 'doctor_account_description'.tr,
+                      userType: UserType.doctor,
+                      icon: Icons.medical_services_outlined,
+                      isSelected: _selectedUserType == UserType.doctor,
+                      onTap: () {
+                        setState(() {
+                          _selectedUserType = UserType.doctor;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Gaps.vGap24,
+              MyDefaultButton(
+                btnText: 'continue',
+                onPressed: () {
+                  final session = BlocProvider.of<SessionCubit>(context);
+                  session.setUserType(_selectedUserType);
+                  context.pushNamed(Routes.loginScreenRoute);
+                },
+              ),
+              Gaps.vGap32,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-                  UserTypeCardWidget(
-                    title: 'patient_account'.tr,
-                    description: 'patient_account_description'.tr,
-                    userType: UserType.patient,
-                    isSelected: _selectedUserType == UserType.patient,
-                    isProminent: true,
-                    onTap: () {
-                      setState(() {
-                        _selectedUserType = UserType.patient;
-                      });
-                    },
+class _EmergencyBanner extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _EmergencyBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: colors.errorColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44.w,
+              height: 44.w,
+              decoration: BoxDecoration(
+                color: colors.whiteColor,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(
+                Icons.local_hospital_rounded,
+                color: colors.errorColor,
+                size: 24.sp,
+              ),
+            ),
+            Gaps.hGap10,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'emergency_banner_title'.tr,
+                    style: TextStyles.medium14(color: colors.errorColor),
                   ),
-                  Gaps.vGap10,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: UserTypeCardWidget(
-                          title: 'doctor_account'.tr,
-                          description: 'doctor_account_description'.tr,
-                          userType: UserType.doctor,
-                          isSelected: _selectedUserType == UserType.doctor,
-                          onTap: () {
-                            setState(() {
-                              _selectedUserType = UserType.doctor;
-                            });
-                          },
-                        ),
-                      ),
-                      Gaps.hGap8,
-                      Expanded(
-                        child: UserTypeCardWidget(
-                          title: 'emergency'.tr,
-                          description: 'emergency_description'.tr,
-                          userType: UserType.delegate,
-                          // isSelected: _selectedUserType == UserType.delegate,
-                          // isProminent: true,
-                          onTap: () {
-                            context.push(Routes.emergencyScreenRoute);
-                            // setState(() {
-                            //   _selectedUserType = UserType.delegate;
-                            // });
-                          },
-                        ),
-                      ),
-                      // Expanded(
-                      //   child: UserTypeCardWidget(
-                      //     title: 'delegate_account'.tr,
-                      //     description: 'delegate_account_description'.tr,
-                      //     userType: UserType.delegate,
-                      //     isSelected: _selectedUserType == UserType.delegate,
-                      //     onTap: () {
-                      //       setState(() {
-                      //         _selectedUserType = UserType.delegate;
-                      //       });
-                      //     },
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                  Gaps.vGap20,
-                  MyDefaultButton(
-                    btnText: 'continue',
-                    onPressed: () {
-                      final session = BlocProvider.of<SessionCubit>(context);
-                      session.setUserType(_selectedUserType);
-                      context.pushNamed(Routes.loginScreenRoute);
-                    },
+                  Gaps.vGap4,
+                  Text(
+                    'emergency_banner_subtitle'.tr,
+                    style: TextStyles.medium12(
+                      color: colors.errorColor.withValues(alpha: 0.7),
+                    ),
                   ),
                 ],
               ),
             ),
-            Gaps.vGap40,
+            Icon(
+              appLocalizations.isEnLocale
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
+              color: colors.errorColor,
+              size: 24.sp,
+            ),
           ],
         ),
       ),

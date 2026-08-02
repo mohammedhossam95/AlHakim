@@ -183,7 +183,10 @@ class _MainPageState extends State<MainPage> {
   }
 
   int _settingsTabIndex(SessionState sessionState) {
-    if (sessionState.userType == UserType.delegate) return 3;
+    if (sessionState.userType == UserType.delegate ||
+        sessionState.userType == UserType.patient) {
+      return 3;
+    }
 
     if (sessionState.userType == UserType.doctor &&
         sessionState.doctorAccountMode == DoctorAccountMode.medicalCenter &&
