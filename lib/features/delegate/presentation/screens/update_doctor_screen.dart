@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:io';
+import 'dart:io'; 
 
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
@@ -79,6 +79,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _minPatientsController = TextEditingController();
 
   final _priceController = TextEditingController();
+  final _consultationPriceController = TextEditingController();
 
   final _representativeCodeController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -102,11 +103,16 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _minPatientsFocus = FocusNode();
 
   final _priceFocus = FocusNode();
+  final _consultationPriceFocus = FocusNode();
 
   final _representativeCodeFocus = FocusNode();
 
   SpecialtyEntity? selectedSpeciality;
   LatLng? selectedLocation;
+  String? selectedCity;
+  String? selectedDistrict;
+  String? selectedStreet;
+  String? existingLicenseName;
   final bool _isLoadingLocation = false;
 
   File? profileImage;
@@ -127,6 +133,44 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   }
 
   bool hidePrice = false;
+  bool hideConsultationPrice = false;
+
+  String? _fileNameFromUrl(String? url) {
+    if (url == null || url.trim().isEmpty) return null;
+    final segments = Uri.tryParse(url)?.pathSegments;
+    if (segments != null && segments.isNotEmpty) {
+      return Uri.decodeComponent(segments.last);
+    }
+    return url.split('/').last;
+  }
+
+  String _buildAddressFromLocation() {
+    final location = widget.doctor.location;
+    final parts = [
+      location?.street,
+      location?.district,
+      location?.city,
+    ].whereType<String>().where((e) => e.trim().isNotEmpty).toList();
+    return parts.join(', ');
+  }
+
+  void _prefillSpecialty(List<SpecialtyEntity> specialties) {
+    if (selectedSpeciality != null) return;
+    final specialtyId = widget.doctor.specialty?.id;
+    if (specialtyId == null) return;
+    SpecialtyEntity? matched;
+    for (final item in specialties) {
+      if (item.id == specialtyId) {
+        matched = item;
+        break;
+      }
+    }
+    if (matched == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || selectedSpeciality != null) return;
+      setState(() => selectedSpeciality = matched);
+    });
+  }
 
   @override
   void initState() {
@@ -134,61 +178,72 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     getCountry();
     context.read<GetSpecialtiesCubit>().getSpecialties();
 
-    _nameArController.text = widget.doctor.name?.ar ?? '';
-
-    _nameEnController.text = widget.doctor.name?.en ?? '';
-
-    _bioArController.text = widget.doctor.bio?.ar ?? '';
-
-    _bioEnController.text = widget.doctor.bio?.en ?? '';
-
+    _nameArController.text = widget.doctor.name?.ar?.toString() ?? '';
+    _nameEnController.text = widget.doctor.name?.en?.toString() ?? '';
+    _bioArController.text = widget.doctor.bio?.ar?.toString() ?? '';
+    _bioEnController.text = widget.doctor.bio?.en?.toString() ?? '';
     _professionalNumberController.text =
         widget.doctor.professionalRegistrationNumber ?? '';
-
     _academicDegreeController.text = widget.doctor.academicDegree ?? '';
-
-    // _clinicPhoneController.text = widget.doctor.clinicPhone ?? '';
-
     _secretaryPhoneController.text = widget.doctor.secretaryPhone ?? '';
     _whatsappNumberController.text = widget.doctor.whatsappNumber ?? '';
+    _minPatientsController.text = widget.doctor.minPatients ?? '';
+    _priceController.text = widget.doctor.price ?? '';
+    _consultationPriceController.text = widget.doctor.consultationPrice ?? '';
+    hidePrice = widget.doctor.priceHidden ?? false;
+    hideConsultationPrice = widget.doctor.consultationPriceHidden ?? false;
+    _representativeCodeController.text = widget.doctor.representativeCode ?? '';
+    existingLicenseName = _fileNameFromUrl(widget.doctor.license);
+
+    if (widget.doctor.secretaryCountryCode != null &&
+        widget.doctor.secretaryCountryCode!.isNotEmpty) {
+      try {
+        _selectedCountry = CountryParser.parsePhoneCode(
+          widget.doctor.secretaryCountryCode!.replaceAll('+', ''),
+        );
+      } catch (_) {}
+    }
+
     if (widget.doctor.whatsappCountryCode != null &&
         widget.doctor.whatsappCountryCode!.isNotEmpty) {
       try {
         _whatsappCountry = CountryParser.parsePhoneCode(
           widget.doctor.whatsappCountryCode!.replaceAll('+', ''),
         );
-      } catch (_) {
-        // keep default country if the stored code can't be parsed
-      }
+      } catch (_) {}
     }
 
-    _minPatientsController.text = widget.doctor.minPatients ?? '';
+    selectedCity = widget.doctor.location?.city;
+    selectedDistrict = widget.doctor.location?.district;
+    selectedStreet = widget.doctor.location?.street;
 
-    _priceController.text = widget.doctor.price ?? '';
-    hidePrice = widget.doctor.priceHidden ?? false;
-    _representativeCodeController.text = widget.doctor.representativeCode ?? '';
-
-    final lat = double.tryParse(widget.doctor.latitude ?? '');
-    final lng = double.tryParse(widget.doctor.longitude ?? '');
+    final lat = double.tryParse(
+      widget.doctor.latitude ?? widget.doctor.location?.latitude ?? '',
+    );
+    final lng = double.tryParse(
+      widget.doctor.longitude ?? widget.doctor.location?.longitude ?? '',
+    );
     if (lat != null && lng != null) {
       selectedLocation = LatLng(lat, lng);
-      _locationController.text = '$lat, $lng';
+    }
+
+    final address = _buildAddressFromLocation();
+    if (address.isNotEmpty) {
+      _locationController.text = address;
+    } else if (selectedLocation != null) {
+      _locationController.text =
+          '${selectedLocation!.latitude}, ${selectedLocation!.longitude}';
     }
 
     if (widget.doctor.schedules != null &&
         widget.doctor.schedules!.isNotEmpty) {
       for (final schedule in widget.doctor.schedules!) {
         final item = DoctorScheduleModel();
-
         item.dayOfWeek = schedule.dayOfWeek;
-
         item.startTimeController.text = schedule.startTime ?? '';
-
         item.endTimeController.text = schedule.endTime ?? '';
-
         item.slotDurationController.text =
             schedule.slotDuration?.toString() ?? '';
-
         schedules.add(item);
       }
     } else {
@@ -221,33 +276,49 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _whatsappNumberController.dispose();
 
     _minPatientsController.dispose();
-
     _priceController.dispose();
-
+    _consultationPriceController.dispose();
     _representativeCodeController.dispose();
+    _locationController.dispose();
 
     _nameArFocus.dispose();
     _nameEnFocus.dispose();
-
     _bioArFocus.dispose();
     _bioEnFocus.dispose();
-
     _professionalNumberFocus.dispose();
-
     _academicDegreeFocus.dispose();
-
-    // _clinicPhoneFocus.dispose();
-
     _secretaryPhoneFocus.dispose();
     _whatsappNumberFocus.dispose();
-
     _minPatientsFocus.dispose();
-
     _priceFocus.dispose();
-
+    _consultationPriceFocus.dispose();
     _representativeCodeFocus.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _pickLocation() async {
+    final result =
+        await context.pushNamed(
+              Routes.myMapViewRoute,
+              extra: {
+                'location': selectedLocation ?? LatLng(30.0444, 31.2357),
+                'onChanged': (LatLng pos) {},
+              },
+            )
+            as Map<String, dynamic>?;
+    if (result == null || !mounted) return;
+
+    final LatLng location = result['location'] as LatLng;
+    final String address = result['address'] as String? ?? '';
+    selectedLocation = location;
+    selectedCity = result['city'] as String?;
+    selectedDistrict = result['district'] as String?;
+    selectedStreet = result['street'] as String?;
+    _locationController.text = address.isNotEmpty
+        ? address
+        : '${location.latitude}, ${location.longitude}';
+    setState(() {});
   }
 
   Future<void> pickProfileImage() async {
@@ -316,31 +387,27 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
         whatsappNumber: whatsappNumber,
         whatsappCountryCode: whatsappCountryCode,
-
         latitude: selectedLocation?.latitude.toString(),
         longitude: selectedLocation?.longitude.toString(),
-
+        city: selectedCity,
+        district: selectedDistrict,
+        street: selectedStreet,
         minPatients: _minPatientsController.text,
-
         price: _priceController.text,
+        consultationPrice: _consultationPriceController.text,
         hidePrice: hidePrice,
-
+        hideConsultationPrice: hideConsultationPrice,
         representativeCode: _representativeCodeController.text,
-
         profileImage: profileImage,
         license: licenseFile,
         schedules: schedules.map((e) {
           return {
             "day_of_week": e.dayOfWeek,
-
             "start_time": e.startTimeController.text,
-
             "end_time": e.endTimeController.text,
-
             "slot_duration": e.slotDurationController.text,
           };
         }).toList(),
-
         secretaryCountryCode: "+${_selectedCountry.phoneCode}",
         clinicCountryCode: "+${_selectedCountry.phoneCode}",
       ),
@@ -462,22 +529,15 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                     /// ar name
                     buildLabel("doctor_name".tr),
-
                     Gaps.vGap8,
-
                     MyTextFormField(
                       controller: _nameArController,
-
                       focusNode: _nameArFocus,
-
                       textInputAction: TextInputAction.next,
-
                       onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_nameEnFocus);
+                        FocusScope.of(context).requestFocus(_bioArFocus);
                       },
-
                       hintText: "enter_doctor_name".tr,
-
                       prefixIcon: Icon(
                         Icons.person_outline,
                         color: colors.main,
@@ -486,24 +546,36 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                     Gaps.vGap16,
 
+                    /// ar bio
+                    buildLabel("doctor_bio".tr),
+                    Gaps.vGap8,
+                    MyTextFormField(
+                      controller: _bioArController,
+                      focusNode: _bioArFocus,
+                      textInputAction: TextInputAction.next,
+                      onSubmit: (_) {
+                        FocusScope.of(context).requestFocus(_nameEnFocus);
+                      },
+                      maxLines: 3,
+                      hintText: "enter_doctor_bio".tr,
+                      prefixIcon: Icon(Icons.info_outline, color: colors.main),
+                    ),
+
+                    Gaps.vGap16,
+
                     /// en name
                     buildLabel("doctor_name_en".tr),
-
                     Gaps.vGap8,
-
                     MyTextFormField(
                       controller: _nameEnController,
-
                       focusNode: _nameEnFocus,
-
                       textInputAction: TextInputAction.next,
-
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.left,
                       onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_bioArFocus);
+                        FocusScope.of(context).requestFocus(_bioEnFocus);
                       },
-
                       hintText: "enter_doctor_name_en".tr,
-
                       prefixIcon: Icon(
                         Icons.badge_outlined,
                         color: colors.main,
@@ -512,53 +584,22 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// ar bio
-                    buildLabel("doctor_bio".tr),
-
-                    Gaps.vGap8,
-
-                    MyTextFormField(
-                      controller: _bioArController,
-
-                      focusNode: _bioArFocus,
-
-                      textInputAction: TextInputAction.next,
-
-                      onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_bioEnFocus);
-                      },
-
-                      maxLines: 3,
-
-                      hintText: "enter_doctor_bio".tr,
-
-                      prefixIcon: Icon(Icons.info_outline, color: colors.main),
-                    ),
-
-                    Gaps.vGap16,
-
                     /// en bio
                     buildLabel("doctor_bio_en".tr),
-
                     Gaps.vGap8,
-
                     MyTextFormField(
                       controller: _bioEnController,
-
                       focusNode: _bioEnFocus,
-
                       textInputAction: TextInputAction.next,
-
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.left,
                       onSubmit: (_) {
                         FocusScope.of(
                           context,
                         ).requestFocus(_professionalNumberFocus);
                       },
-
                       maxLines: 3,
-
                       hintText: "enter_doctor_bio_en".tr,
-
                       prefixIcon: Icon(Icons.translate, color: colors.main),
                     ),
 
@@ -583,68 +624,53 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                         if (state is GetSpecialtiesSuccess) {
                           final specialties =
                               state.response.data as List<SpecialtyEntity>;
+                          _prefillSpecialty(specialties);
 
                           return DropdownButtonFormField<SpecialtyEntity>(
+                            key: ValueKey(selectedSpeciality?.id ?? 'specialty'),
                             initialValue: selectedSpeciality,
-
                             isExpanded: true,
-
                             decoration: InputDecoration(
                               prefixIcon: Icon(
                                 Icons.medical_services_outlined,
                                 color: colors.main,
                               ),
-
                               filled: true,
-
                               fillColor: colors.main.withValues(alpha: .05),
-
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16.w,
                                 vertical: 14.h,
                               ),
-
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16.r),
-
                                 borderSide: BorderSide.none,
                               ),
-
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16.r),
-
                                 borderSide: BorderSide.none,
                               ),
-
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16.r),
-
                                 borderSide: BorderSide(color: colors.main),
                               ),
                             ),
-
                             hint: Text(
                               "choose_speciality".tr,
-
                               style: TextStyles.medium14(
                                 color: colors.lightTextColor,
                               ),
                             ),
-
                             items: specialties
                                 .map(
                                   (e) => DropdownMenuItem(
                                     value: e,
-
                                     child: Text(
                                       e.name ?? '',
-
                                       style: TextStyles.medium14(),
                                     ),
                                   ),
                                 )
                                 .toList(),
-
                             onChanged: (value) {
                               setState(() {
                                 selectedSpeciality = value;
@@ -830,53 +856,110 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// price
-                    buildLabel("price".tr),
-
-                    Gaps.vGap8,
-
-                    MyTextFormField(
-                      controller: _priceController,
-
-                      focusNode: _priceFocus,
-
-                      textInputAction: TextInputAction.next,
-
-                      onSubmit: (_) {
-                        FocusScope.of(
-                          context,
-                        ).requestFocus(_representativeCodeFocus);
-                      },
-
-                      keyboardType: TextInputType.number,
-
-                      hintText: "enter_price".tr,
-
-                      prefixIcon: Icon(
-                        Icons.payments_outlined,
-                        color: colors.main,
-                      ),
-                    ),
-                    Gaps.vGap8,
-
-                    /// description
-                    // buildLabel("hide_price_to_patients".tr),
-                    // Gaps.vGap8,
+                    /// price & consultation price
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Checkbox(
-                          activeColor: colors.main,
-                          value: hidePrice,
-                          onChanged: (value) {
-                            setState(() {
-                              hidePrice = value!;
-                            });
-                          },
-                        ),
                         Expanded(
-                          child: Text(
-                            "hide_price_to_patients_desc".tr,
-                            style: TextStyles.medium14(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("price".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _priceController,
+                                focusNode: _priceFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  FocusScope.of(
+                                    context,
+                                  ).requestFocus(_consultationPriceFocus);
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_price".tr,
+                                prefixIcon: Icon(
+                                  Icons.payments_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Gaps.hGap12,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("consultation_price".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _consultationPriceController,
+                                focusNode: _consultationPriceFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  FocusScope.of(
+                                    context,
+                                  ).requestFocus(_representativeCodeFocus);
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_consultation_price".tr,
+                                prefixIcon: Icon(
+                                  Icons.medical_services_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    Gaps.vGap8,
+
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                activeColor: colors.main,
+                                value: hidePrice,
+                                onChanged: (value) {
+                                  setState(() {
+                                    hidePrice = value!;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "hide_price_to_patients_desc".tr,
+                                  style: TextStyles.medium14(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Gaps.hGap12,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                activeColor: colors.main,
+                                value: hideConsultationPrice,
+                                onChanged: (value) {
+                                  setState(() {
+                                    hideConsultationPrice = value!;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "hide_consultation_price_to_patients_desc".tr,
+                                  style: TextStyles.medium14(),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -886,25 +969,93 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                     /// representative code
                     buildLabel("representative_code".tr),
-
                     Gaps.vGap8,
-
                     MyTextFormField(
                       controller: _representativeCodeController,
-
                       focusNode: _representativeCodeFocus,
-
                       textInputAction: TextInputAction.done,
-
                       hintText: "enter_representative_code".tr,
-
                       prefixIcon: Icon(
                         Icons.confirmation_number_outlined,
                         color: colors.main,
                       ),
                     ),
 
-                    Gaps.vGap24,
+                    Gaps.vGap20,
+
+                    /// license
+                    buildLabel("upload_license".tr),
+                    Gaps.vGap10,
+                    GestureDetector(
+                      onTap: pickLicenseFile,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 16.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.main.withValues(alpha: .05),
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: colors.main.withValues(alpha: .15),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.upload_file, color: colors.main),
+                            Gaps.hGap10,
+                            Expanded(
+                              child: Text(
+                                licenseFile != null
+                                    ? licenseFile!.path.split('/').last
+                                    : (existingLicenseName ??
+                                          "choose_license_file".tr),
+                                style: TextStyles.medium14(
+                                  color:
+                                      licenseFile != null ||
+                                          existingLicenseName != null
+                                      ? colors.textColor
+                                      : colors.lightTextColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    Gaps.vGap20,
+
+                    /// location
+                    buildLabel("location".tr),
+                    Gaps.vGap10,
+                    MyTextFormField(
+                      controller: _locationController,
+                      backgroundColor: colors.whiteColor,
+                      onTap: _pickLocation,
+                      hintText: _isLoadingLocation
+                          ? 'Getting location...'
+                          : 'select_location'.tr,
+                      readOnly: true,
+                      prefixIcon: _isLoadingLocation
+                          ? Padding(
+                              padding: EdgeInsets.all(12.r),
+                              child: SizedBox(
+                                width: 20.w,
+                                height: 20.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              onPressed: _pickLocation,
+                              icon: Icon(Icons.location_on_outlined),
+                            ),
+                    ),
+
+                    Gaps.vGap20,
 
                     /// schedules
                     buildLabel("working_hours".tr),
@@ -1156,141 +1307,13 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                       ),
                     ),
 
-                    Gaps.vGap20,
-
-                    /// license
-                    buildLabel("upload_license".tr),
-
-                    Gaps.vGap10,
-
-                    GestureDetector(
-                      onTap: pickLicenseFile,
-
-                      child: Container(
-                        width: double.infinity,
-
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 16.h,
-                        ),
-
-                        decoration: BoxDecoration(
-                          color: colors.main.withValues(alpha: .05),
-
-                          borderRadius: BorderRadius.circular(16.r),
-
-                          border: Border.all(
-                            color: colors.main.withValues(alpha: .15),
-                          ),
-                        ),
-
-                        child: Row(
-                          children: [
-                            Icon(Icons.upload_file, color: colors.main),
-
-                            Gaps.hGap10,
-
-                            Expanded(
-                              child: Text(
-                                licenseFile != null
-                                    ? licenseFile!.path.split('/').last
-                                    : "choose_license_file".tr,
-
-                                style: TextStyles.medium14(
-                                  color: licenseFile != null
-                                      ? colors.textColor
-                                      : colors.lightTextColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    Gaps.vGap20,
-
-                    /// location
-                    buildLabel("location".tr),
-                    Gaps.vGap10,
-                    MyTextFormField(
-                      controller: _locationController,
-                      backgroundColor: colors.whiteColor,
-                      onTap: () async {
-                        final result =
-                            await context.pushNamed(
-                                  Routes.myMapViewRoute,
-                                  extra: {
-                                    'location':
-                                        selectedLocation ??
-                                        LatLng(30.0444, 31.2357),
-                                    'onChanged': (LatLng pos) {},
-                                  },
-                                )
-                                as Map<String, dynamic>?;
-                        if (result != null) {
-                          final LatLng location = result['location'] as LatLng;
-                          final String address =
-                              result['address'] as String? ?? '';
-                          selectedLocation = location;
-                          _locationController.text = address.isNotEmpty
-                              ? address
-                              : '${location.latitude}, ${location.longitude}';
-                          setState(() {});
-                        }
-                      },
-                      hintText: _isLoadingLocation
-                          ? 'Getting location...'
-                          : 'select_location'.tr,
-                      readOnly: true,
-                      prefixIcon: _isLoadingLocation
-                          ? Padding(
-                              padding: EdgeInsets.all(12.r),
-                              child: SizedBox(
-                                width: 20.w,
-                                height: 20.h,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            )
-                          : IconButton(
-                              onPressed: () async {
-                                final result =
-                                    await context.pushNamed(
-                                          Routes.myMapViewRoute,
-                                          extra: {
-                                            'location':
-                                                selectedLocation ??
-                                                LatLng(30.0444, 31.2357),
-                                            'onChanged': (LatLng pos) {},
-                                          },
-                                        )
-                                        as Map<String, dynamic>?;
-                                if (result != null) {
-                                  final LatLng location =
-                                      result['location'] as LatLng;
-                                  final String address =
-                                      result['address'] as String? ?? '';
-                                  selectedLocation = location;
-                                  _locationController.text = address.isNotEmpty
-                                      ? address
-                                      : '${location.latitude}, ${location.longitude}';
-                                  setState(() {});
-                                }
-                              },
-                              icon: Icon(Icons.location_on_outlined),
-                            ),
-                    ),
-
-                    Gaps.vGap24,
+                    Gaps.vGap30,
 
                     /// button
                     state is UpdateDoctorLoading
                         ? const LoadingView()
                         : MyDefaultButton(
                             btnText: "update_doctor",
-
                             onPressed: submit,
                           ),
                   ],

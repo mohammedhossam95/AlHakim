@@ -29,6 +29,9 @@ class AddDoctorParams extends Equatable {
   final String? consultationPrice;
   final String? latitude;
   final String? longitude;
+  final String? city;
+  final String? district;
+  final String? street;
 
   final File? profileImage;
   final File? license;
@@ -64,6 +67,9 @@ class AddDoctorParams extends Equatable {
     this.whatsappCountryCode,
     this.latitude,
     this.longitude,
+    this.city,
+    this.district,
+    this.street,
   });
 
   @override
@@ -94,5 +100,8 @@ class AddDoctorParams extends Equatable {
     whatsappCountryCode,
     latitude,
     longitude,
+    city,
+    district,
+    street,
   ];
 }

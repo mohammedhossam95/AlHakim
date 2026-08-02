@@ -193,6 +193,18 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         formData.fields.add(MapEntry("longitude", params.longitude!));
       }
 
+      if (params.city != null) {
+        formData.fields.add(MapEntry("city", params.city!));
+      }
+
+      if (params.district != null) {
+        formData.fields.add(MapEntry("district", params.district!));
+      }
+
+      if (params.street != null) {
+        formData.fields.add(MapEntry("street", params.street!));
+      }
+
       if (params.profileImage != null) {
         final compressedImage = await Constants.getCompressedFile(
           params.profileImage!,
@@ -380,6 +392,18 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
 
       if (params.longitude != null) {
         formData.fields.add(MapEntry("longitude", params.longitude!));
+      }
+
+      if (params.city != null) {
+        formData.fields.add(MapEntry("city", params.city!));
+      }
+
+      if (params.district != null) {
+        formData.fields.add(MapEntry("district", params.district!));
+      }
+
+      if (params.street != null) {
+        formData.fields.add(MapEntry("street", params.street!));
       }
 
       if (params.hidePrice != null) {

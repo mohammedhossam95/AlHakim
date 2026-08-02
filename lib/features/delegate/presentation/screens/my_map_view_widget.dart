@@ -10,8 +10,13 @@ import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+
+const double _defaultMapZoom = 18.0;
+const double _minMapZoom = 3.0;
+const double _maxMapZoom = 21.0;
 
 const String _placesApiKey = 'AIzaSyCrPBIVbCvB3xIUG3SFNu9PGCpwV5cOdc8';
 
@@ -51,6 +56,9 @@ class _MyMapViewState extends State<MyMapView> {
   final int _markerIdCounter = 0;
   LatLng? _selectedLocation;
   String _selectedAddress = '';
+  String? _selectedCity;
+  String? _selectedDistrict;
+  String? _selectedStreet;
 
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -58,6 +66,8 @@ class _MyMapViewState extends State<MyMapView> {
   Timer? _debounce;
   bool _isSearching = false;
   bool _isResolvingTap = false;
+  bool _isGettingCurrentLocation = false;
+  double _currentZoom = _defaultMapZoom;
   String? _searchErrorMessage;
 
   // Tracks whether the suggestions/status panel should be visible at
@@ -82,17 +92,64 @@ class _MyMapViewState extends State<MyMapView> {
   }
 
   // ---------------------------------------------------------------------
-  // Reverse geocoding: coordinates -> human readable address
+  // Reverse geocoding: coordinates -> human readable address + parts
   // ---------------------------------------------------------------------
-  Future<String> _getAddressFromLatLng(LatLng coords) async {
-    if (_placesApiKey.isEmpty) return 'Selected Location';
+  Map<String, String?> _parseAddressComponents(List? components) {
+    String? componentOf(List<String> types) {
+      if (components == null) return null;
+      for (final type in types) {
+        for (final c in components) {
+          final typeList = (c['types'] as List?)?.cast<String>() ?? const [];
+          if (typeList.contains(type)) {
+            final value = c['long_name'] as String?;
+            if (value != null && value.trim().isNotEmpty) return value.trim();
+          }
+        }
+      }
+      return null;
+    }
+
+    final streetNumber = componentOf(['street_number']);
+    final route = componentOf(['route']);
+    final street = [
+      ?streetNumber,
+      ?route,
+    ].join(' ').trim();
+
+    return {
+      'city': componentOf(['locality', 'administrative_area_level_1']),
+      'district': componentOf([
+        'sublocality_level_1',
+        'sublocality',
+        'neighborhood',
+        'administrative_area_level_2',
+      ]),
+      'street': street.isNotEmpty
+          ? street
+          : componentOf(['premise', 'point_of_interest', 'establishment']),
+    };
+  }
+
+  Future<Map<String, String?>> _getAddressDetailsFromLatLng(
+    LatLng coords,
+  ) async {
+    if (_placesApiKey.isEmpty) {
+      return {'address': 'Selected Location'};
+    }
     final url =
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=$_placesApiKey&language=ar';
     try {
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == 'OK') {
-        return data['results'][0]['formatted_address'];
+        final result = data['results'][0];
+        final parts = _parseAddressComponents(
+          result['address_components'] as List?,
+        );
+        return {
+          'address': result['formatted_address'] as String?,
+          ...parts,
+        };
       } else {
         log(
           'Geocoding API error: ${data['status']} - ${data['error_message'] ?? ''}',
@@ -101,7 +158,7 @@ class _MyMapViewState extends State<MyMapView> {
     } catch (e) {
       log('Geocoding error: $e');
     }
-    return 'Selected Location';
+    return {'address': 'Selected Location'};
   }
 
   // ---------------------------------------------------------------------
@@ -221,18 +278,27 @@ class _MyMapViewState extends State<MyMapView> {
     _searchFocusNode.unfocus();
 
     final detailUrl =
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.placeId}&key=$_placesApiKey&language=ar';
+        'https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.placeId}&fields=geometry,formatted_address,address_component&key=$_placesApiKey&language=ar';
 
     try {
       final response = await http.get(Uri.parse(detailUrl));
       final data = json.decode(response.body);
       if (data['status'] == 'OK') {
-        final lat = data['result']['geometry']['location']['lat'];
-        final lng = data['result']['geometry']['location']['lng'];
+        final result = data['result'];
+        final lat = result['geometry']['location']['lat'];
+        final lng = result['geometry']['location']['lng'];
         final pos = LatLng(lat, lng);
+        final parts = _parseAddressComponents(
+          result['address_components'] as List?,
+        );
+        final address =
+            (result['formatted_address'] as String?) ?? prediction.description;
         _addMarker(
           pos,
-          address: prediction.description,
+          address: address,
+          city: parts['city'],
+          district: parts['district'],
+          street: parts['street'],
           fromSearchSelection: true,
         );
         _moveCamera(pos);
@@ -262,6 +328,9 @@ class _MyMapViewState extends State<MyMapView> {
   Future<void> _addMarker(
     LatLng pos, {
     String? address,
+    String? city,
+    String? district,
+    String? street,
     bool updateAddress = false,
     bool fromSearchSelection = false,
   }) async {
@@ -277,6 +346,9 @@ class _MyMapViewState extends State<MyMapView> {
     if (address != null) {
       setState(() {
         _selectedAddress = address;
+        _selectedCity = city;
+        _selectedDistrict = district;
+        _selectedStreet = street;
         // Search field is only ever auto-filled when the address came
         // from picking a search suggestion — never from a map tap or
         // the initial location.
@@ -285,19 +357,107 @@ class _MyMapViewState extends State<MyMapView> {
         }
       });
     } else if (updateAddress) {
-      final resolved = await _getAddressFromLatLng(pos);
+      final details = await _getAddressDetailsFromLatLng(pos);
       if (!mounted) return;
       setState(() {
-        _selectedAddress = resolved;
+        _selectedAddress = details['address'] ?? 'Selected Location';
+        _selectedCity = details['city'];
+        _selectedDistrict = details['district'];
+        _selectedStreet = details['street'];
       });
     }
 
     widget.onLocationChanged(pos);
   }
 
-  Future<void> _moveCamera(LatLng pos) async {
+  Future<void> _moveCamera(LatLng pos, {double? zoom}) async {
     final controller = await _mapController.future;
-    controller.animateCamera(CameraUpdate.newLatLngZoom(pos, 20.0));
+    final targetZoom = zoom ?? _currentZoom;
+    _currentZoom = targetZoom.clamp(_minMapZoom, _maxMapZoom);
+    await controller.animateCamera(
+      CameraUpdate.newLatLngZoom(pos, _currentZoom),
+    );
+  }
+
+  Future<void> _zoomIn() async {
+    final controller = await _mapController.future;
+    _currentZoom = (_currentZoom + 1).clamp(_minMapZoom, _maxMapZoom);
+    await controller.animateCamera(CameraUpdate.zoomTo(_currentZoom));
+  }
+
+  Future<void> _zoomOut() async {
+    final controller = await _mapController.future;
+    _currentZoom = (_currentZoom - 1).clamp(_minMapZoom, _maxMapZoom);
+    await controller.animateCamera(CameraUpdate.zoomTo(_currentZoom));
+  }
+
+  Future<void> _goToCurrentLocation() async {
+    if (_isGettingCurrentLocation) return;
+    setState(() => _isGettingCurrentLocation = true);
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('locationServicesDisabled'.tr),
+          ),
+        );
+        return;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('locationPermissionDenied'.tr),
+          ),
+        );
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+      if (!mounted) return;
+
+      final pos = LatLng(position.latitude, position.longitude);
+      final details = await _getAddressDetailsFromLatLng(pos);
+      if (!mounted) return;
+
+      await _addMarker(
+        pos,
+        address: details['address'],
+        city: details['city'],
+        district: details['district'],
+        street: details['street'],
+      );
+      await _moveCamera(pos, zoom: _defaultMapZoom);
+    } catch (e) {
+      log('Current location error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('location_not_found'.tr),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isGettingCurrentLocation = false);
+      }
+    }
   }
 
   void _onMapTapped(LatLng pos) async {
@@ -306,9 +466,15 @@ class _MyMapViewState extends State<MyMapView> {
       _isResolvingTap = true;
       _showSuggestionsPanel = false; // hide panel when interacting with map
     });
-    final address = await _getAddressFromLatLng(pos);
+    final details = await _getAddressDetailsFromLatLng(pos);
     if (!mounted) return;
-    _addMarker(pos, address: address);
+    _addMarker(
+      pos,
+      address: details['address'],
+      city: details['city'],
+      district: details['district'],
+      street: details['street'],
+    );
     _moveCamera(pos);
     setState(() => _isResolvingTap = false);
   }
@@ -359,6 +525,9 @@ class _MyMapViewState extends State<MyMapView> {
                         Navigator.pop(context, {
                           'location': _selectedLocation,
                           'address': _selectedAddress,
+                          'city': _selectedCity,
+                          'district': _selectedDistrict,
+                          'street': _selectedStreet,
                         });
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -580,6 +749,39 @@ class _MyMapViewState extends State<MyMapView> {
     );
   }
 
+  Widget _buildMapControlButton({
+    required IconData icon,
+    required VoidCallback? onPressed,
+    bool isLoading = false,
+  }) {
+    return Material(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12.r),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12.r),
+        child: SizedBox(
+          width: 44.w,
+          height: 44.h,
+          child: Center(
+            child: isLoading
+                ? SizedBox(
+                    width: 18.w,
+                    height: 18.h,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.main,
+                    ),
+                  )
+                : Icon(icon, color: colors.main, size: 22.sp),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMap() {
     return Stack(
       children: [
@@ -588,16 +790,23 @@ class _MyMapViewState extends State<MyMapView> {
           child: GoogleMap(
             initialCameraPosition: CameraPosition(
               target: widget.location,
-              zoom: 15,
+              zoom: _defaultMapZoom,
             ),
             markers: Set<Marker>.of(_markers.values),
             onMapCreated: (GoogleMapController controller) {
               _mapController.complete(controller);
             },
+            onCameraMove: (position) {
+              _currentZoom = position.zoom;
+            },
             onTap: _onMapTapped,
             myLocationEnabled: true,
-            myLocationButtonEnabled: true,
+            myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
+            minMaxZoomPreference: const MinMaxZoomPreference(
+              _minMapZoom,
+              _maxMapZoom,
+            ),
           ),
         ),
         Positioned.fill(
@@ -611,6 +820,32 @@ class _MyMapViewState extends State<MyMapView> {
                 ),
               ),
             ),
+          ),
+        ),
+        Positioned(
+          left: 12.w,
+          bottom: 12.h,
+          child: Column(
+            children: [
+              _buildMapControlButton(
+                icon: Icons.add_rounded,
+                onPressed: _zoomIn,
+              ),
+              Gaps.vGap8,
+              _buildMapControlButton(
+                icon: Icons.remove_rounded,
+                onPressed: _zoomOut,
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          right: 12.w,
+          bottom: 12.h,
+          child: _buildMapControlButton(
+            icon: Icons.my_location_rounded,
+            onPressed: _isGettingCurrentLocation ? null : _goToCurrentLocation,
+            isLoading: _isGettingCurrentLocation,
           ),
         ),
         if (_isResolvingTap)
