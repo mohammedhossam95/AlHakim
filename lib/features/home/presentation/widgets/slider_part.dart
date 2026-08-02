@@ -1,12 +1,12 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
-import 'package:alhakim/core/widgets/diff_img.dart'; // Adjust path
+import 'package:alhakim/core/widgets/diff_img.dart';
+import 'package:alhakim/core/widgets/full_screen_image_viewer.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/appointments/domain/entities/queue_status_entity.dart';
+import 'package:alhakim/injection_container.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../../injection_container.dart'; // Adjust path
 
 class SliderPart extends StatefulWidget {
   const SliderPart({super.key, required this.list});
@@ -19,21 +19,15 @@ class SliderPart extends StatefulWidget {
 class _SliderPartState extends State<SliderPart> {
   int initIndex = 0;
 
-  void _handleSliderNavigation(BuildContext context, Ad slider) {
-    // if (slider.redirectType == null) return;
+  Future<void> _openSlider(Ad slider) async {
+    final photo = slider.photo?.trim() ?? '';
+    if (photo.isEmpty) return;
 
-    // switch (slider.redirectType) {
-    //   case 'product':
-    //     if (slider.redirectTypeId != null) {}
-    //     break;
-
-    //   case 'category':
-    //     if (slider.redirectTypeId != null) {}
-    //     break;
-
-    //   default:
-    //     debugPrint('Unknown redirect type: ${slider.redirectType}');
-    // }
+    await FullScreenImageViewer.show(
+      context,
+      imageUrl: photo,
+      link: slider.link,
+    );
   }
 
   @override
@@ -58,12 +52,13 @@ class _SliderPartState extends State<SliderPart> {
             viewportFraction: 0.82,
             autoPlay: true,
             enlargeCenterPage: true,
-
             autoPlayCurve: Curves.fastOutSlowIn,
+            
           ),
+
           items: widget.list.map((slider) {
             return InkWell(
-              onTap: () => _handleSliderNavigation(context, slider),
+              onTap: () => _openSlider(slider),
               borderRadius: BorderRadius.circular(15.r),
               child: DiffImage(
                 image: slider.photo ?? '',
