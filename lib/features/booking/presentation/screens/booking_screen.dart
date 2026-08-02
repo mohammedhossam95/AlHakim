@@ -60,6 +60,19 @@ class _BookingScreenState extends State<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (availableDates.isEmpty) {
+      return Scaffold(
+        backgroundColor: colors.backGround,
+        appBar: AppBar(title: Text('booking'.tr)),
+        body: Center(
+          child: Text(
+            'no_available_dates'.tr,
+            style: TextStyles.semiBold16(),
+          ),
+        ),
+      );
+    }
+
     final selectedBooking = availableDates[selectedDateIndex];
 
     return Scaffold(
@@ -67,15 +80,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
       appBar: AppBar(title: Text("booking".tr)),
 
-      body: availableDates.isEmpty
-          ? Center(
-              child: Text(
-                "no_available_dates".tr,
-
-                style: TextStyles.semiBold16(),
-              ),
-            )
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
               padding: EdgeInsets.all(16.w),
 
               child: Column(

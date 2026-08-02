@@ -520,6 +520,6 @@
   "selectPosition": "Select your current location",
   "searchForPlace": "Search for a place",
   "noResultsFound": "No results found",
-  
+  "no_available_dates": "No available dates",
   "gettingAddress": "Getting address"
 }

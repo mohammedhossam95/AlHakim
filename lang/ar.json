@@ -519,6 +519,7 @@
   "selectPosition" : "اختر موقعك الحالي",
   "searchForPlace" : "ابحث عن مكان",
   "noResultsFound" : "لم يتم العثور على نتائج",
-  "gettingAddress" : "جاري الحصول على العنوان"
+  "gettingAddress" : "جاري الحصول على العنوان",
+  "no_available_dates": "لا يوجد مواعيد متاحة"
   
 }
