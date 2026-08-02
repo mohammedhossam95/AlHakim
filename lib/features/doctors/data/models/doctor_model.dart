@@ -43,7 +43,6 @@ class DoctorModel extends DoctorEntity {
     super.location,
     super.professionalRegistrationNumber,
     super.academicDegree,
-    super.clinicPhone,
     super.secretaryPhone,
     super.profileImage,
     super.distanceKm,
@@ -85,17 +84,10 @@ class DoctorModel extends DoctorEntity {
           : null,
 
       isActive: json['is_active'],
-
       isClinicOpen: json['is_clinic_open'],
-
       location: location,
-
       professionalRegistrationNumber: json['professional_registration_number'],
-
       academicDegree: json['academic_degree'],
-
-      clinicPhone: json['clinic_phone'],
-
       secretaryPhone: json['secretary_phone'],
 
       profileImage: json['profile_image'],
@@ -163,13 +155,8 @@ class DoctorModel extends DoctorEntity {
     "professional_registration_number": professionalRegistrationNumber,
 
     "academic_degree": academicDegree,
-
-    "clinic_phone": clinicPhone,
-
     "secretary_phone": secretaryPhone,
-
     "profile_image": profileImage,
-
     "distance_km": distanceKm,
 
     "languages": languages == null
@@ -205,10 +192,7 @@ class NameModel extends NameEntity {
   const NameModel({super.en, super.ar});
 
   factory NameModel.fromJson(Map<String, dynamic> json) {
-    return NameModel(
-      en: json['en']?.toString(),
-      ar: json['ar']?.toString(),
-    );
+    return NameModel(en: json['en']?.toString(), ar: json['ar']?.toString());
   }
 
   static NameModel? maybeFromJson(dynamic value) {
@@ -235,10 +219,7 @@ class BioModel extends BioEntity {
   const BioModel({super.en, super.ar});
 
   factory BioModel.fromJson(Map<String, dynamic> json) {
-    return BioModel(
-      en: json['en']?.toString(),
-      ar: json['ar']?.toString(),
-    );
+    return BioModel(en: json['en']?.toString(), ar: json['ar']?.toString());
   }
 
   static BioModel? maybeFromJson(dynamic value) {

@@ -2,83 +2,24 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
-import 'package:alhakim/core/utils/share_builder.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/presentation/widgets/doctor_action_button.dart';
+import 'package:alhakim/features/doctors/presentation/widgets/doctor_contact_helpers.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 
-class DoctorListItem extends StatelessWidget {
+class DoctorListItem extends StatelessWidget with DoctorContactHelpers {
+  @override
   final DoctorEntity doctor;
 
   const DoctorListItem({super.key, required this.doctor});
-
-  String get _doctorDisplayName => appLocalizations.isArLocale
-      ? doctor.name?.ar ?? ''
-      : doctor.name?.en ?? '';
-
-  String get _contactPhone {
-    final countryCode =
-        doctor.secretaryCountryCode ??
-        doctor.medicalCenter?.countryCode ??
-        '20';
-    final phone = doctor.secretaryPhone ?? doctor.medicalCenter?.phone ?? '';
-    return '$countryCode$phone';
-  }
-
-  (double, double)? get _mapCoordinates {
-    final candidates = <(String?, String?)>[
-      (doctor.latitude, doctor.longitude),
-      (doctor.location?.latitude, doctor.location?.longitude),
-      (doctor.medicalCenter?.latitude, doctor.medicalCenter?.longitude),
-    ];
-
-    for (final pair in candidates) {
-      final lat = double.tryParse(pair.$1 ?? '');
-      final lng = double.tryParse(pair.$2 ?? '');
-      if (lat != null && lng != null) {
-        return (lat, lng);
-      }
-    }
-    return null;
-  }
-
-  Future<void> _openMaps() async {
-    final coords = _mapCoordinates;
-    if (coords == null) return;
-    await Constants.openGoogleMaps(lat: coords.$1, lng: coords.$2);
-  }
-
-  Future<void> _openWhatsApp() async {
-    await Constants.openWhatsApp(_contactPhone);
-  }
-
-  Future<void> _callDoctor() async {
-    await Constants.makePhoneCall(_contactPhone);
-  }
-
-  Future<void> _shareDoctor() async {
-    // final specialty = doctor.specialty?.name ?? '';
-    // final shareText = specialty.isEmpty
-    //     ? _doctorDisplayName
-    //     : '$_doctorDisplayName - $specialty';
-    // if (shareText.trim().isEmpty) return;
-    // await SharePlus.instance.share(ShareParams(text: shareText));
-    await SharePlus.instance.share(
-      ShareParams(
-        text: ShareTextBuilder.buildDoctorShareText(doctor),
-        subject: 'مشاركة بيانات دكتور - تطبيق الحكيم',
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +50,7 @@ class DoctorListItem extends StatelessWidget {
                     image: doctor.profileImage,
                     width: 70.w,
                     height: 70.w,
-                    userName: _doctorDisplayName,
+                    userName: doctorDisplayName,
                     fitType: BoxFit.cover,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
@@ -143,7 +84,7 @@ class DoctorListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(_doctorDisplayName, style: TextStyles.semiBold18()),
+                    Text(doctorDisplayName, style: TextStyles.semiBold18()),
                     Text(
                       doctor.specialty?.name ?? '',
                       style: TextStyles.medium14(color: colors.main),
@@ -246,31 +187,31 @@ class DoctorListItem extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: _DoctorActionButton(
+                  child: DoctorActionButton(
                     svgAsset: SvgAssets.location,
                     label: 'location'.tr,
-                    onTap: _openMaps,
+                    onTap: openMaps,
                   ),
                 ),
                 Expanded(
-                  child: _DoctorActionButton(
+                  child: DoctorActionButton(
                     svgAsset: SvgAssets.whatsappIcon,
                     label: 'whatsapp'.tr,
-                    onTap: _openWhatsApp,
+                    onTap: openWhatsApp,
                   ),
                 ),
                 Expanded(
-                  child: _DoctorActionButton(
+                  child: DoctorActionButton(
                     svgAsset: SvgAssets.callIcon,
                     label: 'call'.tr,
-                    onTap: _callDoctor,
+                    onTap: callDoctor,
                   ),
                 ),
                 Expanded(
-                  child: _DoctorActionButton(
+                  child: DoctorActionButton(
                     svgAsset: SvgAssets.shareApp,
                     label: 'share'.tr,
-                    onTap: _shareDoctor,
+                    onTap: shareDoctor,
                   ),
                 ),
               ],
@@ -293,48 +234,6 @@ class DoctorListItem extends StatelessWidget {
             btnText: 'book_now',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _DoctorActionButton extends StatelessWidget {
-  final String svgAsset;
-  final String label;
-  final VoidCallback onTap;
-
-  const _DoctorActionButton({
-    required this.svgAsset,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8.r),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              svgAsset,
-              width: 22.w,
-              height: 22.w,
-              colorFilter: ColorFilter.mode(colors.main, BlendMode.srcIn),
-            ),
-            Gaps.vGap4,
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyles.medium12(color: colors.lightTextColor),
-            ),
-          ],
-        ),
       ),
     );
   }

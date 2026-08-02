@@ -106,7 +106,7 @@ class _FollowUpQueueBody extends StatelessWidget {
 
   Future<void> _callClinic() async {
     final phone =
-        appointment.doctor?.clinicPhone ??
+        appointment.doctor?.secretaryPhone ??
         appointment.doctor?.medicalCenter?.phone ??
         "";
     final countryCode =
