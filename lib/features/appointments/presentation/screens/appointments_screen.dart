@@ -31,6 +31,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     'arrived',
     'entered',
     'rescheduled',
+    'pending_reschedule',
   };
 
   static const _previousStatuses = {'completed', 'cancelled'};
@@ -94,71 +95,93 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
               ),
               Expanded(
-                child: BlocListener<CancelAppointmentCubit, CancelAppointmentState>(
-                  listener: (context, state) {
-                    if (state is CancelAppointmentLoading) {
-                      Constants.showLoading(context);
-                    } else if (state is CancelAppointmentSuccess) {
-                      Constants.hideLoading(context);
-                      Constants.showSnakToast(
-                        message: state.response.message ?? '',
-                        context: context,
-                        type: 1,
-                      );
-                      context.read<GetAppointmentsCubit>().getAppointments();
-                    } else if (state is CancelAppointmentError) {
-                      Constants.hideLoading(context);
-                      Constants.showSnakToast(
-                        message: state.message,
-                        context: context,
-                        type: 3,
-                      );
-                    }
-                  },
-                  child: BlocBuilder<GetAppointmentsCubit, GetAppointmentsState>(
-                    builder: (context, state) {
-                      if (state is GetAppointmentsLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+                child:
+                    BlocListener<
+                      CancelAppointmentCubit,
+                      CancelAppointmentState
+                    >(
+                      listener: (context, state) {
+                        if (state is CancelAppointmentLoading) {
+                          Constants.showLoading(context);
+                        } else if (state is CancelAppointmentSuccess) {
+                          Constants.hideLoading(context);
+                          Constants.showSnakToast(
+                            message: state.response.message ?? '',
+                            context: context,
+                            type: 1,
+                          );
+                          context
+                              .read<GetAppointmentsCubit>()
+                              .getAppointments();
+                        } else if (state is CancelAppointmentError) {
+                          Constants.hideLoading(context);
+                          Constants.showSnakToast(
+                            message: state.message,
+                            context: context,
+                            type: 3,
+                          );
+                        }
+                      },
+                      child:
+                          BlocBuilder<
+                            GetAppointmentsCubit,
+                            GetAppointmentsState
+                          >(
+                            builder: (context, state) {
+                              if (state is GetAppointmentsLoading) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
 
-                      if (state is GetAppointmentsError) {
-                        return Center(
-                          child: ErrorText(text: state.message, width: 300),
-                        );
-                      }
+                              if (state is GetAppointmentsError) {
+                                return Center(
+                                  child: ErrorText(
+                                    text: state.message,
+                                    width: 300,
+                                  ),
+                                );
+                              }
 
-                      List<AppointmentEntity> appointments = [];
+                              List<AppointmentEntity> appointments = [];
 
-                      if (state is GetAppointmentsSuccess) {
-                        appointments =
-                            state.response.data as List<AppointmentEntity>;
-                      }
+                              if (state is GetAppointmentsSuccess) {
+                                appointments =
+                                    state.response.data
+                                        as List<AppointmentEntity>;
+                              }
 
-                      final upcoming = appointments
-                          .where(
-                            (e) => _upcomingStatuses.contains(
-                              e.status?.toLowerCase().trim(),
-                            ),
-                          )
-                          .toList();
+                              final upcoming = appointments
+                                  .where(
+                                    (e) => _upcomingStatuses.contains(
+                                      e.status?.toLowerCase().trim(),
+                                    ),
+                                  )
+                                  .toList();
 
-                      final previous = appointments
-                          .where(
-                            (e) => _previousStatuses.contains(
-                              e.status?.toLowerCase().trim(),
-                            ),
-                          )
-                          .toList();
+                              final previous = appointments
+                                  .where(
+                                    (e) => _previousStatuses.contains(
+                                      e.status?.toLowerCase().trim(),
+                                    ),
+                                  )
+                                  .toList();
 
-                      return TabBarView(
-                        children: [
-                          _AppointmentsList(data: upcoming, isUpcoming: true),
-                          _AppointmentsList(data: previous, isUpcoming: false),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                              return TabBarView(
+                                children: [
+                                  _AppointmentsList(
+                                    data: upcoming,
+                                    isUpcoming: true,
+                                  ),
+                                  _AppointmentsList(
+                                    data: previous,
+                                    isUpcoming: false,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                    ),
               ),
             ],
           ),
@@ -218,6 +241,11 @@ class _AppointmentStatusStyle {
           label: 'rescheduled'.tr,
           color: colors.review,
         );
+      case 'pending_reschedule':
+        return _AppointmentStatusStyle(
+          label: 'pending_reschedule'.tr,
+          color: colors.warning,
+        );
       case 'completed':
         return _AppointmentStatusStyle(
           label: 'completed'.tr,
@@ -245,7 +273,9 @@ class _AppointmentCard extends StatelessWidget {
 
   bool get _canCancel {
     final status = item.status?.toLowerCase().trim();
-    return status == 'confirmed' || status == 'rescheduled';
+    return status == 'confirmed' ||
+        status == 'rescheduled' ||
+        status == 'pending_reschedule';
   }
 
   bool get _canFollowUp {
@@ -253,7 +283,8 @@ class _AppointmentCard extends StatelessWidget {
     return status == 'confirmed' ||
         status == 'arrived' ||
         status == 'entered' ||
-        status == 'rescheduled';
+        status == 'rescheduled' ||
+        status == 'pending_reschedule';
   }
 
   @override
@@ -351,9 +382,7 @@ class _AppointmentCard extends StatelessWidget {
 
                         context.pushNamed(
                           Routes.followUpQueueScreenRoute,
-                          pathParameters: {
-                            'appointmentId': '$appointmentId',
-                          },
+                          pathParameters: {'appointmentId': '$appointmentId'},
                           extra: item,
                         );
                       },
