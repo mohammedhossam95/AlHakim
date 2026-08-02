@@ -4,6 +4,7 @@ import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/error/failures.dart';
 import 'package:alhakim/features/booking/data/datasources/booking_remote_data_source.dart';
 import 'package:alhakim/features/booking/domain/repositories/booking_repository.dart';
+import 'package:alhakim/features/booking/domain/usecases/params/booking_params.dart';
 import 'package:alhakim/features/booking/domain/usecases/params/delete_family_member_params.dart';
 import 'package:alhakim/features/booking/domain/usecases/params/update_family_member_params.dart';
 import 'package:dartz/dartz.dart';
@@ -95,17 +96,24 @@ class BookingRepositoryImpl implements BookingRepository {
   }
 
   @override
-  Future<Either<Failure, BaseOneResponse>> bookAppointment({
-    required String doctorId,
-    required String appointmentDate,
-    String? familyMemberId,
-  }) async {
+  Future<Either<Failure, BaseListResponse>> getAppointmentTypes() async {
     try {
-      final result = await remoteDataSource.bookAppointment(
-        doctorId: doctorId,
-        appointmentDate: appointmentDate,
-        familyMemberId: familyMemberId,
-      );
+      final result = await remoteDataSource.getAppointmentTypes();
+
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> bookAppointment(
+    BookingParams params,
+  ) async {
+    try {
+      final result = await remoteDataSource.bookAppointment(params);
 
       return Right(result);
     } on ServerException catch (e) {

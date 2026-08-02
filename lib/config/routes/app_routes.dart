@@ -8,6 +8,7 @@ import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
+import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/auth/presentation/cubit/check_account_cubit/check_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
@@ -361,15 +362,24 @@ abstract class Routes {
       ),
 
       GoRoute(
-        path: followUpQueueScreenRoute,
+        path: '$followUpQueueScreenRoute/:appointmentId',
         name: followUpQueueScreenRoute,
         builder: (context, state) {
-          final args = state.extra as AppointmentEntity;
+          final appointment = _resolveFollowUpAppointmentArgs(
+            state.extra,
+            appointmentId: state.pathParameters['appointmentId'],
+          );
+
+          if (appointment == null || appointment.id == null) {
+            return const SizedBox.shrink();
+          }
+
           return BlocProvider(
             create: (context) =>
-                sl<GetQueueStatusCubit>()
-                  ..getQueueStatus(appointmentId: args.id.toString()),
-            child: FollowUpQueueScreen(appointment: args),
+                sl<GetQueueStatusCubit>()..getQueueStatus(
+                  appointmentId: appointment.id.toString(),
+                ),
+            child: FollowUpQueueScreen(appointment: appointment),
           );
         },
       ),
@@ -442,10 +452,30 @@ abstract class Routes {
             buildAdaptivePage(state: state, child: const SpecialitiesScreen()),
       ),
       GoRoute(
-        path: doctorsListScreenRoute,
+        path: '$doctorsListScreenRoute/:specialtyId',
         name: doctorsListScreenRoute,
         pageBuilder: (context, state) {
-          final specialty = state.extra as SpecialtyEntity;
+          // `extra` is not part of the URL and is lost on router remount
+          // (e.g. locale change). Prefer extra, fall back to path/query.
+          final specialtyFromExtra = state.extra as SpecialtyEntity?;
+          final specialtyId =
+              int.tryParse(state.pathParameters['specialtyId'] ?? '') ??
+              specialtyFromExtra?.id;
+
+          if (specialtyId == null) {
+            return buildAdaptivePage(
+              state: state,
+              child: const SpecialitiesScreen(),
+            );
+          }
+
+          final specialty =
+              specialtyFromExtra ??
+              SpecialtyEntity(
+                id: specialtyId,
+                name: state.uri.queryParameters['name'],
+              );
+
           return buildAdaptivePage(
             state: state,
             child: BlocProvider(
@@ -628,4 +658,45 @@ abstract class Routes {
     routesStack.removeLast();
     ServiceLocator.injectRoutesStackSingleton(routesStack);
   }
+}
+
+AppointmentEntity? _resolveFollowUpAppointmentArgs(
+  Object? extra, {
+  String? appointmentId,
+}) {
+  if (extra is AppointmentEntity) {
+    return extra;
+  }
+
+  if (extra is Map) {
+    final map = Map<String, dynamic>.from(extra);
+    final rawDoctor = map['doctor'];
+    DoctorEntity? doctor;
+    if (rawDoctor is DoctorEntity) {
+      doctor = rawDoctor;
+    } else if (rawDoctor is Map) {
+      doctor = DoctorModel.fromJson(Map<String, dynamic>.from(rawDoctor));
+    }
+
+    final parsedId = int.tryParse(
+      (map['id'] ?? map['appointment_id'] ?? appointmentId)?.toString() ?? '',
+    );
+
+    return AppointmentEntity(
+      id: parsedId,
+      appointmentDate:
+          (map['appointment_date'] ?? map['appointmentDate'])?.toString(),
+      appointmentType: map['appointment_type']?.toString(),
+      appointmentTypeText: map['appointment_type_text']?.toString(),
+      status: map['status']?.toString(),
+      doctor: doctor,
+      createdAt: map['created_at']?.toString(),
+    );
+  }
+
+  if (appointmentId != null && appointmentId.isNotEmpty) {
+    return AppointmentEntity(id: int.tryParse(appointmentId));
+  }
+
+  return null;
 }

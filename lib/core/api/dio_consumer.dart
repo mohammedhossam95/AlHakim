@@ -23,6 +23,7 @@ abstract class ApiConstants {
   static const String markAllNotificationsAsRead = '/notifications/read-all';
   static const String hospitalEmergencyNumbers = '/hospital-emergency-numbers';
   static const String emergencyNumberCategories = '/emergency-number-categories';
+  static const String appointmentTypes = '/appointment-types';
 }
 
 abstract class DioConsumer {

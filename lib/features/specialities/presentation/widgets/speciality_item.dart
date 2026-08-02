@@ -21,7 +21,7 @@ class SpecialityItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.pushNamed(Routes.doctorsListScreenRoute, extra: item);
+        _openDoctorsList(context);
       },
       child: Container(
         padding: EdgeInsets.all(16.r),
@@ -71,13 +71,27 @@ class SpecialityItem extends StatelessWidget {
               withDottedBorder: false,
               textStyle: TextStyles.medium12(color: colors.whiteColor),
               onPressed: () {
-                context.pushNamed(Routes.doctorsListScreenRoute, extra: item);
+                _openDoctorsList(context);
               },
               btnText: "book_now",
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _openDoctorsList(BuildContext context) {
+    final specialtyId = item.id;
+    if (specialtyId == null) return;
+
+    context.pushNamed(
+      Routes.doctorsListScreenRoute,
+      pathParameters: {'specialtyId': '$specialtyId'},
+      queryParameters: {
+        if ((item.name ?? '').isNotEmpty) 'name': item.name!,
+      },
+      extra: item,
     );
   }
 }

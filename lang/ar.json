@@ -258,6 +258,9 @@
   "other_person": "شخص آخر",
   "other_person_desc": "إضافة بيانات مريض جديد",
   "confirm_booking": "تأكيد الحجز",
+  "select_appointment_type": "اختر نوع الحجز",
+  "select_appointment_type_desc": "حدد نوع الحجز قبل التأكيد",
+  "no_appointment_types": "لا توجد أنواع متاحة",
   "family_members": "أفراد العائلة",
   "manage_family": "إدارة التابعين",
   "manage_family_desc": "أضف أفراد عائلتك",
@@ -483,7 +486,7 @@
   "follow_up_appointment": "متابعة الدور",
   "live_alert": "تنبيه مباشر",
   "doctor_started_examination": "الدكتور بدأ الكشف الآن. يرجى الاستعداد.",
-  "current_status": "الوضع الحالي",
+  "current_status": "الدور الحالي",
   "current_clinic_turn": "الدور الحالي بالعيادة",
   "your_queue_number": "رقم دورك الخاص",
   "your_position_in_list": "موقعك في القائمة",
@@ -521,6 +524,7 @@
   "noResultsFound" : "لم يتم العثور على نتائج",
   "gettingAddress" : "جاري الحصول على العنوان",
   "no_available_dates": "لا يوجد مواعيد متاحة",
-  "schedule_refresh_failed": "تعذر تحديث مواعيد الطبيب"
+  "schedule_refresh_failed": "تعذر تحديث مواعيد الطبيب",
+  "appointment_type":"نوع الحجز"
   
 }

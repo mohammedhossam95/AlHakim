@@ -6,9 +6,13 @@ import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/core/widgets/shimmer/booking_screen_shimmer.dart';
+import 'package:alhakim/features/booking/domain/entities/appointment_type_entity.dart';
 import 'package:alhakim/features/booking/domain/entities/family_member_entity.dart';
 import 'package:alhakim/features/booking/domain/entities/schedule.dart';
+import 'package:alhakim/features/booking/domain/usecases/params/booking_params.dart';
 import 'package:alhakim/features/booking/presentation/cubit/book_appointment_cubit/book_appointment_cubit.dart';
+import 'package:alhakim/features/booking/presentation/cubit/get_appointment_types_cubit/get_appointment_types_cubit.dart';
+import 'package:alhakim/features/booking/presentation/widgets/appointment_type_bottom_sheet.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/widgets/doctor_list_item.dart';
@@ -467,6 +471,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         },
                       ),
                 Gaps.vGap30,
+
                 /// confirm button
                 BlocConsumer<BookAppointmentCubit, BookAppointmentState>(
                   listener: (context, state) {
@@ -498,22 +503,38 @@ class _BookingScreenState extends State<BookingScreen> {
                         ? LoadingView()
                         : MyDefaultButton(
                             btnText: "confirm_booking",
-
                             borderRadius: 30,
+                            onPressed: () async {
+                              final selectedType =
+                                  await showModalBottomSheet<
+                                    AppointmentTypeEntity
+                                  >(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (_) => BlocProvider(
+                                      create: (_) =>
+                                          ServiceLocator.instance<
+                                            GetAppointmentTypesCubit
+                                          >(),
+                                      child: const AppointmentTypeBottomSheet(),
+                                    ),
+                                  );
 
-                            height: 54,
+                              if (selectedType == null) return;
+                              if (!context.mounted) return;
 
-                            onPressed: () {
                               context
                                   .read<BookAppointmentCubit>()
                                   .bookAppointment(
-                                    doctorId: widget.doctor.id ?? '',
-
-                                    appointmentDate: DateFormat(
-                                      'yyyy-MM-dd',
-                                    ).format(selectedBooking.date),
-
-                                    familyMemberId: selectedFamilyMember?.id,
+                                    BookingParams(
+                                      doctorId: widget.doctor.id ?? '',
+                                      appointmentDate: DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).format(selectedBooking.date),
+                                      appointmentTypeId: selectedType.id,
+                                      familyMemberId: selectedFamilyMember?.id,
+                                    ),
                                   );
                             },
                           );

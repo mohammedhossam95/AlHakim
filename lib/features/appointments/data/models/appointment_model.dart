@@ -22,6 +22,8 @@ class AppointmentModel extends AppointmentEntity {
   const AppointmentModel({
     super.id,
     super.appointmentDate,
+    super.appointmentType,
+    super.appointmentTypeText,
     super.status,
     super.doctor,
     super.createdAt,
@@ -31,11 +33,25 @@ class AppointmentModel extends AppointmentEntity {
     return AppointmentModel(
       id: json['id'],
       appointmentDate: json['appointment_date'],
+      appointmentType: json['appointment_type'],
+      appointmentTypeText: json['appointment_type_text'],
       status: json['status'],
       doctor: json['doctor'] != null
           ? DoctorModel.fromJson(json['doctor'])
           : null,
       createdAt: json['created_at'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'appointment_date': appointmentDate,
+      'appointment_type': appointmentType,
+      'appointment_type_text': appointmentTypeText,
+      'status': status,
+      'doctor': (doctor as DoctorModel?)?.toJson(),
+      'created_at': createdAt,
+    };
   }
 }

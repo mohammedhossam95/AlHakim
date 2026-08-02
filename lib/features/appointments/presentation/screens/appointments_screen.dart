@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
@@ -253,6 +254,9 @@ class _AppointmentCard extends StatelessWidget {
             children: [
               DiffImage(
                 image: item.doctor?.profileImage ?? '',
+                userName: appLocalizations.isArLocale
+                    ? item.doctor?.name?.ar ?? ''
+                    : item.doctor?.name?.en ?? '',
                 width: 50.w,
                 height: 50.h,
                 isCircle: true,
@@ -294,16 +298,22 @@ class _AppointmentCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _InfoBox(
-                  title: 'date'.tr,
-                  value: item.appointmentDate ?? '',
-                  icon: Icons.calendar_today,
+                  title: DateFormat(
+                    'EEEE',
+                    appLocalizations.locale?.languageCode,
+                  ).format(DateTime.parse(item.appointmentDate ?? '')),
+                  value: DateFormat(
+                    'd MMM yyyy',
+                    appLocalizations.locale?.languageCode,
+                  ).format(DateTime.parse(item.appointmentDate ?? '')),
+                  icon: Icons.calendar_month_rounded,
                 ),
               ),
               Gaps.hGap10,
               Expanded(
                 child: _InfoBox(
-                  title: 'status'.tr,
-                  value: statusStyle.label,
+                  title: 'appointment_type'.tr,
+                  value: item.appointmentTypeText ?? '',
                   icon: Icons.info_outline,
                   valueColor: statusStyle.color,
                 ),
@@ -318,8 +328,14 @@ class _AppointmentCard extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        context.push(
+                        final appointmentId = item.id;
+                        if (appointmentId == null) return;
+
+                        context.pushNamed(
                           Routes.followUpQueueScreenRoute,
+                          pathParameters: {
+                            'appointmentId': '$appointmentId',
+                          },
                           extra: item,
                         );
                       },
@@ -408,8 +424,8 @@ class _InfoBox extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyles.medium10()),
-                Gaps.vGap8,
+                Text(title, style: TextStyles.medium12()),
+                Gaps.vGap2,
                 Text(
                   value,
                   style: TextStyles.medium12(color: valueColor),

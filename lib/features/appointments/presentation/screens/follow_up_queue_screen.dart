@@ -1,13 +1,13 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
-import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
-import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/shimmer/follow_up_queue_shimmer.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/domain/entities/queue_status_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/presentation/widgets/doctor_list_item.dart';
 import 'package:alhakim/features/home/presentation/widgets/slider_part.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -104,19 +104,6 @@ class _FollowUpQueueBody extends StatelessWidget {
       ? appointment.doctor?.name?.ar ?? ''
       : appointment.doctor?.name?.en ?? '';
 
-  Future<void> _callClinic() async {
-    final phone =
-        appointment.doctor?.secretaryPhone ??
-        appointment.doctor?.medicalCenter?.phone ??
-        "";
-    final countryCode =
-        appointment.doctor?.secretaryCountryCode ??
-        appointment.doctor?.medicalCenter?.countryCode ??
-        "20";
-    if (countryCode.isEmpty || phone.isEmpty) return;
-    await Constants.makePhoneCall('$countryCode$phone');
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!_clinicOpen) {
@@ -164,14 +151,7 @@ class _FollowUpQueueBody extends StatelessWidget {
         Gaps.vGap16,
         _EstimatedWaitCard(minutes: queueStatus.estimatedWaitMinutes ?? 0),
         Gaps.vGap16,
-        _DoctorInfoCard(
-          doctorName: _doctorName,
-          specialty: appointment.doctor?.specialty?.name ?? '',
-          image: appointment.doctor?.profileImage ?? '',
-        ),
-
-        Gaps.vGap24,
-        _CallClinicButton(onTap: _callClinic),
+        DoctorListItem(doctor: appointment.doctor ?? DoctorEntity(), followUpView: true),
         Gaps.vGap24,
       ],
     );
@@ -590,86 +570,6 @@ class _EstimatedWaitCard extends StatelessWidget {
           const Spacer(),
           Icon(Icons.chevron_left, color: colors.lightTextColor, size: 22.sp),
         ],
-      ),
-    );
-  }
-}
-
-class _DoctorInfoCard extends StatelessWidget {
-  final String doctorName;
-  final String specialty;
-  final String image;
-
-  const _DoctorInfoCard({
-    required this.doctorName,
-    required this.specialty,
-    required this.image,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: colors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Row(
-        children: [
-          DiffImage(image: image, width: 52.w, height: 52.w, isCircle: true),
-          Gaps.hGap12,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  doctorName,
-                  style: TextStyles.semiBold16(color: colors.textColor),
-                ),
-                if (specialty.isNotEmpty) ...[
-                  Gaps.vGap4,
-                  Text(
-                    specialty,
-                    style: TextStyles.medium12(color: colors.lightTextColor),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Icon(Icons.info_outline, color: colors.main, size: 22.sp),
-        ],
-      ),
-    );
-  }
-}
-
-class _CallClinicButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _CallClinicButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 52.h,
-        decoration: BoxDecoration(
-          color: colors.main,
-          borderRadius: BorderRadius.circular(30.r),
-        ),
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'call_clinic'.tr,
-              style: TextStyles.semiBold16(color: colors.whiteColor),
-            ),
-            Gaps.hGap8,
-            Icon(Icons.phone, color: colors.whiteColor, size: 20.sp),
-          ],
-        ),
       ),
     );
   }

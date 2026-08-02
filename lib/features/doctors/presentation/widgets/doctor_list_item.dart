@@ -19,11 +19,13 @@ class DoctorListItem extends StatelessWidget with DoctorContactHelpers {
   @override
   final DoctorEntity doctor;
   final bool bookingView;
+  final bool followUpView;
 
   const DoctorListItem({
     super.key,
     required this.doctor,
     this.bookingView = false,
+    this.followUpView = false,
   });
 
   @override
@@ -223,22 +225,26 @@ class DoctorListItem extends StatelessWidget with DoctorContactHelpers {
                 ],
               ),
             ),
-            Gaps.vGap12,
-            MyDefaultButton(
-              onPressed: () {
-                if (sessionCubit.state.status != SessionStatus.authenticated) {
-                  Constants.showLoginWarningDialog(
-                    context,
-                    onOkPressed: () {
-                      context.go(Routes.chooseUserTypeScreenRoute);
-                    },
-                  );
-                  return;
-                }
-                context.push(Routes.bookingScreenRoute, extra: doctor);
-              },
-              btnText: 'book_now',
-            ),
+
+            if (!followUpView) ...[
+              Gaps.vGap12,
+              MyDefaultButton(
+                onPressed: () {
+                  if (sessionCubit.state.status !=
+                      SessionStatus.authenticated) {
+                    Constants.showLoginWarningDialog(
+                      context,
+                      onOkPressed: () {
+                        context.go(Routes.chooseUserTypeScreenRoute);
+                      },
+                    );
+                    return;
+                  }
+                  context.push(Routes.bookingScreenRoute, extra: doctor);
+                },
+                btnText: 'book_now',
+              ),
+            ],
           ],
         ],
       ),
