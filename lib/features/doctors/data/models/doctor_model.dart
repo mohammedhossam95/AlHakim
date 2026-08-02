@@ -1,4 +1,5 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
+import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 
 class DoctorsRespModel extends BaseListResponse {
@@ -28,6 +29,18 @@ class DoctorsRespModel extends BaseListResponse {
           .toList();
     }
     return [];
+  }
+}
+
+class DoctorRespModel extends BaseOneResponse {
+  const DoctorRespModel({super.status, super.message, super.data});
+
+  factory DoctorRespModel.fromJson(Map<String, dynamic> json) {
+    return DoctorRespModel(
+      status: json['status'],
+      message: json['message'],
+      data: json['data'] != null ? DoctorModel.fromJson(json['data']) : null,
+    );
   }
 }
 

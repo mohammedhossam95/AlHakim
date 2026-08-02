@@ -4,6 +4,7 @@ import 'package:alhakim/core/error/failures.dart';
 import 'package:alhakim/core/params/add_doctor_params.dart';
 import 'package:alhakim/core/params/appoinments_params.dart';
 import 'package:alhakim/core/params/reschedule_params.dart';
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:dartz/dartz.dart';
 
 abstract class DoctorRepository {
@@ -12,6 +13,7 @@ abstract class DoctorRepository {
     int? perPage,
   });
   Future<Either<Failure, BaseListResponse>> getMedicalCenterDoctors(int id);
+  Future<Either<Failure, DoctorEntity>> getDoctorById(String doctorId);
   Future<Either<Failure, BaseOneResponse>> addDoctor(AddDoctorParams params);
   Future<Either<Failure, BaseOneResponse>> deleteDoctor(String id);
   Future<Either<Failure, BaseOneResponse>> updateDoctor(AddDoctorParams params);

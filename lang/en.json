@@ -521,5 +521,6 @@
   "searchForPlace": "Search for a place",
   "noResultsFound": "No results found",
   "no_available_dates": "No available dates",
+  "schedule_refresh_failed": "Could not refresh doctor schedule",
   "gettingAddress": "Getting address"
 }

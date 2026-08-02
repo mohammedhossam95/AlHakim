@@ -44,6 +44,7 @@ import 'package:alhakim/features/delegate/presentation/screens/update_medical_ce
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/search_doctors_cubit/search_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_doctor_cubit/update_doctor_cubit.dart';
@@ -472,8 +473,11 @@ abstract class Routes {
           final doctor = state.extra as DoctorEntity;
           return buildAdaptivePage(
             state: state,
-            child: BlocProvider(
-              create: (context) => sl<BookAppointmentCubit>(),
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => sl<BookAppointmentCubit>()),
+                BlocProvider(create: (context) => sl<GetDoctorByIdCubit>()),
+              ],
               child: BookingScreen(doctor: doctor),
             ),
           );

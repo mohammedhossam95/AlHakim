@@ -17,6 +17,7 @@ import 'package:dio/dio.dart';
 abstract class DoctorRemoteDataSource {
   Future<DoctorsRespModel> getDoctors({String? search, int? perPage});
   Future<DoctorsRespModel> getRemoteMedicalCenterDoctors(int id);
+  Future<DoctorRespModel> getDoctorById(String doctorId);
   Future<BaseOneResponse> addDoctor(AddDoctorParams params);
   Future<BaseOneResponse> updateDoctor(AddDoctorParams params);
   Future<BaseOneResponse> deleteDoctor(String id);
@@ -561,6 +562,21 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
           status: response['status'],
           message: response['message'],
         );
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DoctorRespModel> getDoctorById(String doctorId) async {
+    try {
+      final response = await dioConsumer.get('/doctors/$doctorId');
+
+      if (response['status'] == true) {
+        return DoctorRespModel.fromJson(response);
       }
 
       throw ServerException(message: response['message'] ?? '');

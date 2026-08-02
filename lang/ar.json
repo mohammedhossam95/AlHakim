@@ -520,6 +520,7 @@
   "searchForPlace" : "ابحث عن مكان",
   "noResultsFound" : "لم يتم العثور على نتائج",
   "gettingAddress" : "جاري الحصول على العنوان",
-  "no_available_dates": "لا يوجد مواعيد متاحة"
+  "no_available_dates": "لا يوجد مواعيد متاحة",
+  "schedule_refresh_failed": "تعذر تحديث مواعيد الطبيب"
   
 }

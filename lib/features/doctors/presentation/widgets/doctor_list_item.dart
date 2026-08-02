@@ -18,8 +18,13 @@ import 'package:go_router/go_router.dart';
 class DoctorListItem extends StatelessWidget with DoctorContactHelpers {
   @override
   final DoctorEntity doctor;
+  final bool bookingView;
 
-  const DoctorListItem({super.key, required this.doctor});
+  const DoctorListItem({
+    super.key,
+    required this.doctor,
+    this.bookingView = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -178,61 +183,63 @@ class DoctorListItem extends StatelessWidget with DoctorContactHelpers {
             ),
           ],
           Gaps.vGap12,
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w),
-            decoration: BoxDecoration(
-              color: colors.lightTextColor.withValues(alpha: .05),
-              borderRadius: BorderRadius.circular(12.r),
+          if (!bookingView) ...[
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w),
+              decoration: BoxDecoration(
+                color: colors.lightTextColor.withValues(alpha: .05),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DoctorActionButton(
+                      svgAsset: SvgAssets.location,
+                      label: 'location'.tr,
+                      onTap: openMaps,
+                    ),
+                  ),
+                  Expanded(
+                    child: DoctorActionButton(
+                      svgAsset: SvgAssets.whatsappIcon,
+                      label: 'whatsapp'.tr,
+                      onTap: openWhatsApp,
+                    ),
+                  ),
+                  Expanded(
+                    child: DoctorActionButton(
+                      svgAsset: SvgAssets.callIcon,
+                      label: 'call'.tr,
+                      onTap: callDoctor,
+                    ),
+                  ),
+                  Expanded(
+                    child: DoctorActionButton(
+                      svgAsset: SvgAssets.shareApp,
+                      label: 'share'.tr,
+                      onTap: shareDoctor,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DoctorActionButton(
-                    svgAsset: SvgAssets.location,
-                    label: 'location'.tr,
-                    onTap: openMaps,
-                  ),
-                ),
-                Expanded(
-                  child: DoctorActionButton(
-                    svgAsset: SvgAssets.whatsappIcon,
-                    label: 'whatsapp'.tr,
-                    onTap: openWhatsApp,
-                  ),
-                ),
-                Expanded(
-                  child: DoctorActionButton(
-                    svgAsset: SvgAssets.callIcon,
-                    label: 'call'.tr,
-                    onTap: callDoctor,
-                  ),
-                ),
-                Expanded(
-                  child: DoctorActionButton(
-                    svgAsset: SvgAssets.shareApp,
-                    label: 'share'.tr,
-                    onTap: shareDoctor,
-                  ),
-                ),
-              ],
+            Gaps.vGap12,
+            MyDefaultButton(
+              onPressed: () {
+                if (sessionCubit.state.status != SessionStatus.authenticated) {
+                  Constants.showLoginWarningDialog(
+                    context,
+                    onOkPressed: () {
+                      context.go(Routes.chooseUserTypeScreenRoute);
+                    },
+                  );
+                  return;
+                }
+                context.push(Routes.bookingScreenRoute, extra: doctor);
+              },
+              btnText: 'book_now',
             ),
-          ),
-          Gaps.vGap12,
-          MyDefaultButton(
-            onPressed: () {
-              if (sessionCubit.state.status != SessionStatus.authenticated) {
-                Constants.showLoginWarningDialog(
-                  context,
-                  onOkPressed: () {
-                    context.go(Routes.chooseUserTypeScreenRoute);
-                  },
-                );
-                return;
-              }
-              context.push(Routes.bookingScreenRoute, extra: doctor);
-            },
-            btnText: 'book_now',
-          ),
+          ],
         ],
       ),
     );
