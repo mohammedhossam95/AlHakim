@@ -193,6 +193,7 @@
   "please_fill_all_fields": "يرجى ملء جميع الحقول المطلوبة",
   "noـslidersـavailable": "لا يوجد عروض حالياً",
   "close": "اغلاق",
+  "open_link": "فتح الرابط",
   "complete_profile_subtitle": "يرجى استكمال بيانات ملفك الشخصي للحصول على أفضل تجربة.",
   "no_internet_connection": "لا يوجد اتصال بالانترنت",
   "whatsapp": "واتساب",
@@ -258,6 +259,9 @@
   "other_person": "شخص آخر",
   "other_person_desc": "إضافة بيانات مريض جديد",
   "confirm_booking": "تأكيد الحجز",
+  "select_appointment_type": "اختر نوع الحجز",
+  "select_appointment_type_desc": "حدد نوع الحجز قبل التأكيد",
+  "no_appointment_types": "لا توجد أنواع متاحة",
   "family_members": "أفراد العائلة",
   "manage_family": "إدارة التابعين",
   "manage_family_desc": "أضف أفراد عائلتك",
@@ -304,8 +308,8 @@
   "no_medical_centers": "لا توجد مراكز طبية",
   "center_active": "المركز نشط",
   "center_inactive": "المركز غير نشط",
-  "clinic_open": "العيادة مفتوحة",
-  "clinic_closed": "العيادة مغلقة",
+  "clinic_open": "العيادة نشطة",
+  "clinic_closed": "العيادة غير نشطة",
   "active": "نشط",
   "frozen": "مجمد",
   "freeze": "تجميد",
@@ -483,7 +487,7 @@
   "follow_up_appointment": "متابعة الدور",
   "live_alert": "تنبيه مباشر",
   "doctor_started_examination": "الدكتور بدأ الكشف الآن. يرجى الاستعداد.",
-  "current_status": "الوضع الحالي",
+  "current_status": "الدور الحالي",
   "current_clinic_turn": "الدور الحالي بالعيادة",
   "your_queue_number": "رقم دورك الخاص",
   "your_position_in_list": "موقعك في القائمة",
@@ -519,6 +523,9 @@
   "selectPosition" : "اختر موقعك الحالي",
   "searchForPlace" : "ابحث عن مكان",
   "noResultsFound" : "لم يتم العثور على نتائج",
-  "gettingAddress" : "جاري الحصول على العنوان"
+  "gettingAddress" : "جاري الحصول على العنوان",
+  "no_available_dates": "لا يوجد مواعيد متاحة",
+  "schedule_refresh_failed": "تعذر تحديث مواعيد الطبيب",
+  "appointment_type":"نوع الحجز"
   
 }

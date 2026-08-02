@@ -54,7 +54,7 @@ class AppSecureStorageImpl extends AppSecureStorage {
 
   @override
   Future<void> removeDeviceToken() =>
-      instance.delete(key: _AppSecureStorageKeys.accessToken);
+      instance.delete(key: _AppSecureStorageKeys.deviceToken);
 
   //endregion
 

@@ -1,4 +1,5 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
+import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 
 class DoctorsRespModel extends BaseListResponse {
@@ -31,6 +32,18 @@ class DoctorsRespModel extends BaseListResponse {
   }
 }
 
+class DoctorRespModel extends BaseOneResponse {
+  const DoctorRespModel({super.status, super.message, super.data});
+
+  factory DoctorRespModel.fromJson(Map<String, dynamic> json) {
+    return DoctorRespModel(
+      status: json['status'],
+      message: json['message'],
+      data: json['data'] != null ? DoctorModel.fromJson(json['data']) : null,
+    );
+  }
+}
+
 class DoctorModel extends DoctorEntity {
   const DoctorModel({
     super.id,
@@ -43,7 +56,6 @@ class DoctorModel extends DoctorEntity {
     super.location,
     super.professionalRegistrationNumber,
     super.academicDegree,
-    super.clinicPhone,
     super.secretaryPhone,
     super.profileImage,
     super.distanceKm,
@@ -85,17 +97,10 @@ class DoctorModel extends DoctorEntity {
           : null,
 
       isActive: json['is_active'],
-
       isClinicOpen: json['is_clinic_open'],
-
       location: location,
-
       professionalRegistrationNumber: json['professional_registration_number'],
-
       academicDegree: json['academic_degree'],
-
-      clinicPhone: json['clinic_phone'],
-
       secretaryPhone: json['secretary_phone'],
 
       profileImage: json['profile_image'],
@@ -163,13 +168,8 @@ class DoctorModel extends DoctorEntity {
     "professional_registration_number": professionalRegistrationNumber,
 
     "academic_degree": academicDegree,
-
-    "clinic_phone": clinicPhone,
-
     "secretary_phone": secretaryPhone,
-
     "profile_image": profileImage,
-
     "distance_km": distanceKm,
 
     "languages": languages == null
@@ -205,10 +205,7 @@ class NameModel extends NameEntity {
   const NameModel({super.en, super.ar});
 
   factory NameModel.fromJson(Map<String, dynamic> json) {
-    return NameModel(
-      en: json['en']?.toString(),
-      ar: json['ar']?.toString(),
-    );
+    return NameModel(en: json['en']?.toString(), ar: json['ar']?.toString());
   }
 
   static NameModel? maybeFromJson(dynamic value) {
@@ -235,10 +232,7 @@ class BioModel extends BioEntity {
   const BioModel({super.en, super.ar});
 
   factory BioModel.fromJson(Map<String, dynamic> json) {
-    return BioModel(
-      en: json['en']?.toString(),
-      ar: json['ar']?.toString(),
-    );
+    return BioModel(en: json['en']?.toString(), ar: json['ar']?.toString());
   }
 
   static BioModel? maybeFromJson(dynamic value) {

@@ -110,9 +110,7 @@ class DelegateManageItemCard extends StatelessWidget {
                     Text(
                       isActive ? activeStatusText : inactiveStatusText,
                       style: TextStyles.medium12(
-                        color: isActive
-                            ? colors.secondary
-                            : colors.lightTextColor,
+                        color: isActive ? colors.secondary : colors.errorColor,
                       ),
                     ),
                   ],

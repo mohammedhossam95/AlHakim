@@ -65,13 +65,14 @@ class AppoinmentSuccessScreen extends StatelessWidget {
                       children: [
                         DiffImage(
                           image: doctor?.profileImage ?? '',
+                          userName: appLocalizations.isArLocale
+                              ? doctor?.name?.ar ?? ''
+                              : doctor?.name?.en ?? '',
                           width: 64.w,
                           height: 64.w,
                           borderRadius: BorderRadius.circular(32.r),
                         ),
-
                         Gaps.hGap12,
-
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,9 +84,7 @@ class AppoinmentSuccessScreen extends StatelessWidget {
                                 style: TextStyles.semiBold18(),
                                 textAlign: TextAlign.start,
                               ),
-
                               Gaps.vGap4,
-
                               Container(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 10.w,
@@ -108,21 +107,17 @@ class AppoinmentSuccessScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     Gaps.vGap20,
-
                     _InfoTile(
                       icon: Icons.calendar_month_outlined,
                       title: "appointment_date".tr,
                       value: DateFormat(
                         'EEEE, d MMM yyyy',
-
                         appLocalizations.locale?.languageCode,
                       ).format(DateTime.parse(appointmentDate)),
                     ),
                     if (doctor?.location?.city != null) ...[
                       Gaps.vGap12,
-
                       _InfoTile(
                         icon: Icons.location_on_outlined,
                         title: "clinic".tr,

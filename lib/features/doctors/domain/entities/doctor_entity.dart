@@ -11,7 +11,6 @@ class DoctorEntity extends Equatable {
   final LocationEntity? location;
   final String? professionalRegistrationNumber;
   final String? academicDegree;
-  final String? clinicPhone;
   final String? secretaryPhone;
   final String? secretaryCountryCode;
   final String? profileImage;
@@ -44,7 +43,6 @@ class DoctorEntity extends Equatable {
     this.location,
     this.professionalRegistrationNumber,
     this.academicDegree,
-    this.clinicPhone,
     this.secretaryPhone,
     this.profileImage,
     this.distanceKm,
@@ -79,7 +77,6 @@ class DoctorEntity extends Equatable {
     location,
     professionalRegistrationNumber,
     academicDegree,
-    clinicPhone,
     secretaryPhone,
     profileImage,
     distanceKm,

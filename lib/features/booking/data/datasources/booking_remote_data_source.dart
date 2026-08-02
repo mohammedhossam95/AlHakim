@@ -1,14 +1,18 @@
+import 'package:alhakim/core/api/dio_consumer.dart';
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/booking/data/models/appointment_booking_model.dart';
+import 'package:alhakim/features/booking/data/models/appointment_type_model.dart';
 import 'package:alhakim/features/booking/data/models/family_member_model.dart';
 import 'package:alhakim/features/booking/data/models/kinship_model.dart';
+import 'package:alhakim/features/booking/domain/usecases/params/booking_params.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:dio/dio.dart';
 
 abstract class BookingRemoteDataSource {
   Future<KinshipRespModel> getKinships();
   Future<FamilyMemberRespModel> getFamilyMembers();
+  Future<AppointmentTypeRespModel> getAppointmentTypes();
 
   Future<AddFamilyMemberRespModel> addFamilyMember({
     required String fullName,
@@ -21,11 +25,7 @@ abstract class BookingRemoteDataSource {
     required String birthDate,
   });
   Future<BaseOneResponse> deleteFamilyMember({required String id});
-  Future<AppointmentBookingRespModel> bookAppointment({
-    required String doctorId,
-    required String appointmentDate,
-    String? familyMemberId,
-  });
+  Future<AppointmentBookingRespModel> bookAppointment(BookingParams params);
 }
 
 class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
@@ -127,25 +127,28 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   }
 
   @override
-  Future<AppointmentBookingRespModel> bookAppointment({
-    required String doctorId,
-    required String appointmentDate,
-    String? familyMemberId,
-  }) async {
+  Future<AppointmentTypeRespModel> getAppointmentTypes() async {
     try {
-      final Map<String, dynamic> body = {
-        "doctor_id": doctorId,
-        "appointment_date": appointmentDate,
-      };
+      final response = await dioConsumer.get(ApiConstants.appointmentTypes);
 
-      if (familyMemberId != null) {
-        body["family_member_id"] = familyMemberId;
+      if (response['status'] == true) {
+        return AppointmentTypeRespModel.fromJson(response);
       }
 
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AppointmentBookingRespModel> bookAppointment(
+    BookingParams params,
+  ) async {
+    try {
       final response = await dioConsumer.post(
         '/appointments',
-
-        formData: FormData.fromMap(body),
+        formData: FormData.fromMap(params.toJson()),
       );
 
       if (response['status'] == true) {

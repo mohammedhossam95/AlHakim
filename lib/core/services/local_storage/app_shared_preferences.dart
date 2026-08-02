@@ -43,6 +43,7 @@ abstract class AppSharedPreferences {
   const AppSharedPreferences(Object object, {required this.instance});
 
   Future<void> clearSecureStorageOnFreshInstall();
+  Future<void> markSecureStorageReady();
 
   //region:: Country Id
   int? getCountryId();
@@ -149,12 +150,30 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
 
   @override
   Future<void> clearSecureStorageOnFreshInstall() async {
-    final isFirstLaunch = instance.getBool('first_launch') ?? true;
+    // Marker must survive logout. Do NOT use a key that logout's clearAll wipes
+    // without restoring, or the next cold start will delete a valid access token.
+    final secureStorageReady = instance.getBool('secure_storage_ready');
+    final legacyFirstLaunchDone = instance.getBool('first_launch') == false;
 
-    if (isFirstLaunch) {
-      await secureStorage.clearAll(); // 🔥 clears token
-      await instance.setBool('first_launch', false);
+    if (secureStorageReady == true) {
+      return;
     }
+
+    if (legacyFirstLaunchDone) {
+      // Existing installs already past first launch — migrate marker only.
+      await markSecureStorageReady();
+      return;
+    }
+
+    // True fresh install (or prefs wiped): clear leftover Keystore data.
+    await secureStorage.clearAll();
+    await markSecureStorageReady();
+  }
+
+  @override
+  Future<void> markSecureStorageReady() async {
+    await instance.setBool('secure_storage_ready', true);
+    await instance.setBool('first_launch', false);
   }
 
   //region:: Country Id

@@ -1,5 +1,5 @@
 class AppStrings {
-  static const String appName = 'alhakim';
+  static const String appName = 'Alhakim';
   static const double screenHeight = 932.0;
   static const double screenWidth = 430.0;
   static const Duration duration = Duration(milliseconds: 500);

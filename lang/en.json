@@ -194,6 +194,7 @@
   "select_sub_category": "Select Sub Category",
   "please_fill_all_fields": "Please fill all required fields",
   "close": "Close",
+  "open_link": "Open link",
   "complete_profile_subtitle": "Please complete your profile information to get the best experience.",
   "no_internet_connection": "No Internet Connection",
   "whatsapp": "WhatsApp",
@@ -259,6 +260,9 @@
   "other_person": "Another person",
   "other_person_desc": "Add new patient data",
   "confirm_booking": "Confirm Booking",
+  "select_appointment_type": "Select appointment type",
+  "select_appointment_type_desc": "Choose an appointment type before confirming",
+  "no_appointment_types": "No appointment types available",
   "family_members": "Family Members",
   "manage_family": "Manage Dependents",
   "manage_family_desc": "Add your family members",
@@ -305,8 +309,8 @@
   "no_medical_centers": "No medical centers available",
   "center_active": "Center is active",
   "center_inactive": "Center is inactive",
-  "clinic_open": "Clinic is open",
-  "clinic_closed": "Clinic is closed",
+  "clinic_open": "Clinic is active",
+  "clinic_closed": "Clinic is inactive",
   "active": "Active",
   "frozen": "Frozen",
   "freeze": "Freeze",
@@ -484,7 +488,7 @@
   "follow_up_appointment": "Follow Up Queue",
   "live_alert": "Live Alert",
   "doctor_started_examination": "Doctor has started examinations now. Please be ready.",
-  "current_status": "Current Status",
+  "current_status": "Current Role",
   "current_clinic_turn": "Current turn in the clinic",
   "your_queue_number": "Your queue number",
   "your_position_in_list": "Your position in the list",
@@ -520,6 +524,8 @@
   "selectPosition": "Select your current location",
   "searchForPlace": "Search for a place",
   "noResultsFound": "No results found",
-  
-  "gettingAddress": "Getting address"
+  "no_available_dates": "No available dates",
+  "schedule_refresh_failed": "Could not refresh doctor schedule",
+  "gettingAddress": "Getting address",
+  "appointment_type": "Appointment Type"
 }

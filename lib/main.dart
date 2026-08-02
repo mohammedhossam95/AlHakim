@@ -39,7 +39,7 @@ Future<void> main() async {
   NotificationService.instance.initialize();
   Bloc.observer = AppBlocObserver();
   dioConsumer.updateDeviceTypeHeader();
-  sharedPreferences.clearSecureStorageOnFreshInstall();
+  await sharedPreferences.clearSecureStorageOnFreshInstall();
   await DBHelper.initDB();
   await FavoriteDatabaseHelper.instance.database;
   

@@ -96,44 +96,48 @@ class _SplashScreenState extends State<SplashScreen> {
         builder: (context, state) {
           if (state is AppSettingError) {
             return SafeArea(
-              child: Column(
-                children: [
-                  const Spacer(flex: 3),
+              child: Container(
+                alignment: Alignment.center,
 
-                  // FadeIn(
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.all(40.0),
-                  //     child: Image.asset(
-                  //       'assets/images/logo2.png',
-                  //       height: 200.h,
-                  //     ),
-                  //   ),
-                  // ),
-                  LogoIcon(),
-                  const Spacer(flex: 3),
-                  InkWell(
-                    onTap: () {
-                      _forceUpdateShown = false;
-                      context.read<AppSettingCubit>().getAppsetting();
-                    },
-                    child: Column(
-                      children: [
-                        Icon(Icons.refresh, color: colors.main, size: 28.sp),
-                        Gaps.vGap8,
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 24.w),
-                          child: Text(
-                            state.message,
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
-                            style: TextStyles.regular12(color: colors.main),
-                          ),
-                        ),
-                      ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Spacer(flex: 3),
+                    FadeIn(
+                      delay: const Duration(milliseconds: 800),
+                      curve: Curves.easeIn,
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: LogoIcon(),
+                      ),
                     ),
-                  ),
-                  Gaps.vGap40,
-                ],
+                    const Spacer(flex: 3),
+                    InkWell(
+                      onTap: () {
+                        _forceUpdateShown = false;
+                        context.read<AppSettingCubit>().getAppsetting();
+                      },
+                      child: Column(
+                        children: [
+                          Icon(Icons.refresh, color: colors.main, size: 28.sp),
+                          Gaps.vGap8,
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 24.w),
+                            child: Text(
+                              state.message,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              style: TextStyles.regular12(color: colors.main),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Gaps.vGap40,
+                  ],
+                ),
               ),
             );
           }
