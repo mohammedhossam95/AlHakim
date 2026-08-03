@@ -11,6 +11,7 @@ import 'package:alhakim/features/appointments/domain/entities/appointment_entity
 import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -95,7 +96,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
               ),
               Expanded(
-                child:
+                child: MultiBlocListener(
+                  listeners: [
                     BlocListener<
                       CancelAppointmentCubit,
                       CancelAppointmentState
@@ -122,66 +124,88 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           );
                         }
                       },
-                      child:
-                          BlocBuilder<
-                            GetAppointmentsCubit,
-                            GetAppointmentsState
-                          >(
-                            builder: (context, state) {
-                              if (state is GetAppointmentsLoading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-
-                              if (state is GetAppointmentsError) {
-                                return Center(
-                                  child: ErrorText(
-                                    text: state.message,
-                                    width: 300,
-                                  ),
-                                );
-                              }
-
-                              List<AppointmentEntity> appointments = [];
-
-                              if (state is GetAppointmentsSuccess) {
-                                appointments =
-                                    state.response.data
-                                        as List<AppointmentEntity>;
-                              }
-
-                              final upcoming = appointments
-                                  .where(
-                                    (e) => _upcomingStatuses.contains(
-                                      e.status?.toLowerCase().trim(),
-                                    ),
-                                  )
-                                  .toList();
-
-                              final previous = appointments
-                                  .where(
-                                    (e) => _previousStatuses.contains(
-                                      e.status?.toLowerCase().trim(),
-                                    ),
-                                  )
-                                  .toList();
-
-                              return TabBarView(
-                                children: [
-                                  _AppointmentsList(
-                                    data: upcoming,
-                                    isUpcoming: true,
-                                  ),
-                                  _AppointmentsList(
-                                    data: previous,
-                                    isUpcoming: false,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
                     ),
+                    BlocListener<
+                      UpdateQueueStatusCubit,
+                      UpdateQueueStatusState
+                    >(
+                      listener: (context, state) {
+                        if (state is UpdateQueueStatusLoading) {
+                          Constants.showLoading(context);
+                        } else if (state is UpdateQueueStatusSuccess) {
+                          Constants.hideLoading(context);
+                          Constants.showSnakToast(
+                            message: state.response.message ?? '',
+                            context: context,
+                            type: 1,
+                          );
+                          context
+                              .read<GetAppointmentsCubit>()
+                              .getAppointments();
+                        } else if (state is UpdateQueueStatusError) {
+                          Constants.hideLoading(context);
+                          Constants.showSnakToast(
+                            message: state.message,
+                            context: context,
+                            type: 3,
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                  child:
+                      BlocBuilder<GetAppointmentsCubit, GetAppointmentsState>(
+                        builder: (context, state) {
+                          if (state is GetAppointmentsLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (state is GetAppointmentsError) {
+                            return Center(
+                              child: ErrorText(text: state.message, width: 300),
+                            );
+                          }
+
+                          List<AppointmentEntity> appointments = [];
+
+                          if (state is GetAppointmentsSuccess) {
+                            appointments =
+                                state.response.data as List<AppointmentEntity>;
+                          }
+
+                          final upcoming = appointments
+                              .where(
+                                (e) => _upcomingStatuses.contains(
+                                  e.status?.toLowerCase().trim(),
+                                ),
+                              )
+                              .toList();
+
+                          final previous = appointments
+                              .where(
+                                (e) => _previousStatuses.contains(
+                                  e.status?.toLowerCase().trim(),
+                                ),
+                              )
+                              .toList();
+
+                          return TabBarView(
+                            children: [
+                              _AppointmentsList(
+                                data: upcoming,
+                                isUpcoming: true,
+                              ),
+                              _AppointmentsList(
+                                data: previous,
+                                isUpcoming: false,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                ),
               ),
             ],
           ),
@@ -244,7 +268,7 @@ class _AppointmentStatusStyle {
       case 'pending_reschedule':
         return _AppointmentStatusStyle(
           label: 'pending_reschedule'.tr,
-          color: colors.warning,
+          color: const Color(0xFF6C5CE7),
         );
       case 'completed':
         return _AppointmentStatusStyle(
@@ -271,25 +295,57 @@ class _AppointmentCard extends StatelessWidget {
 
   const _AppointmentCard({required this.item, required this.isUpcoming});
 
+  String? get _status => item.status?.toLowerCase().trim();
+
+  bool get _isPendingReschedule => _status == 'pending_reschedule';
+
   bool get _canCancel {
-    final status = item.status?.toLowerCase().trim();
-    return status == 'confirmed' ||
-        status == 'rescheduled' ||
-        status == 'pending_reschedule';
+    return _status == 'confirmed' ||
+        _status == 'rescheduled' ||
+        _status == 'pending_reschedule';
   }
 
   bool get _canFollowUp {
-    final status = item.status?.toLowerCase().trim();
-    return status == 'confirmed' ||
-        status == 'arrived' ||
-        status == 'entered' ||
-        status == 'rescheduled' ||
-        status == 'pending_reschedule';
+    return _status == 'confirmed' ||
+        _status == 'arrived' ||
+        _status == 'entered' ||
+        _status == 'rescheduled';
+  }
+
+  bool get _canConfirmReschedule => _isPendingReschedule;
+
+  void _confirmReschedule(BuildContext context) {
+    Constants.showConfirmDialog(
+      context: context,
+      title: 'confirm_reschedule'.tr,
+      content: 'confirm_reschedule_desc'.tr,
+      onYesPressed: () async {
+        if (!context.mounted) return;
+
+        final doctorId = item.doctor?.id;
+        final appointmentId = item.id;
+        if (doctorId == null || doctorId.isEmpty || appointmentId == null) {
+          Constants.showSnakToast(
+            context: context,
+            message: 'error_occurred'.tr,
+            type: 3,
+          );
+          return;
+        }
+
+        context.read<UpdateQueueStatusCubit>().updateQueueStatus(
+          doctorId: doctorId,
+          appointmentId: appointmentId,
+          status: 'confirmed',
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final statusStyle = _AppointmentStatusStyle.of(item.status);
+    final showPrimaryAction = _canFollowUp || _canConfirmReschedule;
 
     return Container(
       padding: EdgeInsets.all(14.w),
@@ -364,16 +420,34 @@ class _AppointmentCard extends StatelessWidget {
                   title: 'appointment_type'.tr,
                   value: item.appointmentTypeText ?? '',
                   icon: Icons.info_outline,
-                  valueColor: statusStyle.color,
+                  valueColor: colors.textColor,
                 ),
               ),
             ],
           ),
-          if (isUpcoming && (_canFollowUp || _canCancel)) ...[
+          if (isUpcoming && (showPrimaryAction || _canCancel)) ...[
             Gaps.vGap16,
             Row(
               children: [
-                if (_canFollowUp)
+                if (_canConfirmReschedule)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _confirmReschedule(context),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6C5CE7),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'confirm_reschedule'.tr,
+                          style: TextStyles.medium14(color: colors.whiteColor),
+                        ),
+                      ),
+                    ),
+                  )
+                else if (_canFollowUp)
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
@@ -400,7 +474,7 @@ class _AppointmentCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (_canFollowUp && _canCancel) Gaps.hGap10,
+                if (showPrimaryAction && _canCancel) Gaps.hGap10,
                 if (_canCancel)
                   Expanded(
                     child: GestureDetector(

@@ -113,6 +113,9 @@ class _MainPageState extends State<MainPage> {
             BlocProvider(
               create: (_) => ServiceLocator.instance<CancelAppointmentCubit>(),
             ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<UpdateQueueStatusCubit>(),
+            ),
           ],
           child: const AppointmentsScreen(),
         ),

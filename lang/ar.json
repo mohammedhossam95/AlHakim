@@ -424,6 +424,8 @@
   "affected_periods": "الفترات المتأثرة",
   "outside_new_hours": "خارج الدوام الجديد",
   "confirm_reschedule": "تأكيد إعادة الجدولة",
+  "confirm_reschedule_desc": "هل أنت متأكد من تأكيد إعادة جدولة هذا الموعد؟",
+  "pending_reschedule": "بانتظار تأكيد إعادة الجدولة",
   "follow_up": "كشف دوري",
   "queue_management": "إدارة الطوابير",
   "queue_management_desc": "مركز التحكم في تدفق المرضى اليومي",

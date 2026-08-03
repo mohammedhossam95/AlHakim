@@ -425,6 +425,8 @@
   "affected_periods": "Affected Periods",
   "outside_new_hours": "Outside New Hours",
   "confirm_reschedule": "Confirm Reschedule",
+  "confirm_reschedule_desc": "Are you sure you want to confirm this appointment reschedule?",
+  "pending_reschedule": "Pending Reschedule Confirmation",
   "follow_up": "Follow Up",
   "queue_management": "Queue Management",
   "queue_management_desc": "Daily patient flow control center",
