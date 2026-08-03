@@ -489,7 +489,7 @@
   "hide_consultation_price_to_patients_desc": "When this option is enabled, the consultation price will be hidden from patients",
   "follow_up_appointment": "Follow Up Queue",
   "live_alert": "Live Alert",
-  "doctor_started_examination": "Doctor has started examinations now. Please be ready.",
+  "doctor_started_examination": "Your turn is based on booking order. Don't worry, we'll notify you as soon as it's your turn.",
   "current_status": "Current Role",
   "current_clinic_turn": "Current turn in the clinic",
   "your_queue_number": "Your queue number",
