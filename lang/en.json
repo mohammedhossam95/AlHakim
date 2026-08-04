@@ -361,6 +361,8 @@
   "enter_secretary_phone": "Enter secretary phone",
   "min_patients": "Minimum Patients",
   "enter_min_patients": "Enter minimum patients",
+  "appointment_days_number": "Booking Days",
+  "enter_appointment_days_number": "Enter booking days number",
   "price": "Examination Price",
   "enter_price": "Enter examination price",
   "consultation_price": "Consultation Price",
@@ -425,6 +427,8 @@
   "affected_periods": "Affected Periods",
   "outside_new_hours": "Outside New Hours",
   "confirm_reschedule": "Confirm Reschedule",
+  "confirm_reschedule_desc": "Are you sure you want to confirm this appointment reschedule?",
+  "pending_reschedule": "Pending Reschedule Confirmation",
   "follow_up": "Follow Up",
   "queue_management": "Queue Management",
   "queue_management_desc": "Daily patient flow control center",
@@ -487,7 +491,7 @@
   "hide_consultation_price_to_patients_desc": "When this option is enabled, the consultation price will be hidden from patients",
   "follow_up_appointment": "Follow Up Queue",
   "live_alert": "Live Alert",
-  "doctor_started_examination": "Doctor has started examinations now. Please be ready.",
+  "doctor_started_examination": "Your turn is based on booking order. Don't worry, we'll notify you as soon as it's your turn.",
   "current_status": "Current Role",
   "current_clinic_turn": "Current turn in the clinic",
   "your_queue_number": "Your queue number",
@@ -527,5 +531,7 @@
   "no_available_dates": "No available dates",
   "schedule_refresh_failed": "Could not refresh doctor schedule",
   "gettingAddress": "Getting address",
-  "appointment_type": "Appointment Type"
+  "appointment_type": "Appointment Type",
+  "cancel_clinic_schedule_desc": "All appointments for this day will be canceled, and all patients will be notified automatically.",
+  "confirm_cancel_clinic_schedule": "Are you sure you want to cancel the clinic? All appointments for this day will be canceled and patients will be notified automatically."
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:alhakim/core/api/dio_consumer.dart';
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/params/add_doctor_params.dart';
@@ -11,6 +12,7 @@ import 'package:alhakim/features/doctors/data/models/doctor_appoinments_for_day_
 import 'package:alhakim/features/doctors/data/models/doctor_home_model.dart';
 import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/doctors/data/models/reschedule_model.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/delete_schedule_params.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:dio/dio.dart';
 
@@ -29,6 +31,9 @@ abstract class DoctorRemoteDataSource {
     required AppoinmentsParams params,
   });
   Future<RescheduleRespModel> reschedule({required RescheduleParams params});
+  Future<BaseOneResponse> deleteSchedule({
+    required DeleteScheduleParams params,
+  });
 }
 
 class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
@@ -150,6 +155,12 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
 
       if (params.minPatients != null) {
         formData.fields.add(MapEntry("min_patients", params.minPatients!));
+      }
+
+      if (params.appointmentDaysNumber != null) {
+        formData.fields.add(
+          MapEntry("appointment_days_number", params.appointmentDaysNumber!),
+        );
       }
 
       if (params.representativeCode != null) {
@@ -357,6 +368,12 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
 
       if (params.minPatients != null) {
         formData.fields.add(MapEntry("min_patients", params.minPatients!));
+      }
+
+      if (params.appointmentDaysNumber != null) {
+        formData.fields.add(
+          MapEntry("appointment_days_number", params.appointmentDaysNumber!),
+        );
       }
 
       if (params.representativeCode != null) {
@@ -634,6 +651,28 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
 
       if (response['status'] == true) {
         return RescheduleRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> deleteSchedule({
+    required DeleteScheduleParams params,
+  }) async {
+    try {
+      final response = await dioConsumer.delete(
+        ApiConstants.deleteDoctorSchedule(
+          doctorId: params.doctorId,
+          scheduleId: params.scheduleId,
+        ),
+      );
+
+      if (response['status'] == true) {
+        return BaseOneResponse.fromJson(response);
       }
 
       throw ServerException(message: response['message'] ?? '');

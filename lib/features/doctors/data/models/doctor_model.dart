@@ -65,6 +65,7 @@ class DoctorModel extends DoctorEntity {
     super.createdAt,
     super.updatedAt,
     super.minPatients,
+    super.appointmentDaysNumber,
     super.representativeCode,
     super.priceHidden,
     super.secretaryCountryCode,
@@ -128,6 +129,7 @@ class DoctorModel extends DoctorEntity {
       updatedAt: json['updated_at'],
 
       minPatients: json['min_patients']?.toString(),
+      appointmentDaysNumber: json['appointment_days_number']?.toString(),
 
       representativeCode: json['representative_code'],
 
@@ -191,6 +193,8 @@ class DoctorModel extends DoctorEntity {
     "created_at": createdAt,
 
     "updated_at": updatedAt,
+    "min_patients": minPatients,
+    "appointment_days_number": appointmentDaysNumber,
     "price_hidden": priceHidden,
     "secretary_country_code": secretaryCountryCode,
     "whatsapp_number": whatsappNumber,

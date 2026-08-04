@@ -4,6 +4,7 @@ import 'package:alhakim/features/doctors/domain/repositories/doctor_repository.d
 import 'package:alhakim/features/doctors/domain/usecases/add_doctor_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/close_clinic_today_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/delete_doctor_usecase.dart';
+import 'package:alhakim/features/doctors/domain/usecases/delete_schedule_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/get_doctor_appoinments_for_day_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/get_doctor_by_id_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/get_doctor_home_usecase.dart';
@@ -17,6 +18,7 @@ import 'package:alhakim/features/doctors/domain/usecases/update_doctor_usecase.d
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/delete_schedule_cubit/delete_schedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
@@ -46,6 +48,7 @@ Future<void> initDoctorsFeatureInjection() async {
   _sl.registerFactory(() => ToggleClinicCubit(usecase: _sl()));
   _sl.registerFactory(() => GetDoctorAppoinmentsForDayCubit(usecase: _sl()));
   _sl.registerFactory(() => RescheduleCubit(usecase: _sl()));
+  _sl.registerFactory(() => DeleteScheduleCubit(usecase: _sl()));
 
   /// usecase
 
@@ -66,6 +69,7 @@ Future<void> initDoctorsFeatureInjection() async {
   _sl.registerLazySingleton(() => GetDoctorsUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => SearchDoctorsUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => RescheduleUsecase(repository: _sl()));
+  _sl.registerLazySingleton(() => DeleteScheduleUsecase(repository: _sl()));
 
   /// repo
   _sl.registerLazySingleton<DoctorRepository>(

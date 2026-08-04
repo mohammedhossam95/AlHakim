@@ -8,6 +8,8 @@ import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/booking/domain/entities/schedule.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_appoinments_for_day_entity.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/delete_schedule_params.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/delete_schedule_cubit/delete_schedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -132,35 +134,67 @@ class _RescheduleAppointmentsScreenState
 
     final selectedDate = availableDates[selectedDateIndex];
 
-    return BlocListener<RescheduleCubit, RescheduleState>(
-      listener: (context, state) {
-        if (state is RescheduleLoading) {
-          Constants.showLoading(context);
-        }
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<RescheduleCubit, RescheduleState>(
+          listener: (context, state) {
+            if (state is RescheduleLoading) {
+              Constants.showLoading(context);
+            }
 
-        if (state is RescheduleSuccess) {
-          Constants.hideLoading(context);
+            if (state is RescheduleSuccess) {
+              Constants.hideLoading(context);
 
-          Constants.showSnakToast(
-            context: context,
-            type: 1,
-            message: state.response.message,
-          );
+              Constants.showSnakToast(
+                context: context,
+                type: 1,
+                message: state.response.message,
+              );
 
-          Navigator.pop(context);
-        }
+              Navigator.pop(context);
+            }
 
-        if (state is RescheduleError) {
-          Constants.hideLoading(context);
+            if (state is RescheduleError) {
+              Constants.hideLoading(context);
 
-          Constants.showSnakToast(
-            context: context,
-            type: 3,
-            message: state.message,
-          );
-        }
-      },
+              Constants.showSnakToast(
+                context: context,
+                type: 3,
+                message: state.message,
+              );
+            }
+          },
+        ),
+        BlocListener<DeleteScheduleCubit, DeleteScheduleState>(
+          listener: (context, state) {
+            if (state is DeleteScheduleLoading) {
+              Constants.showLoading(context);
+            }
 
+            if (state is DeleteScheduleSuccess) {
+              Constants.hideLoading(context);
+
+              Constants.showSnakToast(
+                context: context,
+                type: 1,
+                message: state.response.message ?? '',
+              );
+
+              Navigator.pop(context);
+            }
+
+            if (state is DeleteScheduleError) {
+              Constants.hideLoading(context);
+
+              Constants.showSnakToast(
+                context: context,
+                type: 3,
+                message: state.message,
+              );
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: colors.backGround,
 
@@ -706,6 +740,94 @@ class _RescheduleAppointmentsScreenState
                         );
                       },
                     ),
+              ),
+
+              Gaps.vGap20,
+
+              /// cancel clinic schedule
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: colors.errorColor.withValues(alpha: .06),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: colors.errorColor.withValues(alpha: .15),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: colors.errorColor,
+                          size: 22.sp,
+                        ),
+                        Gaps.hGap8,
+                        Expanded(
+                          child: Text(
+                            'cancle_clinic'.tr,
+                            style: TextStyles.semiBold16(
+                              color: colors.errorColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Gaps.vGap10,
+                    Text(
+                      'cancel_clinic_schedule_desc'.tr,
+                      style: TextStyles.medium13(color: colors.lightTextColor),
+                    ),
+                    Gaps.vGap12,
+                    MyDefaultButton(
+                      btnText: 'cancle_clinic',
+                      height: 48.h,
+                      borderRadius: 16,
+                      color: colors.whiteColor,
+                      textColor: colors.errorColor,
+                      borderColor: colors.errorColor,
+                      withDottedBorder: false,
+                      rightIcon: true,
+                      buttonIconType: ButtonIconType.icon,
+                      iconData: Icons.cancel_outlined,
+                      onPressed: () {
+                        Constants.showConfirmDialog(
+                          context: context,
+                          title: 'cancle_clinic'.tr,
+                          content: 'confirm_cancel_clinic_schedule'.tr,
+                          yesButtonColor: colors.errorColor,
+                          onYesPressed: () {
+                            if (!context.mounted) return;
+
+                            final doctorId = context
+                                .read<SessionCubit>()
+                                .state
+                                .activeDoctorId;
+                            final scheduleId = selectedDate.schedule.id
+                                ?.toString();
+
+                            if (doctorId == null ||
+                                doctorId.isEmpty ||
+                                scheduleId == null ||
+                                scheduleId.isEmpty) {
+                              return;
+                            }
+
+                            context.read<DeleteScheduleCubit>().deleteSchedule(
+                              params: DeleteScheduleParams(
+                                doctorId: doctorId,
+                                scheduleId: scheduleId,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
 
               Gaps.vGap20,

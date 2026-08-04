@@ -77,6 +77,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _whatsappNumberController = TextEditingController();
 
   final _minPatientsController = TextEditingController();
+  final _appointmentDaysNumberController = TextEditingController();
 
   final _priceController = TextEditingController();
   final _consultationPriceController = TextEditingController();
@@ -101,6 +102,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _whatsappNumberFocus = FocusNode();
 
   final _minPatientsFocus = FocusNode();
+  final _appointmentDaysNumberFocus = FocusNode();
 
   final _priceFocus = FocusNode();
   final _consultationPriceFocus = FocusNode();
@@ -188,6 +190,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _secretaryPhoneController.text = widget.doctor.secretaryPhone ?? '';
     _whatsappNumberController.text = widget.doctor.whatsappNumber ?? '';
     _minPatientsController.text = widget.doctor.minPatients ?? '';
+    _appointmentDaysNumberController.text =
+        widget.doctor.appointmentDaysNumber ?? '';
     _priceController.text = widget.doctor.price ?? '';
     _consultationPriceController.text = widget.doctor.consultationPrice ?? '';
     hidePrice = widget.doctor.priceHidden ?? false;
@@ -276,6 +280,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _whatsappNumberController.dispose();
 
     _minPatientsController.dispose();
+    _appointmentDaysNumberController.dispose();
     _priceController.dispose();
     _consultationPriceController.dispose();
     _representativeCodeController.dispose();
@@ -290,6 +295,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _secretaryPhoneFocus.dispose();
     _whatsappNumberFocus.dispose();
     _minPatientsFocus.dispose();
+    _appointmentDaysNumberFocus.dispose();
     _priceFocus.dispose();
     _consultationPriceFocus.dispose();
     _representativeCodeFocus.dispose();
@@ -393,6 +399,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         district: selectedDistrict,
         street: selectedStreet,
         minPatients: _minPatientsController.text,
+        appointmentDaysNumber: _appointmentDaysNumberController.text,
         price: _priceController.text,
         consultationPrice: _consultationPriceController.text,
         hidePrice: hidePrice,
@@ -828,30 +835,62 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// min patients
-                    buildLabel("min_patients".tr),
-
-                    Gaps.vGap8,
-
-                    MyTextFormField(
-                      controller: _minPatientsController,
-
-                      focusNode: _minPatientsFocus,
-
-                      textInputAction: TextInputAction.next,
-
-                      onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_priceFocus);
-                      },
-
-                      keyboardType: TextInputType.number,
-
-                      hintText: "enter_min_patients".tr,
-
-                      prefixIcon: Icon(
-                        Icons.groups_outlined,
-                        color: colors.main,
-                      ),
+                    /// min patients & appointment days
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("min_patients".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _minPatientsController,
+                                focusNode: _minPatientsFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  FocusScope.of(
+                                    context,
+                                  ).requestFocus(_appointmentDaysNumberFocus);
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_min_patients".tr,
+                                prefixIcon: Icon(
+                                  Icons.groups_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Gaps.hGap12,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("appointment_days_number".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _appointmentDaysNumberController,
+                                focusNode: _appointmentDaysNumberFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  FocusScope.of(
+                                    context,
+                                  ).requestFocus(_priceFocus);
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_appointment_days_number".tr,
+                                prefixIcon: Icon(
+                                  Icons.calendar_month_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
 
                     Gaps.vGap16,

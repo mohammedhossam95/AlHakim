@@ -9,6 +9,7 @@ import 'package:alhakim/features/doctors/data/datasources/doctors_remote_data_so
 import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/domain/repositories/doctor_repository.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/delete_schedule_params.dart';
 import 'package:dartz/dartz.dart';
 
 class DoctorRepositoryImpl implements DoctorRepository {
@@ -194,6 +195,21 @@ class DoctorRepositoryImpl implements DoctorRepository {
   }) async {
     try {
       final result = await remoteDataSource.reschedule(params: params);
+
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> deleteSchedule({
+    required DeleteScheduleParams params,
+  }) async {
+    try {
+      final result = await remoteDataSource.deleteSchedule(params: params);
 
       return Right(result);
     } on ServerException catch (e) {

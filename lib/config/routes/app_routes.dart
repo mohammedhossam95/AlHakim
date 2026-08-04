@@ -45,6 +45,7 @@ import 'package:alhakim/features/delegate/presentation/screens/update_medical_ce
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/delete_schedule_cubit/delete_schedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/search_doctors_cubit/search_doctors_cubit.dart';
@@ -341,6 +342,7 @@ abstract class Routes {
               create: (context) => sl<GetDoctorAppoinmentsForDayCubit>(),
             ),
             BlocProvider(create: (context) => sl<RescheduleCubit>()),
+            BlocProvider(create: (context) => sl<DeleteScheduleCubit>()),
           ],
           child: const RescheduleAppointmentsScreen(),
         ),
