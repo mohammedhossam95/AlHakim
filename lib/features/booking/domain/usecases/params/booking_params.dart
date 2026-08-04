@@ -2,19 +2,23 @@ class BookingParams {
   final String doctorId;
   final String appointmentDate;
   final int appointmentTypeId;
+  final String? appointmentType;
   final String? familyMemberId;
 
   const BookingParams({
     required this.doctorId,
     required this.appointmentDate,
     required this.appointmentTypeId,
+    this.appointmentType,
     this.familyMemberId,
   });
 
   Map<String, dynamic> toJson() => {
     'doctor_id': doctorId,
     'appointment_date': appointmentDate,
-    'appointment_type_id': appointmentTypeId,
+    'appointment_type': appointmentTypeId,
+    if (appointmentType != null && appointmentType!.isNotEmpty)
+      'appointment_type': appointmentType,
     if (familyMemberId != null && familyMemberId!.isNotEmpty)
       'family_member_id': familyMemberId,
   };
