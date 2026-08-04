@@ -23,6 +23,13 @@
             "deviceId": "69f4dba"
         },
         {
+            "name": "alhakim (Redmi Note 8)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "102034f9"
+        },
+        
+        {
             "name": "alhakim",
             "request": "launch",
             "type": "dart"
@@ -42,10 +49,10 @@
     ],
     "compounds": [
         {
-            "name": "alhakim (iPhone)",
+            "name": "alhakim (two)",
             "configurations": [
                 "alhakim (iPhone 11 Pro Max)",
-                "alhakim (iPhone 17 Pro)"
+                "alhakim (Redmi Note 8)"
             ],
             "stopAll": true
         }

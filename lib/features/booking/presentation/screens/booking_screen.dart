@@ -532,6 +532,11 @@ class _BookingScreenState extends State<BookingScreen> {
                                       appointmentDate: DateFormat(
                                         'yyyy-MM-dd',
                                       ).format(selectedBooking.date),
+                                      appointmentType: selectedType.id == 1
+                                          ? "examination"
+                                          : selectedType.id == 2
+                                          ? "contract"
+                                          : "consultation",
                                       appointmentTypeId: selectedType.id,
                                       familyMemberId: selectedFamilyMember?.id,
                                     ),
