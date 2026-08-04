@@ -252,7 +252,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     btnText: "complete_register",
 
                                     onPressed: () {
-                                      context.push(Routes.mainPageRoute);
+                                      context.go(Routes.mainPageRoute);
                                       // if (_formKey.currentState!.validate()) {
                                       //   final params = AuthParams(
                                       //     name: _nameController.text,

@@ -24,7 +24,7 @@ void handleNotificationNavigation(
           context.pop();
         }
       } else {
-        context.push(Routes.mainPageRoute);
+        context.go(Routes.mainPageRoute);
       }
       break;
     default:

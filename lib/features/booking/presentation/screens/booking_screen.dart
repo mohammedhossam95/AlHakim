@@ -52,17 +52,22 @@ class _BookingScreenState extends State<BookingScreen> {
       if (!mounted) return;
       final doctorId = widget.doctor.id?.trim() ?? '';
       if (doctorId.isEmpty) {
-        _applySchedules(widget.doctor.schedules);
+        _applySchedules(widget.doctor);
         return;
       }
       context.read<GetDoctorByIdCubit>().getDoctorById(doctorId);
     });
   }
 
-  void _applySchedules(List<ScheduleEntity>? schedules) {
+  void _applySchedules(DoctorEntity doctor) {
+    final schedules = doctor.schedules;
+    final limit = doctor.appointmentDaysNumber != null
+        ? int.tryParse(doctor.appointmentDaysNumber ?? '3') ?? 7
+        : 3;
     setState(() {
       availableDates = BookingDatesHelper.generateAvailableDates(
         schedules ?? [],
+        limit: limit,
       );
       selectedDateIndex = 0;
       selectedIndex = 0;
@@ -89,9 +94,9 @@ class _BookingScreenState extends State<BookingScreen> {
       listener: (context, state) {
         if (state is GetDoctorByIdSuccess) {
           displayDoctor = state.doctor;
-          _applySchedules(state.doctor.schedules);
+          _applySchedules(state.doctor);
         } else if (state is GetDoctorByIdError) {
-          _applySchedules(widget.doctor.schedules);
+          _applySchedules(widget.doctor);
           Constants.showSnakToast(
             context: context,
             message: state.message.isNotEmpty

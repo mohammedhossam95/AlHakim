@@ -288,7 +288,7 @@ class _OtpAuthScreenState extends State<OtpAuthScreen> {
               default:
                 context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
 
-                context.pushReplacementNamed(Routes.mainPageRoute);
+                context.go(Routes.mainPageRoute);
                 return;
             }
           }

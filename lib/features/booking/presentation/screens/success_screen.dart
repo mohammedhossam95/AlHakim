@@ -151,7 +151,7 @@ class AppoinmentSuccessScreen extends StatelessWidget {
                     color: colors.main,
                     borderColor: colors.main,
                     onPressed: () {
-                      context.pushReplacement(Routes.mainPageRoute);
+                      context.go(Routes.mainPageRoute);
                     },
                   ),
                 ],

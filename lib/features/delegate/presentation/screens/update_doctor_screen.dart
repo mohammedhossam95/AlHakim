@@ -1,6 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'dart:io'; 
+import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
@@ -634,7 +632,9 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                           _prefillSpecialty(specialties);
 
                           return DropdownButtonFormField<SpecialtyEntity>(
-                            key: ValueKey(selectedSpeciality?.id ?? 'specialty'),
+                            key: ValueKey(
+                              selectedSpeciality?.id ?? 'specialty',
+                            ),
                             initialValue: selectedSpeciality,
                             isExpanded: true,
                             decoration: InputDecoration(

@@ -425,21 +425,18 @@ class _DashboardItem extends StatelessWidget {
 
         children: [
           /// icon
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(14.w),
-
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: .12),
-
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-
-              child: Icon(icon, color: color, size: 24.sp),
+          Container(
+            padding: EdgeInsets.all(14.w),
+            width: ScreenUtil().screenWidth * 0.15,
+            height: ScreenUtil().screenWidth * 0.15,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
+            child: Icon(icon, color: color, size: 24.sp),
           ),
 
-          Gaps.vGap8,
+          Gaps.vGap16,
 
           /// title
           Text(

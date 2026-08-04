@@ -204,9 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         .read<BottomNavBarCubit>()
                                         .changeCurrentScreen(index: 0);
 
-                                    context.pushReplacementNamed(
-                                      Routes.mainPageRoute,
-                                    );
+                                    context.go(Routes.mainPageRoute);
                                     return;
                                 }
                               }
