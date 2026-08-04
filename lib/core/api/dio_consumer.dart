@@ -24,6 +24,11 @@ abstract class ApiConstants {
   static const String hospitalEmergencyNumbers = '/hospital-emergency-numbers';
   static const String emergencyNumberCategories = '/emergency-number-categories';
   static const String appointmentTypes = '/appointment-types';
+
+  static String deleteDoctorSchedule({
+    required String doctorId,
+    required String scheduleId,
+  }) => '/doctors/$doctorId/schedules/$scheduleId';
 }
 
 abstract class DioConsumer {

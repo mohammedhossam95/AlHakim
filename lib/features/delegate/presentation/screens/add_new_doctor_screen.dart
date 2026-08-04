@@ -74,6 +74,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   // final _whatsappCountryCodeController = TextEditingController();
 
   final _minPatientsController = TextEditingController();
+  final _appointmentDaysNumberController = TextEditingController();
   final _priceController = TextEditingController();
   final _consultationPriceController = TextEditingController();
 
@@ -96,6 +97,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   // final _whatsappCountryCodeFocus = FocusNode();
 
   final _minPatientsFocus = FocusNode();
+  final _appointmentDaysNumberFocus = FocusNode();
   final _priceFocus = FocusNode();
   final _consultationPriceFocus = FocusNode();
 
@@ -162,6 +164,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _secretaryPhoneController.dispose();
 
     _minPatientsController.dispose();
+    _appointmentDaysNumberController.dispose();
     _priceController.dispose();
     _consultationPriceController.dispose();
 
@@ -180,6 +183,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _secretaryPhoneFocus.dispose();
 
     _minPatientsFocus.dispose();
+    _appointmentDaysNumberFocus.dispose();
     _priceFocus.dispose();
     _consultationPriceFocus.dispose();
 
@@ -301,6 +305,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
           district: selectedDistrict,
           street: selectedStreet,
           minPatients: _minPatientsController.text,
+          appointmentDaysNumber: _appointmentDaysNumberController.text,
           price: _priceController.text,
           consultationPrice: _consultationPriceController.text,
           representativeCode: isMedicalCenterSource
@@ -706,23 +711,62 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// min patients
-                    buildLabel("min_patients".tr),
-                    Gaps.vGap8,
-
-                    MyTextFormField(
-                      controller: _minPatientsController,
-                      focusNode: _minPatientsFocus,
-                      textInputAction: TextInputAction.next,
-                      onSubmit: (_) {
-                        FocusScope.of(context).requestFocus(_priceFocus);
-                      },
-                      keyboardType: TextInputType.number,
-                      hintText: "enter_min_patients".tr,
-                      prefixIcon: Icon(
-                        Icons.groups_outlined,
-                        color: colors.main,
-                      ),
+                    /// min patients & appointment days
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("min_patients".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _minPatientsController,
+                                focusNode: _minPatientsFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  FocusScope.of(
+                                    context,
+                                  ).requestFocus(_appointmentDaysNumberFocus);
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_min_patients".tr,
+                                prefixIcon: Icon(
+                                  Icons.groups_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Gaps.hGap12,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              buildLabel("appointment_days_number".tr),
+                              Gaps.vGap8,
+                              MyTextFormField(
+                                controller: _appointmentDaysNumberController,
+                                focusNode: _appointmentDaysNumberFocus,
+                                textInputAction: TextInputAction.next,
+                                onSubmit: (_) {
+                                  FocusScope.of(
+                                    context,
+                                  ).requestFocus(_priceFocus);
+                                },
+                                keyboardType: TextInputType.number,
+                                hintText: "enter_appointment_days_number".tr,
+                                prefixIcon: Icon(
+                                  Icons.calendar_month_outlined,
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
 
                     Gaps.vGap16,

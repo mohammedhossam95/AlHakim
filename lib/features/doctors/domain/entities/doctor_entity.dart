@@ -21,6 +21,7 @@ class DoctorEntity extends Equatable {
   final String? createdAt;
   final String? updatedAt;
   final String? minPatients;
+  final String? appointmentDaysNumber;
   final String? representativeCode;
   final bool? priceHidden;
   final String? consultationPrice;
@@ -52,6 +53,7 @@ class DoctorEntity extends Equatable {
     this.createdAt,
     this.updatedAt,
     this.minPatients,
+    this.appointmentDaysNumber,
     this.representativeCode,
     this.priceHidden,
     this.secretaryCountryCode,
@@ -86,6 +88,7 @@ class DoctorEntity extends Equatable {
     createdAt,
     updatedAt,
     minPatients,
+    appointmentDaysNumber,
     representativeCode,
     priceHidden,
     secretaryCountryCode,
