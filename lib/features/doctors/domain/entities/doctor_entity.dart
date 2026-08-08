@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:alhakim/features/booking/domain/entities/appointment_type_entity.dart';
 
 class DoctorEntity extends Equatable {
   final String? id;
@@ -18,6 +19,8 @@ class DoctorEntity extends Equatable {
   final List<LanguageEntity>? languages;
   final DoctorSpecialtyEntity? specialty;
   final List<ScheduleEntity>? schedules;
+  final List<ScheduleExceptionEntity>? scheduleExceptions;
+  final List<AppointmentTypeEntity>? appointmentTypes;
   final String? createdAt;
   final String? updatedAt;
   final String? minPatients;
@@ -50,6 +53,8 @@ class DoctorEntity extends Equatable {
     this.languages,
     this.specialty,
     this.schedules,
+    this.scheduleExceptions,
+    this.appointmentTypes,
     this.createdAt,
     this.updatedAt,
     this.minPatients,
@@ -85,6 +90,8 @@ class DoctorEntity extends Equatable {
     languages,
     specialty,
     schedules,
+    scheduleExceptions,
+    appointmentTypes,
     createdAt,
     updatedAt,
     minPatients,
@@ -166,6 +173,7 @@ class LanguageEntity extends Equatable {
 class DoctorSpecialtyEntity extends Equatable {
   final int? id;
   final String? icon;
+  final dynamic mainSpecialty;
   final int? isActive;
   final int? sortOrder;
   final String? name;
@@ -178,6 +186,7 @@ class DoctorSpecialtyEntity extends Equatable {
   const DoctorSpecialtyEntity({
     this.id,
     this.icon,
+    this.mainSpecialty,
     this.isActive,
     this.sortOrder,
     this.name,
@@ -192,6 +201,7 @@ class DoctorSpecialtyEntity extends Equatable {
   List<Object?> get props => [
     id,
     icon,
+    mainSpecialty,
     isActive,
     sortOrder,
     name,
@@ -210,6 +220,7 @@ class ScheduleEntity extends Equatable {
   final String? startTime;
   final String? endTime;
   final int? slotDuration;
+  final String? scheduleStatus;
 
   const ScheduleEntity({
     this.id,
@@ -218,6 +229,7 @@ class ScheduleEntity extends Equatable {
     this.startTime,
     this.endTime,
     this.slotDuration,
+    this.scheduleStatus,
   });
 
   @override
@@ -228,6 +240,41 @@ class ScheduleEntity extends Equatable {
     startTime,
     endTime,
     slotDuration,
+    scheduleStatus,
+  ];
+}
+
+class ScheduleExceptionEntity extends Equatable {
+  final int? id;
+  final String? doctorId;
+  final String? date;
+  final String? type;
+  final String? startTime;
+  final String? endTime;
+  final int? slotDuration;
+  final String? reason;
+
+  const ScheduleExceptionEntity({
+    this.id,
+    this.doctorId,
+    this.date,
+    this.type,
+    this.startTime,
+    this.endTime,
+    this.slotDuration,
+    this.reason,
+  });
+
+  @override
+  List<Object?> get props => [
+    id,
+    doctorId,
+    date,
+    type,
+    startTime,
+    endTime,
+    slotDuration,
+    reason,
   ];
 }
 

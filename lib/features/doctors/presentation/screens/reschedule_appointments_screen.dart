@@ -5,13 +5,16 @@ import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/core/widgets/tags_text_form_field.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/booking/domain/entities/schedule.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_appoinments_for_day_entity.dart';
-import 'package:alhakim/features/doctors/domain/usecases/params/delete_schedule_params.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/delete_schedule_cubit/delete_schedule_cubit.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/close_clinic_params.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/update_schedule_status_params.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/close_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/update_schedule_status_cubit/update_schedule_status_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,7 +50,11 @@ class _RescheduleAppointmentsScreenState
         sharedPreferences.getAuth()?.doctor?.schedules ??
         [];
 
-    availableDates = BookingDatesHelper.generateAvailableDates(schedules);
+    // Reschedule: one upcoming date per returned schedule day (not the booking limit of 7).
+    availableDates = BookingDatesHelper.generateAvailableDates(
+      schedules,
+      limit: schedules.length,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || availableDates.isEmpty) return;
@@ -116,6 +123,184 @@ class _RescheduleAppointmentsScreenState
     return date.weekday;
   }
 
+  Future<void> _showCancelClinicDialog(
+    AvailableBookingDate selectedDate,
+  ) async {
+    final reasonController = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: Text(
+            'cancle_clinic'.tr,
+            style: TextStyles.semiBold18(),
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'confirm_cancel_clinic_schedule'.tr,
+                style: TextStyles.medium14(color: colors.lightTextColor),
+                textAlign: TextAlign.center,
+              ),
+              Gaps.vGap16,
+              Text('reason'.tr, style: TextStyles.semiBold14()),
+              Gaps.vGap8,
+              AppTextFormField(
+                controller: reasonController,
+                maxLines: 3,
+                hintText: 'enter_reason'.tr,
+                focusNode: FocusNode(),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'reason_required'.tr;
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: MyDefaultButton(
+                    btnText: 'no',
+                    height: 42.h,
+                    withDottedBorder: false,
+                    color: colors.whiteColor,
+                    borderColor: colors.main,
+                    textColor: colors.main,
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                  ),
+                ),
+                Gaps.hGap12,
+                Expanded(
+                  child: MyDefaultButton(
+                    btnText: 'yes',
+                    height: 42.h,
+                    withDottedBorder: false,
+                    color: colors.errorColor,
+                    borderColor: colors.errorColor,
+                    onPressed: () {
+                      final reason = reasonController.text.trim();
+                      if (reason.isEmpty) {
+                        Constants.showSnakToast(
+                          context: dialogContext,
+                          type: 2,
+                          message: 'reason_required'.tr,
+                        );
+                        return;
+                      }
+                      Navigator.pop(dialogContext, true);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+
+    final reason = reasonController.text.trim();
+    reasonController.dispose();
+
+    if (confirmed != true || !mounted) return;
+
+    final doctorId = context.read<SessionCubit>().state.activeDoctorId;
+    if (doctorId == null || doctorId.isEmpty) return;
+
+    context.read<CloseClinicCubit>().closeClinic(
+      params: CloseClinicParams(
+        doctorId: doctorId,
+        date: DateFormat('yyyy-MM-dd').format(selectedDate.date),
+        reason: reason,
+      ),
+    );
+  }
+
+  Future<void> _showStopBookingDialog(AvailableBookingDate selectedDate) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: Text(
+            'stop_booking'.tr,
+            style: TextStyles.semiBold18(),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            'confirm_stop_booking'.tr,
+            style: TextStyles.medium14(color: colors.lightTextColor),
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: MyDefaultButton(
+                    btnText: 'no',
+                    height: 42.h,
+                    withDottedBorder: false,
+                    color: colors.whiteColor,
+                    borderColor: colors.main,
+                    textColor: colors.main,
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                  ),
+                ),
+                Gaps.hGap12,
+                Expanded(
+                  child: MyDefaultButton(
+                    btnText: 'yes',
+                    height: 42.h,
+                    withDottedBorder: false,
+                    color: colors.errorColor,
+                    borderColor: colors.errorColor,
+                    onPressed: () => Navigator.pop(dialogContext, true),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final doctorId = context.read<SessionCubit>().state.activeDoctorId;
+    final scheduleId = selectedDate.schedule.id?.toString();
+
+    if (doctorId == null ||
+        doctorId.isEmpty ||
+        scheduleId == null ||
+        scheduleId.isEmpty) {
+      return;
+    }
+
+    context.read<UpdateScheduleStatusCubit>().updateScheduleStatus(
+      params: UpdateScheduleStatusParams(
+        doctorId: doctorId,
+        scheduleId: scheduleId,
+        scheduleStatus: 'full',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (availableDates.isEmpty) {
@@ -165,13 +350,13 @@ class _RescheduleAppointmentsScreenState
             }
           },
         ),
-        BlocListener<DeleteScheduleCubit, DeleteScheduleState>(
+        BlocListener<CloseClinicCubit, CloseClinicState>(
           listener: (context, state) {
-            if (state is DeleteScheduleLoading) {
+            if (state is CloseClinicLoading) {
               Constants.showLoading(context);
             }
 
-            if (state is DeleteScheduleSuccess) {
+            if (state is CloseClinicSuccess) {
               Constants.hideLoading(context);
 
               Constants.showSnakToast(
@@ -183,7 +368,36 @@ class _RescheduleAppointmentsScreenState
               Navigator.pop(context);
             }
 
-            if (state is DeleteScheduleError) {
+            if (state is CloseClinicError) {
+              Constants.hideLoading(context);
+
+              Constants.showSnakToast(
+                context: context,
+                type: 3,
+                message: state.message,
+              );
+            }
+          },
+        ),
+        BlocListener<UpdateScheduleStatusCubit, UpdateScheduleStatusState>(
+          listener: (context, state) {
+            if (state is UpdateScheduleStatusLoading) {
+              Constants.showLoading(context);
+            }
+
+            if (state is UpdateScheduleStatusSuccess) {
+              Constants.hideLoading(context);
+
+              Constants.showSnakToast(
+                context: context,
+                type: 1,
+                message: state.response.message ?? '',
+              );
+
+              Navigator.pop(context);
+            }
+
+            if (state is UpdateScheduleStatusError) {
               Constants.hideLoading(context);
 
               Constants.showSnakToast(
@@ -346,6 +560,43 @@ class _RescheduleAppointmentsScreenState
                 ),
               ),
 
+              Gaps.vGap10,
+
+              Row(
+                children: [
+                  Expanded(
+                    child: MyDefaultButton(
+                      btnText: 'cancle_clinic',
+                      height: 48.h,
+                      borderRadius: 16,
+                      color: colors.whiteColor,
+                      textColor: colors.errorColor,
+                      borderColor: colors.errorColor,
+                      withDottedBorder: false,
+                      rightIcon: true,
+                      buttonIconType: ButtonIconType.icon,
+                      iconData: Icons.cancel_outlined,
+                      onPressed: () => _showCancelClinicDialog(selectedDate),
+                    ),
+                  ),
+                  Gaps.hGap12,
+                  Expanded(
+                    child: MyDefaultButton(
+                      btnText: 'stop_booking',
+                      height: 48.h,
+                      borderRadius: 16,
+                      // color: colors.whiteColor,
+                      // textColor: colors.errorColor,
+                      // borderColor: colors.errorColor,
+                      withDottedBorder: false,
+                      rightIcon: true,
+                      buttonIconType: ButtonIconType.icon,
+                      iconData: Icons.block_outlined,
+                      onPressed: () => _showStopBookingDialog(selectedDate),
+                    ),
+                  ),
+                ],
+              ),
               Gaps.vGap20,
 
               /// working hours
@@ -742,94 +993,62 @@ class _RescheduleAppointmentsScreenState
                     ),
               ),
 
-              Gaps.vGap20,
+              // Gaps.vGap20,
 
-              /// cancel clinic schedule
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: colors.errorColor.withValues(alpha: .06),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: colors.errorColor.withValues(alpha: .15),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.warning_amber_rounded,
-                          color: colors.errorColor,
-                          size: 22.sp,
-                        ),
-                        Gaps.hGap8,
-                        Expanded(
-                          child: Text(
-                            'cancle_clinic'.tr,
-                            style: TextStyles.semiBold16(
-                              color: colors.errorColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Gaps.vGap10,
-                    Text(
-                      'cancel_clinic_schedule_desc'.tr,
-                      style: TextStyles.medium13(color: colors.lightTextColor),
-                    ),
-                    Gaps.vGap12,
-                    MyDefaultButton(
-                      btnText: 'cancle_clinic',
-                      height: 48.h,
-                      borderRadius: 16,
-                      color: colors.whiteColor,
-                      textColor: colors.errorColor,
-                      borderColor: colors.errorColor,
-                      withDottedBorder: false,
-                      rightIcon: true,
-                      buttonIconType: ButtonIconType.icon,
-                      iconData: Icons.cancel_outlined,
-                      onPressed: () {
-                        Constants.showConfirmDialog(
-                          context: context,
-                          title: 'cancle_clinic'.tr,
-                          content: 'confirm_cancel_clinic_schedule'.tr,
-                          yesButtonColor: colors.errorColor,
-                          onYesPressed: () {
-                            if (!context.mounted) return;
-
-                            final doctorId = context
-                                .read<SessionCubit>()
-                                .state
-                                .activeDoctorId;
-                            final scheduleId = selectedDate.schedule.id
-                                ?.toString();
-
-                            if (doctorId == null ||
-                                doctorId.isEmpty ||
-                                scheduleId == null ||
-                                scheduleId.isEmpty) {
-                              return;
-                            }
-
-                            context.read<DeleteScheduleCubit>().deleteSchedule(
-                              params: DeleteScheduleParams(
-                                doctorId: doctorId,
-                                scheduleId: scheduleId,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
+              // /// cancel clinic schedule
+              // Container(
+              //   width: double.infinity,
+              //   padding: EdgeInsets.all(16.w),
+              //   decoration: BoxDecoration(
+              //     color: colors.errorColor.withValues(alpha: .06),
+              //     borderRadius: BorderRadius.circular(20.r),
+              //     border: Border.all(
+              //       color: colors.errorColor.withValues(alpha: .15),
+              //     ),
+              //   ),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Row(
+              //         children: [
+              //           Icon(
+              //             Icons.warning_amber_rounded,
+              //             color: colors.errorColor,
+              //             size: 22.sp,
+              //           ),
+              //           Gaps.hGap8,
+              //           Expanded(
+              //             child: Text(
+              //               'cancle_clinic'.tr,
+              //               style: TextStyles.semiBold16(
+              //                 color: colors.errorColor,
+              //               ),
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //       Gaps.vGap10,
+              //       Text(
+              //         'cancel_clinic_schedule_desc'.tr,
+              //         style: TextStyles.medium13(color: colors.lightTextColor),
+              //       ),
+              //       Gaps.vGap12,
+              //       MyDefaultButton(
+              //         btnText: 'cancle_clinic',
+              //         height: 48.h,
+              //         borderRadius: 16,
+              //         color: colors.whiteColor,
+              //         textColor: colors.errorColor,
+              //         borderColor: colors.errorColor,
+              //         withDottedBorder: false,
+              //         rightIcon: true,
+              //         buttonIconType: ButtonIconType.icon,
+              //         iconData: Icons.cancel_outlined,
+              //         onPressed: () => _showCancelClinicDialog(selectedDate),
+              //       ),
+              //     ],
+              //   ),
+              // ),
               Gaps.vGap20,
 
               MyDefaultButton(

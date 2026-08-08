@@ -108,7 +108,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: 'settings_and_support'.tr,
                       child: Column(
                         children: [
-                          if (sessionState.status == SessionStatus.guest)
+                          if (sessionState.status !=
+                              SessionStatus.authenticated)
                             ProfileWidet(
                               title: 'login_as_delegate'.tr,
                               icon: SvgAssets.user,

@@ -25,6 +25,7 @@ class AddDoctorParams extends Equatable {
 
   final String? minPatients;
   final String? appointmentDaysNumber;
+  final List<int>? appointmentTypeIds;
   final String? representativeCode;
   final String? price;
   final String? consultationPrice;
@@ -54,6 +55,7 @@ class AddDoctorParams extends Equatable {
     this.secretaryPhone,
     this.minPatients,
     this.appointmentDaysNumber,
+    this.appointmentTypeIds,
     this.representativeCode,
     this.price,
     this.consultationPrice,
@@ -88,6 +90,7 @@ class AddDoctorParams extends Equatable {
     secretaryPhone,
     minPatients,
     appointmentDaysNumber,
+    appointmentTypeIds,
     representativeCode,
     price,
     consultationPrice,

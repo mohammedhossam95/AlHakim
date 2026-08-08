@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
@@ -10,7 +12,12 @@ import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/booking/domain/entities/appointment_type_entity.dart';
+import 'package:alhakim/features/booking/presentation/cubit/get_appointment_types_cubit/get_appointment_types_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/widgets/appointment_days_number_bottom_sheet.dart';
+import 'package:alhakim/features/delegate/presentation/widgets/select_appointment_types_bottom_sheet.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_doctor_cubit/update_doctor_cubit.dart';
 import 'package:alhakim/features/specialities/domain/entities/specialty_entity.dart';
 import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
@@ -36,9 +43,9 @@ class DoctorScheduleModel {
 }
 
 class UpdateDoctorScreen extends StatefulWidget {
-  final DoctorEntity doctor;
+  final String doctorId;
 
-  const UpdateDoctorScreen({super.key, required this.doctor});
+  const UpdateDoctorScreen({super.key, required this.doctorId});
 
   @override
   State<UpdateDoctorScreen> createState() => _UpdateDoctorScreenState();
@@ -47,15 +54,16 @@ class UpdateDoctorScreen extends StatefulWidget {
 class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _formKey = GlobalKey<FormState>();
   final List<DoctorScheduleModel> schedules = [];
+  DoctorEntity? _doctor;
 
   final List<Map<String, dynamic>> weekDays = [
+    {"title": "السبت", "value": 6},
     {"title": "الأحد", "value": 0},
     {"title": "الإثنين", "value": 1},
     {"title": "الثلاثاء", "value": 2},
     {"title": "الأربعاء", "value": 3},
     {"title": "الخميس", "value": 4},
     {"title": "الجمعة", "value": 5},
-    {"title": "السبت", "value": 6},
   ];
 
   /// Controllers
@@ -75,7 +83,6 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _whatsappNumberController = TextEditingController();
 
   final _minPatientsController = TextEditingController();
-  final _appointmentDaysNumberController = TextEditingController();
 
   final _priceController = TextEditingController();
   final _consultationPriceController = TextEditingController();
@@ -100,7 +107,6 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _whatsappNumberFocus = FocusNode();
 
   final _minPatientsFocus = FocusNode();
-  final _appointmentDaysNumberFocus = FocusNode();
 
   final _priceFocus = FocusNode();
   final _consultationPriceFocus = FocusNode();
@@ -108,6 +114,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _representativeCodeFocus = FocusNode();
 
   SpecialtyEntity? selectedSpeciality;
+  List<AppointmentTypeEntity> selectedAppointmentTypes = [];
   LatLng? selectedLocation;
   String? selectedCity;
   String? selectedDistrict;
@@ -145,7 +152,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   }
 
   String _buildAddressFromLocation() {
-    final location = widget.doctor.location;
+    final location = _doctor?.location;
     final parts = [
       location?.street,
       location?.district,
@@ -156,7 +163,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
   void _prefillSpecialty(List<SpecialtyEntity> specialties) {
     if (selectedSpeciality != null) return;
-    final specialtyId = widget.doctor.specialty?.id;
+    final specialtyId = _doctor?.specialty?.id;
     if (specialtyId == null) return;
     SpecialtyEntity? matched;
     for (final item in specialties) {
@@ -177,53 +184,58 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     super.initState();
     getCountry();
     context.read<GetSpecialtiesCubit>().getSpecialties();
+    context.read<GetDoctorByIdCubit>().getDoctorById(widget.doctorId);
+  }
 
-    _nameArController.text = widget.doctor.name?.ar?.toString() ?? '';
-    _nameEnController.text = widget.doctor.name?.en?.toString() ?? '';
-    _bioArController.text = widget.doctor.bio?.ar?.toString() ?? '';
-    _bioEnController.text = widget.doctor.bio?.en?.toString() ?? '';
+  void _populateDoctor(DoctorEntity doctor) {
+    _doctor = doctor;
+    _nameArController.text = doctor.name?.ar?.toString() ?? '';
+    _nameEnController.text = doctor.name?.en?.toString() ?? '';
+    _bioArController.text = doctor.bio?.ar?.toString() ?? '';
+    _bioEnController.text = doctor.bio?.en?.toString() ?? '';
     _professionalNumberController.text =
-        widget.doctor.professionalRegistrationNumber ?? '';
-    _academicDegreeController.text = widget.doctor.academicDegree ?? '';
-    _secretaryPhoneController.text = widget.doctor.secretaryPhone ?? '';
-    _whatsappNumberController.text = widget.doctor.whatsappNumber ?? '';
-    _minPatientsController.text = widget.doctor.minPatients ?? '';
-    _appointmentDaysNumberController.text =
-        widget.doctor.appointmentDaysNumber ?? '';
-    _priceController.text = widget.doctor.price ?? '';
-    _consultationPriceController.text = widget.doctor.consultationPrice ?? '';
-    hidePrice = widget.doctor.priceHidden ?? false;
-    hideConsultationPrice = widget.doctor.consultationPriceHidden ?? false;
-    _representativeCodeController.text = widget.doctor.representativeCode ?? '';
-    existingLicenseName = _fileNameFromUrl(widget.doctor.license);
+        doctor.professionalRegistrationNumber ?? '';
+    _academicDegreeController.text = doctor.academicDegree ?? '';
+    _secretaryPhoneController.text = doctor.secretaryPhone ?? '';
+    _whatsappNumberController.text = doctor.whatsappNumber ?? '';
+    _minPatientsController.text = doctor.minPatients ?? '';
+    selectedAppointmentTypes = List<AppointmentTypeEntity>.from(
+      doctor.appointmentTypes ?? [],
+    );
+    _priceController.text = doctor.price ?? '';
+    _consultationPriceController.text = doctor.consultationPrice ?? '';
+    hidePrice = doctor.priceHidden ?? false;
+    hideConsultationPrice = doctor.consultationPriceHidden ?? false;
+    _representativeCodeController.text = doctor.representativeCode ?? '';
+    existingLicenseName = _fileNameFromUrl(doctor.license);
 
-    if (widget.doctor.secretaryCountryCode != null &&
-        widget.doctor.secretaryCountryCode!.isNotEmpty) {
+    if (doctor.secretaryCountryCode != null &&
+        doctor.secretaryCountryCode!.isNotEmpty) {
       try {
         _selectedCountry = CountryParser.parsePhoneCode(
-          widget.doctor.secretaryCountryCode!.replaceAll('+', ''),
+          doctor.secretaryCountryCode!.replaceAll('+', ''),
         );
       } catch (_) {}
     }
 
-    if (widget.doctor.whatsappCountryCode != null &&
-        widget.doctor.whatsappCountryCode!.isNotEmpty) {
+    if (doctor.whatsappCountryCode != null &&
+        doctor.whatsappCountryCode!.isNotEmpty) {
       try {
         _whatsappCountry = CountryParser.parsePhoneCode(
-          widget.doctor.whatsappCountryCode!.replaceAll('+', ''),
+          doctor.whatsappCountryCode!.replaceAll('+', ''),
         );
       } catch (_) {}
     }
 
-    selectedCity = widget.doctor.location?.city;
-    selectedDistrict = widget.doctor.location?.district;
-    selectedStreet = widget.doctor.location?.street;
+    selectedCity = doctor.location?.city;
+    selectedDistrict = doctor.location?.district;
+    selectedStreet = doctor.location?.street;
 
     final lat = double.tryParse(
-      widget.doctor.latitude ?? widget.doctor.location?.latitude ?? '',
+      doctor.latitude ?? doctor.location?.latitude ?? '',
     );
     final lng = double.tryParse(
-      widget.doctor.longitude ?? widget.doctor.location?.longitude ?? '',
+      doctor.longitude ?? doctor.location?.longitude ?? '',
     );
     if (lat != null && lng != null) {
       selectedLocation = LatLng(lat, lng);
@@ -237,9 +249,9 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
           '${selectedLocation!.latitude}, ${selectedLocation!.longitude}';
     }
 
-    if (widget.doctor.schedules != null &&
-        widget.doctor.schedules!.isNotEmpty) {
-      for (final schedule in widget.doctor.schedules!) {
+    schedules.clear();
+    if (doctor.schedules != null && doctor.schedules!.isNotEmpty) {
+      for (final schedule in doctor.schedules!) {
         final item = DoctorScheduleModel();
         item.dayOfWeek = schedule.dayOfWeek;
         item.startTimeController.text = schedule.startTime ?? '';
@@ -260,6 +272,24 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _whatsappCountry = CountryParser.parsePhoneCode('20');
   }
 
+  List<Map<String, dynamic>> availableDaysFor(int index) {
+    final takenDays = schedules
+        .asMap()
+        .entries
+        .where((e) => e.key != index && e.value.dayOfWeek != null)
+        .map((e) => e.value.dayOfWeek)
+        .toSet();
+
+    return weekDays.where((day) => !takenDays.contains(day['value'])).toList();
+  }
+
+  bool get canAddSchedule =>
+      schedules.length < weekDays.length &&
+      schedules.every((e) => e.dayOfWeek != null);
+
+  int get selectedSchedulesCount =>
+      schedules.where((e) => e.dayOfWeek != null).length;
+
   @override
   void dispose() {
     _nameArController.dispose();
@@ -278,7 +308,6 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _whatsappNumberController.dispose();
 
     _minPatientsController.dispose();
-    _appointmentDaysNumberController.dispose();
     _priceController.dispose();
     _consultationPriceController.dispose();
     _representativeCodeController.dispose();
@@ -293,7 +322,6 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _secretaryPhoneFocus.dispose();
     _whatsappNumberFocus.dispose();
     _minPatientsFocus.dispose();
-    _appointmentDaysNumberFocus.dispose();
     _priceFocus.dispose();
     _consultationPriceFocus.dispose();
     _representativeCodeFocus.dispose();
@@ -328,9 +356,12 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   Future<void> pickProfileImage() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
 
-    if (result != null) {
+    if (result != null && result.files.single.path != null) {
+      final persisted = await Constants.persistPickedFile(
+        File(result.files.single.path!),
+      );
       setState(() {
-        profileImage = File(result.files.single.path!);
+        profileImage = persisted;
       });
     }
   }
@@ -338,14 +369,49 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   Future<void> pickLicenseFile() async {
     final result = await FilePicker.platform.pickFiles();
 
-    if (result != null) {
+    if (result != null && result.files.single.path != null) {
+      final persisted = await Constants.persistPickedFile(
+        File(result.files.single.path!),
+      );
       setState(() {
-        licenseFile = File(result.files.single.path!);
+        licenseFile = persisted;
       });
     }
   }
 
   void submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (selectedAppointmentTypes.isEmpty) {
+      Constants.showSnakToast(
+        context: context,
+        message: 'must_select_at_least_one_appointment_type'.tr,
+        type: 2,
+      );
+      return;
+    }
+
+    if (selectedSchedulesCount < 1) {
+      Constants.showSnakToast(
+        context: context,
+        message: 'must_add_schedule_before_submit'.tr,
+        type: 2,
+      );
+      return;
+    }
+
+    final appointmentDays = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) =>
+          AppointmentDaysNumberBottomSheet(maxDays: selectedSchedulesCount),
+    );
+
+    if (appointmentDays == null || !mounted) return;
+    await _updateDoctor(appointmentDays.toString());
+  }
+
+  Future<void> _updateDoctor(String appointmentDaysNumber) async {
     final secretaryPhone = await Constants.phoneParsing(
       phone: _secretaryPhoneController.text,
       countryCode: _selectedCountry.countryCode,
@@ -371,7 +437,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     if (!context.mounted) return;
     context.read<UpdateDoctorCubit>().updateDoctor(
       params: AddDoctorParams(
-        id: widget.doctor.id,
+        id: _doctor?.id,
 
         nameAr: _nameArController.text,
         nameEn: _nameEnController.text,
@@ -397,7 +463,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         district: selectedDistrict,
         street: selectedStreet,
         minPatients: _minPatientsController.text,
-        appointmentDaysNumber: _appointmentDaysNumberController.text,
+        appointmentDaysNumber: appointmentDaysNumber,
+        appointmentTypeIds: selectedAppointmentTypes.map((e) => e.id).toList(),
         price: _priceController.text,
         consultationPrice: _consultationPriceController.text,
         hidePrice: hidePrice,
@@ -421,6 +488,33 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_doctor == null) {
+      return Scaffold(
+        backgroundColor: colors.backGround,
+        appBar: AppBar(title: Text("update_doctor".tr)),
+        body: BlocConsumer<GetDoctorByIdCubit, GetDoctorByIdState>(
+          listener: (context, state) {
+            if (state is GetDoctorByIdSuccess) {
+              setState(() => _populateDoctor(state.doctor));
+            }
+          },
+          builder: (context, state) {
+            if (state is GetDoctorByIdError) {
+              return Center(
+                child: TextButton(
+                  onPressed: () => context
+                      .read<GetDoctorByIdCubit>()
+                      .getDoctorById(widget.doctorId),
+                  child: Text(state.message),
+                ),
+              );
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: colors.backGround,
 
@@ -484,15 +578,13 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                               backgroundImage: profileImage != null
                                   ? FileImage(profileImage!)
-                                  : widget.doctor.profileImage != null
-                                  ? NetworkImage(
-                                      widget.doctor.profileImage ?? '',
-                                    )
+                                  : _doctor?.profileImage != null
+                                  ? NetworkImage(_doctor?.profileImage ?? '')
                                   : null,
 
                               child:
                                   profileImage == null &&
-                                      widget.doctor.profileImage == null
+                                      _doctor?.profileImage == null
                                   ? Icon(
                                       Icons.person,
                                       size: 40.sp,
@@ -835,62 +927,90 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// min patients & appointment days
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              buildLabel("min_patients".tr),
-                              Gaps.vGap8,
-                              MyTextFormField(
-                                controller: _minPatientsController,
-                                focusNode: _minPatientsFocus,
-                                textInputAction: TextInputAction.next,
-                                onSubmit: (_) {
-                                  FocusScope.of(
-                                    context,
-                                  ).requestFocus(_appointmentDaysNumberFocus);
-                                },
-                                keyboardType: TextInputType.number,
-                                hintText: "enter_min_patients".tr,
-                                prefixIcon: Icon(
-                                  Icons.groups_outlined,
-                                  color: colors.main,
+                    /// min patients
+                    buildLabel("min_patients".tr),
+                    Gaps.vGap8,
+                    MyTextFormField(
+                      controller: _minPatientsController,
+                      focusNode: _minPatientsFocus,
+                      textInputAction: TextInputAction.next,
+                      onSubmit: (_) {
+                        FocusScope.of(context).requestFocus(_priceFocus);
+                      },
+                      keyboardType: TextInputType.number,
+                      hintText: "enter_min_patients".tr,
+                      prefixIcon: Icon(
+                        Icons.groups_outlined,
+                        color: colors.main,
+                      ),
+                    ),
+
+                    Gaps.vGap16,
+
+                    /// appointment types
+                    buildLabel("appointment_types".tr),
+                    Gaps.vGap8,
+                    GestureDetector(
+                      onTap: () async {
+                        final result =
+                            await showModalBottomSheet<
+                              List<AppointmentTypeEntity>
+                            >(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => BlocProvider(
+                                create: (_) =>
+                                    ServiceLocator.instance<
+                                      GetAppointmentTypesCubit
+                                    >(),
+                                child: SelectAppointmentTypesBottomSheet(
+                                  selectedTypes: selectedAppointmentTypes,
                                 ),
                               ),
-                            ],
+                            );
+                        if (result != null) {
+                          setState(() => selectedAppointmentTypes = result);
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.whiteColor,
+                          borderRadius: BorderRadius.circular(18.r),
+                          border: Border.all(
+                            color: colors.main.withValues(alpha: 0.12),
                           ),
                         ),
-                        Gaps.hGap12,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              buildLabel("appointment_days_number".tr),
-                              Gaps.vGap8,
-                              MyTextFormField(
-                                controller: _appointmentDaysNumberController,
-                                focusNode: _appointmentDaysNumberFocus,
-                                textInputAction: TextInputAction.next,
-                                onSubmit: (_) {
-                                  FocusScope.of(
-                                    context,
-                                  ).requestFocus(_priceFocus);
-                                },
-                                keyboardType: TextInputType.number,
-                                hintText: "enter_appointment_days_number".tr,
-                                prefixIcon: Icon(
-                                  Icons.calendar_month_outlined,
-                                  color: colors.main,
+                        child: selectedAppointmentTypes.isEmpty
+                            ? Text(
+                                "select_appointment_types".tr,
+                                style: TextStyles.medium14(
+                                  color: colors.lightTextColor,
                                 ),
+                              )
+                            : Wrap(
+                                spacing: 6.w,
+                                runSpacing: 6.h,
+                                children: selectedAppointmentTypes
+                                    .map(
+                                      (type) => Chip(
+                                        label: Text(type.name),
+                                        backgroundColor: colors.main.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        labelStyle: TextStyles.medium12(
+                                          color: colors.main,
+                                        ),
+                                        side: BorderSide.none,
+                                      ),
+                                    )
+                                    .toList(),
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
 
                     Gaps.vGap16,
@@ -1212,7 +1332,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                                   style: TextStyles.medium14(),
                                 ),
 
-                                items: weekDays
+                                items: availableDaysFor(index)
                                     .map(
                                       (e) => DropdownMenuItem<int>(
                                         value: e['value'],
@@ -1306,45 +1426,51 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                     ),
 
                     /// add new schedule
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          schedules.add(DoctorScheduleModel());
-                        });
-                      },
+                    if (canAddSchedule)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            schedules.add(DoctorScheduleModel());
+                          });
+                        },
 
-                      child: Container(
-                        width: double.infinity,
+                        child: Container(
+                          width: double.infinity,
 
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
 
-                        decoration: BoxDecoration(
-                          color: colors.main.withValues(alpha: .08),
+                          decoration: BoxDecoration(
+                            color: colors.main.withValues(alpha: .08),
 
-                          borderRadius: BorderRadius.circular(18.r),
+                            borderRadius: BorderRadius.circular(18.r),
 
-                          border: Border.all(
-                            color: colors.main.withValues(alpha: .2),
+                            border: Border.all(
+                              color: colors.main.withValues(alpha: .2),
+                            ),
+                          ),
+
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+
+                            children: [
+                              Icon(
+                                Icons.add_circle_outline,
+                                color: colors.main,
+                              ),
+
+                              Gaps.hGap8,
+
+                              Text(
+                                "add_new_schedule".tr,
+
+                                style: TextStyles.semiBold14(
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Icon(Icons.add_circle_outline, color: colors.main),
-
-                            Gaps.hGap8,
-
-                            Text(
-                              "add_new_schedule".tr,
-
-                              style: TextStyles.semiBold14(color: colors.main),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
 
                     Gaps.vGap30,
 

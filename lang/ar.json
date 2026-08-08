@@ -262,6 +262,10 @@
   "select_appointment_type": "اختر نوع الحجز",
   "select_appointment_type_desc": "حدد نوع الحجز قبل التأكيد",
   "no_appointment_types": "لا توجد أنواع متاحة",
+  "appointment_types": "أنواع الحجز",
+  "select_appointment_types": "اختر أنواع الحجز",
+  "select_appointment_types_desc": "اختر الأنواع المتاحة للحجز عند هذا الطبيب",
+  "must_select_at_least_one_appointment_type": "يجب اختيار نوع حجز واحد على الأقل",
   "family_members": "أفراد العائلة",
   "manage_family": "إدارة التابعين",
   "manage_family_desc": "أضف أفراد عائلتك",
@@ -362,6 +366,8 @@
   "enter_min_patients": "ادخل الحد الأدنى للمرضى",
   "appointment_days_number": "عدد أيام الحجز",
   "enter_appointment_days_number": "ادخل عدد أيام الحجز",
+  "appointment_days_number_desc": "اختر عدد أيام الحجز من 1 إلى {max} حسب أيام المواعيد المضافة",
+  "must_add_schedule_before_submit": "يجب إضافة موعد واحد على الأقل مع اختيار اليوم",
   "price": "سعر الكشف",
   "enter_price": "ادخل سعر الكشف",
   "consultation_price": "سعر الاستشارة",
@@ -532,5 +538,11 @@
   "schedule_refresh_failed": "تعذر تحديث مواعيد الطبيب",
   "appointment_type":"نوع الحجز",
   "cancel_clinic_schedule_desc": "سيتم إلغاء جميع المواعيد الخاصة بهذا اليوم، وسيتم إشعار جميع المرضى تلقائيًا.",
-  "confirm_cancel_clinic_schedule": "هل أنت متأكد من إلغاء العيادة؟ سيتم إلغاء جميع المواعيد الخاصة بهذا اليوم وإشعار المرضى تلقائيًا."
+  "confirm_cancel_clinic_schedule": "هل أنت متأكد من إلغاء العيادة؟ سيتم إلغاء جميع المواعيد الخاصة بهذا اليوم وإشعار المرضى تلقائيًا.",
+  "close_clinic_reason": "الدكتور لن يحضر اليوم",
+  "reason": "السبب",
+  "enter_reason": "اكتب سبب إلغاء العيادة",
+  "reason_required": "يجب إدخال السبب",
+  "stop_booking": "إيقاف الحجز",
+  "confirm_stop_booking": "هل أنت متأكد من إيقاف الحجز لهذا اليوم؟"
 }

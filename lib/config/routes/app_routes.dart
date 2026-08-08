@@ -44,12 +44,13 @@ import 'package:alhakim/features/delegate/presentation/screens/update_doctor_scr
 import 'package:alhakim/features/delegate/presentation/screens/update_medical_center_screen.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/close_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/delete_schedule_cubit/delete_schedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/search_doctors_cubit/search_doctors_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_doctor_cubit/update_doctor_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/update_schedule_status_cubit/update_schedule_status_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen.dart';
 import 'package:alhakim/features/doctors/presentation/screens/reschedule_appointments_screen.dart';
 import 'package:alhakim/features/doctors/presentation/screens/search_doctors_screen.dart';
@@ -239,9 +240,10 @@ abstract class Routes {
             child: MultiBlocProvider(
               providers: [
                 BlocProvider(create: (context) => sl<GetSpecialtiesCubit>()),
+                BlocProvider(create: (context) => sl<GetDoctorByIdCubit>()),
                 BlocProvider(create: (context) => sl<UpdateDoctorCubit>()),
               ],
-              child: UpdateDoctorScreen(doctor: doctor),
+              child: UpdateDoctorScreen(doctorId: doctor.id ?? ''),
             ),
           );
         },
@@ -342,7 +344,8 @@ abstract class Routes {
               create: (context) => sl<GetDoctorAppoinmentsForDayCubit>(),
             ),
             BlocProvider(create: (context) => sl<RescheduleCubit>()),
-            BlocProvider(create: (context) => sl<DeleteScheduleCubit>()),
+            BlocProvider(create: (context) => sl<CloseClinicCubit>()),
+            BlocProvider(create: (context) => sl<UpdateScheduleStatusCubit>()),
           ],
           child: const RescheduleAppointmentsScreen(),
         ),
@@ -378,9 +381,8 @@ abstract class Routes {
 
           return BlocProvider(
             create: (context) =>
-                sl<GetQueueStatusCubit>()..getQueueStatus(
-                  appointmentId: appointment.id.toString(),
-                ),
+                sl<GetQueueStatusCubit>()
+                  ..getQueueStatus(appointmentId: appointment.id.toString()),
             child: FollowUpQueueScreen(appointment: appointment),
           );
         },
@@ -686,8 +688,8 @@ AppointmentEntity? _resolveFollowUpAppointmentArgs(
 
     return AppointmentEntity(
       id: parsedId,
-      appointmentDate:
-          (map['appointment_date'] ?? map['appointmentDate'])?.toString(),
+      appointmentDate: (map['appointment_date'] ?? map['appointmentDate'])
+          ?.toString(),
       appointmentType: map['appointment_type']?.toString(),
       appointmentTypeText: map['appointment_type_text']?.toString(),
       status: map['status']?.toString(),

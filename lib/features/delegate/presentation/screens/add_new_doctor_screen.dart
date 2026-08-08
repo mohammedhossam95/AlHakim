@@ -11,6 +11,10 @@ import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/booking/domain/entities/appointment_type_entity.dart';
+import 'package:alhakim/features/booking/presentation/cubit/get_appointment_types_cubit/get_appointment_types_cubit.dart';
+import 'package:alhakim/features/delegate/presentation/widgets/appointment_days_number_bottom_sheet.dart';
+import 'package:alhakim/features/delegate/presentation/widgets/select_appointment_types_bottom_sheet.dart';
 import 'package:alhakim/features/doctors/domain/entities/profile_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/specialities/domain/entities/specialty_entity.dart';
@@ -74,7 +78,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   // final _whatsappCountryCodeController = TextEditingController();
 
   final _minPatientsController = TextEditingController();
-  final _appointmentDaysNumberController = TextEditingController();
   final _priceController = TextEditingController();
   final _consultationPriceController = TextEditingController();
 
@@ -97,7 +100,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   // final _whatsappCountryCodeFocus = FocusNode();
 
   final _minPatientsFocus = FocusNode();
-  final _appointmentDaysNumberFocus = FocusNode();
   final _priceFocus = FocusNode();
   final _consultationPriceFocus = FocusNode();
 
@@ -107,14 +109,15 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   final bool _isLoadingLocation = false;
 
   SpecialtyEntity? selectedSpeciality;
+  List<AppointmentTypeEntity> selectedAppointmentTypes = [];
   final List<Map<String, dynamic>> weekDays = [
+    {"title": "السبت", "value": 6},
     {"title": "الأحد", "value": 0},
     {"title": "الإثنين", "value": 1},
     {"title": "الثلاثاء", "value": 2},
     {"title": "الأربعاء", "value": 3},
     {"title": "الخميس", "value": 4},
     {"title": "الجمعة", "value": 5},
-    {"title": "السبت", "value": 6},
   ];
   File? profileImage;
   File? licenseFile;
@@ -140,6 +143,24 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _whatsappCountry = CountryParser.parsePhoneCode('20');
   }
 
+  List<Map<String, dynamic>> availableDaysFor(int index) {
+    final takenDays = schedules
+        .asMap()
+        .entries
+        .where((e) => e.key != index && e.value.dayOfWeek != null)
+        .map((e) => e.value.dayOfWeek)
+        .toSet();
+
+    return weekDays.where((day) => !takenDays.contains(day['value'])).toList();
+  }
+
+  bool get canAddSchedule =>
+      schedules.length < weekDays.length &&
+      schedules.every((e) => e.dayOfWeek != null);
+
+  int get selectedSchedulesCount =>
+      schedules.where((e) => e.dayOfWeek != null).length;
+
   @override
   void initState() {
     super.initState();
@@ -164,7 +185,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _secretaryPhoneController.dispose();
 
     _minPatientsController.dispose();
-    _appointmentDaysNumberController.dispose();
     _priceController.dispose();
     _consultationPriceController.dispose();
 
@@ -183,7 +203,6 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _secretaryPhoneFocus.dispose();
 
     _minPatientsFocus.dispose();
-    _appointmentDaysNumberFocus.dispose();
     _priceFocus.dispose();
     _consultationPriceFocus.dispose();
 
@@ -195,9 +214,12 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   Future<void> pickProfileImage() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
 
-    if (result != null) {
+    if (result != null && result.files.single.path != null) {
+      final persisted = await Constants.persistPickedFile(
+        File(result.files.single.path!),
+      );
       setState(() {
-        profileImage = File(result.files.single.path!);
+        profileImage = persisted;
       });
     }
   }
@@ -205,9 +227,12 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   Future<void> pickLicenseFile() async {
     final result = await FilePicker.platform.pickFiles();
 
-    if (result != null) {
+    if (result != null && result.files.single.path != null) {
+      final persisted = await Constants.persistPickedFile(
+        File(result.files.single.path!),
+      );
       setState(() {
-        licenseFile = File(result.files.single.path!);
+        licenseFile = persisted;
       });
     }
   }
@@ -237,103 +262,123 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   }
 
   void submit() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      final isMedicalCenterSource =
-          widget.source == DoctorFormSource.medicalCenter;
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
 
-      if (isMedicalCenterSource && widget.medicalCenterProfile == null) {
-        Constants.showSnakToast(
-          context: context,
-          message: 'error_occurred'.tr,
-          type: 3,
-        );
-        return;
-      }
-
-      String? clinicPhone;
-      String? secretaryPhone;
-      String? clinicCountryCode;
-      String? secretaryCountryCode;
-
-      if (isMedicalCenterSource) {
-        final profile = widget.medicalCenterProfile!;
-        clinicPhone = profile.phone;
-        secretaryPhone = profile.phone;
-        clinicCountryCode = profile.countryCode;
-        secretaryCountryCode = profile.countryCode;
-      } else {
-        secretaryPhone = await Constants.phoneParsing(
-          phone: _secretaryPhoneController.text,
-          countryCode: _selectedCountry.countryCode,
-          withCode: false,
-        );
-        clinicPhone = secretaryPhone;
-        clinicCountryCode = "+${_selectedCountry.phoneCode}";
-        secretaryCountryCode = clinicCountryCode;
-      }
-
-      String? whatsappNumber;
-      String? whatsappCountryCode;
-      if (_whatsappNumberController.text.isNotEmpty) {
-        whatsappNumber = await Constants.phoneParsing(
-          phone: _whatsappNumberController.text,
-          countryCode: _whatsappCountry.countryCode,
-          withCode: false,
-        );
-        whatsappCountryCode = "+${_whatsappCountry.phoneCode}";
-      }
-
-      if (!context.mounted) return;
-      if (!mounted) return;
-      context.read<AddDoctorCubit>().addDoctor(
-        AddDoctorParams(
-          nameAr: _nameArController.text,
-          nameEn: _nameEnController.text,
-          bioAr: _bioArController.text,
-          bioEn: _bioEnController.text,
-          specialtyId: selectedSpeciality?.id,
-          professionalRegistrationNumber: _professionalNumberController.text,
-          academicDegree: _academicDegreeController.text,
-          clinicPhone: clinicPhone,
-          secretaryPhone: secretaryPhone,
-          whatsappNumber: whatsappNumber,
-          whatsappCountryCode: whatsappCountryCode,
-          latitude: selectedLocation?.latitude.toString(),
-          longitude: selectedLocation?.longitude.toString(),
-          city: selectedCity,
-          district: selectedDistrict,
-          street: selectedStreet,
-          minPatients: _minPatientsController.text,
-          appointmentDaysNumber: _appointmentDaysNumberController.text,
-          price: _priceController.text,
-          consultationPrice: _consultationPriceController.text,
-          representativeCode: isMedicalCenterSource
-              ? null
-              : _representativeCodeController.text,
-          medicalCenterId: isMedicalCenterSource
-              ? int.parse(widget.medicalCenterProfile?.id ?? '0')
-              : null,
-          profileImage: profileImage,
-          license: licenseFile,
-          schedules: schedules.map((e) {
-            return {
-              "day_of_week": e.dayOfWeek,
-
-              "start_time": e.startTimeController.text,
-
-              "end_time": e.endTimeController.text,
-
-              "slot_duration": e.slotDurationController.text,
-            };
-          }).toList(),
-          secretaryCountryCode: secretaryCountryCode,
-          clinicCountryCode: clinicCountryCode,
-          hidePrice: hidePrice,
-          hideConsultationPrice: hideConsultationPrice,
-        ),
+    if (selectedSchedulesCount < 1) {
+      Constants.showSnakToast(
+        context: context,
+        message: 'must_add_schedule_before_submit'.tr,
+        type: 2,
       );
+      return;
     }
+
+    final appointmentDays = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) =>
+          AppointmentDaysNumberBottomSheet(maxDays: selectedSchedulesCount),
+    );
+
+    if (appointmentDays == null || !mounted) return;
+
+    await _addDoctor(appointmentDays.toString());
+  }
+
+  Future<void> _addDoctor(String appointmentDaysNumber) async {
+    final isMedicalCenterSource =
+        widget.source == DoctorFormSource.medicalCenter;
+
+    if (isMedicalCenterSource && widget.medicalCenterProfile == null) {
+      Constants.showSnakToast(
+        context: context,
+        message: 'error_occurred'.tr,
+        type: 3,
+      );
+      return;
+    }
+
+    String? clinicPhone;
+    String? secretaryPhone;
+    String? clinicCountryCode;
+    String? secretaryCountryCode;
+
+    if (isMedicalCenterSource) {
+      final profile = widget.medicalCenterProfile!;
+      clinicPhone = profile.phone;
+      secretaryPhone = profile.phone;
+      clinicCountryCode = profile.countryCode;
+      secretaryCountryCode = profile.countryCode;
+    } else {
+      secretaryPhone = await Constants.phoneParsing(
+        phone: _secretaryPhoneController.text,
+        countryCode: _selectedCountry.countryCode,
+        withCode: false,
+      );
+      clinicPhone = secretaryPhone;
+      clinicCountryCode = "+${_selectedCountry.phoneCode}";
+      secretaryCountryCode = clinicCountryCode;
+    }
+
+    String? whatsappNumber;
+    String? whatsappCountryCode;
+    if (_whatsappNumberController.text.isNotEmpty) {
+      whatsappNumber = await Constants.phoneParsing(
+        phone: _whatsappNumberController.text,
+        countryCode: _whatsappCountry.countryCode,
+        withCode: false,
+      );
+      whatsappCountryCode = "+${_whatsappCountry.phoneCode}";
+    }
+
+    if (!context.mounted) return;
+    if (!mounted) return;
+    context.read<AddDoctorCubit>().addDoctor(
+      AddDoctorParams(
+        nameAr: _nameArController.text,
+        nameEn: _nameEnController.text,
+        bioAr: _bioArController.text,
+        bioEn: _bioEnController.text,
+        specialtyId: selectedSpeciality?.id,
+        professionalRegistrationNumber: _professionalNumberController.text,
+        academicDegree: _academicDegreeController.text,
+        clinicPhone: clinicPhone,
+        secretaryPhone: secretaryPhone,
+        whatsappNumber: whatsappNumber,
+        whatsappCountryCode: whatsappCountryCode,
+        latitude: selectedLocation?.latitude.toString(),
+        longitude: selectedLocation?.longitude.toString(),
+        city: selectedCity,
+        district: selectedDistrict,
+        street: selectedStreet,
+        minPatients: _minPatientsController.text,
+        appointmentDaysNumber: appointmentDaysNumber,
+        appointmentTypeIds: selectedAppointmentTypes.map((e) => e.id).toList(),
+        price: _priceController.text,
+        consultationPrice: _consultationPriceController.text,
+        representativeCode: isMedicalCenterSource
+            ? null
+            : _representativeCodeController.text,
+        medicalCenterId: isMedicalCenterSource
+            ? int.parse(widget.medicalCenterProfile?.id ?? '0')
+            : null,
+        profileImage: profileImage,
+        license: licenseFile,
+        schedules: schedules.map((e) {
+          return {
+            "day_of_week": e.dayOfWeek,
+            "start_time": e.startTimeController.text,
+            "end_time": e.endTimeController.text,
+            "slot_duration": e.slotDurationController.text,
+          };
+        }).toList(),
+        secretaryCountryCode: secretaryCountryCode,
+        clinicCountryCode: clinicCountryCode,
+        hidePrice: hidePrice,
+        hideConsultationPrice: hideConsultationPrice,
+      ),
+    );
   }
 
   @override
@@ -478,7 +523,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       focusNode: _nameEnFocus,
                       textInputAction: TextInputAction.next,
                       textDirection: TextDirection.ltr,
-                      textAlign: TextAlign.left,
+                      // textAlign: TextAlign.left,
                       onSubmit: (_) {
                         FocusScope.of(context).requestFocus(_bioEnFocus);
                       },
@@ -500,7 +545,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       focusNode: _bioEnFocus,
                       textInputAction: TextInputAction.next,
                       textDirection: TextDirection.ltr,
-                      textAlign: TextAlign.left,
+                      // textAlign: TextAlign.left,
                       onSubmit: (_) {
                         FocusScope.of(
                           context,
@@ -711,62 +756,92 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
                     Gaps.vGap16,
 
-                    /// min patients & appointment days
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              buildLabel("min_patients".tr),
-                              Gaps.vGap8,
-                              MyTextFormField(
-                                controller: _minPatientsController,
-                                focusNode: _minPatientsFocus,
-                                textInputAction: TextInputAction.next,
-                                onSubmit: (_) {
-                                  FocusScope.of(
-                                    context,
-                                  ).requestFocus(_appointmentDaysNumberFocus);
-                                },
-                                keyboardType: TextInputType.number,
-                                hintText: "enter_min_patients".tr,
-                                prefixIcon: Icon(
-                                  Icons.groups_outlined,
-                                  color: colors.main,
+                    /// min patients
+                    buildLabel("min_patients".tr),
+                    Gaps.vGap8,
+                    MyTextFormField(
+                      controller: _minPatientsController,
+                      focusNode: _minPatientsFocus,
+                      textInputAction: TextInputAction.next,
+                      onSubmit: (_) {
+                        FocusScope.of(context).requestFocus(_priceFocus);
+                      },
+                      keyboardType: TextInputType.number,
+                      hintText: "enter_min_patients".tr,
+                      prefixIcon: Icon(
+                        Icons.groups_outlined,
+                        color: colors.main,
+                      ),
+                    ),
+
+                    Gaps.vGap16,
+
+                    /// appointment types
+                    buildLabel("appointment_types".tr),
+                    Gaps.vGap8,
+                    GestureDetector(
+                      onTap: () async {
+                        final result =
+                            await showModalBottomSheet<
+                              List<AppointmentTypeEntity>
+                            >(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => BlocProvider(
+                                create: (_) =>
+                                    ServiceLocator.instance<
+                                      GetAppointmentTypesCubit
+                                    >(),
+                                child: SelectAppointmentTypesBottomSheet(
+                                  selectedTypes: selectedAppointmentTypes,
                                 ),
                               ),
-                            ],
+                            );
+                        if (result != null) {
+                          setState(() {
+                            selectedAppointmentTypes = result;
+                          });
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.whiteColor,
+                          borderRadius: BorderRadius.circular(18.r),
+                          border: Border.all(
+                            color: colors.main.withValues(alpha: 0.12),
                           ),
                         ),
-                        Gaps.hGap12,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              buildLabel("appointment_days_number".tr),
-                              Gaps.vGap8,
-                              MyTextFormField(
-                                controller: _appointmentDaysNumberController,
-                                focusNode: _appointmentDaysNumberFocus,
-                                textInputAction: TextInputAction.next,
-                                onSubmit: (_) {
-                                  FocusScope.of(
-                                    context,
-                                  ).requestFocus(_priceFocus);
-                                },
-                                keyboardType: TextInputType.number,
-                                hintText: "enter_appointment_days_number".tr,
-                                prefixIcon: Icon(
-                                  Icons.calendar_month_outlined,
-                                  color: colors.main,
+                        child: selectedAppointmentTypes.isEmpty
+                            ? Text(
+                                "select_appointment_types".tr,
+                                style: TextStyles.medium14(
+                                  color: colors.lightTextColor,
                                 ),
+                              )
+                            : Wrap(
+                                spacing: 6.w,
+                                runSpacing: 6.h,
+                                children: selectedAppointmentTypes
+                                    .map(
+                                      (type) => Chip(
+                                        label: Text(type.name),
+                                        backgroundColor: colors.main.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        labelStyle: TextStyles.medium12(
+                                          color: colors.main,
+                                        ),
+                                        side: BorderSide.none,
+                                      ),
+                                    )
+                                    .toList(),
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
 
                     Gaps.vGap16,
@@ -1084,7 +1159,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                                   style: TextStyles.medium14(),
                                 ),
 
-                                items: weekDays
+                                items: availableDaysFor(index)
                                     .map(
                                       (e) => DropdownMenuItem<int>(
                                         value: e['value'],
@@ -1177,45 +1252,51 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                     Gaps.vGap10,
 
                     /// add new schedule
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          schedules.add(DoctorScheduleModel());
-                        });
-                      },
+                    if (canAddSchedule)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            schedules.add(DoctorScheduleModel());
+                          });
+                        },
 
-                      child: Container(
-                        width: double.infinity,
+                        child: Container(
+                          width: double.infinity,
 
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
 
-                        decoration: BoxDecoration(
-                          color: colors.main.withValues(alpha: .08),
+                          decoration: BoxDecoration(
+                            color: colors.main.withValues(alpha: .08),
 
-                          borderRadius: BorderRadius.circular(18.r),
+                            borderRadius: BorderRadius.circular(18.r),
 
-                          border: Border.all(
-                            color: colors.main.withValues(alpha: .2),
+                            border: Border.all(
+                              color: colors.main.withValues(alpha: .2),
+                            ),
+                          ),
+
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+
+                            children: [
+                              Icon(
+                                Icons.add_circle_outline,
+                                color: colors.main,
+                              ),
+
+                              Gaps.hGap8,
+
+                              Text(
+                                "add_new_schedule".tr,
+
+                                style: TextStyles.semiBold14(
+                                  color: colors.main,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Icon(Icons.add_circle_outline, color: colors.main),
-
-                            Gaps.hGap8,
-
-                            Text(
-                              "add_new_schedule".tr,
-
-                              style: TextStyles.semiBold14(color: colors.main),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
 
                     Gaps.vGap30,
 

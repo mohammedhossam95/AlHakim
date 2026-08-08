@@ -1,5 +1,6 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
 import 'package:alhakim/core/base_classes/base_one_response.dart';
+import 'package:alhakim/features/booking/domain/entities/appointment_type_entity.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 
 class DoctorsRespModel extends BaseListResponse {
@@ -62,6 +63,8 @@ class DoctorModel extends DoctorEntity {
     super.languages,
     super.specialty,
     super.schedules,
+    super.scheduleExceptions,
+    super.appointmentTypes,
     super.createdAt,
     super.updatedAt,
     super.minPatients,
@@ -121,6 +124,28 @@ class DoctorModel extends DoctorEntity {
       schedules: json['schedules'] != null
           ? (json['schedules'] as List)
                 .map((e) => ScheduleModel.fromJson(e))
+                .toList()
+          : [],
+      scheduleExceptions: json['schedule_exceptions'] != null
+          ? (json['schedule_exceptions'] as List)
+                .whereType<Map>()
+                .map(
+                  (e) => ScheduleExceptionModel.fromJson(
+                    Map<String, dynamic>.from(e),
+                  ),
+                )
+                .toList()
+          : [],
+      appointmentTypes: json['appointment_types'] is List
+          ? (json['appointment_types'] as List)
+                .whereType<Map>()
+                .map(
+                  (e) => AppointmentTypeEntity(
+                    id: int.tryParse(e['id']?.toString() ?? '') ?? 0,
+                    name: e['name']?.toString() ?? '',
+                  ),
+                )
+                .where((e) => e.id > 0)
                 .toList()
           : [],
 
@@ -189,6 +214,18 @@ class DoctorModel extends DoctorEntity {
         : List<dynamic>.from(
             schedules!.map((x) => (x as ScheduleModel).toJson()),
           ),
+    "schedule_exceptions": scheduleExceptions == null
+        ? []
+        : List<dynamic>.from(
+            scheduleExceptions!.map(
+              (x) => (x as ScheduleExceptionModel).toJson(),
+            ),
+          ),
+    "appointment_types":
+        appointmentTypes
+            ?.map((type) => {"id": type.id, "name": type.name})
+            .toList() ??
+        [],
 
     "created_at": createdAt,
 
@@ -321,6 +358,7 @@ class DoctorSpecialtyModel extends DoctorSpecialtyEntity {
   const DoctorSpecialtyModel({
     super.id,
     super.icon,
+    super.mainSpecialty,
     super.isActive,
     super.sortOrder,
     super.name,
@@ -336,6 +374,7 @@ class DoctorSpecialtyModel extends DoctorSpecialtyEntity {
       id: json['id'],
 
       icon: json['icon'],
+      mainSpecialty: json['main_specialty'],
 
       isActive: json['is_active'],
 
@@ -358,6 +397,7 @@ class DoctorSpecialtyModel extends DoctorSpecialtyEntity {
   Map<String, dynamic> toJson() => {
     "id": id,
     "icon": icon,
+    "main_specialty": mainSpecialty,
     "is_active": isActive,
     "sort_order": sortOrder,
     "name": name,
@@ -377,6 +417,7 @@ class ScheduleModel extends ScheduleEntity {
     super.startTime,
     super.endTime,
     super.slotDuration,
+    super.scheduleStatus,
   });
 
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
@@ -392,6 +433,8 @@ class ScheduleModel extends ScheduleEntity {
       endTime: json['end_time'],
 
       slotDuration: json['slot_duration'],
+
+      scheduleStatus: json['schedule_status'],
     );
   }
 
@@ -402,6 +445,44 @@ class ScheduleModel extends ScheduleEntity {
     "start_time": startTime,
     "end_time": endTime,
     "slot_duration": slotDuration,
+    "schedule_status": scheduleStatus,
+  };
+}
+
+class ScheduleExceptionModel extends ScheduleExceptionEntity {
+  const ScheduleExceptionModel({
+    super.id,
+    super.doctorId,
+    super.date,
+    super.type,
+    super.startTime,
+    super.endTime,
+    super.slotDuration,
+    super.reason,
+  });
+
+  factory ScheduleExceptionModel.fromJson(Map<String, dynamic> json) {
+    return ScheduleExceptionModel(
+      id: json['id'],
+      doctorId: json['doctor_id']?.toString(),
+      date: json['date']?.toString(),
+      type: json['type']?.toString(),
+      startTime: json['start_time']?.toString(),
+      endTime: json['end_time']?.toString(),
+      slotDuration: json['slot_duration'],
+      reason: json['reason']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "doctor_id": doctorId,
+    "date": date,
+    "type": type,
+    "start_time": startTime,
+    "end_time": endTime,
+    "slot_duration": slotDuration,
+    "reason": reason,
   };
 }
 
