@@ -12,7 +12,9 @@ import 'package:alhakim/features/doctors/data/models/doctor_appoinments_for_day_
 import 'package:alhakim/features/doctors/data/models/doctor_home_model.dart';
 import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/doctors/data/models/reschedule_model.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/close_clinic_params.dart';
 import 'package:alhakim/features/doctors/domain/usecases/params/delete_schedule_params.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/update_schedule_status_params.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:dio/dio.dart';
 
@@ -25,6 +27,7 @@ abstract class DoctorRemoteDataSource {
   Future<BaseOneResponse> deleteDoctor(String id);
   Future<BaseOneResponse> toggleDoctorStatus({required String id});
   Future<BaseOneResponse> closeClinicToday({required String doctorId});
+  Future<BaseOneResponse> closeClinic({required CloseClinicParams params});
   Future<BaseOneResponse> toggleClinic({required String doctorId});
   Future<DoctorHomeRespModel> getDoctorHome(String id);
   Future<DoctorAppoinmentsForDayRespModel> getDoctorAppoinmentsForDay({
@@ -33,6 +36,9 @@ abstract class DoctorRemoteDataSource {
   Future<RescheduleRespModel> reschedule({required RescheduleParams params});
   Future<BaseOneResponse> deleteSchedule({
     required DeleteScheduleParams params,
+  });
+  Future<BaseOneResponse> updateScheduleStatus({
+    required UpdateScheduleStatusParams params,
   });
 }
 
@@ -163,6 +169,18 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         );
       }
 
+      if (params.appointmentTypeIds != null &&
+          params.appointmentTypeIds!.isNotEmpty) {
+        for (int i = 0; i < params.appointmentTypeIds!.length; i++) {
+          formData.fields.add(
+            MapEntry(
+              "appointment_types[$i]",
+              params.appointmentTypeIds![i].toString(),
+            ),
+          );
+        }
+      }
+
       if (params.representativeCode != null) {
         formData.fields.add(
           MapEntry("representative_code", params.representativeCode!),
@@ -220,7 +238,6 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       if (params.profileImage != null) {
         final compressedImage = await Constants.getCompressedFile(
           params.profileImage!,
-          "${params.profileImage!.path}_compressed.jpg",
         );
 
         final imageFile = compressedImage ?? params.profileImage!;
@@ -236,10 +253,7 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         File file = params.license!;
 
         if (!Constants.checkPDFFiles(file.path)) {
-          final compressedFile = await Constants.getCompressedFile(
-            file,
-            "${file.path}_compressed.jpg",
-          );
+          final compressedFile = await Constants.getCompressedFile(file);
 
           file = compressedFile ?? file;
         }
@@ -376,6 +390,18 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         );
       }
 
+      if (params.appointmentTypeIds != null &&
+          params.appointmentTypeIds!.isNotEmpty) {
+        for (int i = 0; i < params.appointmentTypeIds!.length; i++) {
+          formData.fields.add(
+            MapEntry(
+              "appointment_types[$i]",
+              params.appointmentTypeIds![i].toString(),
+            ),
+          );
+        }
+      }
+
       if (params.representativeCode != null) {
         formData.fields.add(
           MapEntry("representative_code", params.representativeCode!),
@@ -396,8 +422,7 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         formData.fields.add(
           MapEntry("whatsapp_country_code", params.whatsappCountryCode!),
         );
-      }
-
+      } 
       if (params.whatsappNumber != null) {
         formData.fields.add(
           MapEntry("whatsapp_number", params.whatsappNumber!),
@@ -440,7 +465,6 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
       if (params.profileImage != null) {
         final compressedImage = await Constants.getCompressedFile(
           params.profileImage!,
-          "${params.profileImage!.path}_compressed.jpg",
         );
 
         final imageFile = compressedImage ?? params.profileImage!;
@@ -456,10 +480,7 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         File file = params.license!;
 
         if (!Constants.checkPDFFiles(file.path)) {
-          final compressedFile = await Constants.getCompressedFile(
-            file,
-            "${file.path}_compressed.jpg",
-          );
+          final compressedFile = await Constants.getCompressedFile(file);
 
           file = compressedFile ?? file;
         }
@@ -557,6 +578,26 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
           status: response['status'],
           message: response['message'],
         );
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> closeClinic({
+    required CloseClinicParams params,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        ApiConstants.closeClinic(params.doctorId),
+        formData: FormData.fromMap(params.toJson()),
+      );
+
+      if (response['status'] == true) {
+        return BaseOneResponse.fromJson(response);
       }
 
       throw ServerException(message: response['message'] ?? '');
@@ -669,6 +710,29 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
           doctorId: params.doctorId,
           scheduleId: params.scheduleId,
         ),
+      );
+
+      if (response['status'] == true) {
+        return BaseOneResponse.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> updateScheduleStatus({
+    required UpdateScheduleStatusParams params,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        ApiConstants.updateDoctorScheduleStatus(
+          doctorId: params.doctorId,
+          scheduleId: params.scheduleId,
+        ),
+        formData: FormData.fromMap(params.toJson()),
       );
 
       if (response['status'] == true) {

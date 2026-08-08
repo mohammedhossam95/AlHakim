@@ -3,6 +3,7 @@ import 'package:alhakim/features/doctors/data/repositories/doctor_repository_imp
 import 'package:alhakim/features/doctors/domain/repositories/doctor_repository.dart';
 import 'package:alhakim/features/doctors/domain/usecases/add_doctor_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/close_clinic_today_usecase.dart';
+import 'package:alhakim/features/doctors/domain/usecases/close_clinic_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/delete_doctor_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/delete_schedule_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/get_doctor_appoinments_for_day_usecase.dart';
@@ -15,7 +16,9 @@ import 'package:alhakim/features/doctors/domain/usecases/search_doctors_usecase.
 import 'package:alhakim/features/doctors/domain/usecases/toggle_clinic_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/toggle_doctor_status_usecase.dart';
 import 'package:alhakim/features/doctors/domain/usecases/update_doctor_usecase.dart';
+import 'package:alhakim/features/doctors/domain/usecases/update_schedule_status_usecase.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/close_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/delete_schedule_cubit/delete_schedule_cubit.dart';
@@ -29,6 +32,7 @@ import 'package:alhakim/features/doctors/presentation/cubit/search_doctors_cubit
 import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_doctor_cubit/update_doctor_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/update_schedule_status_cubit/update_schedule_status_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 
 final _sl = ServiceLocator.instance;
@@ -43,12 +47,14 @@ Future<void> initDoctorsFeatureInjection() async {
   _sl.registerFactory(() => GetDoctorByIdCubit(usecase: _sl()));
   _sl.registerFactory(() => GetDoctorHomeCubit(usecase: _sl()));
   _sl.registerFactory(() => CloseClinicTodayCubit(usecase: _sl()));
+  _sl.registerFactory(() => CloseClinicCubit(usecase: _sl()));
   _sl.registerFactory(() => DeleteDoctorCubit(usecase: _sl()));
   _sl.registerFactory(() => ToggelDoctorStatusCubit(usecase: _sl()));
   _sl.registerFactory(() => ToggleClinicCubit(usecase: _sl()));
   _sl.registerFactory(() => GetDoctorAppoinmentsForDayCubit(usecase: _sl()));
   _sl.registerFactory(() => RescheduleCubit(usecase: _sl()));
   _sl.registerFactory(() => DeleteScheduleCubit(usecase: _sl()));
+  _sl.registerFactory(() => UpdateScheduleStatusCubit(usecase: _sl()));
 
   /// usecase
 
@@ -65,11 +71,15 @@ Future<void> initDoctorsFeatureInjection() async {
   _sl.registerLazySingleton(() => GetDoctorByIdUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => GetDoctorHomeUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => CloseClinicTodayUsecase(repository: _sl()));
+  _sl.registerLazySingleton(() => CloseClinicUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => DeleteDoctorUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => GetDoctorsUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => SearchDoctorsUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => RescheduleUsecase(repository: _sl()));
   _sl.registerLazySingleton(() => DeleteScheduleUsecase(repository: _sl()));
+  _sl.registerLazySingleton(
+    () => UpdateScheduleStatusUsecase(repository: _sl()),
+  );
 
   /// repo
   _sl.registerLazySingleton<DoctorRepository>(

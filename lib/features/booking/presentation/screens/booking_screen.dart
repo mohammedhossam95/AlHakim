@@ -11,7 +11,6 @@ import 'package:alhakim/features/booking/domain/entities/family_member_entity.da
 import 'package:alhakim/features/booking/domain/entities/schedule.dart';
 import 'package:alhakim/features/booking/domain/usecases/params/booking_params.dart';
 import 'package:alhakim/features/booking/presentation/cubit/book_appointment_cubit/book_appointment_cubit.dart';
-import 'package:alhakim/features/booking/presentation/cubit/get_appointment_types_cubit/get_appointment_types_cubit.dart';
 import 'package:alhakim/features/booking/presentation/widgets/appointment_type_bottom_sheet.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
@@ -61,13 +60,10 @@ class _BookingScreenState extends State<BookingScreen> {
 
   void _applySchedules(DoctorEntity doctor) {
     final schedules = doctor.schedules;
-    final limit = doctor.appointmentDaysNumber != null
-        ? int.tryParse(doctor.appointmentDaysNumber ?? '3') ?? 7
-        : 3;
     setState(() {
       availableDates = BookingDatesHelper.generateAvailableDates(
         schedules ?? [],
-        limit: limit,
+        limit: int.tryParse(doctor.appointmentDaysNumber ?? '3') ?? 3,
       );
       selectedDateIndex = 0;
       selectedIndex = 0;
@@ -517,12 +513,9 @@ class _BookingScreenState extends State<BookingScreen> {
                                     context: context,
                                     isScrollControlled: true,
                                     backgroundColor: Colors.transparent,
-                                    builder: (_) => BlocProvider(
-                                      create: (_) =>
-                                          ServiceLocator.instance<
-                                            GetAppointmentTypesCubit
-                                          >(),
-                                      child: const AppointmentTypeBottomSheet(),
+                                    builder: (_) => AppointmentTypeBottomSheet(
+                                      appointmentTypes:
+                                          displayDoctor.appointmentTypes ?? [],
                                     ),
                                   );
 

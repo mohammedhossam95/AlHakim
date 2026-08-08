@@ -5,7 +5,9 @@ import 'package:alhakim/core/params/add_doctor_params.dart';
 import 'package:alhakim/core/params/appoinments_params.dart';
 import 'package:alhakim/core/params/reschedule_params.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/close_clinic_params.dart';
 import 'package:alhakim/features/doctors/domain/usecases/params/delete_schedule_params.dart';
+import 'package:alhakim/features/doctors/domain/usecases/params/update_schedule_status_params.dart';
 import 'package:dartz/dartz.dart';
 
 abstract class DoctorRepository {
@@ -24,6 +26,9 @@ abstract class DoctorRepository {
   Future<Either<Failure, BaseOneResponse>> closeClinicToday({
     required String doctorId,
   });
+  Future<Either<Failure, BaseOneResponse>> closeClinic({
+    required CloseClinicParams params,
+  });
   Future<Either<Failure, BaseOneResponse>> toggleClinic({
     required String doctorId,
   });
@@ -36,5 +41,8 @@ abstract class DoctorRepository {
   });
   Future<Either<Failure, BaseOneResponse>> deleteSchedule({
     required DeleteScheduleParams params,
+  });
+  Future<Either<Failure, BaseOneResponse>> updateScheduleStatus({
+    required UpdateScheduleStatusParams params,
   });
 }

@@ -263,6 +263,10 @@
   "select_appointment_type": "Select appointment type",
   "select_appointment_type_desc": "Choose an appointment type before confirming",
   "no_appointment_types": "No appointment types available",
+  "appointment_types": "Booking Types",
+  "select_appointment_types": "Select booking types",
+  "select_appointment_types_desc": "Select available booking types for this doctor",
+  "must_select_at_least_one_appointment_type": "Must select at least one booking type",
   "family_members": "Family Members",
   "manage_family": "Manage Dependents",
   "manage_family_desc": "Add your family members",
@@ -363,6 +367,8 @@
   "enter_min_patients": "Enter minimum patients",
   "appointment_days_number": "Booking Days",
   "enter_appointment_days_number": "Enter booking days number",
+  "appointment_days_number_desc": "Choose booking days from 1 to {max} based on added schedule days",
+  "must_add_schedule_before_submit": "You must add at least one schedule with a selected day",
   "price": "Examination Price",
   "enter_price": "Enter examination price",
   "consultation_price": "Consultation Price",
@@ -533,5 +539,11 @@
   "gettingAddress": "Getting address",
   "appointment_type": "Appointment Type",
   "cancel_clinic_schedule_desc": "All appointments for this day will be canceled, and all patients will be notified automatically.",
-  "confirm_cancel_clinic_schedule": "Are you sure you want to cancel the clinic? All appointments for this day will be canceled and patients will be notified automatically."
+  "confirm_cancel_clinic_schedule": "Are you sure you want to cancel the clinic? All appointments for this day will be canceled and patients will be notified automatically.",
+  "close_clinic_reason": "doctor will not attend today",
+  "reason": "Reason",
+  "enter_reason": "Enter clinic cancellation reason",
+  "reason_required": "Reason is required",
+  "stop_booking": "Stop Booking",
+  "confirm_stop_booking": "Are you sure you want to stop booking for this day?"
 }

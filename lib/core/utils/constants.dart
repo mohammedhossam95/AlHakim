@@ -20,6 +20,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -68,21 +69,53 @@ class Constants {
     }
   }
 
-  static Future<File?> getCompressedFile(File file, String targetPath) async {
-    XFile? result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: 88,
-    );
-
-    if (result != null) {
-      log(
-        "Original File Size -- ${file.lengthSync()} --- CompressedFile ${File(result.path).lengthSync()} ",
-      );
-      return File(result.path);
-    } else {
+  static Future<File?> getCompressedFile(File file, [String? targetPath]) async {
+    if (!await file.exists()) {
+      Log.e('Compress skipped, source file missing: ${file.path}');
       return null;
     }
+
+    try {
+      final outputPath = targetPath ??
+          '${Directory.systemTemp.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      XFile? result = await FlutterImageCompress.compressAndGetFile(
+        file.absolute.path,
+        outputPath,
+        quality: 88,
+      );
+
+      if (result != null) {
+        log(
+          "Original File Size -- ${file.lengthSync()} --- CompressedFile ${File(result.path).lengthSync()} ",
+        );
+        return File(result.path);
+      }
+    } catch (e) {
+      Log.e('CompressError: $e');
+    }
+    return null;
+  }
+
+  static Future<File> persistPickedFile(File source) async {
+    if (!await source.exists()) {
+      throw FileSystemException(
+        'The selected file is no longer available.',
+        source.path,
+      );
+    }
+
+    final appDirectory = await getApplicationDocumentsDirectory();
+    final uploadsDirectory = Directory('${appDirectory.path}/pending_uploads');
+    if (!await uploadsDirectory.exists()) {
+      await uploadsDirectory.create(recursive: true);
+    }
+
+    final fileName = source.path.split(Platform.pathSeparator).last;
+    final destination = File(
+      '${uploadsDirectory.path}/${DateTime.now().microsecondsSinceEpoch}_$fileName',
+    );
+    return source.copy(destination.path);
   }
 
   static Future<bool> checkVersion(String newVersion) async {

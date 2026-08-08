@@ -29,6 +29,13 @@ abstract class ApiConstants {
     required String doctorId,
     required String scheduleId,
   }) => '/doctors/$doctorId/schedules/$scheduleId';
+
+  static String closeClinic(String doctorId) => '/doctors/$doctorId/close-clinic';
+
+  static String updateDoctorScheduleStatus({
+    required String doctorId,
+    required String scheduleId,
+  }) => '/doctors/$doctorId/schedules/$scheduleId/status';
 }
 
 abstract class DioConsumer {
