@@ -494,7 +494,7 @@
   "go_to_appointments": "My Appointments",
   "hide_price_to_patients": "Hide price from patients",
   "hide_price_to_patients_desc": "When this option is enabled, the examination price will be hidden from patients",
-  "hide_consultation_price_to_patients_desc": "When this option is enabled, the consultation price will be hidden from patients",
+  "hide__price_to_patients_desc": "When this option is enabled, the consultation price will be hidden from patients",
   "follow_up_appointment": "Follow Up Queue",
   "live_alert": "Live Alert",
   "doctor_started_examination": "Your turn is based on booking order. Don't worry, we'll notify you as soon as it's your turn.",

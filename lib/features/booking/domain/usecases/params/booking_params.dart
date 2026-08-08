@@ -16,9 +16,9 @@ class BookingParams {
   Map<String, dynamic> toJson() => {
     'doctor_id': doctorId,
     'appointment_date': appointmentDate,
-    'appointment_type': appointmentTypeId,
-    if (appointmentType != null && appointmentType!.isNotEmpty)
-      'appointment_type': appointmentType,
+    'appointment_type_id': appointmentTypeId,
+    // if (appointmentType != null && appointmentType!.isNotEmpty)
+    //   'appointment_type': appointmentType,
     if (familyMemberId != null && familyMemberId!.isNotEmpty)
       'family_member_id': familyMemberId,
   };

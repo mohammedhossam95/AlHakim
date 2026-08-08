@@ -439,18 +439,17 @@ class _DashboardItem extends StatelessWidget {
           Gaps.vGap16,
 
           /// title
-          Text(
-            title,
+          // Text(
+          //   title,
 
-            maxLines: 2,
+          //   maxLines: 2,
 
-            overflow: TextOverflow.ellipsis,
+          //   overflow: TextOverflow.ellipsis,
 
-            textAlign: TextAlign.right,
+          //   textAlign: TextAlign.right,
 
-            style: TextStyles.medium13(),
-          ),
-
+          //   style: TextStyles.medium13(),
+          // ),
           Gaps.vGap8,
 
           /// value
