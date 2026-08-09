@@ -13,6 +13,10 @@ import '../../../../injection_container.dart';
 import '../../domain/repositories/auth_repo.dart';
 import '../../domain/usecases/save_session_usecase.dart';
 import '../../domain/usecases/save_user_type_usecase.dart';
+import '../../domain/usecases/params/authenticate_params.dart';
+import '../../domain/usecases/params/forgot_password_params.dart';
+import '../../domain/usecases/params/register_params.dart';
+import '../../domain/usecases/params/reset_password_params.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/auth_resp_model.dart';
 
@@ -91,6 +95,24 @@ class AuthRepositoryImpl implements AuthRepository {
       if (auth.token != null && auth.token!.isNotEmpty) {
         await secureStorage.saveAccessToken(auth.token!);
       }
+    }
+  }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> authenticate(
+    AuthenticateParams params,
+  ) async {
+    try {
+      final response = await remote.authenticate(params: params);
+      if (response.data != null && response.data is AuthModel) {
+        await _saveAuthResponse(response);
+      }
+      return Right<Failure, BaseOneResponse>(response);
+    } on AppException catch (error) {
+      Log.e(
+        '[authenticate] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, BaseOneResponse>(error.toFailure());
     }
   }
 
@@ -179,16 +201,45 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, BaseOneResponse>> register(AuthParams params) async {
+  Future<Either<Failure, BaseOneResponse>> register(
+    RegisterParams params,
+  ) async {
     try {
-      final BaseOneResponse response = await remote.register(params: params);
-      if (response is AuthRespModel) {
-        await _saveAuthResponse(response);
-      }
+      final response = await remote.register(params: params);
       return Right<Failure, BaseOneResponse>(response);
     } on AppException catch (error) {
       Log.e(
         '[register] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, BaseOneResponse>(error.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> forgotPassword(
+    ForgotPasswordParams params,
+  ) async {
+    try {
+      final response = await remote.forgotPassword(params: params);
+      return Right<Failure, BaseOneResponse>(response);
+    } on AppException catch (error) {
+      Log.e(
+        '[forgotPassword] [${error.runtimeType.toString()}] ---- ${error.message}',
+      );
+      return Left<Failure, BaseOneResponse>(error.toFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, BaseOneResponse>> resetPassword(
+    ResetPasswordParams params,
+  ) async {
+    try {
+      final response = await remote.resetPassword(params: params);
+      return Right<Failure, BaseOneResponse>(response);
+    } on AppException catch (error) {
+      Log.e(
+        '[resetPassword] [${error.runtimeType.toString()}] ---- ${error.message}',
       );
       return Left<Failure, BaseOneResponse>(error.toFailure());
     }

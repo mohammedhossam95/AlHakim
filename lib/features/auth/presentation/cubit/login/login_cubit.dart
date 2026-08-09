@@ -1,7 +1,7 @@
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/core/error/failures.dart';
-import 'package:alhakim/core/params/auth_params.dart';
-import 'package:alhakim/features/auth/domain/usecases/login_use_case.dart';
+import 'package:alhakim/features/auth/domain/usecases/authenticate_use_case.dart';
+import 'package:alhakim/features/auth/domain/usecases/params/authenticate_params.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,16 +9,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 part 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  final LoginUseCase loginUseCase;
+  final AuthenticateUseCase authenticateUseCase;
 
-  LoginCubit({required this.loginUseCase}) : super(LoginInitial());
+  LoginCubit({required this.authenticateUseCase}) : super(LoginInitial());
 
-  Future<void> login(AuthParams params) async {
+  Future<void> authenticate(AuthenticateParams params) async {
     emit(LoginIsLoading());
     try {
-      final Either<Failure, BaseOneResponse> eitherResult = await loginUseCase(
-        params,
-      );
+      final Either<Failure, BaseOneResponse> eitherResult =
+          await authenticateUseCase(params);
       eitherResult.fold(
         (Failure failure) {
           emit(LoginError(params: params, message: failure.message ?? ''));

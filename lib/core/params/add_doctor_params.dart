@@ -35,6 +35,9 @@ class AddDoctorParams extends Equatable {
   final String? district;
   final String? street;
 
+  final String? password;
+  final String? passwordConfirmation;
+
   final File? profileImage;
   final File? license;
   final List<dynamic>? schedules;
@@ -59,6 +62,8 @@ class AddDoctorParams extends Equatable {
     this.representativeCode,
     this.price,
     this.consultationPrice,
+    this.password,
+    this.passwordConfirmation,
     this.profileImage,
     this.license,
     this.schedules,
@@ -94,6 +99,8 @@ class AddDoctorParams extends Equatable {
     representativeCode,
     price,
     consultationPrice,
+    password,
+    passwordConfirmation,
     profileImage,
     license,
     schedules,

@@ -1,5 +1,6 @@
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/features/auth/domain/usecases/params/register_params.dart';
 import 'package:alhakim/features/auth/domain/usecases/register_use_case.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
@@ -14,18 +15,27 @@ class RegisterCubit extends Cubit<RegisterState> {
 
   RegisterCubit({required this.registerUseCase}) : super(RegisterInitial());
 
-  Future<void> register(AuthParams params) async {
-    emit(RegisterIsLoading(isLoading: true));
+  Future<void> register(RegisterParams params) async {
+    emit(const RegisterIsLoading(isLoading: true));
     try {
       final Either<Failure, BaseOneResponse> eitherResult =
           await registerUseCase(params);
-      emit(RegisterIsLoading(isLoading: false));
+      emit(const RegisterIsLoading(isLoading: false));
       eitherResult.fold(
         (Failure failure) {
           emit(RegisterError(failure.message ?? ''));
         },
         (BaseOneResponse response) {
-          emit(RegisterLoaded(params: params, response: response));
+          emit(
+            RegisterLoaded(
+              params: params,
+              response: response,
+              otpParams: AuthParams(
+                phoneNumber: params.phoneNumber,
+                countryCode: params.countryCode,
+              ),
+            ),
+          );
         },
       );
     } catch (e) {

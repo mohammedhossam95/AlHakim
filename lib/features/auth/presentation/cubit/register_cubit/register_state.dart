@@ -16,13 +16,24 @@ class RegisterIsLoading extends RegisterState {
 
 class RegisterLoaded extends RegisterState {
   final BaseOneResponse response;
-  final AuthParams params;
+  final RegisterParams params;
+  final AuthParams otpParams;
 
-  const RegisterLoaded({required this.response, required this.params});
+  const RegisterLoaded({
+    required this.response,
+    required this.params,
+    required this.otpParams,
+  });
+
+  @override
+  List<Object> get props => [response, params, otpParams];
 }
 
 class RegisterError extends RegisterState {
   final String message;
 
   const RegisterError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

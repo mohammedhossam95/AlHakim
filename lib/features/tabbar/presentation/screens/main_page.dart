@@ -230,6 +230,7 @@ class _MainPageState extends State<MainPage> {
         return BlocConsumer<BottomNavBarCubit, BottomNavBarState>(
           listenWhen: (pre, current) => pre.index != current.index,
           listener: (context, state) {},
+          buildWhen: (pre, current) => pre.index != current.index,
           builder: (context, state) {
             final tabCount = tabs.length;
             final displayIndex = state.index >= 0 && state.index < tabCount

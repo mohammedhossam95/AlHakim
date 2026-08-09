@@ -434,6 +434,7 @@ class _BookingScreenState extends State<BookingScreen> {
                               onPressed: () async {
                                 final result = await context.push(
                                   Routes.familyMembersScreenRoute,
+                                  extra: true,
                                 );
 
                                 if (result is FamilyMemberEntity) {
@@ -460,6 +461,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         onTap: () async {
                           final result = await context.push(
                             Routes.familyMembersScreenRoute,
+                            extra: true,
                           );
 
                           if (result is FamilyMemberEntity) {

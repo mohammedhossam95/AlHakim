@@ -1,3 +1,5 @@
+import 'package:alhakim/core/api/dio_consumer.dart';
+import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
@@ -9,12 +11,17 @@ import 'package:alhakim/features/auth/data/models/countries_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/delete_user_account_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/get_setting_response_model.dart';
 import 'package:alhakim/features/auth/data/models/send_code_resp_model.dart';
+import 'package:alhakim/features/auth/domain/usecases/params/authenticate_params.dart';
+import 'package:alhakim/features/auth/domain/usecases/params/forgot_password_params.dart';
+import 'package:alhakim/features/auth/domain/usecases/params/register_params.dart';
+import 'package:alhakim/features/auth/domain/usecases/params/reset_password_params.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
+  Future<AuthRespModel> authenticate({required AuthenticateParams params});
   Future<AuthRespModel> login({required AuthParams params});
-  Future<AuthRespModel> register({required AuthParams params});
+  Future<AuthRespModel> register({required RegisterParams params});
   Future<AuthRespModel> verifyCode({required AuthParams params});
   Future<AuthRespModel> checkRemotePhoneVerified({required AuthParams params});
   Future<CheckAccountRespModel> checkAccount({required AuthParams params});
@@ -28,9 +35,29 @@ abstract class AuthRemoteDataSource {
   Future<AuthRespModel> completeProfile({
     required CompleteProfileParams params,
   });
+  Future<AuthRespModel> forgotPassword({required ForgotPasswordParams params});
+  Future<BaseOneResponse> resetPassword({required ResetPasswordParams params});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  @override
+  Future<AuthRespModel> authenticate({required AuthenticateParams params}) async {
+    try {
+      final response = await dioConsumer.post(
+        ApiConstants.authenticate,
+        formData: FormData.fromMap(params.toJson()),
+      );
+
+      if (response['status'] == true) {
+        return AuthRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (error) {
+      rethrow;
+    }
+  }
+
   @override
   Future<AuthRespModel> login({required AuthParams params}) async {
     try {
@@ -63,29 +90,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (params.otp != null) {
         formData.fields.add(MapEntry('otp', params.otp!));
       }
-      if (params.phoneNumber != null) {
-        formData.fields.add(MapEntry('secretary_phone', params.phoneNumber!));
-      }
-      if (params.countryCode != null) {
-        formData.fields.add(
-          MapEntry('secretary_country_code', params.countryCode!),
-        );
-      }
-      if (params.firebaseToken != null) {
-        formData.fields.add(MapEntry('device_token', params.firebaseToken!));
-      }
 
-      // final isDoctor = params.userType == UserType.doctor;
-      final endpoint = '/auth/verify-otp';
-
-      final response = await dioConsumer.post(endpoint, formData: formData);
+      final response = await dioConsumer.post(
+        ApiConstants.verifyOtp,
+        formData: formData,
+      );
 
       if (response['status'] == true) {
-        final authResponse = AuthRespModel.fromJson(response);
-
-        // await _saveAuthResponse(authResponse);
-
-        return authResponse;
+        return AuthRespModel.fromJson(response);
       }
 
       throw ServerException(message: response['message'] ?? '');
@@ -187,7 +199,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             })
           : null;
       final response = await dioConsumer.post(
-        '/auth/resend-otp',
+        ApiConstants.resendOtp,
         formData: formData,
       );
 
@@ -223,15 +235,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<AuthRespModel> register({required AuthParams params}) async {
+  Future<AuthRespModel> register({required RegisterParams params}) async {
     try {
-      final dynamic response = await dioConsumer.post(
-        '/auth/register',
-        // body: params.toRegisterJson(),
+      final response = await dioConsumer.post(
+        ApiConstants.register,
+        formData: FormData.fromMap(params.toJson()),
       );
-      if (response['success'] == true || response['status'] == 'success') {
+
+      if (response['status'] == true) {
         return AuthRespModel.fromJson(response);
       }
+
       throw ServerException(message: response['message'] ?? '');
     } catch (error) {
       rethrow;
@@ -311,6 +325,46 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response['status'] == 'success') {
         return DeleteUserAccountRespModel.fromJson(response);
       }
+      throw ServerException(message: response['message'] ?? '');
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AuthRespModel> forgotPassword({
+    required ForgotPasswordParams params,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        ApiConstants.forgotPassword,
+        formData: FormData.fromMap(params.toJson()),
+      );
+
+      if (response['status'] == true) {
+        return AuthRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> resetPassword({
+    required ResetPasswordParams params,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        ApiConstants.resetPassword,
+        formData: FormData.fromMap(params.toJson()),
+      );
+
+      if (response['status'] == true) {
+        return BaseOneResponse.fromJson(response);
+      }
+
       throw ServerException(message: response['message'] ?? '');
     } catch (error) {
       rethrow;

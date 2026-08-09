@@ -1,13 +1,17 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
+import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
-import 'package:alhakim/core/widgets/back_button.dart';
+import 'package:alhakim/core/widgets/country_code_widget.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
-import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/core/widgets/split_date_picker.dart';
+import 'package:alhakim/features/auth/domain/usecases/params/register_params.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
 import 'package:alhakim/injection_container.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,28 +26,75 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _birthDateController = TextEditingController();
 
-  final _nameController = TextEditingController();
-  final _specialityController = TextEditingController();
-  final _commercialController = TextEditingController();
-  final _codeController = TextEditingController();
-  String? selectedSpeciality;
+  late Country _selectedCountry;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
-  final List<String> specialities = [
-    "باطنة",
-    "أسنان",
-    "جلدية",
-    "عظام",
-    "أطفال",
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _selectedCountry = CountryParser.parsePhoneCode('20');
+  }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _specialityController.dispose();
-    _commercialController.dispose();
-    _codeController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _birthDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _onRegisterPressed() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_passwordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
+      Constants.showSnakToast(
+        context: context,
+        type: 3,
+        message: 'passwords_not_match'.tr,
+      );
+      return;
+    }
+
+    final phone = await Constants.phoneParsing(
+      phone: _phoneController.text,
+      countryCode: _selectedCountry.countryCode,
+      withCode: false,
+    );
+
+    if (phone == null) {
+      if (!mounted) return;
+      Constants.showSnakToast(
+        context: context,
+        type: 3,
+        message: 'invalid_phone'.tr,
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    context.read<RegisterCubit>().register(
+      RegisterParams(
+        countryCode: '+${_selectedCountry.phoneCode}',
+        phoneNumber: phone,
+        password: _passwordController.text.trim(),
+        passwordConfirmation: _confirmPasswordController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        birthDate: _birthDateController.text.trim(),
+      ),
+    );
   }
 
   @override
@@ -59,280 +110,199 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ],
             ),
           ),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(20.w),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  /// header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [CustomBackButton()],
+          child: BlocConsumer<RegisterCubit, RegisterState>(
+            listener: (context, state) {
+              if (state is RegisterLoaded) {
+                Constants.showSnakToast(
+                  context: context,
+                  type: 1,
+                  message: state.response.message ?? '',
+                );
+                context.pushReplacementNamed(
+                  Routes.otpAuthRoute,
+                  extra: state.otpParams,
+                );
+              } else if (state is RegisterError) {
+                Constants.showSnakToast(
+                  context: context,
+                  type: 3,
+                  message: state.message,
+                );
+              }
+            },
+            builder: (context, state) {
+              final isLoading = state is RegisterIsLoading && state.isLoading;
+
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(20.w),
+                child: Container(
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: colors.whiteColor,
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
-
-                  // Gaps.vGap20,
-
-                  /// icon
-                  CircleAvatar(
-                    radius: 40.r,
-                    backgroundColor: colors.whiteColor,
-                    child: Icon(
-                      Icons.medical_services,
-                      color: colors.main,
-                      size: 30,
-                    ),
-                  ),
-
-                  Gaps.vGap16,
-
-                  Text(
-                    "create_doctor_account".tr,
-                    style: TextStyles.semiBold18(),
-                  ),
-
-                  // Gaps.vGap8,
-
-                  // Text(
-                  //   "join_network".tr,
-                  //   style: TextStyles.medium14(color: colors.lightTextColor),
-                  // ),
-                  Gaps.vGap20,
-
-                  /// card
-                  Container(
-                    padding: EdgeInsets.all(20.w),
-                    decoration: BoxDecoration(
-                      color: colors.whiteColor,
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        /// image
-                        Center(
-                          child: Container(
-                            height: 100.h,
-                            width: 100.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colors.main.withValues(alpha: .3),
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                            child: Icon(Icons.camera_alt, color: colors.main),
-                          ),
-                        ),
-
-                        Gaps.vGap10,
-
-                        Center(
-                          child: Text(
-                            "add_profile_image".tr,
-                            style: TextStyles.medium14(color: colors.main),
-                          ),
-                        ),
-
-                        Gaps.vGap20,
-
-                        /// name
-                        buildLabel("doctor_name".tr),
-                        Gaps.vGap8,
-                        MyTextFormField(
-                          controller: _nameController,
-                          hintText: "doctor_name_hint".tr,
-                          prefixIcon: Icon(Icons.person, color: colors.main),
-                        ),
-
-                        Gaps.vGap16,
-
-                        /// speciality
-                        buildLabel("speciality".tr),
-                        Gaps.vGap8,
-                        DropdownButtonFormField<String>(
-                          initialValue: selectedSpeciality,
-                          isExpanded: true,
-
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.medical_services,
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: GestureDetector(
+                            onTap: () => context.pop(),
+                            child: Icon(
+                              Icons.arrow_back,
                               color: colors.main,
-                            ),
-                            filled: true,
-                            fillColor: colors.main.withValues(alpha: 0.05),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 14.h,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.r),
-                              borderSide: BorderSide.none,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.r),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16.r),
-                              borderSide: BorderSide(color: colors.main),
+                              size: 26,
                             ),
                           ),
-                          hint: Text(
-                            "speciality_hint".tr,
-                            style: TextStyles.medium12(
-                              color: colors.lightTextColor,
-                            ),
+                        ),
+                        Image.asset('assets/images/logo2.png', height: 120.h),
+                        Gaps.vGap12,
+                        Text(
+                          'create_account'.tr,
+                          style: TextStyles.semiBold18(),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          'enter_data_to_register'.tr,
+                          style: TextStyles.medium14(
+                            color: colors.lightTextColor,
                           ),
-                          icon: Icon(
-                            Icons.keyboard_arrow_down,
+                          textAlign: TextAlign.center,
+                        ),
+                        Gaps.vGap20,
+                        MyTextFormField(
+                          controller: _firstNameController,
+                          hintText: 'enter_first_name'.tr,
+                          validatorType: ValidatorType.standard,
+                          prefixIcon: Icon(
+                            Icons.person_outline,
                             color: colors.main,
+                            size: 16,
                           ),
-                          items: specialities
-                              .map(
-                                (e) => DropdownMenuItem(
-                                  value: e,
-                                  child: Text(e, style: TextStyles.medium14()),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() => selectedSpeciality = value);
+                        ),
+                        Gaps.vGap12,
+                        MyTextFormField(
+                          controller: _lastNameController,
+                          hintText: 'enter_last_name'.tr,
+                          validatorType: ValidatorType.standard,
+                          prefixIcon: Icon(
+                            Icons.person_outline,
+                            color: colors.main,
+                            size: 16,
+                          ),
+                        ),
+                        Gaps.vGap12,
+                        SplitDatePicker(
+                          controller: _birthDateController,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'select_birth_date'.tr;
+                            }
+                            return null;
                           },
                         ),
-
-                        Gaps.vGap16,
-
-                        /// commercial
-                        buildLabel("commercial_number".tr),
-                        Gaps.vGap8,
-                        MyTextFormField(
-                          controller: _commercialController,
-                          hintText: "commercial_number_hint".tr,
-                          prefixIcon: Icon(
-                            Icons.business_center,
-                            color: colors.main,
-                          ),
-                        ),
-
-                        Gaps.vGap16,
-
-                        /// code
-                        buildLabel("represent_code".tr),
-                        Gaps.vGap8,
-                        MyTextFormField(
-                          controller: _codeController,
-                          hintText: "represent_code_hint".tr,
-                          prefixIcon: Icon(Icons.numbers, color: colors.main),
-                        ),
-
-                        Gaps.vGap8,
-
+                        Gaps.vGap12,
                         Row(
                           children: [
-                            Icon(Icons.info, color: colors.main, size: 18.sp),
+                            CountryCodeWidget(
+                              country: _selectedCountry,
+                              updateValue: (country) {
+                                setState(() => _selectedCountry = country);
+                              },
+                            ),
                             Gaps.hGap8,
-                            Text(
-                              "represent_code_hint_text".tr,
-                              style: TextStyles.medium10( 
-                                color: colors.lightTextColor,
+                            Expanded(
+                              flex: 5,
+                              child: MyTextFormField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                validatorType: ValidatorType.phone,
+                                hintText: 'phone'.tr,
+                                prefixIcon: Icon(
+                                  Icons.phone_android,
+                                  color: colors.main,
+                                  size: 16,
+                                ),
                               ),
                             ),
                           ],
                         ),
-
-                        Gaps.vGap20,
-
-                        /// button
-                        BlocBuilder<RegisterCubit, RegisterState>(
-                          builder: (context, state) {
-                            return state is RegisterIsLoading
-                                ? const LoadingView()
-                                : MyDefaultButton(
-                                    btnText: "complete_register",
-
-                                    onPressed: () {
-                                      context.go(Routes.mainPageRoute);
-                                      // if (_formKey.currentState!.validate()) {
-                                      //   final params = AuthParams(
-                                      //     name: _nameController.text,
-                                      //     commercialNumber:
-                                      //         _commercialController.text,
-                                      //     representCode: _codeController.text,
-                                      //     userType: "doctor",
-                                      //   );
-
-                                      //   context.read<RegisterCubit>().register(
-                                      //     params,
-                                      //   );
-                                      // }
-                                    },
-                                  );
-                          },
+                        Gaps.vGap12,
+                        MyTextFormField(
+                          controller: _passwordController,
+                          hintText: 'password'.tr,
+                          obscureText: _obscurePassword,
+                          validatorType: ValidatorType.password,
+                          prefixIcon: Icon(
+                            Icons.lock_outline,
+                            color: colors.main,
+                            size: 16,
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: colors.lightTextColor,
+                            ),
+                          ),
                         ),
-
-                        Gaps.vGap10,
-
-                        Text(
-                          "terms_hint".tr,
-                          textAlign: TextAlign.center,
-                          style: TextStyles.medium12(
-                            color: colors.lightTextColor,
+                        Gaps.vGap12,
+                        MyTextFormField(
+                          controller: _confirmPasswordController,
+                          hintText: 'confirm_password'.tr,
+                          obscureText: _obscureConfirmPassword,
+                          validatorType: ValidatorType.password,
+                          prefixIcon: Icon(
+                            Icons.lock_outline,
+                            color: colors.main,
+                            size: 16,
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: colors.lightTextColor,
+                            ),
+                          ),
+                        ),
+                        Gaps.vGap24,
+                        MyDefaultButton(
+                          btnText: 'create_account_btn',
+                          isLoading: isLoading,
+                          onPressed: isLoading ? null : _onRegisterPressed,
+                        ),
+                        Gaps.vGap8,
+                        TextButton(
+                          onPressed: () => context.pop(),
+                          child: Text(
+                            'already_have_account'.tr,
+                            style: TextStyles.medium14(color: colors.main),
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  Gaps.vGap20,
-
-                  /// bottom cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildBottomCard(
-                          Icons.security,
-                          "high_security".tr,
-                          colors.success,
-                        ),
-                      ),
-                      Gaps.hGap10,
-                      Expanded(
-                        child: _buildBottomCard(
-                          Icons.analytics,
-                          "smart_management".tr,
-                          colors.main,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
     );
   }
-
-  Widget _buildBottomCard(IconData icon, String text, Color color) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .1),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color),
-          Gaps.vGap8,
-          Text(text, style: TextStyles.medium14()),
-        ],
-      ),
-    );
-  }
-}
-
-Widget buildLabel(String text) {
-  return Text(text, style: TextStyles.medium14(color: colors.textColor));
 }

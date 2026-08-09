@@ -88,6 +88,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _consultationPriceController = TextEditingController();
 
   final _representativeCodeController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
   /// Focus Nodes
@@ -112,6 +114,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   final _consultationPriceFocus = FocusNode();
 
   final _representativeCodeFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
 
   SpecialtyEntity? selectedSpeciality;
   List<AppointmentTypeEntity> selectedAppointmentTypes = [];
@@ -124,6 +128,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
   File? profileImage;
   File? licenseFile;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   Future<void> pickTime(TextEditingController controller) async {
     final picked = await showTimePicker(
       context: context,
@@ -311,6 +317,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _priceController.dispose();
     _consultationPriceController.dispose();
     _representativeCodeController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _locationController.dispose();
 
     _nameArFocus.dispose();
@@ -325,6 +333,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     _priceFocus.dispose();
     _consultationPriceFocus.dispose();
     _representativeCodeFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
 
     super.dispose();
   }
@@ -381,6 +391,16 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
 
   void submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_passwordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
+      Constants.showSnakToast(
+        context: context,
+        message: 'passwords_not_match'.tr,
+        type: 3,
+      );
+      return;
+    }
 
     if (selectedAppointmentTypes.isEmpty) {
       Constants.showSnakToast(
@@ -482,6 +502,12 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         }).toList(),
         secretaryCountryCode: "+${_selectedCountry.phoneCode}",
         clinicCountryCode: "+${_selectedCountry.phoneCode}",
+        password: _passwordController.text.trim().isEmpty
+            ? null
+            : _passwordController.text.trim(),
+        passwordConfirmation: _confirmPasswordController.text.trim().isEmpty
+            ? null
+            : _confirmPasswordController.text.trim(),
       ),
     );
   }
@@ -1137,6 +1163,85 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                       prefixIcon: Icon(
                         Icons.confirmation_number_outlined,
                         color: colors.main,
+                      ),
+                    ),
+
+                    Gaps.vGap20,
+
+                    buildLabel("password".tr),
+                    Gaps.vGap8,
+                    MyTextFormField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      obscureText: _obscurePassword,
+                      hintText: "password".tr,
+                      validator: (value) {
+                        final confirm = _confirmPasswordController.text.trim();
+                        if ((value == null || value.isEmpty) &&
+                            confirm.isEmpty) {
+                          return null;
+                        }
+                        if (value == null || value.isEmpty) {
+                          return 'required'.tr;
+                        }
+                        return null;
+                      },
+                      prefixIcon: Icon(
+                        Icons.lock_outline,
+                        color: colors.main,
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: colors.lightTextColor,
+                        ),
+                      ),
+                    ),
+                    Gaps.vGap16,
+                    buildLabel("confirm_password".tr),
+                    Gaps.vGap8,
+                    MyTextFormField(
+                      controller: _confirmPasswordController,
+                      focusNode: _confirmPasswordFocus,
+                      obscureText: _obscureConfirmPassword,
+                      hintText: "confirm_password".tr,
+                      validator: (value) {
+                        final password = _passwordController.text.trim();
+                        if ((value == null || value.isEmpty) &&
+                            password.isEmpty) {
+                          return null;
+                        }
+                        if (value == null || value.isEmpty) {
+                          return 'required'.tr;
+                        }
+                        if (value != _passwordController.text) {
+                          return 'passwords_not_match'.tr;
+                        }
+                        return null;
+                      },
+                      prefixIcon: Icon(
+                        Icons.lock_outline,
+                        color: colors.main,
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: colors.lightTextColor,
+                        ),
                       ),
                     ),
 

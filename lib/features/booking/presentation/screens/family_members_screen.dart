@@ -15,7 +15,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class FamilyMembersScreen extends StatefulWidget {
-  const FamilyMembersScreen({super.key});
+  /// When true (e.g. from booking), hide edit/delete and only allow selecting.
+  final bool selectionMode;
+
+  const FamilyMembersScreen({super.key, this.selectionMode = false});
 
   @override
   State<FamilyMembersScreen> createState() => _FamilyMembersScreenState();
@@ -140,6 +143,7 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
                               final member = familyMembers[index];
                               return _FamilyItem(
                                 item: member,
+                                showActions: !widget.selectionMode,
                                 onSelect: () {
                                   Navigator.pop(context, member);
                                 },
@@ -161,12 +165,14 @@ class _FamilyMembersScreenState extends State<FamilyMembersScreen> {
 
 class _FamilyItem extends StatelessWidget {
   final FamilyMemberEntity item;
+  final bool showActions;
   final VoidCallback onSelect;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _FamilyItem({
     required this.item,
+    required this.showActions,
     required this.onSelect,
     required this.onEdit,
     required this.onDelete,
@@ -249,19 +255,21 @@ class _FamilyItem extends StatelessWidget {
               ),
             ),
           ),
-          Gaps.hGap4,
-          IconButton(
-            onPressed: onEdit,
-            icon: Icon(Icons.edit_outlined, color: colors.main, size: 22.sp),
-          ),
-          IconButton(
-            onPressed: onDelete,
-            icon: Icon(
-              Icons.delete_outline,
-              color: colors.errorColor,
-              size: 22.sp,
+          if (showActions) ...[
+            Gaps.hGap4,
+            IconButton(
+              onPressed: onEdit,
+              icon: Icon(Icons.edit_outlined, color: colors.main, size: 22.sp),
             ),
-          ),
+            IconButton(
+              onPressed: onDelete,
+              icon: Icon(
+                Icons.delete_outline,
+                color: colors.errorColor,
+                size: 22.sp,
+              ),
+            ),
+          ],
         ],
       ),
     );

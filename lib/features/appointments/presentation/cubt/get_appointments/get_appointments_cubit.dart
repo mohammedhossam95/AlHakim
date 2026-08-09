@@ -21,14 +21,19 @@ class GetAppointmentsCubit extends Cubit<GetAppointmentsState> {
     await getAppointments();
   }
 
-  Future<void> getAppointments() async {
-    emit(GetAppointmentsLoading());
+  Future<void> getAppointments({bool showLoading = true}) async {
+    if (showLoading || state is! GetAppointmentsSuccess) {
+      emit(GetAppointmentsLoading());
+    }
 
     final result = await usecase(NoParams());
 
     result.fold(
       (l) => emit(GetAppointmentsError(message: l.message ?? '')),
-      (r) => emit(GetAppointmentsSuccess(response: r)),
+      (r) {
+        _hasLoaded = true;
+        emit(GetAppointmentsSuccess(response: r));
+      },
     );
   }
 }
