@@ -65,8 +65,41 @@ class _BookingScreenState extends State<BookingScreen> {
         schedules ?? [],
         limit: int.tryParse(doctor.appointmentDaysNumber ?? '3') ?? 3,
       );
-      selectedDateIndex = 0;
+      selectedDateIndex = _firstSelectableDateIndex(
+        availableDates,
+        doctor.scheduleExceptions,
+      );
       selectedIndex = 0;
+    });
+  }
+
+  int _firstSelectableDateIndex(
+    List<AvailableBookingDate> dates,
+    List<ScheduleExceptionEntity>? exceptions,
+  ) {
+    final index = dates.indexWhere(
+      (booking) => !_isDateDisabled(booking, exceptions: exceptions),
+    );
+    return index >= 0 ? index : 0;
+  }
+
+  bool _isDateDisabled(
+    AvailableBookingDate booking, {
+    List<ScheduleExceptionEntity>? exceptions,
+  }) {
+    final scheduleStatus = booking.schedule.scheduleStatus
+        ?.toLowerCase()
+        .trim();
+    if (scheduleStatus == 'full') return true;
+
+    final exceptionDates = exceptions ?? displayDoctor.scheduleExceptions ?? [];
+    if (exceptionDates.isEmpty) return false;
+
+    final bookingDateKey = DateFormat('yyyy-MM-dd').format(booking.date);
+    return exceptionDates.any((exception) {
+      final exceptionDate = exception.date?.trim();
+      if (exceptionDate == null || exceptionDate.isEmpty) return false;
+      return exceptionDate.startsWith(bookingDateKey);
     });
   }
 
@@ -160,75 +193,91 @@ class _BookingScreenState extends State<BookingScreen> {
                     children: List.generate(availableDates.length, (index) {
                       final bookingDate = availableDates[index];
                       final date = bookingDate.date;
-                      final isSelected = selectedDateIndex == index;
+                      final isDisabled = _isDateDisabled(bookingDate);
+                      final isSelected =
+                          selectedDateIndex == index && !isDisabled;
                       final isLast = index == availableDates.length - 1;
+
+                      final backgroundColor = isDisabled
+                          ? colors.lightTextColor.withValues(alpha: 0.08)
+                          : isSelected
+                          ? colors.main
+                          : colors.whiteColor;
+                      final borderColor = isDisabled
+                          ? colors.lightTextColor.withValues(alpha: 0.15)
+                          : isSelected
+                          ? colors.main
+                          : colors.main.withValues(alpha: .08);
+                      final primaryTextColor = isDisabled
+                          ? colors.lightTextColor.withValues(alpha: 0.45)
+                          : isSelected
+                          ? colors.whiteColor
+                          : colors.textColor;
+                      final secondaryTextColor = isDisabled
+                          ? colors.lightTextColor.withValues(alpha: 0.4)
+                          : isSelected
+                          ? colors.whiteColor
+                          : colors.lightTextColor;
 
                       return Padding(
                         padding: EdgeInsetsDirectional.only(
                           end: isLast ? 0 : 12.w,
                         ),
                         child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedDateIndex = index;
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 20.w,
-                              vertical: 10.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? colors.main
-                                  : colors.whiteColor,
-                              borderRadius: BorderRadius.circular(22.r),
-                              border: Border.all(
-                                color: isSelected
-                                    ? colors.main
-                                    : colors.main.withValues(alpha: .08),
+                          onTap: isDisabled
+                              ? null
+                              : () {
+                                  setState(() {
+                                    selectedDateIndex = index;
+                                  });
+                                },
+                          child: Opacity(
+                            opacity: isDisabled ? 0.55 : 1,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 20.w,
+                                vertical: 10.h,
                               ),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  DateFormat(
-                                    'EEE',
-                                    appLocalizations.locale?.languageCode,
-                                  ).format(date),
-                                  style: TextStyles.medium14(
-                                    color: isSelected
-                                        ? colors.whiteColor
-                                        : colors.lightTextColor,
+                              decoration: BoxDecoration(
+                                color: backgroundColor,
+                                borderRadius: BorderRadius.circular(22.r),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    DateFormat(
+                                      'EEE',
+                                      appLocalizations.locale?.languageCode,
+                                    ).format(date),
+                                    style: TextStyles.medium14(
+                                      color: secondaryTextColor,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                Gaps.vGap4,
-                                Text(
-                                  '${date.day}',
-                                  style: TextStyles.semiBold24(
-                                    color: isSelected
-                                        ? colors.whiteColor
-                                        : colors.textColor,
+                                  Gaps.vGap4,
+                                  Text(
+                                    '${date.day}',
+                                    style: TextStyles.semiBold24(
+                                      color: primaryTextColor,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                Gaps.vGap4,
-                                Text(
-                                  DateFormat(
-                                    'MMM',
-                                    appLocalizations.locale?.languageCode,
-                                  ).format(date),
-                                  style: TextStyles.medium12(
-                                    color: isSelected
-                                        ? colors.whiteColor
-                                        : colors.lightTextColor,
+                                  Gaps.vGap4,
+                                  Text(
+                                    DateFormat(
+                                      'MMM',
+                                      appLocalizations.locale?.languageCode,
+                                    ).format(date),
+                                    style: TextStyles.medium12(
+                                      color: secondaryTextColor,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -434,6 +483,7 @@ class _BookingScreenState extends State<BookingScreen> {
                               onPressed: () async {
                                 final result = await context.push(
                                   Routes.familyMembersScreenRoute,
+                                  extra: true,
                                 );
 
                                 if (result is FamilyMemberEntity) {
@@ -460,6 +510,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         onTap: () async {
                           final result = await context.push(
                             Routes.familyMembersScreenRoute,
+                            extra: true,
                           );
 
                           if (result is FamilyMemberEntity) {
@@ -506,6 +557,15 @@ class _BookingScreenState extends State<BookingScreen> {
                             btnText: "confirm_booking",
                             borderRadius: 30,
                             onPressed: () async {
+                              if (_isDateDisabled(selectedBooking)) {
+                                Constants.showSnakToast(
+                                  context: context,
+                                  message: 'no_available_dates'.tr,
+                                  type: 2,
+                                );
+                                return;
+                              }
+
                               final selectedType =
                                   await showModalBottomSheet<
                                     AppointmentTypeEntity

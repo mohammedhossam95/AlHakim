@@ -10,6 +10,11 @@ class BottomNavBarCubit extends Cubit<BottomNavBarState> {
 
   Future<void> changeCurrentScreen({required int index}) async {
     currentIndex = index;
-    emit(BottomNavBarState(index: currentIndex));
+    emit(
+      BottomNavBarState(
+        index: currentIndex,
+        tapId: state.tapId + 1,
+      ),
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:alhakim/features/auth/domain/usecases/authenticate_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/check_account_use_case.dart';
 import 'package:alhakim/features/auth/domain/usecases/complete_profile_usecase.dart';
 import 'package:alhakim/features/auth/domain/usecases/delete_user_account_usecase.dart';
@@ -20,6 +21,10 @@ import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get
 import 'package:alhakim/features/auth/presentation/cubit/get_setting/get_setting_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/logout/logout_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
+import 'package:alhakim/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:alhakim/features/auth/domain/usecases/reset_password_usecase.dart';
+import 'package:alhakim/features/auth/presentation/cubit/forgot_password_cubit/forgot_password_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/reset_password_cubit/reset_password_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/resend_otp_cubit/resend_otp_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/send_code_cubit/send_code_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
@@ -39,7 +44,9 @@ final _sl = ServiceLocator.instance;
 Future<void> initAuthFeatureInjection() async {
   ///-> Cubits
 
-  _sl.registerFactory<LoginCubit>(() => LoginCubit(loginUseCase: _sl()));
+  _sl.registerFactory<LoginCubit>(
+    () => LoginCubit(authenticateUseCase: _sl()),
+  );
   _sl.registerFactory<VerifyCodeCubit>(
     () => VerifyCodeCubit(verifyCodeUseCase: _sl()),
   );
@@ -51,6 +58,12 @@ Future<void> initAuthFeatureInjection() async {
   );
   _sl.registerFactory<RegisterCubit>(
     () => RegisterCubit(registerUseCase: _sl()),
+  );
+  _sl.registerFactory<ForgotPasswordCubit>(
+    () => ForgotPasswordCubit(usecase: _sl()),
+  );
+  _sl.registerFactory<ResetPasswordCubit>(
+    () => ResetPasswordCubit(usecase: _sl()),
   );
   _sl.registerFactory<GetAllCitiesCubit>(
     () => GetAllCitiesCubit(getAllCitiesUseCase: _sl()),
@@ -103,6 +116,9 @@ Future<void> initAuthFeatureInjection() async {
     () => LogoutUseCase(repository: _sl()),
   );
 
+  _sl.registerLazySingleton<AuthenticateUseCase>(
+    () => AuthenticateUseCase(repository: _sl()),
+  );
   _sl.registerLazySingleton<LoginUseCase>(
     () => LoginUseCase(repository: _sl()),
   );
@@ -117,6 +133,12 @@ Future<void> initAuthFeatureInjection() async {
   );
   _sl.registerLazySingleton<RegisterUseCase>(
     () => RegisterUseCase(repository: _sl()),
+  );
+  _sl.registerLazySingleton<ForgotPasswordUseCase>(
+    () => ForgotPasswordUseCase(repository: _sl()),
+  );
+  _sl.registerLazySingleton<ResetPasswordUseCase>(
+    () => ResetPasswordUseCase(repository: _sl()),
   );
   _sl.registerLazySingleton<GetAllCitiesUseCase>(
     () => GetAllCitiesUseCase(repository: _sl()),

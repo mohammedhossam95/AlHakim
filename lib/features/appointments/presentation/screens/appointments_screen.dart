@@ -7,11 +7,13 @@ import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/notifications_icon_button.dart';
+import 'package:alhakim/core/widgets/shimmer/appointments_list_shimmer.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
+import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,177 +39,213 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
   static const _previousStatuses = {'completed', 'cancelled'};
 
+  /// Patient appointments tab index in [MainPage].
+  static const _appointmentsTabIndex = 1;
+
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
-      final sessionState = context.read<SessionCubit>().state;
-
-      if (sessionState.status != SessionStatus.authenticated) return;
-
-      context.read<GetAppointmentsCubit>().getAppointments();
+      _fetchAppointments();
     });
+  }
+
+  void _fetchAppointments({bool showLoading = true}) {
+    final sessionState = context.read<SessionCubit>().state;
+    if (sessionState.status != SessionStatus.authenticated) return;
+    context.read<GetAppointmentsCubit>().getAppointments(
+      showLoading: showLoading,
+    );
+  }
+
+  Future<void> _onRefresh() {
+    return context.read<GetAppointmentsCubit>().getAppointments(
+      showLoading: false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: colors.backGround,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'appointments'.tr,
-                        style: TextStyles.semiBold18(),
+    return BlocListener<BottomNavBarCubit, BottomNavBarState>(
+      listenWhen: (previous, current) =>
+          current.index == _appointmentsTabIndex &&
+          previous.tapId != current.tapId,
+      listener: (context, state) {
+        _fetchAppointments();
+      },
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          backgroundColor: colors.backGround,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'appointments'.tr,
+                          style: TextStyles.semiBold18(),
+                        ),
                       ),
-                    ),
-                    const NotificationsIconButton(),
-                  ],
+                      const NotificationsIconButton(),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: colors.whiteColor,
-                  borderRadius: BorderRadius.circular(30.r),
-                ),
-                child: TabBar(
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicator: BoxDecoration(
-                    color: colors.main,
+                Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.whiteColor,
                     borderRadius: BorderRadius.circular(30.r),
                   ),
-                  labelColor: colors.whiteColor,
-                  unselectedLabelColor: colors.textColor,
-                  tabs: [
-                    Tab(text: 'upcoming'.tr),
-                    Tab(text: 'previous'.tr),
-                  ],
+                  child: TabBar(
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicator: BoxDecoration(
+                      color: colors.main,
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                    labelColor: colors.whiteColor,
+                    unselectedLabelColor: colors.textColor,
+                    tabs: [
+                      Tab(text: 'upcoming'.tr),
+                      Tab(text: 'previous'.tr),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: MultiBlocListener(
-                  listeners: [
-                    BlocListener<
-                      CancelAppointmentCubit,
-                      CancelAppointmentState
-                    >(
-                      listener: (context, state) {
-                        if (state is CancelAppointmentLoading) {
-                          Constants.showLoading(context);
-                        } else if (state is CancelAppointmentSuccess) {
-                          Constants.hideLoading(context);
-                          Constants.showSnakToast(
-                            message: state.response.message ?? '',
-                            context: context,
-                            type: 1,
-                          );
-                          context
-                              .read<GetAppointmentsCubit>()
-                              .getAppointments();
-                        } else if (state is CancelAppointmentError) {
-                          Constants.hideLoading(context);
-                          Constants.showSnakToast(
-                            message: state.message,
-                            context: context,
-                            type: 3,
-                          );
-                        }
-                      },
-                    ),
-                    BlocListener<
-                      UpdateQueueStatusCubit,
-                      UpdateQueueStatusState
-                    >(
-                      listener: (context, state) {
-                        if (state is UpdateQueueStatusLoading) {
-                          Constants.showLoading(context);
-                        } else if (state is UpdateQueueStatusSuccess) {
-                          Constants.hideLoading(context);
-                          Constants.showSnakToast(
-                            message: state.response.message ?? '',
-                            context: context,
-                            type: 1,
-                          );
-                          context
-                              .read<GetAppointmentsCubit>()
-                              .getAppointments();
-                        } else if (state is UpdateQueueStatusError) {
-                          Constants.hideLoading(context);
-                          Constants.showSnakToast(
-                            message: state.message,
-                            context: context,
-                            type: 3,
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                  child:
-                      BlocBuilder<GetAppointmentsCubit, GetAppointmentsState>(
-                        builder: (context, state) {
-                          if (state is GetAppointmentsLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                Expanded(
+                  child: MultiBlocListener(
+                    listeners: [
+                      BlocListener<
+                        CancelAppointmentCubit,
+                        CancelAppointmentState
+                      >(
+                        listener: (context, state) {
+                          if (state is CancelAppointmentLoading) {
+                            Constants.showLoading(context);
+                          } else if (state is CancelAppointmentSuccess) {
+                            Constants.hideLoading(context);
+                            Constants.showSnakToast(
+                              message: state.response.message ?? '',
+                              context: context,
+                              type: 1,
+                            );
+                            context
+                                .read<GetAppointmentsCubit>()
+                                .getAppointments();
+                          } else if (state is CancelAppointmentError) {
+                            Constants.hideLoading(context);
+                            Constants.showSnakToast(
+                              message: state.message,
+                              context: context,
+                              type: 3,
                             );
                           }
-
-                          if (state is GetAppointmentsError) {
-                            return Center(
-                              child: ErrorText(text: state.message, width: 300),
-                            );
-                          }
-
-                          List<AppointmentEntity> appointments = [];
-
-                          if (state is GetAppointmentsSuccess) {
-                            appointments =
-                                state.response.data as List<AppointmentEntity>;
-                          }
-
-                          final upcoming = appointments
-                              .where(
-                                (e) => _upcomingStatuses.contains(
-                                  e.status?.toLowerCase().trim(),
-                                ),
-                              )
-                              .toList();
-
-                          final previous = appointments
-                              .where(
-                                (e) => _previousStatuses.contains(
-                                  e.status?.toLowerCase().trim(),
-                                ),
-                              )
-                              .toList();
-
-                          return TabBarView(
-                            children: [
-                              _AppointmentsList(
-                                data: upcoming,
-                                isUpcoming: true,
-                              ),
-                              _AppointmentsList(
-                                data: previous,
-                                isUpcoming: false,
-                              ),
-                            ],
-                          );
                         },
                       ),
+                      BlocListener<
+                        UpdateQueueStatusCubit,
+                        UpdateQueueStatusState
+                      >(
+                        listener: (context, state) {
+                          if (state is UpdateQueueStatusLoading) {
+                            Constants.showLoading(context);
+                          } else if (state is UpdateQueueStatusSuccess) {
+                            Constants.hideLoading(context);
+                            Constants.showSnakToast(
+                              message: state.response.message ?? '',
+                              context: context,
+                              type: 1,
+                            );
+                            context
+                                .read<GetAppointmentsCubit>()
+                                .getAppointments();
+                          } else if (state is UpdateQueueStatusError) {
+                            Constants.hideLoading(context);
+                            Constants.showSnakToast(
+                              message: state.message,
+                              context: context,
+                              type: 3,
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                    child:
+                        BlocBuilder<GetAppointmentsCubit, GetAppointmentsState>(
+                          builder: (context, state) {
+                            if (state is GetAppointmentsLoading) {
+                              return const AppointmentsListShimmer();
+                            }
+
+                            if (state is GetAppointmentsError) {
+                              return RefreshIndicator(
+                                color: colors.main,
+                                onRefresh: _onRefresh,
+                                child: ListView(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  children: [
+                                    SizedBox(height: 120.h),
+                                    ErrorText(text: state.message, width: 300),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            List<AppointmentEntity> appointments = [];
+
+                            if (state is GetAppointmentsSuccess) {
+                              appointments =
+                                  state.response.data
+                                      as List<AppointmentEntity>;
+                            }
+
+                            final upcoming = appointments
+                                .where(
+                                  (e) => _upcomingStatuses.contains(
+                                    e.status?.toLowerCase().trim(),
+                                  ),
+                                )
+                                .toList();
+
+                            final previous = appointments
+                                .where(
+                                  (e) => _previousStatuses.contains(
+                                    e.status?.toLowerCase().trim(),
+                                  ),
+                                )
+                                .toList();
+
+                            return TabBarView(
+                              children: [
+                                _AppointmentsList(
+                                  data: upcoming,
+                                  isUpcoming: true,
+                                  onRefresh: _onRefresh,
+                                ),
+                                _AppointmentsList(
+                                  data: previous,
+                                  isUpcoming: false,
+                                  onRefresh: _onRefresh,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -218,24 +256,44 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 class _AppointmentsList extends StatelessWidget {
   final List<AppointmentEntity> data;
   final bool isUpcoming;
+  final Future<void> Function() onRefresh;
 
-  const _AppointmentsList({required this.data, required this.isUpcoming});
+  const _AppointmentsList({
+    required this.data,
+    required this.isUpcoming,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (data.isEmpty) {
-      return Center(
-        child: Text('no_appointments'.tr, style: TextStyles.medium14()),
-      );
-    }
-
-    return ListView.separated(
-      padding: EdgeInsets.all(16.w),
-      itemCount: data.length,
-      separatorBuilder: (_, _) => Gaps.vGap12,
-      itemBuilder: (context, index) {
-        return _AppointmentCard(item: data[index], isUpcoming: isUpcoming);
-      },
+    return RefreshIndicator(
+      color: colors.main,
+      onRefresh: onRefresh,
+      child: data.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(height: 120.h),
+                Center(
+                  child: Text(
+                    'no_appointments'.tr,
+                    style: TextStyles.medium14(),
+                  ),
+                ),
+              ],
+            )
+          : ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(16.w),
+              itemCount: data.length,
+              separatorBuilder: (_, _) => Gaps.vGap12,
+              itemBuilder: (context, index) {
+                return _AppointmentCard(
+                  item: data[index],
+                  isUpcoming: isUpcoming,
+                );
+              },
+            ),
     );
   }
 }

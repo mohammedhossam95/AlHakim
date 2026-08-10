@@ -9,10 +9,12 @@ import 'package:alhakim/features/appointments/domain/entities/appointment_entity
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
 import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
-import 'package:alhakim/features/auth/presentation/cubit/check_account_cubit/check_account_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/login/login_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get_countries_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/forgot_password_cubit/forgot_password_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/reset_password_cubit/reset_password_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/resend_otp_cubit/resend_otp_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
@@ -21,6 +23,7 @@ import 'package:alhakim/features/auth/presentation/screen/complete_profile_scree
 import 'package:alhakim/features/auth/presentation/screen/login_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/otp_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/register_screen.dart';
+import 'package:alhakim/features/auth/presentation/screen/forgot_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/reset_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/splash_screen.dart';
 import 'package:alhakim/features/booking/domain/entities/family_member_entity.dart';
@@ -187,11 +190,8 @@ abstract class Routes {
         path: loginScreenRoute,
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (_) => sl<VerifyCodeCubit>()),
-              BlocProvider(create: (_) => sl<CheckAccountCubit>()),
-            ],
+          child: BlocProvider(
+            create: (_) => sl<LoginCubit>(),
             child: const LoginScreen(),
           ),
         ),
@@ -394,6 +394,19 @@ abstract class Routes {
         builder: (context, state) => const DelegateDoctorsScreen(),
       ),
 
+      /// Forgot Password
+      GoRoute(
+        name: forgotPasswordRoute,
+        path: forgotPasswordRoute,
+        pageBuilder: (context, state) => buildAdaptivePage(
+          state: state,
+          child: BlocProvider(
+            create: (_) => sl<ForgotPasswordCubit>(),
+            child: const ForgotPasswordScreen(),
+          ),
+        ),
+      ),
+
       /// Reset Password
       GoRoute(
         name: resetPasswordRoute,
@@ -403,7 +416,7 @@ abstract class Routes {
           return buildAdaptivePage(
             state: state,
             child: BlocProvider(
-              create: (context) => sl<RegisterCubit>(),
+              create: (_) => sl<ResetPasswordCubit>(),
               child: ResetPasswordScreen(authParams: authParams),
             ),
           );
@@ -521,16 +534,19 @@ abstract class Routes {
       GoRoute(
         path: familyMembersScreenRoute,
         name: familyMembersScreenRoute,
-        pageBuilder: (context, state) => buildAdaptivePage(
-          state: state,
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (context) => sl<GetFamilyMembersCubit>()),
-              BlocProvider(create: (context) => sl<DeleteFamilyMemberCubit>()),
-            ],
-            child: const FamilyMembersScreen(),
-          ),
-        ),
+        pageBuilder: (context, state) {
+          final selectionMode = state.extra == true;
+          return buildAdaptivePage(
+            state: state,
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => sl<GetFamilyMembersCubit>()),
+                BlocProvider(create: (context) => sl<DeleteFamilyMemberCubit>()),
+              ],
+              child: FamilyMembersScreen(selectionMode: selectionMode),
+            ),
+          );
+        },
       ),
       GoRoute(
         path: addFamilyMemberScreenRoute,
@@ -652,13 +668,16 @@ abstract class Routes {
         Scaffold(body: Center(child: Text(AppStrings.noRouteFound))),
   );
 
-  static String get currentRoute => routesStack.last;
+  static String get currentRoute =>
+      routesStack.isEmpty ? '' : routesStack.last;
+
   static void pushRouteToRoutesStack(String route) {
     routesStack.add(route);
     ServiceLocator.injectRoutesStackSingleton(routesStack);
   }
 
   static void popRouteFromRoutesStack() {
+    if (routesStack.isEmpty) return;
     routesStack.removeLast();
     ServiceLocator.injectRoutesStackSingleton(routesStack);
   }

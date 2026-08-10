@@ -12,14 +12,20 @@ class LoginIsLoading extends LoginState {}
 
 class LoginLoaded extends LoginState {
   final BaseOneResponse response;
-  final AuthParams params;
+  final AuthenticateParams params;
 
   const LoginLoaded({required this.response, required this.params});
+
+  @override
+  List<Object> get props => [response, params];
 }
 
 class LoginError extends LoginState {
   final String message;
-  final AuthParams params;
+  final AuthenticateParams params;
 
   const LoginError({required this.message, required this.params});
+
+  @override
+  List<Object> get props => [message, params];
 }

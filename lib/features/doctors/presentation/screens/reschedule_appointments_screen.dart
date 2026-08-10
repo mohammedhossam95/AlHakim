@@ -126,95 +126,12 @@ class _RescheduleAppointmentsScreenState
   Future<void> _showCancelClinicDialog(
     AvailableBookingDate selectedDate,
   ) async {
-    final reasonController = TextEditingController();
-
-    final confirmed = await showDialog<bool>(
+    final reason = await showDialog<String>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          title: Text(
-            'cancle_clinic'.tr,
-            style: TextStyles.semiBold18(),
-            textAlign: TextAlign.center,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'confirm_cancel_clinic_schedule'.tr,
-                style: TextStyles.medium14(color: colors.lightTextColor),
-                textAlign: TextAlign.center,
-              ),
-              Gaps.vGap16,
-              Text('reason'.tr, style: TextStyles.semiBold14()),
-              Gaps.vGap8,
-              AppTextFormField(
-                controller: reasonController,
-                maxLines: 3,
-                hintText: 'enter_reason'.tr,
-                focusNode: FocusNode(),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'reason_required'.tr;
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
-          actionsAlignment: MainAxisAlignment.center,
-          actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: MyDefaultButton(
-                    btnText: 'no',
-                    height: 42.h,
-                    withDottedBorder: false,
-                    color: colors.whiteColor,
-                    borderColor: colors.main,
-                    textColor: colors.main,
-                    onPressed: () => Navigator.pop(dialogContext, false),
-                  ),
-                ),
-                Gaps.hGap12,
-                Expanded(
-                  child: MyDefaultButton(
-                    btnText: 'yes',
-                    height: 42.h,
-                    withDottedBorder: false,
-                    color: colors.errorColor,
-                    borderColor: colors.errorColor,
-                    onPressed: () {
-                      final reason = reasonController.text.trim();
-                      if (reason.isEmpty) {
-                        Constants.showSnakToast(
-                          context: dialogContext,
-                          type: 2,
-                          message: 'reason_required'.tr,
-                        );
-                        return;
-                      }
-                      Navigator.pop(dialogContext, true);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
+      builder: (dialogContext) => const _CancelClinicReasonDialog(),
     );
 
-    final reason = reasonController.text.trim();
-    reasonController.dispose();
-
-    if (confirmed != true || !mounted) return;
+    if (reason == null || reason.isEmpty || !mounted) return;
 
     final doctorId = context.read<SessionCubit>().state.activeDoctorId;
     if (doctorId == null || doctorId.isEmpty) return;
@@ -1126,6 +1043,105 @@ class _RescheduleAppointmentsScreenState
           );
         },
       ),
+    );
+  }
+}
+
+class _CancelClinicReasonDialog extends StatefulWidget {
+  const _CancelClinicReasonDialog();
+
+  @override
+  State<_CancelClinicReasonDialog> createState() =>
+      _CancelClinicReasonDialogState();
+}
+
+class _CancelClinicReasonDialogState extends State<_CancelClinicReasonDialog> {
+  final _reasonController = TextEditingController();
+  final _reasonFocus = FocusNode();
+
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    _reasonFocus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      title: Text(
+        'cancle_clinic'.tr,
+        style: TextStyles.semiBold18(),
+        textAlign: TextAlign.center,
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'confirm_cancel_clinic_schedule'.tr,
+            style: TextStyles.medium14(color: colors.lightTextColor),
+            textAlign: TextAlign.center,
+          ),
+          Gaps.vGap16,
+          Text('reason'.tr, style: TextStyles.semiBold14()),
+          Gaps.vGap8,
+          AppTextFormField(
+            controller: _reasonController,
+            maxLines: 3,
+            hintText: 'enter_reason'.tr,
+            focusNode: _reasonFocus,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'reason_required'.tr;
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+      actions: [
+        Row(
+          children: [
+            Expanded(
+              child: MyDefaultButton(
+                btnText: 'no',
+                height: 42.h,
+                withDottedBorder: false,
+                color: colors.whiteColor,
+                borderColor: colors.main,
+                textColor: colors.main,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            Gaps.hGap12,
+            Expanded(
+              child: MyDefaultButton(
+                btnText: 'yes',
+                height: 42.h,
+                withDottedBorder: false,
+                color: colors.errorColor,
+                borderColor: colors.errorColor,
+                onPressed: () {
+                  final reason = _reasonController.text.trim();
+                  if (reason.isEmpty) {
+                    Constants.showSnakToast(
+                      context: context,
+                      type: 2,
+                      message: 'reason_required'.tr,
+                    );
+                    return;
+                  }
+                  Navigator.pop(context, reason);
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

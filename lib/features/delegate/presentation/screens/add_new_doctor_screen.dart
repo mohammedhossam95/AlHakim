@@ -5,6 +5,7 @@ import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/add_doctor_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/country_code_widget.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
@@ -82,6 +83,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   final _consultationPriceController = TextEditingController();
 
   final _representativeCodeController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
   final _nameArFocus = FocusNode();
@@ -104,9 +107,13 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   final _consultationPriceFocus = FocusNode();
 
   final _representativeCodeFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
   bool hidePrice = false;
   bool hideConsultationPrice = false;
   final bool _isLoadingLocation = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   SpecialtyEntity? selectedSpeciality;
   List<AppointmentTypeEntity> selectedAppointmentTypes = [];
@@ -189,6 +196,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _consultationPriceController.dispose();
 
     _representativeCodeController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
 
     _nameArFocus.dispose();
     _nameEnFocus.dispose();
@@ -207,6 +216,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _consultationPriceFocus.dispose();
 
     _representativeCodeFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
 
     super.dispose();
   }
@@ -264,6 +275,16 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   void submit() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
+
+    if (_passwordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
+      Constants.showSnakToast(
+        context: context,
+        message: 'passwords_not_match'.tr,
+        type: 3,
+      );
+      return;
+    }
 
     if (selectedSchedulesCount < 1) {
       Constants.showSnakToast(
@@ -377,6 +398,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
         clinicCountryCode: clinicCountryCode,
         hidePrice: hidePrice,
         hideConsultationPrice: hideConsultationPrice,
+        password: _passwordController.text.trim(),
+        passwordConfirmation: _confirmPasswordController.text.trim(),
       ),
     );
   }
@@ -980,6 +1003,64 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
 
                       Gaps.vGap24,
                     ],
+
+                    buildLabel("password".tr),
+                    Gaps.vGap8,
+                    MyTextFormField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      obscureText: _obscurePassword,
+                      validatorType: ValidatorType.password,
+                      hintText: "password".tr,
+                      prefixIcon: Icon(Icons.lock_outline, color: colors.main),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: colors.lightTextColor,
+                        ),
+                      ),
+                    ),
+                    Gaps.vGap16,
+                    buildLabel("confirm_password".tr),
+                    Gaps.vGap8,
+                    MyTextFormField(
+                      controller: _confirmPasswordController,
+                      focusNode: _confirmPasswordFocus,
+                      obscureText: _obscureConfirmPassword,
+                      hintText: "confirm_password".tr,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'required'.tr;
+                        }
+                        if (value != _passwordController.text) {
+                          return 'passwords_not_match'.tr;
+                        }
+                        return null;
+                      },
+                      prefixIcon: Icon(Icons.lock_outline, color: colors.main),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: colors.lightTextColor,
+                        ),
+                      ),
+                    ),
+                    Gaps.vGap24,
+
                     // Gaps.vGap20,
 
                     /// license

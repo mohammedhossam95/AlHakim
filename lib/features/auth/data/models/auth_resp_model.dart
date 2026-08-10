@@ -64,6 +64,7 @@ class AuthModel extends UserAuthEntity {
 class UserModel extends UserEntity {
   const UserModel({
     super.id,
+    super.role,
     super.firstName,
     super.lastName,
     super.phoneNumber,
@@ -81,7 +82,8 @@ class UserModel extends UserEntity {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'],
+      id: json['id']?.toString(),
+      role: json['role']?.toString(),
       firstName: json['first_name'],
       lastName: json['last_name'],
       phoneNumber: json['phone_number'],
@@ -99,6 +101,7 @@ class UserModel extends UserEntity {
   }
   Map<String, dynamic> toJson() => {
     "id": id,
+    "role": role,
     "first_name": firstName,
     "last_name": lastName,
     "phone_number": phoneNumber,
