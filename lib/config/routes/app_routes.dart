@@ -668,13 +668,16 @@ abstract class Routes {
         Scaffold(body: Center(child: Text(AppStrings.noRouteFound))),
   );
 
-  static String get currentRoute => routesStack.last;
+  static String get currentRoute =>
+      routesStack.isEmpty ? '' : routesStack.last;
+
   static void pushRouteToRoutesStack(String route) {
     routesStack.add(route);
     ServiceLocator.injectRoutesStackSingleton(routesStack);
   }
 
   static void popRouteFromRoutesStack() {
+    if (routesStack.isEmpty) return;
     routesStack.removeLast();
     ServiceLocator.injectRoutesStackSingleton(routesStack);
   }

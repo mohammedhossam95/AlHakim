@@ -56,9 +56,13 @@ class AppNavigatorObserver extends NavigatorObserver {
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didRemove(route, previousRoute);
     if (route.settings.name != null) {
-      String lastRoute = routesStack.last;
-      routesStack.clear();
-      routesStack.add(lastRoute);
+      if (routesStack.isNotEmpty) {
+        final lastRoute = routesStack.last;
+        routesStack.clear();
+        routesStack.add(lastRoute);
+      } else if (previousRoute?.settings.name != null) {
+        routesStack.add(previousRoute!.settings.name!);
+      }
     }
     Log.i(
         '@ROUTES: [remove] current: ${route.settings.name}, previous: ${previousRoute?.settings.name}, routesStack: ${routesStack.toString()}');

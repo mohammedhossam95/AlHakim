@@ -2,6 +2,7 @@ import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/country_code_widget.dart';
@@ -143,10 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       Image.asset('assets/images/logo2.png', height: 150.h),
                       Gaps.vGap16,
-                      Text(
-                        'welcome_back'.tr,
-                        style: TextStyles.semiBold18(),
-                      ),
+                      Text('welcome_back'.tr, style: TextStyles.semiBold18()),
                       Text(
                         'login_subtitle'.tr,
                         style: TextStyles.medium14(
@@ -237,28 +235,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       Gaps.vGap8,
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: () {
-                            context.pushNamed(Routes.forgotPasswordRoute);
-                          },
-                          child: Text(
-                            'forgot_password'.tr,
-                            style: TextStyles.medium12(color: colors.main),
+                      if (sessionCubit.state.userType == UserType.patient) ...[
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: () {
+                              context.pushNamed(Routes.forgotPasswordRoute);
+                            },
+                            child: Text(
+                              'forgot_password'.tr,
+                              style: TextStyles.medium12(color: colors.main),
+                            ),
                           ),
                         ),
-                      ),
-                      Gaps.vGap8,
-                      TextButton(
-                        onPressed: () {
-                          context.pushNamed(Routes.registerRoute);
-                        },
-                        child: Text(
-                          'create_new_account'.tr,
-                          style: TextStyles.semiBold14(color: colors.main),
+                        Gaps.vGap8,
+                        TextButton(
+                          onPressed: () {
+                            context.pushNamed(Routes.registerRoute);
+                          },
+                          child: Text(
+                            'create_new_account'.tr,
+                            style: TextStyles.semiBold14(color: colors.main),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

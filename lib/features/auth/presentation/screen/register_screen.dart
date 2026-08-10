@@ -172,26 +172,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           textAlign: TextAlign.center,
                         ),
                         Gaps.vGap20,
-                        MyTextFormField(
-                          controller: _firstNameController,
-                          hintText: 'enter_first_name'.tr,
-                          validatorType: ValidatorType.standard,
-                          prefixIcon: Icon(
-                            Icons.person_outline,
-                            color: colors.main,
-                            size: 16,
-                          ),
-                        ),
-                        Gaps.vGap12,
-                        MyTextFormField(
-                          controller: _lastNameController,
-                          hintText: 'enter_last_name'.tr,
-                          validatorType: ValidatorType.standard,
-                          prefixIcon: Icon(
-                            Icons.person_outline,
-                            color: colors.main,
-                            size: 16,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: MyTextFormField(
+                                controller: _firstNameController,
+                                hintText: 'enter_first_name'.tr,
+                                validatorType: ValidatorType.standard,
+                                prefixIcon: Icon(
+                                  Icons.person_outline,
+                                  color: colors.main,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                            Gaps.hGap12,
+                            Expanded(
+                              child: MyTextFormField(
+                                controller: _lastNameController,
+                                hintText: 'enter_last_name'.tr,
+                                validatorType: ValidatorType.standard,
+                                prefixIcon: Icon(
+                                  Icons.person_outline,
+                                  color: colors.main,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         Gaps.vGap12,
                         SplitDatePicker(
