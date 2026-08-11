@@ -16,6 +16,7 @@ class GetHospitalEmergencyCubit extends Cubit<GetHospitalEmergencyState> {
     int? perPage,
     String? hospitalName,
     int? categoryId,
+    int? isOffered,
   }) async {
     emit(GetHospitalEmergencyLoading());
 
@@ -24,6 +25,7 @@ class GetHospitalEmergencyCubit extends Cubit<GetHospitalEmergencyState> {
         perPage: perPage,
         hospitalName: hospitalName,
         categoryId: categoryId,
+        isOffered: isOffered,
       ),
     );
 

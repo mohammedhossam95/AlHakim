@@ -81,6 +81,7 @@
   "update_app_body": "An update is available for this app. We recommend updating to the latest version to get the latest features.",
   "force_update_app_body": "You must update the app to continue. Please update to the latest version.",
   "emergency": "Emergency",
+  "patient_offers": "Offers",
   "emergency_search_hint": "Search for a hospital, clinic, or area...",
   "major_hospitals_facilities": "Major Hospitals and Facilities",
   "no_hospitals_found": "No hospitals available now",

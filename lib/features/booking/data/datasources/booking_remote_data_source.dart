@@ -1,4 +1,3 @@
-import 'package:alhakim/core/api/dio_consumer.dart';
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/features/booking/data/models/appointment_booking_model.dart';
@@ -129,7 +128,7 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   @override
   Future<AppointmentTypeRespModel> getAppointmentTypes() async {
     try {
-      final response = await dioConsumer.get(ApiConstants.appointmentTypes);
+      final response = await dioConsumer.get('/appointment-types');
 
       if (response['status'] == true) {
         return AppointmentTypeRespModel.fromJson(response);

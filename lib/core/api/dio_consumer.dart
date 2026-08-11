@@ -21,15 +21,6 @@ abstract class ApiConstants {
   static const String analyzeComplaint = '/complaints/analyze';
   static const String getNotifications = '/notifications';
   static const String markAllNotificationsAsRead = '/notifications/read-all';
-  static const String hospitalEmergencyNumbers = '/hospital-emergency-numbers';
-  static const String emergencyNumberCategories = '/emergency-number-categories';
-  static const String appointmentTypes = '/appointment-types';
-  static const String authenticate = '/auth/authenticate';
-  static const String register = '/auth/register';
-  static const String verifyOtp = '/auth/verify-otp';
-  static const String resendOtp = '/auth/resend-otp';
-  static const String forgotPassword = '/auth/forgot-password';
-  static const String resetPassword = '/auth/reset-password';
 
   static String deleteDoctorSchedule({
     required String doctorId,
