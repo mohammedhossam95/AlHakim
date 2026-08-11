@@ -712,9 +712,7 @@ class QueuePatientCard extends StatelessWidget {
                         .read<UpdateQueueStatusCubit>()
                         .updateQueueStatus(
                           doctorId: doctorId,
-
                           appointmentId: item.id ?? 0,
-
                           status: value,
                         );
                     if (!context.mounted) return;

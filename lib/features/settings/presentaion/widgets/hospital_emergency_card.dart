@@ -89,12 +89,7 @@ class HospitalEmergencyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        item.name ?? '',
-                        style: TextStyles.bold16(color: colors.main),
-                      ),
-                    ),
+                    Spacer(),
                     Gaps.hGap10,
 
                     _CircleActionButton(
@@ -125,6 +120,10 @@ class HospitalEmergencyCard extends StatelessWidget {
                     //   onTap: _call,
                     // ),
                   ],
+                ),
+                Text(
+                  item.name ?? '',
+                  style: TextStyles.bold16(color: colors.main),
                 ),
                 if ((item.location ?? '').isNotEmpty) ...[
                   Gaps.vGap4,

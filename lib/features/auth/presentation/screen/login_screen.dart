@@ -17,6 +17,7 @@ import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,11 +37,24 @@ class _LoginScreenState extends State<LoginScreen> {
 
   late Country _selectedCountry;
   bool _obscurePassword = true;
+  String firebaseToken = '';
 
   @override
   void initState() {
     super.initState();
     _selectedCountry = CountryParser.parsePhoneCode('20');
+    getFirebaseToken();
+  }
+
+  void getFirebaseToken() async {
+    FirebaseMessaging.instance
+        .getToken()
+        .then((devicefcmToken) {
+          firebaseToken = devicefcmToken ?? '';
+        })
+        .catchError((e) {
+          firebaseToken = 'error';
+        });
   }
 
   @override
@@ -100,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
         countryCode: '+${_selectedCountry.phoneCode}',
         phoneNumber: phone,
         password: _passwordController.text.trim(),
+        firebaseToken: firebaseToken,
       ),
     );
   }

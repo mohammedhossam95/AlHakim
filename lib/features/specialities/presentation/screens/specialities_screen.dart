@@ -507,7 +507,7 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
                         } else if (state is GetSpecialtiesError) {
                           return SliverToBoxAdapter(
                             child: SizedBox(
-                              height: 150.h,
+                              height: 200.h,
                               child: Center(
                                 child: ErrorText(
                                   width: 100.w,

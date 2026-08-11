@@ -100,7 +100,7 @@ class _ErrorTextState extends State<ErrorText> {
           //login button
           if (widget.text == AppStrings.unAuthorizedFailure)
             Container(
-              margin: EdgeInsets.all(20.r),
+              margin: EdgeInsets.all(10.r),
 
               child: MyDefaultButton(
                 onPressed: () {
@@ -108,7 +108,7 @@ class _ErrorTextState extends State<ErrorText> {
                 },
 
                 btnText: Strings.login,
-
+                height: 30.h,
                 localeText: true,
               ),
             ),
