@@ -22,6 +22,7 @@ extension UserTypeMapper on UserType {
       case 'patient':
         return UserType.patient;
       case 'doctor':
+      case 'medical_center':
         return UserType.doctor;
       case 'representative':
         return UserType.delegate;

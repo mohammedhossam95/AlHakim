@@ -41,7 +41,7 @@
 //   final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
 //   int _markerIdCounter = 0;
 //   final Completer<GoogleMapController> _mapController = Completer();
-//   LatLng position = const LatLng(30.044398, 31.235715);
+//   LatLng position = const LatLng(30.044398, 30.513615);
 //   final ScrollController scrollController = ScrollController();
 
 //   void _onMapCreated(GoogleMapController controller) async {

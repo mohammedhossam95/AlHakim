@@ -12,6 +12,11 @@ class MedicalCenterEntity extends Equatable {
   final String? cover;
   final bool? isActive;
   final String? createdAt;
+  final String? latitude;
+  final String? longitude;
+  final String? city;
+  final String? district;
+  final String? street;
 
   const MedicalCenterEntity({
     this.id,
@@ -25,20 +30,30 @@ class MedicalCenterEntity extends Equatable {
     this.cover,
     this.isActive,
     this.createdAt,
+    this.latitude,
+    this.longitude,
+    this.city,
+    this.district,
+    this.street,
   });
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        address,
-        countryCode,
-        phone,
-        email,
-        logo,
-        cover,
-        isActive,
-        createdAt,
-      ];
+    id,
+    name,
+    description,
+    address,
+    countryCode,
+    phone,
+    email,
+    logo,
+    cover,
+    isActive,
+    createdAt,
+    latitude,
+    longitude,
+    city,
+    district,
+    street,
+  ];
 }

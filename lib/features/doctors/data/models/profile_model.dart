@@ -1,3 +1,4 @@
+import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/doctors/domain/entities/profile_entity.dart';
 
 class ProfileModel extends ProfileEntity {
@@ -6,6 +7,7 @@ class ProfileModel extends ProfileEntity {
     super.name,
     super.description,
     super.address,
+    super.location,
     super.countryCode,
     super.phone,
     super.email,
@@ -20,6 +22,9 @@ class ProfileModel extends ProfileEntity {
     name: json["name"],
     description: json["description"],
     address: json["address"],
+    location: json["location"] == null
+        ? null
+        : LocationModel.fromJson(json["location"]),
     countryCode: json["country_code"],
     phone: json["phone"],
     email: json["email"],
@@ -36,6 +41,17 @@ class ProfileModel extends ProfileEntity {
     "name": name,
     "description": description,
     "address": address,
+    "location": location is LocationModel
+        ? (location as LocationModel).toJson()
+        : location == null
+        ? null
+        : {
+            "city": location?.city,
+            "district": location?.district,
+            "street": location?.street,
+            "latitude": location?.latitude,
+            "longitude": location?.longitude,
+          },
     "country_code": countryCode,
     "phone": phone,
     "email": email,

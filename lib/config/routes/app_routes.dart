@@ -312,7 +312,7 @@ abstract class Routes {
           final map = state.extra as Map<String, dynamic>?;
 
           final LatLng initialLocation =
-              map?['location'] as LatLng? ?? LatLng(30.0444, 31.2357);
+              map?['location'] as LatLng? ?? LatLng(30.4323, 30.5136);
           final LocationCallback? onChanged =
               map?['onChanged'] as LocationCallback?;
 

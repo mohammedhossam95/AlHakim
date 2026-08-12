@@ -158,6 +158,27 @@ class MedicalCenterRemoteDataSourceImpl
         MapEntry('confirm_password', params.confirmPassword!),
       );
     }
+    if (params.latitude != null) {
+      formData.fields.add(MapEntry('latitude', params.latitude!));
+    }
+    if (params.longitude != null) {
+      formData.fields.add(MapEntry('longitude', params.longitude!));
+    }
+    if (params.city != null) {
+      formData.fields.add(MapEntry('city', params.city!));
+    }
+    if (params.district != null) {
+      formData.fields.add(MapEntry('district', params.district!));
+    }
+    if (params.street != null) {
+      formData.fields.add(MapEntry('street', params.street!));
+    }
+    if (params.representativeCode != null &&
+        params.representativeCode!.trim().isNotEmpty) {
+      formData.fields.add(
+        MapEntry('representative_code', params.representativeCode!),
+      );
+    }
 
     await _appendFile(formData, 'logo', params.logo, compressImage: true);
     await _appendFile(formData, 'cover', params.cover, compressImage: true);

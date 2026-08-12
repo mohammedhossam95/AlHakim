@@ -42,6 +42,11 @@ class MedicalCenterFormSection extends StatelessWidget {
   final VoidCallback onPickLogo;
   final VoidCallback onPickCover;
   final VoidCallback onPickLicense;
+  final TextEditingController? locationController;
+  final bool isLoadingLocation;
+  final VoidCallback? onPickLocation;
+  final TextEditingController? representativeCodeController;
+  final FocusNode? representativeCodeFocus;
 
   const MedicalCenterFormSection({
     super.key,
@@ -71,6 +76,11 @@ class MedicalCenterFormSection extends StatelessWidget {
     required this.onPickLogo,
     required this.onPickCover,
     required this.onPickLicense,
+    this.locationController,
+    this.isLoadingLocation = false,
+    this.onPickLocation,
+    this.representativeCodeController,
+    this.representativeCodeFocus,
   });
 
   @override
@@ -198,17 +208,44 @@ class MedicalCenterFormSection extends StatelessWidget {
           hintText: 'enter_center_description'.tr,
           prefixIcon: Icon(Icons.info_outline, color: colors.main),
         ),
-        Gaps.vGap16,
-        _buildLabel('address'.tr),
-        Gaps.vGap8,
-        MyTextFormField(
-          controller: addressController,
-          focusNode: addressFocus,
-          textInputAction: TextInputAction.next,
-          onSubmit: (_) => FocusScope.of(context).requestFocus(phoneFocus),
-          hintText: 'enter_address'.tr,
-          prefixIcon: Icon(Icons.location_on_outlined, color: colors.main),
-        ),
+        // Gaps.vGap16,
+        // _buildLabel('address'.tr),
+        // Gaps.vGap8,
+        // MyTextFormField(
+        //   controller: addressController,
+        //   focusNode: addressFocus,
+        //   textInputAction: TextInputAction.next,
+        //   onSubmit: (_) => FocusScope.of(context).requestFocus(phoneFocus),
+        //   hintText: 'enter_address'.tr,
+        //   prefixIcon: Icon(Icons.location_on_outlined, color: colors.main),
+        // ),
+        if (locationController != null && onPickLocation != null) ...[
+          Gaps.vGap16,
+          _buildLabel('location'.tr),
+          Gaps.vGap10,
+          MyTextFormField(
+            controller: locationController!,
+            backgroundColor: colors.whiteColor,
+            onTap: onPickLocation,
+            hintText: isLoadingLocation
+                ? 'Getting location...'
+                : 'select_location'.tr,
+            readOnly: true,
+            prefixIcon: isLoadingLocation
+                ? Padding(
+                    padding: EdgeInsets.all(12.r),
+                    child: SizedBox(
+                      width: 20.w,
+                      height: 20.h,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : IconButton(
+                    onPressed: onPickLocation,
+                    icon: Icon(Icons.location_on_outlined),
+                  ),
+          ),
+        ],
         Gaps.vGap16,
         _buildLabel('phone'.tr),
         Gaps.vGap8,
@@ -279,6 +316,22 @@ class MedicalCenterFormSection extends StatelessWidget {
           ),
         ),
         Gaps.vGap16,
+        if (representativeCodeController != null) ...[
+          _buildLabel('representative_code'.tr),
+          Gaps.vGap8,
+          MyTextFormField(
+            controller: representativeCodeController!,
+            focusNode: representativeCodeFocus,
+            textInputAction: TextInputAction.next,
+            onSubmit: (_) => FocusScope.of(context).requestFocus(passwordFocus),
+            hintText: 'enter_representative_code'.tr,
+            prefixIcon: Icon(
+              Icons.confirmation_number_outlined,
+              color: colors.main,
+            ),
+          ),
+          Gaps.vGap16,
+        ],
         _buildLabel("password".tr),
         Gaps.vGap8,
         MyTextFormField(

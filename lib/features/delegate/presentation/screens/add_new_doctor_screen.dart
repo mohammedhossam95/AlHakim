@@ -175,6 +175,40 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     _representativeCodeController.text =
         sharedPreferences.getAuth()?.user?.referralCode ?? '';
     context.read<GetSpecialtiesCubit>().getSpecialties();
+
+    // Load medical center location if applicable
+    if (widget.source == DoctorFormSource.medicalCenter) {
+      _loadMedicalCenterLocation();
+    }
+  }
+
+  void _loadMedicalCenterLocation() {
+    final profile = sharedPreferences.getAuth()?.profile;
+    if (profile?.location == null) return;
+
+    final location = profile!.location!;
+    selectedCity = location.city;
+    selectedDistrict = location.district;
+    selectedStreet = location.street;
+
+    final lat = double.tryParse(location.latitude ?? '');
+    final lng = double.tryParse(location.longitude ?? '');
+    if (lat != null && lng != null) {
+      selectedLocation = LatLng(lat, lng);
+    }
+
+    final addressParts = [
+      selectedStreet,
+      selectedDistrict,
+      selectedCity,
+    ].where((e) => e != null && e.trim().isNotEmpty).join(', ');
+
+    if (addressParts.isNotEmpty) {
+      _locationController.text = addressParts;
+    } else if (selectedLocation != null) {
+      _locationController.text =
+          '${selectedLocation!.latitude}, ${selectedLocation!.longitude}';
+    }
   }
 
   @override
@@ -249,11 +283,14 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   }
 
   Future<void> _pickLocation() async {
+    // Medical center can't change location
+    if (widget.source == DoctorFormSource.medicalCenter) return;
+
     final result =
         await context.pushNamed(
               Routes.myMapViewRoute,
               extra: {
-                'location': selectedLocation ?? LatLng(30.0444, 31.2357),
+                'location': selectedLocation ?? LatLng(30.4323, 30.5136),
                 'onChanged': (LatLng pos) {},
               },
             )
@@ -276,8 +313,12 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    if (_passwordController.text.trim() !=
-        _confirmPasswordController.text.trim()) {
+    final isMedicalCenterSource =
+        widget.source == DoctorFormSource.medicalCenter;
+
+    if (!isMedicalCenterSource &&
+        _passwordController.text.trim() !=
+            _confirmPasswordController.text.trim()) {
       Constants.showSnakToast(
         context: context,
         message: 'passwords_not_match'.tr,
@@ -398,8 +439,12 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
         clinicCountryCode: clinicCountryCode,
         hidePrice: hidePrice,
         hideConsultationPrice: hideConsultationPrice,
-        password: _passwordController.text.trim(),
-        passwordConfirmation: _confirmPasswordController.text.trim(),
+        password: isMedicalCenterSource
+            ? null
+            : _passwordController.text.trim(),
+        passwordConfirmation: isMedicalCenterSource
+            ? null
+            : _confirmPasswordController.text.trim(),
       ),
     );
   }
@@ -1004,62 +1049,67 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                       Gaps.vGap24,
                     ],
 
-                    buildLabel("password".tr),
-                    Gaps.vGap8,
-                    MyTextFormField(
-                      controller: _passwordController,
-                      focusNode: _passwordFocus,
-                      obscureText: _obscurePassword,
-                      validatorType: ValidatorType.password,
-                      hintText: "password".tr,
-                      prefixIcon: Icon(Icons.lock_outline, color: colors.main),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: colors.lightTextColor,
+                    if (widget.source == DoctorFormSource.delegate) ...[
+                      buildLabel("password".tr),
+                      Gaps.vGap8,
+                      MyTextFormField(
+                        controller: _passwordController,
+                        focusNode: _passwordFocus,
+                        obscureText: _obscurePassword,
+                        validatorType: ValidatorType.password,
+                        hintText: "password".tr,
+                        prefixIcon:
+                            Icon(Icons.lock_outline, color: colors.main),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: colors.lightTextColor,
+                          ),
                         ),
                       ),
-                    ),
-                    Gaps.vGap16,
-                    buildLabel("confirm_password".tr),
-                    Gaps.vGap8,
-                    MyTextFormField(
-                      controller: _confirmPasswordController,
-                      focusNode: _confirmPasswordFocus,
-                      obscureText: _obscureConfirmPassword,
-                      hintText: "confirm_password".tr,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'required'.tr;
-                        }
-                        if (value != _passwordController.text) {
-                          return 'passwords_not_match'.tr;
-                        }
-                        return null;
-                      },
-                      prefixIcon: Icon(Icons.lock_outline, color: colors.main),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
+                      Gaps.vGap16,
+                      buildLabel("confirm_password".tr),
+                      Gaps.vGap8,
+                      MyTextFormField(
+                        controller: _confirmPasswordController,
+                        focusNode: _confirmPasswordFocus,
+                        obscureText: _obscureConfirmPassword,
+                        hintText: "confirm_password".tr,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'required'.tr;
+                          }
+                          if (value != _passwordController.text) {
+                            return 'passwords_not_match'.tr;
+                          }
+                          return null;
                         },
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: colors.lightTextColor,
+                        prefixIcon:
+                            Icon(Icons.lock_outline, color: colors.main),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: colors.lightTextColor,
+                          ),
                         ),
                       ),
-                    ),
-                    Gaps.vGap24,
+                      Gaps.vGap24,
+                    ],
 
                     // Gaps.vGap20,
 
@@ -1109,7 +1159,9 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                     MyTextFormField(
                       controller: _locationController,
                       backgroundColor: colors.whiteColor,
-                      onTap: _pickLocation,
+                      onTap: widget.source == DoctorFormSource.medicalCenter
+                          ? null
+                          : _pickLocation,
                       hintText: _isLoadingLocation
                           ? 'Getting location...'
                           : 'select_location'.tr,
@@ -1125,9 +1177,12 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                                 ),
                               ),
                             )
-                          : IconButton(
-                              onPressed: _pickLocation,
-                              icon: Icon(Icons.location_on_outlined),
+                          : Icon(
+                              Icons.location_on_outlined,
+                              color: widget.source ==
+                                      DoctorFormSource.medicalCenter
+                                  ? colors.lightTextColor
+                                  : colors.main,
                             ),
                     ),
                     Gaps.vGap20,

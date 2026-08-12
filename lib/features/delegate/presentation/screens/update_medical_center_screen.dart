@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class UpdateMedicalCenterScreen extends StatefulWidget {
   final MedicalCenterEntity medicalCenter;
@@ -39,6 +41,7 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _locationController = TextEditingController();
 
   final _nameFocus = FocusNode();
   final _descriptionFocus = FocusNode();
@@ -49,6 +52,12 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
   final _confirmPasswordFocus = FocusNode();
   final bool _obscurePassword = true;
   final bool _obscureConfirmPassword = true;
+  final bool _isLoadingLocation = false;
+
+  LatLng? selectedLocation;
+  String? selectedCity;
+  String? selectedDistrict;
+  String? selectedStreet;
 
   late Country _selectedCountry;
   File? logoFile;
@@ -67,6 +76,29 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
     _addressController.text = widget.medicalCenter.address ?? '';
     _phoneController.text = widget.medicalCenter.phone ?? '';
     _emailController.text = widget.medicalCenter.email ?? '';
+
+    selectedCity = widget.medicalCenter.city;
+    selectedDistrict = widget.medicalCenter.district;
+    selectedStreet = widget.medicalCenter.street;
+
+    final lat = double.tryParse(widget.medicalCenter.latitude ?? '');
+    final lng = double.tryParse(widget.medicalCenter.longitude ?? '');
+    if (lat != null && lng != null) {
+      selectedLocation = LatLng(lat, lng);
+    }
+
+    final addressParts = [
+      selectedStreet,
+      selectedDistrict,
+      selectedCity,
+    ].where((e) => e != null && e.trim().isNotEmpty).join(', ');
+
+    if (addressParts.isNotEmpty) {
+      _locationController.text = addressParts;
+    } else if (selectedLocation != null) {
+      _locationController.text =
+          '${selectedLocation!.latitude}, ${selectedLocation!.longitude}';
+    }
   }
 
   @override
@@ -76,11 +108,16 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
     _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _locationController.dispose();
     _nameFocus.dispose();
     _descriptionFocus.dispose();
     _addressFocus.dispose();
     _phoneFocus.dispose();
     _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     super.dispose();
   }
 
@@ -92,10 +129,34 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
   }
 
   Future<void> _pickLicense() async {
-    final result = await FilePicker.platform.pickFiles();
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null) {
       setState(() => licenseFile = File(result.files.single.path!));
     }
+  }
+
+  Future<void> _pickLocation() async {
+    final result =
+        await context.pushNamed(
+              Routes.myMapViewRoute,
+              extra: {
+                'location': selectedLocation ?? LatLng(30.4323, 30.5136),
+                'onChanged': (LatLng pos) {},
+              },
+            )
+            as Map<String, dynamic>?;
+    if (result == null || !mounted) return;
+
+    final LatLng location = result['location'] as LatLng;
+    final String address = result['address'] as String? ?? '';
+    selectedLocation = location;
+    selectedCity = result['city'] as String?;
+    selectedDistrict = result['district'] as String?;
+    selectedStreet = result['street'] as String?;
+    _locationController.text = address.isNotEmpty
+        ? address
+        : '${location.latitude}, ${location.longitude}';
+    setState(() {});
   }
 
   Future<void> _submit() async {
@@ -118,6 +179,17 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
         countryCode: '+${_selectedCountry.phoneCode}',
         phone: phone,
         email: _emailController.text,
+        password: _passwordController.text.isEmpty
+            ? null
+            : _passwordController.text,
+        confirmPassword: _confirmPasswordController.text.isEmpty
+            ? null
+            : _confirmPasswordController.text,
+        latitude: selectedLocation?.latitude.toString(),
+        longitude: selectedLocation?.longitude.toString(),
+        city: selectedCity,
+        district: selectedDistrict,
+        street: selectedStreet,
         logo: logoFile,
         cover: coverFile,
         license: licenseFile,
@@ -190,6 +262,9 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
                       onPickLogo: () => _pickImage((f) => logoFile = f),
                       onPickCover: () => _pickImage((f) => coverFile = f),
                       onPickLicense: _pickLicense,
+                      locationController: _locationController,
+                      isLoadingLocation: _isLoadingLocation,
+                      onPickLocation: _pickLocation,
                     ),
                     Gaps.vGap30,
                     state is UpdateMedicalCenterLoading
