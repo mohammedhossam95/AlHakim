@@ -100,10 +100,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
+                  margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   decoration: BoxDecoration(
                     color: colors.whiteColor,
                     borderRadius: BorderRadius.circular(30.r),
@@ -476,7 +473,10 @@ class _AppointmentCard extends StatelessWidget {
               Expanded(
                 child: _InfoBox(
                   title: 'appointment_type'.tr,
-                  value: item.appointmentTypeText ?? '',
+                  value:
+                      item.appointmentTypeText ??
+                      item.appointmentType?.name ??
+                      '',
                   icon: Icons.info_outline,
                   valueColor: colors.textColor,
                 ),

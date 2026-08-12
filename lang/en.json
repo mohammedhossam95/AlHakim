@@ -549,5 +549,7 @@
   "enter_reason": "Enter clinic cancellation reason",
   "reason_required": "Reason is required",
   "stop_booking": "Stop Booking",
-  "confirm_stop_booking": "Are you sure you want to stop booking for this day?"
+  "confirm_stop_booking": "Are you sure you want to stop booking for this day?",
+  "open_booking": "Open Booking",
+  "confirm_open_booking": "Are you sure you want to open booking for this day?"
 }

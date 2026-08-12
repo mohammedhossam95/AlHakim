@@ -1,5 +1,6 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
+import 'package:alhakim/features/booking/data/models/appointment_type_model.dart';
 import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 
 class AppointmentRespModel extends BaseListResponse {
@@ -33,7 +34,9 @@ class AppointmentModel extends AppointmentEntity {
     return AppointmentModel(
       id: json['id'],
       appointmentDate: json['appointment_date'],
-      appointmentType: json['appointment_type'],
+      appointmentType: json['appointment_type'] != null
+          ? AppointmentTypeModel.fromJson(json['appointment_type'])
+          : null,
       appointmentTypeText: json['appointment_type_text'],
       status: json['status'],
       doctor: json['doctor'] != null

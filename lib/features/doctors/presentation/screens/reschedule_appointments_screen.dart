@@ -9,10 +9,12 @@ import 'package:alhakim/core/widgets/tags_text_form_field.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/booking/domain/entities/schedule.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_appoinments_for_day_entity.dart';
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/domain/usecases/params/close_clinic_params.dart';
 import 'package:alhakim/features/doctors/domain/usecases/params/update_schedule_status_params.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/close_clinic_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_schedule_status_cubit/update_schedule_status_cubit.dart';
 import 'package:alhakim/injection_container.dart';
@@ -38,28 +40,74 @@ class _RescheduleAppointmentsScreenState
 
   TimeOfDay endTime = const TimeOfDay(hour: 15, minute: 0);
 
-  late List<AvailableBookingDate> availableDates;
+  List<AvailableBookingDate> availableDates = [];
 
   @override
   void initState() {
     super.initState();
 
-    final sessionState = sessionCubit.state;
-    final schedules =
-        sessionState.selectedDoctor?.schedules ??
-        sharedPreferences.getAuth()?.doctor?.schedules ??
-        [];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final doctorId = context.read<SessionCubit>().state.activeDoctorId;
+      if (doctorId == null || doctorId.isEmpty) {
+        return;
+      }
 
+      context.read<GetDoctorByIdCubit>().getDoctorById(doctorId);
+    });
+  }
+
+  void _applyDoctorSchedules(DoctorEntity doctor) {
+    final previousDateKey =
+        availableDates.isNotEmpty &&
+            selectedDateIndex >= 0 &&
+            selectedDateIndex < availableDates.length
+        ? DateFormat(
+            'yyyy-MM-dd',
+          ).format(availableDates[selectedDateIndex].date)
+        : null;
+    final previousScheduleId =
+        availableDates.isNotEmpty &&
+            selectedDateIndex >= 0 &&
+            selectedDateIndex < availableDates.length
+        ? availableDates[selectedDateIndex].schedule.id
+        : null;
+
+    final schedules = doctor.schedules ?? [];
     // Reschedule: one upcoming date per returned schedule day (not the booking limit of 7).
-    availableDates = BookingDatesHelper.generateAvailableDates(
+    final dates = BookingDatesHelper.generateAvailableDates(
       schedules,
       limit: schedules.length,
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || availableDates.isEmpty) return;
-      _getAppointments(availableDates.first);
+    var newIndex = 0;
+    if (previousDateKey != null) {
+      final byDate = dates.indexWhere(
+        (d) => DateFormat('yyyy-MM-dd').format(d.date) == previousDateKey,
+      );
+      if (byDate >= 0) {
+        newIndex = byDate;
+      } else if (previousScheduleId != null) {
+        final byId = dates.indexWhere(
+          (d) => d.schedule.id == previousScheduleId,
+        );
+        if (byId >= 0) newIndex = byId;
+      }
+    }
+
+    setState(() {
+      availableDates = dates;
+      selectedDateIndex = newIndex;
     });
+
+    if (availableDates.isNotEmpty) {
+      _getAppointments(availableDates[selectedDateIndex]);
+    }
+  }
+
+  bool _isScheduleFull(AvailableBookingDate selectedDate) {
+    return selectedDate.schedule.scheduleStatus?.toLowerCase().trim() ==
+        'full';
   }
 
   void _getAppointments(AvailableBookingDate date) {
@@ -145,7 +193,16 @@ class _RescheduleAppointmentsScreenState
     );
   }
 
-  Future<void> _showStopBookingDialog(AvailableBookingDate selectedDate) async {
+  Future<void> _showToggleBookingDialog(
+    AvailableBookingDate selectedDate,
+  ) async {
+    final isCurrentlyFull = _isScheduleFull(selectedDate);
+    final titleKey = isCurrentlyFull ? 'open_booking' : 'stop_booking';
+    final confirmKey = isCurrentlyFull
+        ? 'confirm_open_booking'
+        : 'confirm_stop_booking';
+    final yesColor = isCurrentlyFull ? colors.main : colors.errorColor;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -154,12 +211,12 @@ class _RescheduleAppointmentsScreenState
             borderRadius: BorderRadius.circular(16.r),
           ),
           title: Text(
-            'stop_booking'.tr,
+            titleKey.tr,
             style: TextStyles.semiBold18(),
             textAlign: TextAlign.center,
           ),
           content: Text(
-            'confirm_stop_booking'.tr,
+            confirmKey.tr,
             style: TextStyles.medium14(color: colors.lightTextColor),
             textAlign: TextAlign.center,
           ),
@@ -185,8 +242,8 @@ class _RescheduleAppointmentsScreenState
                     btnText: 'yes',
                     height: 42.h,
                     withDottedBorder: false,
-                    color: colors.errorColor,
-                    borderColor: colors.errorColor,
+                    color: yesColor,
+                    borderColor: yesColor,
                     onPressed: () => Navigator.pop(dialogContext, true),
                   ),
                 ),
@@ -213,52 +270,38 @@ class _RescheduleAppointmentsScreenState
       params: UpdateScheduleStatusParams(
         doctorId: doctorId,
         scheduleId: scheduleId,
-        scheduleStatus: 'full',
+        scheduleStatus: isCurrentlyFull ? 'available' : 'full',
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (availableDates.isEmpty) {
-      return Scaffold(
-        backgroundColor: colors.backGround,
-        appBar: AppBar(title: Text('reschedule_appointments'.tr)),
-        body: Center(
-          child: Text(
-            'noData'.tr,
-            style: TextStyles.medium16(color: colors.lightTextColor),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
-    final selectedDate = availableDates[selectedDateIndex];
-
     return MultiBlocListener(
       listeners: [
+        BlocListener<GetDoctorByIdCubit, GetDoctorByIdState>(
+          listener: (context, state) {
+            if (state is GetDoctorByIdSuccess) {
+              _applyDoctorSchedules(state.doctor);
+            }
+          },
+        ),
         BlocListener<RescheduleCubit, RescheduleState>(
           listener: (context, state) {
             if (state is RescheduleLoading) {
               Constants.showLoading(context);
             }
-
             if (state is RescheduleSuccess) {
               Constants.hideLoading(context);
-
               Constants.showSnakToast(
                 context: context,
                 type: 1,
                 message: state.response.message,
               );
-
               Navigator.pop(context);
             }
-
             if (state is RescheduleError) {
               Constants.hideLoading(context);
-
               Constants.showSnakToast(
                 context: context,
                 type: 3,
@@ -311,7 +354,11 @@ class _RescheduleAppointmentsScreenState
                 message: state.response.message ?? '',
               );
 
-              Navigator.pop(context);
+              final doctorId =
+                  context.read<SessionCubit>().state.activeDoctorId;
+              if (doctorId != null && doctorId.isNotEmpty) {
+                context.read<GetDoctorByIdCubit>().getDoctorById(doctorId);
+              }
             }
 
             if (state is UpdateScheduleStatusError) {
@@ -326,692 +373,698 @@ class _RescheduleAppointmentsScreenState
           },
         ),
       ],
-      child: Scaffold(
-        backgroundColor: colors.backGround,
+      child: BlocBuilder<GetDoctorByIdCubit, GetDoctorByIdState>(
+        builder: (context, doctorState) {
+          if ((doctorState is GetDoctorByIdInitial ||
+                  doctorState is GetDoctorByIdLoading) &&
+              availableDates.isEmpty) {
+            return Scaffold(
+              backgroundColor: colors.backGround,
+              appBar: AppBar(title: Text('reschedule_appointments'.tr)),
+              body: Padding(
+                padding: EdgeInsets.all(16.w),
+                child: _buildShimmer(),
+              ),
+            );
+          }
 
-        appBar: AppBar(title: Text("reschedule_appointments".tr)),
+          if (doctorState is GetDoctorByIdError) {
+            return Scaffold(
+              backgroundColor: colors.backGround,
+              appBar: AppBar(title: Text('reschedule_appointments'.tr)),
+              body: Center(child: Text(doctorState.message)),
+            );
+          }
 
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-
-          child: Column(
-            children: [
-              /// choose day
-              Container(
-                width: double.infinity,
-
-                padding: EdgeInsets.all(18.w),
-
-                decoration: BoxDecoration(
-                  color: colors.whiteColor,
-
-                  borderRadius: BorderRadius.circular(24.r),
+          if (availableDates.isEmpty) {
+            return Scaffold(
+              backgroundColor: colors.backGround,
+              appBar: AppBar(title: Text('reschedule_appointments'.tr)),
+              body: Center(
+                child: Text(
+                  'noData'.tr,
+                  style: TextStyles.medium16(color: colors.lightTextColor),
+                  textAlign: TextAlign.center,
                 ),
+              ),
+            );
+          }
 
-                child: Column(
-                  children: [
-                    Row(
+          final selectedDate = availableDates[selectedDateIndex];
+
+          return Scaffold(
+            backgroundColor: colors.backGround,
+
+            appBar: AppBar(title: Text("reschedule_appointments".tr)),
+
+            body: SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+
+              child: Column(
+                children: [
+                  /// choose day
+                  Container(
+                    width: double.infinity,
+
+                    padding: EdgeInsets.all(18.w),
+
+                    decoration: BoxDecoration(
+                      color: colors.whiteColor,
+
+                      borderRadius: BorderRadius.circular(24.r),
+                    ),
+
+                    child: Column(
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(12.w),
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12.w),
 
-                          decoration: BoxDecoration(
-                            color: colors.main.withValues(alpha: .12),
+                              decoration: BoxDecoration(
+                                color: colors.main.withValues(alpha: .12),
 
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
+                                borderRadius: BorderRadius.circular(14.r),
+                              ),
 
-                          child: Icon(
-                            Icons.calendar_today_outlined,
+                              child: Icon(
+                                Icons.calendar_today_outlined,
 
-                            color: colors.main,
-                          ),
+                                color: colors.main,
+                              ),
+                            ),
+
+                            Gaps.hGap12,
+
+                            Expanded(
+                              child: Text(
+                                "choose_day".tr,
+
+                                style: TextStyles.semiBold18(),
+                              ),
+                            ),
+                          ],
                         ),
 
-                        Gaps.hGap12,
+                        Gaps.vGap24,
 
-                        Expanded(
-                          child: Text(
-                            "choose_day".tr,
+                        SizedBox(
+                          height: ScreenUtil().screenHeight * 0.14,
 
-                            style: TextStyles.semiBold18(),
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+
+                            itemCount: availableDates.length,
+
+                            separatorBuilder: (_, _) => Gaps.hGap12,
+
+                            itemBuilder: (context, index) {
+                              final date = availableDates[index];
+
+                              final isSelected = selectedDateIndex == index;
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedDateIndex = index;
+                                  });
+
+                                  _getAppointments(date);
+                                },
+
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+
+                                  width: ScreenUtil().screenWidth * 0.2,
+
+                                  padding: EdgeInsets.symmetric(vertical: 12.h),
+
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? colors.main
+                                        : colors.backGround,
+
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+
+                                    children: [
+                                      Text(
+                                        DateFormat(
+                                          'EEEE',
+
+                                          appLocalizations.isArLocale
+                                              ? 'ar'
+                                              : 'en',
+                                        ).format(date.date),
+
+                                        style: TextStyles.medium14(
+                                          color: isSelected
+                                              ? colors.whiteColor
+                                              : colors.lightTextColor,
+                                        ),
+                                      ),
+
+                                      Gaps.vGap2,
+
+                                      Text(
+                                        "${date.date.day}",
+
+                                        style: TextStyles.bold22(
+                                          color: isSelected
+                                              ? colors.whiteColor
+                                              : colors.textColor,
+                                        ),
+                                      ),
+
+                                      Gaps.vGap2,
+
+                                      Text(
+                                        DateFormat(
+                                          'MMM',
+
+                                          appLocalizations.isArLocale
+                                              ? 'ar'
+                                              : 'en',
+                                        ).format(date.date),
+
+                                        style: TextStyles.medium12(
+                                          color: isSelected
+                                              ? colors.whiteColor
+                                              : colors.lightTextColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ],
                     ),
+                  ),
 
-                    Gaps.vGap24,
+                  Gaps.vGap10,
 
-                    SizedBox(
-                      height: ScreenUtil().screenHeight * 0.14,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: MyDefaultButton(
+                          btnText: 'cancle_clinic',
+                          height: 48.h,
+                          borderRadius: 16,
+                          color: colors.whiteColor,
+                          textColor: colors.errorColor,
+                          borderColor: colors.errorColor,
+                          withDottedBorder: false,
+                          rightIcon: true,
+                          buttonIconType: ButtonIconType.icon,
+                          iconData: Icons.cancel_outlined,
+                          onPressed: () =>
+                              _showCancelClinicDialog(selectedDate),
+                        ),
+                      ),
+                      Gaps.hGap12,
+                      Expanded(
+                        child: MyDefaultButton(
+                          btnText: _isScheduleFull(selectedDate)
+                              ? 'open_booking'
+                              : 'stop_booking',
+                          height: 48.h,
+                          borderRadius: 16,
+                          withDottedBorder: false,
+                          rightIcon: true,
+                          buttonIconType: ButtonIconType.icon,
+                          iconData: _isScheduleFull(selectedDate)
+                              ? Icons.event_available_outlined
+                              : Icons.block_outlined,
+                          onPressed: () =>
+                              _showToggleBookingDialog(selectedDate),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Gaps.vGap20,
 
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
+                  /// working hours
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: colors.whiteColor,
+                      borderRadius: BorderRadius.circular(24.r),
+                    ),
 
-                        itemCount: availableDates.length,
-
-                        separatorBuilder: (_, _) => Gaps.hGap12,
-
-                        itemBuilder: (context, index) {
-                          final date = availableDates[index];
-
-                          final isSelected = selectedDateIndex == index;
-
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedDateIndex = index;
-                              });
-
-                              _getAppointments(date);
-                            },
-
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-
-                              width: ScreenUtil().screenWidth * 0.2,
-
-                              padding: EdgeInsets.symmetric(vertical: 12.h),
-
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12.w),
                               decoration: BoxDecoration(
-                                color: isSelected
-                                    ? colors.main
-                                    : colors.backGround,
-
-                                borderRadius: BorderRadius.circular(20.r),
+                                color: colors.main.withValues(alpha: .12),
+                                borderRadius: BorderRadius.circular(14.r),
                               ),
-
+                              child: Icon(
+                                Icons.access_time,
+                                color: colors.main,
+                              ),
+                            ),
+                            Gaps.hGap12,
+                            Expanded(
+                              child: Text(
+                                "edit_working_hours".tr,
+                                style: TextStyles.semiBold18(),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Gaps.vGap16,
+                        Row(
+                          children: [
+                            Expanded(
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    DateFormat(
-                                      'EEEE',
+                                  Align(
+                                    alignment: Alignment.centerRight,
 
-                                      appLocalizations.isArLocale ? 'ar' : 'en',
-                                    ).format(date.date),
-
-                                    style: TextStyles.medium14(
-                                      color: isSelected
-                                          ? colors.whiteColor
-                                          : colors.lightTextColor,
+                                    child: Text(
+                                      "from_time".tr,
+                                      style: TextStyles.medium14(),
                                     ),
                                   ),
 
-                                  Gaps.vGap2,
+                                  Gaps.vGap10,
 
-                                  Text(
-                                    "${date.date.day}",
+                                  GestureDetector(
+                                    onTap: () {
+                                      pickTime(isStart: true);
+                                    },
 
-                                    style: TextStyles.bold22(
-                                      color: isSelected
-                                          ? colors.whiteColor
-                                          : colors.textColor,
-                                    ),
-                                  ),
+                                    child: Container(
+                                      width: double.infinity,
 
-                                  Gaps.vGap2,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 18.w,
 
-                                  Text(
-                                    DateFormat(
-                                      'MMM',
+                                        vertical: 18.h,
+                                      ),
 
-                                      appLocalizations.isArLocale ? 'ar' : 'en',
-                                    ).format(date.date),
+                                      decoration: BoxDecoration(
+                                        color: colors.backGround,
 
-                                    style: TextStyles.medium12(
-                                      color: isSelected
-                                          ? colors.whiteColor
-                                          : colors.lightTextColor,
+                                        borderRadius: BorderRadius.circular(
+                                          18.r,
+                                        ),
+                                      ),
+
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.access_time_rounded,
+                                            color: colors.main,
+                                          ),
+
+                                          Gaps.hGap10,
+
+                                          Expanded(
+                                            child: Text(
+                                              formatTime(startTime),
+
+                                              style: TextStyles.medium15(),
+                                            ),
+                                          ),
+
+                                          Icon(
+                                            Icons.restart_alt_rounded,
+                                            color: colors.main,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          );
-                        },
-                      ),
+                            Gaps.hGap8,
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerRight,
+
+                                    child: Text(
+                                      "to_time".tr,
+                                      style: TextStyles.medium14(),
+                                    ),
+                                  ),
+
+                                  Gaps.vGap10,
+
+                                  GestureDetector(
+                                    onTap: () {
+                                      pickTime(isStart: false);
+                                    },
+
+                                    child: Container(
+                                      width: double.infinity,
+
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 18.w,
+
+                                        vertical: 18.h,
+                                      ),
+
+                                      decoration: BoxDecoration(
+                                        color: colors.backGround,
+
+                                        borderRadius: BorderRadius.circular(
+                                          18.r,
+                                        ),
+                                      ),
+
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.access_time_rounded,
+                                            color: colors.main,
+                                          ),
+
+                                          Gaps.hGap10,
+
+                                          Expanded(
+                                            child: Text(
+                                              formatTime(endTime),
+
+                                              style: TextStyles.medium15(),
+                                            ),
+                                          ),
+
+                                          Icon(
+                                            Icons.restart_alt_rounded,
+                                            color: colors.main,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
 
-              Gaps.vGap10,
+                  Gaps.vGap20,
 
-              Row(
-                children: [
-                  Expanded(
-                    child: MyDefaultButton(
-                      btnText: 'cancle_clinic',
-                      height: 48.h,
-                      borderRadius: 16,
+                  /// affected appointments
+                  Container(
+                    width: double.infinity,
+
+                    padding: EdgeInsets.all(18.w),
+
+                    decoration: BoxDecoration(
                       color: colors.whiteColor,
-                      textColor: colors.errorColor,
-                      borderColor: colors.errorColor,
-                      withDottedBorder: false,
-                      rightIcon: true,
-                      buttonIconType: ButtonIconType.icon,
-                      iconData: Icons.cancel_outlined,
-                      onPressed: () => _showCancelClinicDialog(selectedDate),
+
+                      borderRadius: BorderRadius.circular(24.r),
                     ),
-                  ),
-                  Gaps.hGap12,
-                  Expanded(
-                    child: MyDefaultButton(
-                      btnText: 'stop_booking',
-                      height: 48.h,
-                      borderRadius: 16,
-                      // color: colors.whiteColor,
-                      // textColor: colors.errorColor,
-                      // borderColor: colors.errorColor,
-                      withDottedBorder: false,
-                      rightIcon: true,
-                      buttonIconType: ButtonIconType.icon,
-                      iconData: Icons.block_outlined,
-                      onPressed: () => _showStopBookingDialog(selectedDate),
-                    ),
-                  ),
-                ],
-              ),
-              Gaps.vGap20,
 
-              /// working hours
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(
-                  color: colors.whiteColor,
-                  borderRadius: BorderRadius.circular(24.r),
-                ),
+                    child:
+                        BlocBuilder<
+                          GetDoctorAppoinmentsForDayCubit,
+                          GetDoctorAppoinmentsForDayState
+                        >(
+                          builder: (context, state) {
+                            if (state is GetDoctorAppoinmentsForDayLoading) {
+                              return _buildShimmer();
+                            }
 
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(12.w),
-                          decoration: BoxDecoration(
-                            color: colors.main.withValues(alpha: .12),
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          child: Icon(Icons.access_time, color: colors.main),
-                        ),
-                        Gaps.hGap12,
-                        Expanded(
-                          child: Text(
-                            "edit_working_hours".tr,
-                            style: TextStyles.semiBold18(),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Gaps.vGap16,
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Align(
-                                alignment: Alignment.centerRight,
+                            if (state is GetDoctorAppoinmentsForDayError) {
+                              return Center(child: Text(state.message));
+                            }
 
-                                child: Text(
-                                  "from_time".tr,
-                                  style: TextStyles.medium14(),
-                                ),
-                              ),
+                            List<DoctorAppoinmentsForDayEntity> appointments =
+                                [];
 
-                              Gaps.vGap10,
+                            if (state is GetDoctorAppoinmentsForDaySuccess) {
+                              appointments =
+                                  state.response.data
+                                      as List<DoctorAppoinmentsForDayEntity>;
+                            }
 
-                              GestureDetector(
-                                onTap: () {
-                                  pickTime(isStart: true);
-                                },
-
-                                child: Container(
-                                  width: double.infinity,
-
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 18.w,
-
-                                    vertical: 18.h,
-                                  ),
-
-                                  decoration: BoxDecoration(
-                                    color: colors.backGround,
-
-                                    borderRadius: BorderRadius.circular(18.r),
-                                  ),
-
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time_rounded,
-                                        color: colors.main,
-                                      ),
-
-                                      Gaps.hGap10,
-
-                                      Expanded(
-                                        child: Text(
-                                          formatTime(startTime),
-
-                                          style: TextStyles.medium15(),
-                                        ),
-                                      ),
-
-                                      Icon(
-                                        Icons.restart_alt_rounded,
-                                        color: colors.main,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Gaps.hGap8,
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Align(
-                                alignment: Alignment.centerRight,
-
-                                child: Text(
-                                  "to_time".tr,
-                                  style: TextStyles.medium14(),
-                                ),
-                              ),
-
-                              Gaps.vGap10,
-
-                              GestureDetector(
-                                onTap: () {
-                                  pickTime(isStart: false);
-                                },
-
-                                child: Container(
-                                  width: double.infinity,
-
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 18.w,
-
-                                    vertical: 18.h,
-                                  ),
-
-                                  decoration: BoxDecoration(
-                                    color: colors.backGround,
-
-                                    borderRadius: BorderRadius.circular(18.r),
-                                  ),
-
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time_rounded,
-                                        color: colors.main,
-                                      ),
-
-                                      Gaps.hGap10,
-
-                                      Expanded(
-                                        child: Text(
-                                          formatTime(endTime),
-
-                                          style: TextStyles.medium15(),
-                                        ),
-                                      ),
-
-                                      Icon(
-                                        Icons.restart_alt_rounded,
-                                        color: colors.main,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              Gaps.vGap20,
-
-              /// affected appointments
-              Container(
-                width: double.infinity,
-
-                padding: EdgeInsets.all(18.w),
-
-                decoration: BoxDecoration(
-                  color: colors.whiteColor,
-
-                  borderRadius: BorderRadius.circular(24.r),
-                ),
-
-                child:
-                    BlocBuilder<
-                      GetDoctorAppoinmentsForDayCubit,
-                      GetDoctorAppoinmentsForDayState
-                    >(
-                      builder: (context, state) {
-                        if (state is GetDoctorAppoinmentsForDayLoading) {
-                          return _buildShimmer();
-                        }
-
-                        if (state is GetDoctorAppoinmentsForDayError) {
-                          return Center(child: Text(state.message));
-                        }
-
-                        List<DoctorAppoinmentsForDayEntity> appointments = [];
-
-                        if (state is GetDoctorAppoinmentsForDaySuccess) {
-                          appointments =
-                              state.response.data
-                                  as List<DoctorAppoinmentsForDayEntity>;
-                        }
-
-                        return Column(
-                          children: [
-                            Row(
+                            return Column(
                               children: [
-                                Text(
-                                  "affected_periods".tr,
+                                Row(
+                                  children: [
+                                    Text(
+                                      "affected_periods".tr,
 
-                                  style: TextStyles.semiBold18(),
-                                ),
-
-                                Gaps.hGap8,
-
-                                Icon(
-                                  Icons.warning_rounded,
-
-                                  color: colors.errorColor,
-                                ),
-
-                                const Spacer(),
-
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w,
-
-                                    vertical: 6.h,
-                                  ),
-
-                                  decoration: BoxDecoration(
-                                    color: colors.errorColor.withValues(
-                                      alpha: .12,
+                                      style: TextStyles.semiBold18(),
                                     ),
 
-                                    borderRadius: BorderRadius.circular(20.r),
-                                  ),
+                                    Gaps.hGap8,
 
-                                  child: Text(
-                                    "${"appointments".tr}: ${appointments.length}",
+                                    Icon(
+                                      Icons.warning_rounded,
 
-                                    style: TextStyles.medium12(
                                       color: colors.errorColor,
                                     ),
-                                  ),
-                                ),
-                              ],
-                            ),
 
-                            Gaps.vGap20,
+                                    const Spacer(),
 
-                            if (appointments.isEmpty)
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 30.h),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 10.w,
 
-                                child: Text(
-                                  "no_appointments".tr,
+                                        vertical: 6.h,
+                                      ),
 
-                                  style: TextStyles.medium14(),
-                                ),
-                              ),
+                                      decoration: BoxDecoration(
+                                        color: colors.errorColor.withValues(
+                                          alpha: .12,
+                                        ),
 
-                            if (appointments.isNotEmpty)
-                              ListView.separated(
-                                shrinkWrap: true,
-
-                                physics: const NeverScrollableScrollPhysics(),
-
-                                itemCount: appointments.length,
-
-                                separatorBuilder: (_, _) => Gaps.vGap12,
-
-                                itemBuilder: (context, index) {
-                                  final item = appointments[index];
-
-                                  return Container(
-                                    padding: EdgeInsets.all(14.w),
-
-                                    decoration: BoxDecoration(
-                                      color: colors.whiteColor,
-
-                                      borderRadius: BorderRadius.circular(18.r),
-
-                                      border: Border(
-                                        right: BorderSide(
-                                          color: colors.errorColor,
-
-                                          width: 4.w,
+                                        borderRadius: BorderRadius.circular(
+                                          20.r,
                                         ),
                                       ),
 
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: colors.textColor.withValues(
-                                            alpha: .04,
-                                          ),
+                                      child: Text(
+                                        "${"appointments".tr}: ${appointments.length}",
 
-                                          blurRadius: 10,
-
-                                          offset: const Offset(0, 4),
+                                        style: TextStyles.medium12(
+                                          color: colors.errorColor,
                                         ),
-                                      ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                Gaps.vGap20,
+
+                                if (appointments.isEmpty)
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 30.h,
                                     ),
 
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.all(10.w),
+                                    child: Text(
+                                      "no_appointments".tr,
 
-                                          decoration: BoxDecoration(
-                                            color: colors.backGround,
+                                      style: TextStyles.medium14(),
+                                    ),
+                                  ),
 
-                                            shape: BoxShape.circle,
+                                if (appointments.isNotEmpty)
+                                  ListView.separated(
+                                    shrinkWrap: true,
+
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+
+                                    itemCount: appointments.length,
+
+                                    separatorBuilder: (_, _) => Gaps.vGap12,
+
+                                    itemBuilder: (context, index) {
+                                      final item = appointments[index];
+
+                                      return Container(
+                                        padding: EdgeInsets.all(14.w),
+
+                                        decoration: BoxDecoration(
+                                          color: colors.whiteColor,
+
+                                          borderRadius: BorderRadius.circular(
+                                            18.r,
                                           ),
 
-                                          child: Icon(
-                                            Icons.person_outline,
+                                          border: Border(
+                                            right: BorderSide(
+                                              color: colors.errorColor,
 
-                                            color: colors.lightTextColor,
+                                              width: 4.w,
+                                            ),
                                           ),
+
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: colors.textColor
+                                                  .withValues(alpha: .04),
+
+                                              blurRadius: 10,
+
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
                                         ),
 
-                                        Gaps.hGap16,
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.all(10.w),
 
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                              decoration: BoxDecoration(
+                                                color: colors.backGround,
 
-                                            children: [
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 10.w,
+                                                shape: BoxShape.circle,
+                                              ),
 
-                                                  vertical: 4.h,
-                                                ),
+                                              child: Icon(
+                                                Icons.person_outline,
 
-                                                decoration: BoxDecoration(
-                                                  color: colors.errorColor
-                                                      .withValues(alpha: .08),
+                                                color: colors.lightTextColor,
+                                              ),
+                                            ),
 
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        10.r,
-                                                      ),
-                                                ),
+                                            Gaps.hGap16,
 
-                                                child: Text(
-                                                  "outside_new_hours".tr,
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
 
-                                                  style: TextStyles.medium12(
-                                                    color: colors.errorColor,
+                                                children: [
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: 10.w,
+
+                                                          vertical: 4.h,
+                                                        ),
+
+                                                    decoration: BoxDecoration(
+                                                      color: colors.errorColor
+                                                          .withValues(
+                                                            alpha: .08,
+                                                          ),
+
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10.r,
+                                                          ),
+                                                    ),
+
+                                                    child: Text(
+                                                      "outside_new_hours".tr,
+
+                                                      style:
+                                                          TextStyles.medium12(
+                                                            color: colors
+                                                                .errorColor,
+                                                          ),
+                                                    ),
                                                   ),
-                                                ),
+
+                                                  Gaps.vGap10,
+
+                                                  Text(
+                                                    item.bookedBy?.fullName ??
+                                                        '',
+
+                                                    style:
+                                                        TextStyles.semiBold14(),
+                                                  ),
+
+                                                  Gaps.vGap8,
+
+                                                  Text(
+                                                    item
+                                                            .bookedBy
+                                                            ?.phoneNumber ??
+                                                        '',
+
+                                                    style: TextStyles.medium12(
+                                                      color:
+                                                          colors.lightTextColor,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
+                                            ),
 
-                                              Gaps.vGap10,
+                                            Gaps.hGap16,
 
-                                              Text(
-                                                item.bookedBy?.fullName ?? '',
+                                            Text(
+                                              item.queuePosition ?? '',
 
-                                                style: TextStyles.semiBold14(),
-                                              ),
-
-                                              Gaps.vGap8,
-
-                                              Text(
-                                                item.bookedBy?.phoneNumber ??
-                                                    '',
-
-                                                style: TextStyles.medium12(
-                                                  color: colors.lightTextColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                              style: TextStyles.medium16(),
+                                            ),
+                                          ],
                                         ),
+                                      );
+                                    },
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                  ),
 
-                                        Gaps.hGap16,
+                  Gaps.vGap20,
+                  MyDefaultButton(
+                    btnText: "confirm_reschedule",
+                    borderRadius: 30,
+                    height: 56.h,
+                    onPressed: () {
+                      final doctorId = context
+                          .read<SessionCubit>()
+                          .state
+                          .activeDoctorId;
+                      if (doctorId == null || doctorId.isEmpty) return;
 
-                                        Text(
-                                          item.queuePosition ?? '',
+                      context.read<RescheduleCubit>().reschedule(
+                        params: RescheduleParams(
+                          doctorId: doctorId,
 
-                                          style: TextStyles.medium16(),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                          ],
-                        );
-                      },
-                    ),
+                          date: DateFormat(
+                            'yyyy-MM-dd',
+                          ).format(selectedDate.date),
+
+                          dayOfWeek: convertWeekDay(selectedDate.date),
+
+                          startTime: formatApiTime(startTime),
+
+                          endTime: formatApiTime(endTime),
+
+                          slotDuration: selectedDate.schedule.slotDuration,
+                        ),
+                      );
+                    },
+                  ),
+
+                  Gaps.vGap20,
+                ],
               ),
-
-              // Gaps.vGap20,
-
-              // /// cancel clinic schedule
-              // Container(
-              //   width: double.infinity,
-              //   padding: EdgeInsets.all(16.w),
-              //   decoration: BoxDecoration(
-              //     color: colors.errorColor.withValues(alpha: .06),
-              //     borderRadius: BorderRadius.circular(20.r),
-              //     border: Border.all(
-              //       color: colors.errorColor.withValues(alpha: .15),
-              //     ),
-              //   ),
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [
-              //       Row(
-              //         children: [
-              //           Icon(
-              //             Icons.warning_amber_rounded,
-              //             color: colors.errorColor,
-              //             size: 22.sp,
-              //           ),
-              //           Gaps.hGap8,
-              //           Expanded(
-              //             child: Text(
-              //               'cancle_clinic'.tr,
-              //               style: TextStyles.semiBold16(
-              //                 color: colors.errorColor,
-              //               ),
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //       Gaps.vGap10,
-              //       Text(
-              //         'cancel_clinic_schedule_desc'.tr,
-              //         style: TextStyles.medium13(color: colors.lightTextColor),
-              //       ),
-              //       Gaps.vGap12,
-              //       MyDefaultButton(
-              //         btnText: 'cancle_clinic',
-              //         height: 48.h,
-              //         borderRadius: 16,
-              //         color: colors.whiteColor,
-              //         textColor: colors.errorColor,
-              //         borderColor: colors.errorColor,
-              //         withDottedBorder: false,
-              //         rightIcon: true,
-              //         buttonIconType: ButtonIconType.icon,
-              //         iconData: Icons.cancel_outlined,
-              //         onPressed: () => _showCancelClinicDialog(selectedDate),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              Gaps.vGap20,
-
-              MyDefaultButton(
-                btnText: "confirm_reschedule",
-
-                borderRadius: 30,
-
-                height: 56.h,
-
-                onPressed: () {
-                  final doctorId = context
-                      .read<SessionCubit>()
-                      .state
-                      .activeDoctorId;
-                  if (doctorId == null || doctorId.isEmpty) return;
-
-                  final sessionState = context.read<SessionCubit>().state;
-                  final schedules =
-                      sessionState.selectedDoctor?.schedules ??
-                      sharedPreferences.getAuth()?.doctor?.schedules ??
-                      [];
-
-                  context.read<RescheduleCubit>().reschedule(
-                    params: RescheduleParams(
-                      doctorId: doctorId,
-
-                      date: DateFormat('yyyy-MM-dd').format(selectedDate.date),
-
-                      dayOfWeek: convertWeekDay(selectedDate.date),
-
-                      startTime: formatApiTime(startTime),
-
-                      endTime: formatApiTime(endTime),
-
-                      slotDuration: schedules.isNotEmpty
-                          ? schedules.first.slotDuration
-                          : null,
-                    ),
-                  );
-                },
-              ),
-
-              Gaps.vGap20,
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

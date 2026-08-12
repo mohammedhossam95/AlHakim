@@ -25,6 +25,7 @@ import 'package:alhakim/features/auth/presentation/screen/otp_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/register_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/reset_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/splash_screen.dart';
+import 'package:alhakim/features/booking/data/models/appointment_type_model.dart';
 import 'package:alhakim/features/booking/domain/entities/family_member_entity.dart';
 import 'package:alhakim/features/booking/presentation/cubit/add_family_member_cubit/add_family_member_cubit.dart';
 import 'package:alhakim/features/booking/presentation/cubit/book_appointment_cubit/book_appointment_cubit.dart';
@@ -360,6 +361,7 @@ abstract class Routes {
             BlocProvider(create: (context) => sl<RescheduleCubit>()),
             BlocProvider(create: (context) => sl<CloseClinicCubit>()),
             BlocProvider(create: (context) => sl<UpdateScheduleStatusCubit>()),
+            BlocProvider(create: (context) => sl<GetDoctorByIdCubit>()),
           ],
           child: const RescheduleAppointmentsScreen(),
         ),
@@ -724,7 +726,9 @@ AppointmentEntity? _resolveFollowUpAppointmentArgs(
       id: parsedId,
       appointmentDate: (map['appointment_date'] ?? map['appointmentDate'])
           ?.toString(),
-      appointmentType: map['appointment_type']?.toString(),
+      appointmentType: map['appointment_type'] != null
+          ? AppointmentTypeModel.fromJson(map['appointment_type'])
+          : null,
       appointmentTypeText: map['appointment_type_text']?.toString(),
       status: map['status']?.toString(),
       doctor: doctor,

@@ -548,5 +548,7 @@
   "enter_reason": "اكتب سبب إلغاء العيادة",
   "reason_required": "يجب إدخال السبب",
   "stop_booking": "إيقاف الحجز",
-  "confirm_stop_booking": "هل أنت متأكد من إيقاف الحجز لهذا اليوم؟"
+  "confirm_stop_booking": "هل أنت متأكد من إيقاف الحجز لهذا اليوم؟",
+  "open_booking": "فتح الحجز",
+  "confirm_open_booking": "هل أنت متأكد من فتح الحجز لهذا اليوم؟"
 }

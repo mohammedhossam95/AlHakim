@@ -1,10 +1,11 @@
+import 'package:alhakim/features/booking/domain/entities/appointment_type_entity.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class AppointmentEntity extends Equatable {
   final int? id;
   final String? appointmentDate;
-  final String? appointmentType;
+  final AppointmentTypeEntity? appointmentType;
   final String? appointmentTypeText;
   final String? status;
   final DoctorEntity? doctor;

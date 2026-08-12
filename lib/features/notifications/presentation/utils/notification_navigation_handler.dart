@@ -27,6 +27,16 @@ void handleNotificationNavigation(
         context.go(Routes.mainPageRoute);
       }
       break;
+    case 'doctor_rescheduled':
+      if (sessionCubit.state.userType == UserType.patient) {
+        context.read<BottomNavBarCubit>().changeCurrentScreen(index: 1);
+        if (context.canPop()) {
+          context.pop();
+        }
+      } else {
+        context.go(Routes.mainPageRoute);
+      }
+      break;
     case 'appointment_completed':
       context.pushNamed(Routes.patientOffersRoute);
       break;
