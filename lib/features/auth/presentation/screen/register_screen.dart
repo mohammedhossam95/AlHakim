@@ -12,6 +12,7 @@ import 'package:alhakim/features/auth/domain/usecases/params/register_params.dar
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,11 +37,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late Country _selectedCountry;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String firebaseToken = '';
 
   @override
   void initState() {
     super.initState();
     _selectedCountry = CountryParser.parsePhoneCode('20');
+    getFirebaseToken();
+  }
+
+  void getFirebaseToken() async {
+    FirebaseMessaging.instance
+        .getToken()
+        .then((devicefcmToken) {
+          firebaseToken = devicefcmToken ?? '';
+        })
+        .catchError((e) {
+          firebaseToken = 'error';
+        });
   }
 
   @override
@@ -93,6 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         birthDate: _birthDateController.text.trim(),
+        firebaseToken: firebaseToken,
       ),
     );
   }

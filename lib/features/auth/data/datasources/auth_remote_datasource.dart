@@ -1,4 +1,3 @@
-import 'package:alhakim/core/api/dio_consumer.dart';
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/core/params/auth_params.dart';
@@ -44,7 +43,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<AuthRespModel> authenticate({required AuthenticateParams params}) async {
     try {
       final response = await dioConsumer.post(
-        ApiConstants.authenticate,
+        '/auth/authenticate',
         formData: FormData.fromMap(params.toJson()),
       );
 
@@ -90,9 +89,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (params.otp != null) {
         formData.fields.add(MapEntry('otp', params.otp!));
       }
+      if (params.firebaseToken != null && params.firebaseToken!.isNotEmpty) {
+        formData.fields.add(MapEntry('device_token', params.firebaseToken!));
+      }
 
       final response = await dioConsumer.post(
-        ApiConstants.verifyOtp,
+        '/auth/verify-otp',
         formData: formData,
       );
 
@@ -199,7 +201,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             })
           : null;
       final response = await dioConsumer.post(
-        ApiConstants.resendOtp,
+        '/auth/resend-otp',
         formData: formData,
       );
 
@@ -238,7 +240,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<AuthRespModel> register({required RegisterParams params}) async {
     try {
       final response = await dioConsumer.post(
-        ApiConstants.register,
+        '/auth/register',
         formData: FormData.fromMap(params.toJson()),
       );
 
@@ -337,7 +339,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     try {
       final response = await dioConsumer.post(
-        ApiConstants.forgotPassword,
+        '/auth/forgot-password',
         formData: FormData.fromMap(params.toJson()),
       );
 
@@ -357,7 +359,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     try {
       final response = await dioConsumer.post(
-        ApiConstants.resetPassword,
+        '/auth/reset-password',
         formData: FormData.fromMap(params.toJson()),
       );
 

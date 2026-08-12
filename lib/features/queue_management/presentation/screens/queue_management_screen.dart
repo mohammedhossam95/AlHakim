@@ -17,6 +17,62 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
+enum BookingStatus {
+  notArrived,
+  arrived,
+  inExamination,
+  finished,
+  rescheduled,
+  cancelled,
+}
+
+enum BookingAction { arrive, examine, finish, reschedule, cancel }
+
+final Map<BookingStatus, List<BookingAction>> allowedActions = {
+  BookingStatus.notArrived: [
+    BookingAction.arrive,
+    BookingAction.reschedule,
+    BookingAction.cancel,
+  ],
+  BookingStatus.arrived: [BookingAction.examine, BookingAction.cancel],
+  BookingStatus.inExamination: [BookingAction.finish],
+  BookingStatus.finished: [],
+  BookingStatus.rescheduled: [],
+  BookingStatus.cancelled: [],
+};
+
+BookingStatus _parseBookingStatus(String? status) {
+  switch (status) {
+    case "arrived":
+      return BookingStatus.arrived;
+    case "entered":
+      return BookingStatus.inExamination;
+    case "completed":
+      return BookingStatus.finished;
+    case "rescheduled":
+      return BookingStatus.rescheduled;
+    case "cancelled":
+      return BookingStatus.cancelled;
+    default:
+      return BookingStatus.notArrived;
+  }
+}
+
+String _bookingActionToApiStatus(BookingAction action) {
+  switch (action) {
+    case BookingAction.arrive:
+      return "arrived";
+    case BookingAction.examine:
+      return "entered";
+    case BookingAction.finish:
+      return "completed";
+    case BookingAction.reschedule:
+      return "rescheduled";
+    case BookingAction.cancel:
+      return "cancelled";
+  }
+}
+
 class QueueManagementScreen extends StatefulWidget {
   const QueueManagementScreen({super.key});
 
@@ -429,6 +485,9 @@ class QueuePatientCard extends StatelessWidget {
       case "rescheduled":
         return Colors.indigo;
 
+      case "cancelled":
+        return Colors.red;
+
       default:
         return colors.lightTextColor;
     }
@@ -448,6 +507,9 @@ class QueuePatientCard extends StatelessWidget {
       case "rescheduled":
         return "rescheduled".tr;
 
+      case "cancelled":
+        return "cancelled".tr;
+
       default:
         return "waiting_arrival".tr;
     }
@@ -458,7 +520,7 @@ class QueuePatientCard extends StatelessWidget {
       case "arrived":
         return Icons.check_circle_outline;
 
-      case "enterd":
+      case "entered":
         return Icons.local_hospital_outlined;
 
       case "completed":
@@ -466,6 +528,9 @@ class QueuePatientCard extends StatelessWidget {
 
       case "rescheduled":
         return Icons.event_repeat_outlined;
+
+      case "cancelled":
+        return Icons.cancel_outlined;
 
       default:
         return Icons.access_time;
@@ -699,142 +764,133 @@ class QueuePatientCard extends StatelessWidget {
               ),
               Gaps.hGap12,
 
-              Expanded(
-                child: PopupMenuButton<String>(
-                  onSelected: (value) async {
-                    final doctorId = context
-                        .read<SessionCubit>()
-                        .state
-                        .activeDoctorId;
-                    if (doctorId == null || doctorId.isEmpty) return;
-
-                    await context
-                        .read<UpdateQueueStatusCubit>()
-                        .updateQueueStatus(
-                          doctorId: doctorId,
-                          appointmentId: item.id ?? 0,
-                          status: value,
-                        );
-                    if (!context.mounted) return;
-                    final activeDoctorId = context
-                        .read<SessionCubit>()
-                        .state
-                        .activeDoctorId;
-                    if (activeDoctorId == null || activeDoctorId.isEmpty) {
-                      return;
-                    }
-                    context.read<GetQueueManagementCubit>().getQueueManagement(
-                      doctorId: activeDoctorId,
-                    );
-                  },
-
-                  color: colors.whiteColor,
-
-                  elevation: 5,
-
-                  offset: const Offset(0, 50),
-
-                  initialValue: status,
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: "arrived",
-
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle_outline,
-
-                            color: colors.secondary,
-                          ),
-
-                          Gaps.hGap10,
-
-                          Text("arrived".tr),
-                        ],
-                      ),
-                    ),
-
-                    PopupMenuItem(
-                      value: "entered",
-
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.local_hospital_outlined,
-
-                            color: Colors.deepOrange,
-                          ),
-
-                          Gaps.hGap10,
-
-                          Text("enterd".tr),
-                        ],
-                      ),
-                    ),
-
-                    PopupMenuItem(
-                      value: "completed",
-
-                      child: Row(
-                        children: [
-                          Icon(Icons.task_alt_outlined, color: Colors.green),
-
-                          Gaps.hGap10,
-
-                          Text("completed".tr),
-                        ],
-                      ),
-                    ),
-
-                    PopupMenuItem(
-                      value: "rescheduled",
-
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.event_repeat_outlined,
-
-                            color: Colors.indigo,
-                          ),
-
-                          Gaps.hGap10,
-
-                          Text("rescheduled".tr),
-                        ],
-                      ),
-                    ),
-                  ],
-
-                  child: Container(
-                    height: 52.h,
-
-                    decoration: BoxDecoration(
-                      color: colors.backGround,
-
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-
-                    child: Icon(
-                      Icons.more_horiz_rounded,
-
-                      color: colors.lightTextColor,
-                    ),
-                  ),
-                ),
-              ),
+              Expanded(child: _buildPopupMenu(context, status, item)),
             ],
           ),
         ],
       ),
     );
   }
+
+  Widget _buildPopupMenu(
+    BuildContext context,
+    String status,
+    QueueManagementEntity item,
+  ) {
+    final currentStatus = _parseBookingStatus(status);
+    final actions = allowedActions[currentStatus] ?? [];
+
+    if (actions.isEmpty) {
+      return Container(
+        height: 52.h,
+        decoration: BoxDecoration(
+          color: colors.backGround,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Center(
+          child: Icon(Icons.lock_outline, color: colors.lightTextColor),
+        ),
+      );
+    }
+
+    return PopupMenuButton<BookingAction>(
+      onSelected: (action) async {
+        final doctorId = context.read<SessionCubit>().state.activeDoctorId;
+        if (doctorId == null || doctorId.isEmpty) return;
+
+        final newStatus = _bookingActionToApiStatus(action);
+
+        await context.read<UpdateQueueStatusCubit>().updateQueueStatus(
+          doctorId: doctorId,
+          appointmentId: item.id ?? 0,
+          status: newStatus,
+        );
+
+        if (!context.mounted) return;
+        final activeDoctorId = context
+            .read<SessionCubit>()
+            .state
+            .activeDoctorId;
+        if (activeDoctorId == null || activeDoctorId.isEmpty) return;
+
+        context.read<GetQueueManagementCubit>().getQueueManagement(
+          doctorId: activeDoctorId,
+        );
+      },
+      color: colors.whiteColor,
+      elevation: 5,
+      offset: const Offset(0, 50),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      itemBuilder: (context) {
+        return actions.map((action) {
+          return PopupMenuItem<BookingAction>(
+            value: action,
+            child: Row(
+              children: [
+                Icon(_getActionIcon(action), color: _getActionColor(action)),
+                Gaps.hGap10,
+                Text(_getActionLabel(action)),
+              ],
+            ),
+          );
+        }).toList();
+      },
+      child: Container(
+        height: 52.h,
+        decoration: BoxDecoration(
+          color: colors.backGround,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Icon(Icons.more_horiz_rounded, color: colors.lightTextColor),
+      ),
+    );
+  }
+
+  IconData _getActionIcon(BookingAction action) {
+    switch (action) {
+      case BookingAction.arrive:
+        return Icons.check_circle_outline;
+      case BookingAction.examine:
+        return Icons.local_hospital_outlined;
+      case BookingAction.finish:
+        return Icons.task_alt_outlined;
+      case BookingAction.reschedule:
+        return Icons.event_repeat_outlined;
+      case BookingAction.cancel:
+        return Icons.cancel_outlined;
+    }
+  }
+
+  Color _getActionColor(BookingAction action) {
+    switch (action) {
+      case BookingAction.arrive:
+        return colors.secondary;
+      case BookingAction.examine:
+        return Colors.deepOrange;
+      case BookingAction.finish:
+        return Colors.green;
+      case BookingAction.reschedule:
+        return Colors.indigo;
+      case BookingAction.cancel:
+        return Colors.red;
+    }
+  }
+
+  String _getActionLabel(BookingAction action) {
+    switch (action) {
+      case BookingAction.arrive:
+        return "arrived".tr;
+      case BookingAction.examine:
+        return "enterd".tr;
+      case BookingAction.finish:
+        return "completed".tr;
+      case BookingAction.reschedule:
+        return "rescheduled".tr;
+      case BookingAction.cancel:
+        return "cancelled".tr;
+    }
+  }
 }
-// rescheduled , arrived , entered , completed
 
 class QueueActionButton extends StatelessWidget {
   final IconData icon;

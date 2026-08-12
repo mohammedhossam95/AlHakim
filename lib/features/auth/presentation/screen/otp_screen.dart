@@ -12,6 +12,7 @@ import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,11 +41,24 @@ class _OtpAuthScreenState extends State<OtpAuthScreen> {
   int _secondsRemaining = 60;
   Timer? _timer;
   bool _canResend = false;
+  String firebaseToken = '';
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+    getFirebaseToken();
+  }
+
+  void getFirebaseToken() async {
+    FirebaseMessaging.instance
+        .getToken()
+        .then((devicefcmToken) {
+          firebaseToken = devicefcmToken ?? '';
+        })
+        .catchError((e) {
+          firebaseToken = 'error';
+        });
   }
 
   String _internationalPhone() {
@@ -106,6 +120,7 @@ class _OtpAuthScreenState extends State<OtpAuthScreen> {
         phoneNumber: widget.authParams.phoneNumber,
         countryCode: widget.authParams.countryCode,
         userType: sessionCubit.state.userType,
+        firebaseToken: firebaseToken,
       ),
     );
   }

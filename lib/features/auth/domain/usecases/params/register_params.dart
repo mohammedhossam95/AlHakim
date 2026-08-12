@@ -6,6 +6,7 @@ class RegisterParams {
   final String firstName;
   final String lastName;
   final String birthDate;
+  final String firebaseToken;
 
   const RegisterParams({
     required this.countryCode,
@@ -15,6 +16,7 @@ class RegisterParams {
     required this.firstName,
     required this.lastName,
     required this.birthDate,
+    required this.firebaseToken,
   });
 
   Map<String, dynamic> toJson() => {
@@ -25,6 +27,7 @@ class RegisterParams {
     'first_name': firstName,
     'last_name': lastName,
     'birth_date': birthDate,
+    'device_token': firebaseToken,
   };
 
   RegisterParams copyWith({
@@ -35,6 +38,7 @@ class RegisterParams {
     String? firstName,
     String? lastName,
     String? birthDate,
+    String? firebaseToken,
   }) {
     return RegisterParams(
       countryCode: countryCode ?? this.countryCode,
@@ -44,6 +48,7 @@ class RegisterParams {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       birthDate: birthDate ?? this.birthDate,
+      firebaseToken: firebaseToken ?? this.firebaseToken,
     );
   }
 }

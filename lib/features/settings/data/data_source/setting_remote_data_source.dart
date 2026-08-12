@@ -1,4 +1,3 @@
-import 'package:alhakim/core/api/dio_consumer.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
@@ -193,7 +192,7 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   ) async {
     try {
       final dynamic response = await dioConsumer.get(
-        ApiConstants.hospitalEmergencyNumbers,
+        '/hospital-emergency-numbers',
         queryParameters: params.toQuery(),
       );
       if (response['status'] == true) {
@@ -209,7 +208,7 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   Future<EmergencyCategoryRespModel> getEmergencyCategories() async {
     try {
       final dynamic response = await dioConsumer.get(
-        ApiConstants.emergencyNumberCategories,
+        '/emergency-number-categories',
       );
       if (response['status'] == true) {
         return EmergencyCategoryRespModel.fromJson(response);
