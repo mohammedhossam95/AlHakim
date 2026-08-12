@@ -27,6 +27,10 @@ void handleNotificationNavigation(
         context.go(Routes.mainPageRoute);
       }
       break;
+    case 'appointment_completed':
+      context.pushNamed(Routes.patientOffersRoute);
+      break;
+
     default:
       break;
   }

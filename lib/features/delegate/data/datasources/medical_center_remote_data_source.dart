@@ -150,6 +150,14 @@ class MedicalCenterRemoteDataSourceImpl
     if (params.email != null) {
       formData.fields.add(MapEntry('email', params.email!));
     }
+    if (params.password != null) {
+      formData.fields.add(MapEntry('password', params.password!));
+    }
+    if (params.confirmPassword != null) {
+      formData.fields.add(
+        MapEntry('confirm_password', params.confirmPassword!),
+      );
+    }
 
     await _appendFile(formData, 'logo', params.logo, compressImage: true);
     await _appendFile(formData, 'cover', params.cover, compressImage: true);

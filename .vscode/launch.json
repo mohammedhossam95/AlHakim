@@ -45,13 +45,20 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
+        },
+        {
+            "name": "iPhone 15",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "B9C5C814-B374-4E15-B05B-0C5ECEA9F92E"
         }
     ],
     "compounds": [
         {
             "name": "alhakim (two)",
             "configurations": [
-               "alhakim (CPH1907)",
+               "iPhone 17 Pro",
+               "iPhone 15",
                 "iPhone 11 Pro Max"
             ],
         }

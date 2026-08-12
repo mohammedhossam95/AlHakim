@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/country_code_widget.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
@@ -19,11 +20,18 @@ class MedicalCenterFormSection extends StatelessWidget {
   final TextEditingController addressController;
   final TextEditingController phoneController;
   final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+
   final FocusNode nameFocus;
   final FocusNode descriptionFocus;
   final FocusNode addressFocus;
   final FocusNode phoneFocus;
   final FocusNode emailFocus;
+  final FocusNode passwordFocus;
+  final FocusNode confirmPasswordFocus;
+  final bool obscurePassword;
+  final bool obscureConfirmPassword;
   final Country selectedCountry;
   final ValueChanged<Country> onCountryChanged;
   final File? logoFile;
@@ -42,11 +50,17 @@ class MedicalCenterFormSection extends StatelessWidget {
     required this.addressController,
     required this.phoneController,
     required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
     required this.nameFocus,
     required this.descriptionFocus,
     required this.addressFocus,
     required this.phoneFocus,
     required this.emailFocus,
+    required this.passwordFocus,
+    required this.confirmPasswordFocus,
+    required this.obscurePassword,
+    required this.obscureConfirmPassword,
     required this.selectedCountry,
     required this.onCountryChanged,
     required this.logoFile,
@@ -64,49 +78,49 @@ class MedicalCenterFormSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('upload_cover'.tr),
-        Gaps.vGap8,
-        GestureDetector(
-          onTap: onPickCover,
-          child: Container(
-            width: double.infinity,
-            height: 130.h,
-            decoration: BoxDecoration(
-              color: colors.main.withValues(alpha: .08),
-              borderRadius: BorderRadius.circular(16.r),
-              image: coverFile != null
-                  ? DecorationImage(
-                      image: FileImage(coverFile!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: coverFile == null
-                ? existingCover != null && existingCover!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(16.r),
-                        child: DiffImage(
-                          image: existingCover,
-                          width: double.infinity,
-                          height: 130.h,
-                          fitType: BoxFit.cover,
-                        ),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.image_outlined,
-                              color: colors.main, size: 32.sp),
-                          Gaps.vGap8,
-                          Text(
-                            'choose_cover_image'.tr,
-                            style: TextStyles.medium14(color: colors.main),
-                          ),
-                        ],
-                      )
-                : null,
-          ),
-        ),
+        // _buildLabel('upload_cover'.tr),
+        // Gaps.vGap8,
+        // GestureDetector(
+        //   onTap: onPickCover,
+        //   child: Container(
+        //     width: double.infinity,
+        //     height: 130.h,
+        //     decoration: BoxDecoration(
+        //       color: colors.main.withValues(alpha: .08),
+        //       borderRadius: BorderRadius.circular(16.r),
+        //       image: coverFile != null
+        //           ? DecorationImage(
+        //               image: FileImage(coverFile!),
+        //               fit: BoxFit.cover,
+        //             )
+        //           : null,
+        //     ),
+        //     child: coverFile == null
+        //         ? existingCover != null && existingCover!.isNotEmpty
+        //             ? ClipRRect(
+        //                 borderRadius: BorderRadius.circular(16.r),
+        //                 child: DiffImage(
+        //                   image: existingCover,
+        //                   width: double.infinity,
+        //                   height: 130.h,
+        //                   fitType: BoxFit.cover,
+        //                 ),
+        //               )
+        //             : Column(
+        //                 mainAxisAlignment: MainAxisAlignment.center,
+        //                 children: [
+        //                   Icon(Icons.image_outlined,
+        //                       color: colors.main, size: 32.sp),
+        //                   Gaps.vGap8,
+        //                   Text(
+        //                     'choose_cover_image'.tr,
+        //                     style: TextStyles.medium14(color: colors.main),
+        //                   ),
+        //                 ],
+        //               )
+        //         : null,
+        //   ),
+        // ),
         Gaps.vGap24,
         Center(
           child: GestureDetector(
@@ -117,20 +131,24 @@ class MedicalCenterFormSection extends StatelessWidget {
                 CircleAvatar(
                   radius: 50.r,
                   backgroundColor: colors.main.withValues(alpha: .08),
-                  backgroundImage:
-                      logoFile != null ? FileImage(logoFile!) : null,
+                  backgroundImage: logoFile != null
+                      ? FileImage(logoFile!)
+                      : null,
                   child: logoFile == null
                       ? existingLogo != null && existingLogo!.isNotEmpty
-                          ? ClipOval(
-                              child: DiffImage(
-                                image: existingLogo,
-                                width: 100.w,
-                                height: 100.h,
-                                isCircle: true,
-                              ),
-                            )
-                          : Icon(Icons.local_hospital_outlined,
-                              size: 40.sp, color: colors.main)
+                            ? ClipOval(
+                                child: DiffImage(
+                                  image: existingLogo,
+                                  width: 100.w,
+                                  height: 100.h,
+                                  isCircle: true,
+                                ),
+                              )
+                            : Icon(
+                                Icons.local_hospital_outlined,
+                                size: 40.sp,
+                                color: colors.main,
+                              )
                       : null,
                 ),
                 Container(
@@ -139,8 +157,11 @@ class MedicalCenterFormSection extends StatelessWidget {
                     color: colors.main,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.camera_alt,
-                      color: colors.whiteColor, size: 18.sp),
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: colors.whiteColor,
+                    size: 18.sp,
+                  ),
                 ),
               ],
             ),
@@ -214,16 +235,16 @@ class MedicalCenterFormSection extends StatelessWidget {
           ],
         ),
         Gaps.vGap16,
-        _buildLabel('email'.tr),
-        Gaps.vGap8,
-        MyTextFormField(
-          controller: emailController,
-          focusNode: emailFocus,
-          textInputAction: TextInputAction.done,
-          keyboardType: TextInputType.emailAddress,
-          hintText: 'enter_email'.tr,
-          prefixIcon: Icon(Icons.email_outlined, color: colors.main),
-        ),
+        // _buildLabel('email'.tr),
+        // Gaps.vGap8,
+        // MyTextFormField(
+        //   controller: emailController,
+        //   focusNode: emailFocus,
+        //   textInputAction: TextInputAction.done,
+        //   keyboardType: TextInputType.emailAddress,
+        //   hintText: 'enter_email'.tr,
+        //   prefixIcon: Icon(Icons.email_outlined, color: colors.main),
+        // ),
         Gaps.vGap24,
         _buildLabel('upload_license'.tr),
         Gaps.vGap10,
@@ -257,6 +278,37 @@ class MedicalCenterFormSection extends StatelessWidget {
             ),
           ),
         ),
+        Gaps.vGap16,
+        _buildLabel("password".tr),
+        Gaps.vGap8,
+        MyTextFormField(
+          controller: passwordController,
+          focusNode: passwordFocus,
+          obscureText: obscurePassword,
+          validatorType: ValidatorType.password,
+          hintText: "password".tr,
+          prefixIcon: Icon(Icons.lock_outline, color: colors.main),
+        ),
+        Gaps.vGap16,
+        _buildLabel("confirm_password".tr),
+        Gaps.vGap8,
+        MyTextFormField(
+          controller: confirmPasswordController,
+          focusNode: confirmPasswordFocus,
+          obscureText: obscureConfirmPassword,
+          hintText: "confirm_password".tr,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'required'.tr;
+            }
+            if (value != passwordController.text) {
+              return 'passwords_not_match'.tr;
+            }
+            return null;
+          },
+          prefixIcon: Icon(Icons.lock_outline, color: colors.main),
+        ),
+        Gaps.vGap24,
       ],
     );
   }

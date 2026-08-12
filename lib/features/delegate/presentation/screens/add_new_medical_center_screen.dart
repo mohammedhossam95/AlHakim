@@ -34,12 +34,18 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   final _nameFocus = FocusNode();
   final _descriptionFocus = FocusNode();
   final _addressFocus = FocusNode();
   final _phoneFocus = FocusNode();
   final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
+  final bool _obscurePassword = true;
+  final bool _obscureConfirmPassword = true;
 
   late Country _selectedCountry;
   File? logoFile;
@@ -75,7 +81,9 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
   }
 
   Future<void> _pickLicense() async {
-    final result = await FilePicker.platform.pickFiles();
+    // final result = await FilePicker.platform.pickFiles();
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+
     if (result != null) {
       setState(() => licenseFile = File(result.files.single.path!));
     }
@@ -93,18 +101,20 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
     if (!context.mounted) return;
 
     context.read<AddMedicalCenterCubit>().addMedicalCenter(
-          AddMedicalCenterParams(
-            name: _nameController.text,
-            description: _descriptionController.text,
-            address: _addressController.text,
-            countryCode: '+${_selectedCountry.phoneCode}',
-            phone: phone,
-            email: _emailController.text,
-            logo: logoFile,
-            cover: coverFile,
-            license: licenseFile,
-          ),
-        );
+      AddMedicalCenterParams(
+        name: _nameController.text,
+        description: _descriptionController.text,
+        address: _addressController.text,
+        countryCode: '+${_selectedCountry.phoneCode}',
+        phone: phone,
+        email: _emailController.text,
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+        logo: logoFile,
+        cover: coverFile,
+        license: licenseFile,
+      ),
+    );
   }
 
   @override
@@ -149,11 +159,17 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
                       addressController: _addressController,
                       phoneController: _phoneController,
                       emailController: _emailController,
+                      passwordController: _passwordController,
+                      confirmPasswordController: _confirmPasswordController,
                       nameFocus: _nameFocus,
                       descriptionFocus: _descriptionFocus,
                       addressFocus: _addressFocus,
                       phoneFocus: _phoneFocus,
                       emailFocus: _emailFocus,
+                      passwordFocus: _passwordFocus,
+                      confirmPasswordFocus: _confirmPasswordFocus,
+                      obscurePassword: _obscurePassword,
+                      obscureConfirmPassword: _obscureConfirmPassword,
                       selectedCountry: _selectedCountry,
                       onCountryChanged: (country) {
                         setState(() => _selectedCountry = country);

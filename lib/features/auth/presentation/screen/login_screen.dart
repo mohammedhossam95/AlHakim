@@ -3,6 +3,7 @@ import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
+import 'package:alhakim/core/utils/extension.dart';
 import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/country_code_widget.dart';
@@ -224,13 +225,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       BlocConsumer<LoginCubit, LoginState>(
                         listener: (context, state) {
                           if (state is LoginLoaded) {
+                            final data = state.response.data as AuthModel?;
+                            if (data == null) return;
+                            //
+                            final userType = context
+                                .read<SessionCubit>()
+                                .state
+                                .userType;
+                            final loggedUserType = UserTypeMapper.fromRole(
+                              data.role ?? '',
+                            );
+                            if (userType != loggedUserType) {
+                              Constants.showSnakToast(
+                                context: context,
+                                type: 3,
+                                message: 'user_type_not_matched'.tr,
+                              );
+                              return;
+                            }
                             Constants.showSnakToast(
                               context: context,
                               type: 1,
                               message: state.response.message ?? '',
                             );
-                            final data = state.response.data as AuthModel?;
-                            if (data == null) return;
                             _handleAuthSuccess(data, state.params);
                           } else if (state is LoginError) {
                             Constants.showSnakToast(

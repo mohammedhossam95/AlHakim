@@ -16,6 +16,21 @@ extension ImageExtension on num {
   }
 }
 
+extension UserTypeMapper on UserType {
+  static UserType fromRole(String role) {
+    switch (role) {
+      case 'patient':
+        return UserType.patient;
+      case 'doctor':
+        return UserType.doctor;
+      case 'representative':
+        return UserType.delegate;
+      default:
+        throw ArgumentError('Unknown role: $role');
+    }
+  }
+}
+
 extension StatusLevelExtension on StatusLevel {
   static StatusLevel fromString(String value) {
     for (StatusLevel type in StatusLevel.values) {

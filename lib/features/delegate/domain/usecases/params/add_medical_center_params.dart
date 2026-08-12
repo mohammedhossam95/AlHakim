@@ -10,6 +10,8 @@ class AddMedicalCenterParams extends Equatable {
   final String? countryCode;
   final String? phone;
   final String? email;
+  final String? password;
+  final String? confirmPassword;
   final File? logo;
   final File? cover;
   final File? license;
@@ -22,6 +24,8 @@ class AddMedicalCenterParams extends Equatable {
     this.countryCode,
     this.phone,
     this.email,
+    this.password,
+    this.confirmPassword,
     this.logo,
     this.cover,
     this.license,
@@ -55,15 +59,15 @@ class AddMedicalCenterParams extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        address,
-        countryCode,
-        phone,
-        email,
-        logo,
-        cover,
-        license,
-      ];
+    id,
+    name,
+    description,
+    address,
+    countryCode,
+    phone,
+    email,
+    logo,
+    cover,
+    license,
+  ];
 }

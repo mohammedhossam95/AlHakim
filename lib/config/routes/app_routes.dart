@@ -8,22 +8,21 @@ import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
-import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
-import 'package:alhakim/features/auth/presentation/cubit/login/login_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/forgot_password_cubit/forgot_password_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_countries_cubit/get_countries_cubit.dart';
-import 'package:alhakim/features/auth/presentation/cubit/forgot_password_cubit/forgot_password_cubit.dart';
-import 'package:alhakim/features/auth/presentation/cubit/reset_password_cubit/reset_password_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/login/login_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/resend_otp_cubit/resend_otp_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/reset_password_cubit/reset_password_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
 import 'package:alhakim/features/auth/presentation/screen/choose_user_type_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/complete_profile_screen.dart';
+import 'package:alhakim/features/auth/presentation/screen/forgot_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/login_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/otp_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/register_screen.dart';
-import 'package:alhakim/features/auth/presentation/screen/forgot_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/reset_password_screen.dart';
 import 'package:alhakim/features/auth/presentation/screen/splash_screen.dart';
 import 'package:alhakim/features/booking/domain/entities/family_member_entity.dart';
@@ -45,6 +44,7 @@ import 'package:alhakim/features/delegate/presentation/screens/delegate_doctors_
 import 'package:alhakim/features/delegate/presentation/screens/my_map_view_widget.dart';
 import 'package:alhakim/features/delegate/presentation/screens/update_doctor_screen.dart';
 import 'package:alhakim/features/delegate/presentation/screens/update_medical_center_screen.dart';
+import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/close_clinic_cubit.dart';
@@ -58,6 +58,7 @@ import 'package:alhakim/features/doctors/presentation/screens/clinic_home_screen
 import 'package:alhakim/features/doctors/presentation/screens/reschedule_appointments_screen.dart';
 import 'package:alhakim/features/doctors/presentation/screens/search_doctors_screen.dart';
 import 'package:alhakim/features/home/presentation/screen/agent_screen.dart';
+import 'package:alhakim/features/notifications/presentation/screens/patient_offers_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/quick_booking_cubit/quick_booking_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/quick_booking_screen.dart';
@@ -150,6 +151,7 @@ abstract class Routes {
   static const String quickBookingScreenRoute = '/QuickBookingScreenRoute';
   static const String appoinmentSuccessScreen = '/AppoinmentSuccessScreen';
   static const String followUpQueueScreenRoute = '/FollowUpQueueScreenRoute';
+  static const String patientOffersRoute = '/patient-offers';
 
   static final sl = ServiceLocator.instance;
 
@@ -172,6 +174,18 @@ abstract class Routes {
           ),
         ),
       ),
+      GoRoute(
+        name: patientOffersRoute,
+        path: patientOffersRoute,
+        pageBuilder: (context, state) => buildAdaptivePage(
+          state: state,
+          child: BlocProvider(
+            create: (_) => sl<GetHospitalEmergencyCubit>(),
+            child: const PatientOffersScreen(),
+          ),
+        ),
+      ),
+
       GoRoute(
         name: initialRoute,
         path: initialRoute,
@@ -541,7 +555,9 @@ abstract class Routes {
             child: MultiBlocProvider(
               providers: [
                 BlocProvider(create: (context) => sl<GetFamilyMembersCubit>()),
-                BlocProvider(create: (context) => sl<DeleteFamilyMemberCubit>()),
+                BlocProvider(
+                  create: (context) => sl<DeleteFamilyMemberCubit>(),
+                ),
               ],
               child: FamilyMembersScreen(selectionMode: selectionMode),
             ),
@@ -668,8 +684,7 @@ abstract class Routes {
         Scaffold(body: Center(child: Text(AppStrings.noRouteFound))),
   );
 
-  static String get currentRoute =>
-      routesStack.isEmpty ? '' : routesStack.last;
+  static String get currentRoute => routesStack.isEmpty ? '' : routesStack.last;
 
   static void pushRouteToRoutesStack(String route) {
     routesStack.add(route);
