@@ -237,14 +237,31 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     selectedDistrict = doctor.location?.district;
     selectedStreet = doctor.location?.street;
 
-    final lat = double.tryParse(
-      doctor.latitude ?? doctor.location?.latitude ?? '',
-    );
-    final lng = double.tryParse(
-      doctor.longitude ?? doctor.location?.longitude ?? '',
-    );
-    if (lat != null && lng != null) {
-      selectedLocation = LatLng(lat, lng);
+    // Load location from medical center if applicable
+    if (doctor.medicalCenter != null) {
+      final profile = sharedPreferences.getAuth()?.profile;
+      if (profile?.location != null) {
+        final location = profile!.location!;
+        selectedCity = location.city;
+        selectedDistrict = location.district;
+        selectedStreet = location.street;
+
+        final mcLat = double.tryParse(location.latitude ?? '');
+        final mcLng = double.tryParse(location.longitude ?? '');
+        if (mcLat != null && mcLng != null) {
+          selectedLocation = LatLng(mcLat, mcLng);
+        }
+      }
+    } else {
+      final lat = double.tryParse(
+        doctor.latitude ?? doctor.location?.latitude ?? '',
+      );
+      final lng = double.tryParse(
+        doctor.longitude ?? doctor.location?.longitude ?? '',
+      );
+      if (lat != null && lng != null) {
+        selectedLocation = LatLng(lat, lng);
+      }
     }
 
     final address = _buildAddressFromLocation();
@@ -340,11 +357,14 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   }
 
   Future<void> _pickLocation() async {
+    // Medical center can't change location
+    if (_doctor?.medicalCenter != null) return;
+
     final result =
         await context.pushNamed(
               Routes.myMapViewRoute,
               extra: {
-                'location': selectedLocation ?? LatLng(30.0444, 31.2357),
+                'location': selectedLocation ?? LatLng(30.4323, 30.5136),
                 'onChanged': (LatLng pos) {},
               },
             )
@@ -392,8 +412,11 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   void submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_passwordController.text.trim() !=
-        _confirmPasswordController.text.trim()) {
+    final isMedicalCenter = _doctor?.medicalCenter != null;
+
+    if (!isMedicalCenter &&
+        _passwordController.text.trim() !=
+            _confirmPasswordController.text.trim()) {
       Constants.showSnakToast(
         context: context,
         message: 'passwords_not_match'.tr,
@@ -502,10 +525,14 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         }).toList(),
         secretaryCountryCode: "+${_selectedCountry.phoneCode}",
         clinicCountryCode: "+${_selectedCountry.phoneCode}",
-        password: _passwordController.text.trim().isEmpty
+        password:
+            (_doctor?.medicalCenter != null) ||
+                _passwordController.text.trim().isEmpty
             ? null
             : _passwordController.text.trim(),
-        passwordConfirmation: _confirmPasswordController.text.trim().isEmpty
+        passwordConfirmation:
+            (_doctor?.medicalCenter != null) ||
+                _confirmPasswordController.text.trim().isEmpty
             ? null
             : _confirmPasswordController.text.trim(),
       ),
@@ -863,50 +890,51 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                     ),
 
                     Gaps.vGap16,
+                    if (_doctor?.medicalCenter == null) ...[
+                      /// secretary phone
+                      buildLabel("clinic_phone".tr),
 
-                    /// secretary phone
-                    buildLabel("clinic_phone".tr),
+                      Gaps.vGap8,
 
-                    Gaps.vGap8,
-
-                    Row(
-                      children: [
-                        CountryCodeWidget(
-                          country: _selectedCountry,
-                          updateValue: (country) {
-                            setState(() {
-                              _selectedCountry = country;
-                            });
-                          },
-                        ),
-                        Gaps.hGap8,
-                        Expanded(
-                          flex: 5,
-                          child: MyTextFormField(
-                            controller: _secretaryPhoneController,
-
-                            focusNode: _secretaryPhoneFocus,
-
-                            textInputAction: TextInputAction.next,
-
-                            onSubmit: (_) {
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(_whatsappNumberFocus);
+                      Row(
+                        children: [
+                          CountryCodeWidget(
+                            country: _selectedCountry,
+                            updateValue: (country) {
+                              setState(() {
+                                _selectedCountry = country;
+                              });
                             },
+                          ),
+                          Gaps.hGap8,
+                          Expanded(
+                            flex: 5,
+                            child: MyTextFormField(
+                              controller: _secretaryPhoneController,
 
-                            keyboardType: TextInputType.phone,
+                              focusNode: _secretaryPhoneFocus,
 
-                            hintText: "enter_secretary_phone".tr,
+                              textInputAction: TextInputAction.next,
 
-                            prefixIcon: Icon(
-                              Icons.support_agent_outlined,
-                              color: colors.main,
+                              onSubmit: (_) {
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_whatsappNumberFocus);
+                              },
+
+                              keyboardType: TextInputType.phone,
+
+                              hintText: "enter_secretary_phone".tr,
+
+                              prefixIcon: Icon(
+                                Icons.support_agent_outlined,
+                                color: colors.main,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
 
                     Gaps.vGap16,
 
@@ -1153,99 +1181,103 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                     Gaps.vGap16,
 
                     /// representative code
-                    buildLabel("representative_code".tr),
-                    Gaps.vGap8,
-                    MyTextFormField(
-                      controller: _representativeCodeController,
-                      focusNode: _representativeCodeFocus,
-                      textInputAction: TextInputAction.done,
-                      hintText: "enter_representative_code".tr,
-                      prefixIcon: Icon(
-                        Icons.confirmation_number_outlined,
-                        color: colors.main,
-                      ),
-                    ),
-
-                    Gaps.vGap20,
-
-                    buildLabel("password".tr),
-                    Gaps.vGap8,
-                    MyTextFormField(
-                      controller: _passwordController,
-                      focusNode: _passwordFocus,
-                      obscureText: _obscurePassword,
-                      hintText: "password".tr,
-                      validator: (value) {
-                        final confirm = _confirmPasswordController.text.trim();
-                        if ((value == null || value.isEmpty) &&
-                            confirm.isEmpty) {
-                          return null;
-                        }
-                        if (value == null || value.isEmpty) {
-                          return 'required'.tr;
-                        }
-                        return null;
-                      },
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: colors.main,
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: colors.lightTextColor,
+                    if (_doctor?.medicalCenter == null) ...[
+                      buildLabel("representative_code".tr),
+                      Gaps.vGap8,
+                      MyTextFormField(
+                        controller: _representativeCodeController,
+                        focusNode: _representativeCodeFocus,
+                        textInputAction: TextInputAction.done,
+                        hintText: "enter_representative_code".tr,
+                        prefixIcon: Icon(
+                          Icons.confirmation_number_outlined,
+                          color: colors.main,
                         ),
                       ),
-                    ),
-                    Gaps.vGap16,
-                    buildLabel("confirm_password".tr),
-                    Gaps.vGap8,
-                    MyTextFormField(
-                      controller: _confirmPasswordController,
-                      focusNode: _confirmPasswordFocus,
-                      obscureText: _obscureConfirmPassword,
-                      hintText: "confirm_password".tr,
-                      validator: (value) {
-                        final password = _passwordController.text.trim();
-                        if ((value == null || value.isEmpty) &&
-                            password.isEmpty) {
+                      Gaps.vGap20,
+                    ],
+
+                    if (_doctor?.medicalCenter == null) ...[
+                      buildLabel("password".tr),
+                      Gaps.vGap8,
+                      MyTextFormField(
+                        controller: _passwordController,
+                        focusNode: _passwordFocus,
+                        obscureText: _obscurePassword,
+                        hintText: "password".tr,
+                        validator: (value) {
+                          final confirm = _confirmPasswordController.text
+                              .trim();
+                          if ((value == null || value.isEmpty) &&
+                              confirm.isEmpty) {
+                            return null;
+                          }
+                          if (value == null || value.isEmpty) {
+                            return 'required'.tr;
+                          }
                           return null;
-                        }
-                        if (value == null || value.isEmpty) {
-                          return 'required'.tr;
-                        }
-                        if (value != _passwordController.text) {
-                          return 'passwords_not_match'.tr;
-                        }
-                        return null;
-                      },
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: colors.main,
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
                         },
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: colors.lightTextColor,
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: colors.main,
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: colors.lightTextColor,
+                          ),
                         ),
                       ),
-                    ),
-
-                    Gaps.vGap20,
+                      Gaps.vGap16,
+                      buildLabel("confirm_password".tr),
+                      Gaps.vGap8,
+                      MyTextFormField(
+                        controller: _confirmPasswordController,
+                        focusNode: _confirmPasswordFocus,
+                        obscureText: _obscureConfirmPassword,
+                        hintText: "confirm_password".tr,
+                        validator: (value) {
+                          final password = _passwordController.text.trim();
+                          if ((value == null || value.isEmpty) &&
+                              password.isEmpty) {
+                            return null;
+                          }
+                          if (value == null || value.isEmpty) {
+                            return 'required'.tr;
+                          }
+                          if (value != _passwordController.text) {
+                            return 'passwords_not_match'.tr;
+                          }
+                          return null;
+                        },
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: colors.main,
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: colors.lightTextColor,
+                          ),
+                        ),
+                      ),
+                      Gaps.vGap20,
+                    ],
 
                     /// license
                     buildLabel("upload_license".tr),
@@ -1297,7 +1329,9 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                     MyTextFormField(
                       controller: _locationController,
                       backgroundColor: colors.whiteColor,
-                      onTap: _pickLocation,
+                      onTap: _doctor?.medicalCenter != null
+                          ? null
+                          : _pickLocation,
                       hintText: _isLoadingLocation
                           ? 'Getting location...'
                           : 'select_location'.tr,
@@ -1313,9 +1347,11 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                                 ),
                               ),
                             )
-                          : IconButton(
-                              onPressed: _pickLocation,
-                              icon: Icon(Icons.location_on_outlined),
+                          : Icon(
+                              Icons.location_on_outlined,
+                              color: _doctor?.medicalCenter != null
+                                  ? colors.lightTextColor
+                                  : colors.main,
                             ),
                     ),
 
@@ -1394,64 +1430,102 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                               Gaps.vGap16,
 
                               /// day
-                              DropdownButtonFormField<int>(
-                                initialValue: item.dayOfWeek,
-
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(
-                                    Icons.calendar_today,
-                                    color: colors.main,
-                                  ),
-
-                                  filled: true,
-
-                                  fillColor: colors.main.withValues(alpha: .05),
-
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16.w,
-                                    vertical: 14.h,
-                                  ),
-
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.r),
-
-                                    borderSide: BorderSide.none,
-                                  ),
-
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.r),
-
-                                    borderSide: BorderSide.none,
-                                  ),
-
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.r),
-
-                                    borderSide: BorderSide(color: colors.main),
-                                  ),
-                                ),
-
-                                hint: Text(
-                                  "choose_day".tr,
-
-                                  style: TextStyles.medium14(),
-                                ),
-
-                                items: availableDaysFor(index)
-                                    .map(
-                                      (e) => DropdownMenuItem<int>(
-                                        value: e['value'],
-
-                                        child: Text(e['title']),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: DropdownButtonFormField<int>(
+                                      initialValue: item.dayOfWeek,
+                                      isExpanded: true,
+                                      isDense: false,
+                                      style: TextStyles.medium14(
+                                        color: colors.textColor,
                                       ),
-                                    )
-                                    .toList(),
+                                      decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.calendar_today,
+                                          color: colors.main,
+                                        ),
 
-                                onChanged: (value) {
-                                  item.dayOfWeek = value;
+                                        filled: true,
 
-                                  setState(() {});
-                                },
+                                        fillColor: colors.main.withValues(
+                                          alpha: .05,
+                                        ),
+
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 16.w,
+                                          // vertical: 14.h,
+                                        ),
+
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+
+                                          borderSide: BorderSide.none,
+                                        ),
+
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+
+                                          borderSide: BorderSide.none,
+                                        ),
+
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+
+                                          borderSide: BorderSide(
+                                            color: colors.main,
+                                          ),
+                                        ),
+                                      ),
+
+                                      hint: Text(
+                                        "choose_day".tr,
+
+                                        style: TextStyles.medium14(),
+                                      ),
+
+                                      items: availableDaysFor(index)
+                                          .map(
+                                            (e) => DropdownMenuItem<int>(
+                                              value: e['value'],
+
+                                              child: Text(e['title']),
+                                            ),
+                                          )
+                                          .toList(),
+
+                                      onChanged: (value) {
+                                        item.dayOfWeek = value;
+
+                                        setState(() {});
+                                      },
+                                    ),
+                                  ),
+                                  Gaps.hGap8,
+
+                                  /// slot duration
+                                  Expanded(
+                                    child: MyTextFormField(
+                                      controller: item.slotDurationController,
+
+                                      keyboardType: TextInputType.number,
+
+                                      hintText: "slot_duration".tr,
+
+                                      prefixIcon: Icon(
+                                        Icons.timelapse_outlined,
+
+                                        color: colors.main,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
 
                               Gaps.vGap16,
@@ -1482,7 +1556,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                                         ),
                                   ),
 
-                                  Gaps.vGap16,
+                                  Gaps.hGap8,
 
                                   /// end time
                                   Expanded(
@@ -1507,22 +1581,6 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                                     ),
                                   ),
                                 ],
-                              ),
-                              Gaps.vGap16,
-
-                              /// slot duration
-                              MyTextFormField(
-                                controller: item.slotDurationController,
-
-                                keyboardType: TextInputType.number,
-
-                                hintText: "slot_duration".tr,
-
-                                prefixIcon: Icon(
-                                  Icons.timelapse_outlined,
-
-                                  color: colors.main,
-                                ),
                               ),
                             ],
                           ),

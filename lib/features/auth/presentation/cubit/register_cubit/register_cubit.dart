@@ -1,5 +1,6 @@
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/auth/domain/usecases/params/register_params.dart';
 import 'package:alhakim/features/auth/domain/usecases/register_use_case.dart';
 import 'package:dartz/dartz.dart';
@@ -33,6 +34,7 @@ class RegisterCubit extends Cubit<RegisterState> {
               otpParams: AuthParams(
                 phoneNumber: params.phoneNumber,
                 countryCode: params.countryCode,
+                userType: UserType.patient,
               ),
             ),
           );

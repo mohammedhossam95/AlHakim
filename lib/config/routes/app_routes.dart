@@ -203,13 +203,19 @@ abstract class Routes {
       GoRoute(
         name: loginScreenRoute,
         path: loginScreenRoute,
-        pageBuilder: (context, state) => buildAdaptivePage(
-          state: state,
-          child: BlocProvider(
-            create: (_) => sl<LoginCubit>(),
-            child: const LoginScreen(),
-          ),
-        ),
+        pageBuilder: (context, state) {
+          final userType = state.extra is UserType
+              ? state.extra as UserType
+              : sessionCubit.state.userType;
+
+          return buildAdaptivePage(
+            state: state,
+            child: BlocProvider(
+              create: (_) => sl<LoginCubit>(),
+              child: LoginScreen(userType: userType),
+            ),
+          );
+        },
       ),
 
       /// LoginScreen
@@ -312,7 +318,7 @@ abstract class Routes {
           final map = state.extra as Map<String, dynamic>?;
 
           final LatLng initialLocation =
-              map?['location'] as LatLng? ?? LatLng(30.0444, 31.2357);
+              map?['location'] as LatLng? ?? LatLng(30.4323, 30.5136);
           final LocationCallback? onChanged =
               map?['onChanged'] as LocationCallback?;
 

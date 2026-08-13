@@ -94,7 +94,7 @@ class _AppointmentDaysNumberBottomSheetState
                     SizedBox(
                       width: 48.w,
                       child: Text(
-                        '$_count',
+                        widget.maxDays > 1 ? '$_count' : '1',
                         textAlign: TextAlign.center,
                         style: TextStyles.semiBold18(color: colors.whiteColor),
                       ),

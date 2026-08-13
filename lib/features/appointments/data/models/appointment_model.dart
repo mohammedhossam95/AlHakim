@@ -2,6 +2,7 @@ import 'package:alhakim/core/base_classes/base_list_response.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/booking/data/models/appointment_type_model.dart';
 import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
+import 'package:alhakim/features/queue_management/data/models/queue_management_model.dart';
 
 class AppointmentRespModel extends BaseListResponse {
   const AppointmentRespModel({super.status, super.message, super.data});
@@ -28,6 +29,8 @@ class AppointmentModel extends AppointmentEntity {
     super.status,
     super.doctor,
     super.createdAt,
+    super.bookedBy,
+    super.patient,
   });
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +46,12 @@ class AppointmentModel extends AppointmentEntity {
           ? DoctorModel.fromJson(json['doctor'])
           : null,
       createdAt: json['created_at'],
+      bookedBy: json['booked_by'] != null
+          ? QueueUserModel.fromJson(json['booked_by'])
+          : null,
+      patient: json['patient'] != null
+          ? QueueUserModel.fromJson(json['patient'])
+          : null,
     );
   }
 

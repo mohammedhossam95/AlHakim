@@ -32,9 +32,18 @@ class MedicalCenterModel extends MedicalCenterEntity {
     super.cover,
     super.isActive,
     super.createdAt,
+    super.latitude,
+    super.longitude,
+    super.city,
+    super.district,
+    super.street,
   });
 
   factory MedicalCenterModel.fromJson(Map<String, dynamic> json) {
+    final location = json['location'] is Map<String, dynamic>
+        ? json['location'] as Map<String, dynamic>
+        : null;
+
     return MedicalCenterModel(
       id: json['id'],
       name: json['name']?.toString(),
@@ -47,6 +56,11 @@ class MedicalCenterModel extends MedicalCenterEntity {
       cover: json['cover']?.toString(),
       isActive: json['is_active'],
       createdAt: json['created_at']?.toString(),
+      latitude: (json['latitude'] ?? location?['latitude'])?.toString(),
+      longitude: (json['longitude'] ?? location?['longitude'])?.toString(),
+      city: (json['city'] ?? location?['city'])?.toString(),
+      district: (json['district'] ?? location?['district'])?.toString(),
+      street: (json['street'] ?? location?['street'])?.toString(),
     );
   }
 }

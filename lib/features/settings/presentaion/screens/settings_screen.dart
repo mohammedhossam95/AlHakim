@@ -114,11 +114,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               title: 'login_as_delegate'.tr,
                               icon: SvgAssets.user,
                               onTap: () {
-                                final session = BlocProvider.of<SessionCubit>(
-                                  context,
+                                context.pushNamed(
+                                  Routes.loginScreenRoute,
+                                  extra: UserType.delegate,
                                 );
-                                session.setUserType(UserType.delegate);
-                                context.pushNamed(Routes.loginScreenRoute);
                               },
                             ),
                           // if (sessionState.status ==

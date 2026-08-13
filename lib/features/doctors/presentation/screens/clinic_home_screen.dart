@@ -57,6 +57,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     return sessionState.activeDoctorId;
   }
 
+  final today = DateTime.now().weekday;
   @override
   Widget build(BuildContext context) {
     final sessionState = context.watch<SessionCubit>().state;
@@ -144,141 +145,152 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                       ),
 
                       Gaps.vGap10,
-
-                      Text(
-                        home?.doctorClosedToday == true
-                            ? "cancelled_today".tr
-                            : home?.isClinicOpen == true
-                            ? "open".tr
-                            : "closed".tr,
-
-                        style: TextStyles.bold22(
-                          color: home?.doctorClosedToday == true
-                              ? colors.errorColor
+                      if (home?.doctor?.schedules?.any(
+                            (schedule) => schedule.dayOfWeek == today,
+                          ) ==
+                          true) ...[
+                        Text(
+                          home?.doctorClosedToday == true
+                              ? "cancelled_today".tr
                               : home?.isClinicOpen == true
-                              ? colors.main
-                              : colors.lightTextColor,
-                        ),
-                      ),
+                              ? "open".tr
+                              : "closed".tr,
 
-                      Gaps.vGap20,
-                      if (home?.doctorClosedToday == false)
-                        /// toggle clinic
-                        BlocListener<ToggleClinicCubit, ToggleClinicState>(
-                          listener: (context, toggleState) {
-                            if (toggleState is ToggleClinicLoading) {
-                              Constants.showLoading(context);
-                            } else if (toggleState is ToggleClinicError) {
-                              Constants.hideLoading(context);
-
-                              Constants.showSnakToast(
-                                context: context,
-                                type: 3,
-                                message: toggleState.message,
-                              );
-                            } else if (toggleState is ToggleClinicSuccess) {
-                              Constants.hideLoading(context);
-                              Constants.showSnakToast(
-                                context: context,
-                                type: 1,
-                                message: toggleState.response.message,
-                              );
-
-                              getDoctorHome();
-                            }
-                          },
-                          child: MyDefaultButton(
-                            btnText: home?.isClinicOpen == true
-                                ? "close_clinic"
-                                : "open_clinic",
-
-                            borderRadius: 30,
-
-                            height: 54.h,
-
-                            svgAsset: null,
-
-                            color: home?.isClinicOpen == true
+                          style: TextStyles.bold22(
+                            color: home?.doctorClosedToday == true
                                 ? colors.errorColor
-                                : colors.main,
-                            onPressed: () async {
-                              Constants.showConfirmDialog(
-                                context: context,
-                                title: home?.isClinicOpen == true
-                                    ? "close_clinic".tr
-                                    : "open_clinic".tr,
-                                content: home?.isClinicOpen == true
-                                    ? "close_clinic_desc".tr
-                                    : "open_clinic_desc".tr,
-                                onYesPressed: () async {
-                                  if (!context.mounted) return;
-                                  final doctorId = _activeDoctorId(context);
-                                  if (doctorId == null || doctorId.isEmpty) {
-                                    return;
-                                  }
-                                  context
-                                      .read<ToggleClinicCubit>()
-                                      .toggleClinic(doctorId: doctorId);
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      if (home?.doctorClosedToday == false) Gaps.vGap16,
-
-                      /// close today
-                      if (home?.doctorClosedToday != true)
-                        BlocListener<
-                          CloseClinicTodayCubit,
-                          CloseClinicTodayState
-                        >(
-                          listener: (context, state) {
-                            if (state is CloseClinicTodayLoading) {
-                              Constants.showLoading(context);
-                            } else if (state is CloseClinicTodayError) {
-                              Constants.hideLoading(context);
-                              Constants.showSnakToast(
-                                context: context,
-                                type: 3,
-                                message: state.message,
-                              );
-                            } else if (state is CloseClinicTodaySuccess) {
-                              Constants.hideLoading(context);
-                              Constants.showSnakToast(
-                                context: context,
-                                type: 1,
-                                message: state.response.message ?? '',
-                              );
-
-                              getDoctorHome();
-                            }
-                          },
-
-                          child: MyDefaultButton(
-                            btnText: "close_clinic_today",
-                            color: colors.whiteColor,
-                            textColor: colors.errorColor,
-                            borderColor: colors.errorColor,
-                            onPressed: () async {
-                              Constants.showConfirmDialog(
-                                context: context,
-                                title: "cancle_clinic".tr,
-                                content: "cancle_clinic_desc".tr,
-                                onYesPressed: () async {
-                                  if (!context.mounted) return;
-                                  final doctorId = _activeDoctorId(context);
-                                  if (doctorId == null || doctorId.isEmpty) {
-                                    return;
-                                  }
-                                  context
-                                      .read<CloseClinicTodayCubit>()
-                                      .closeClinicToday(doctorId: doctorId);
-                                },
-                              );
-                            },
+                                : home?.isClinicOpen == true
+                                ? colors.main
+                                : colors.lightTextColor,
                           ),
                         ),
 
+                        Gaps.vGap20,
+                        if (home?.doctorClosedToday == false)
+                          /// toggle clinic
+                          BlocListener<ToggleClinicCubit, ToggleClinicState>(
+                            listener: (context, toggleState) {
+                              if (toggleState is ToggleClinicLoading) {
+                                Constants.showLoading(context);
+                              } else if (toggleState is ToggleClinicError) {
+                                Constants.hideLoading(context);
+
+                                Constants.showSnakToast(
+                                  context: context,
+                                  type: 3,
+                                  message: toggleState.message,
+                                );
+                              } else if (toggleState is ToggleClinicSuccess) {
+                                Constants.hideLoading(context);
+                                Constants.showSnakToast(
+                                  context: context,
+                                  type: 1,
+                                  message: toggleState.response.message,
+                                );
+
+                                getDoctorHome();
+                              }
+                            },
+                            child: MyDefaultButton(
+                              btnText: home?.isClinicOpen == true
+                                  ? "close_clinic"
+                                  : "open_clinic",
+
+                              borderRadius: 30,
+
+                              height: 54.h,
+
+                              svgAsset: null,
+
+                              color: home?.isClinicOpen == true
+                                  ? colors.errorColor
+                                  : colors.main,
+                              onPressed: () async {
+                                Constants.showConfirmDialog(
+                                  context: context,
+                                  title: home?.isClinicOpen == true
+                                      ? "close_clinic".tr
+                                      : "open_clinic".tr,
+                                  content: home?.isClinicOpen == true
+                                      ? "close_clinic_desc".tr
+                                      : "open_clinic_desc".tr,
+                                  onYesPressed: () async {
+                                    if (!context.mounted) return;
+                                    final doctorId = _activeDoctorId(context);
+                                    if (doctorId == null || doctorId.isEmpty) {
+                                      return;
+                                    }
+                                    context
+                                        .read<ToggleClinicCubit>()
+                                        .toggleClinic(doctorId: doctorId);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        if (home?.doctorClosedToday == false) Gaps.vGap16,
+
+                        /// close today
+                        if (home?.doctorClosedToday != true)
+                          BlocListener<
+                            CloseClinicTodayCubit,
+                            CloseClinicTodayState
+                          >(
+                            listener: (context, state) {
+                              if (state is CloseClinicTodayLoading) {
+                                Constants.showLoading(context);
+                              } else if (state is CloseClinicTodayError) {
+                                Constants.hideLoading(context);
+                                Constants.showSnakToast(
+                                  context: context,
+                                  type: 3,
+                                  message: state.message,
+                                );
+                              } else if (state is CloseClinicTodaySuccess) {
+                                Constants.hideLoading(context);
+                                Constants.showSnakToast(
+                                  context: context,
+                                  type: 1,
+                                  message: state.response.message ?? '',
+                                );
+
+                                getDoctorHome();
+                              }
+                            },
+
+                            child: MyDefaultButton(
+                              btnText: "close_clinic_today",
+                              color: colors.whiteColor,
+                              textColor: colors.errorColor,
+                              borderColor: colors.errorColor,
+                              onPressed: () async {
+                                Constants.showConfirmDialog(
+                                  context: context,
+                                  title: "cancle_clinic".tr,
+                                  content: "cancle_clinic_desc".tr,
+                                  onYesPressed: () async {
+                                    if (!context.mounted) return;
+                                    final doctorId = _activeDoctorId(context);
+                                    if (doctorId == null || doctorId.isEmpty) {
+                                      return;
+                                    }
+                                    context
+                                        .read<CloseClinicTodayCubit>()
+                                        .closeClinicToday(doctorId: doctorId);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                      ] else ...[
+                        Text(
+                          "doctor_closed_today".tr,
+                          style: TextStyles.bold22(
+                            color: colors.lightTextColor,
+                          ),
+                        ),
+                        Gaps.vGap16,
+                      ],
                       if (home?.doctorClosedToday != true) Gaps.vGap16,
 
                       /// reschedule

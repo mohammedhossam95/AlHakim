@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class AddNewMedicalCenterScreen extends StatefulWidget {
   const AddNewMedicalCenterScreen({super.key});
@@ -36,6 +38,8 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _representativeCodeController = TextEditingController();
 
   final _nameFocus = FocusNode();
   final _descriptionFocus = FocusNode();
@@ -44,8 +48,15 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _confirmPasswordFocus = FocusNode();
+  final _representativeCodeFocus = FocusNode();
   final bool _obscurePassword = true;
   final bool _obscureConfirmPassword = true;
+  final bool _isLoadingLocation = false;
+
+  LatLng? selectedLocation;
+  String? selectedCity;
+  String? selectedDistrict;
+  String? selectedStreet;
 
   late Country _selectedCountry;
   File? logoFile;
@@ -56,6 +67,8 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
   void initState() {
     super.initState();
     _selectedCountry = CountryParser.parsePhoneCode('20');
+    _representativeCodeController.text =
+        sharedPreferences.getAuth()?.user?.referralCode ?? '';
   }
 
   @override
@@ -65,11 +78,18 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
     _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _locationController.dispose();
+    _representativeCodeController.dispose();
     _nameFocus.dispose();
     _descriptionFocus.dispose();
     _addressFocus.dispose();
     _phoneFocus.dispose();
     _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
+    _representativeCodeFocus.dispose();
     super.dispose();
   }
 
@@ -81,12 +101,35 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
   }
 
   Future<void> _pickLicense() async {
-    // final result = await FilePicker.platform.pickFiles();
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
 
     if (result != null) {
       setState(() => licenseFile = File(result.files.single.path!));
     }
+  }
+
+  Future<void> _pickLocation() async {
+    final result =
+        await context.pushNamed(
+              Routes.myMapViewRoute,
+              extra: {
+                'location': selectedLocation ?? LatLng(30.4323, 30.5136),
+                'onChanged': (LatLng pos) {},
+              },
+            )
+            as Map<String, dynamic>?;
+    if (result == null || !mounted) return;
+
+    final LatLng location = result['location'] as LatLng;
+    final String address = result['address'] as String? ?? '';
+    selectedLocation = location;
+    selectedCity = result['city'] as String?;
+    selectedDistrict = result['district'] as String?;
+    selectedStreet = result['street'] as String?;
+    _locationController.text = address.isNotEmpty
+        ? address
+        : '${location.latitude}, ${location.longitude}';
+    setState(() {});
   }
 
   Future<void> _submit() async {
@@ -110,6 +153,12 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
         email: _emailController.text,
         password: _passwordController.text,
         confirmPassword: _confirmPasswordController.text,
+        latitude: selectedLocation?.latitude.toString(),
+        longitude: selectedLocation?.longitude.toString(),
+        city: selectedCity,
+        district: selectedDistrict,
+        street: selectedStreet,
+        representativeCode: _representativeCodeController.text,
         logo: logoFile,
         cover: coverFile,
         license: licenseFile,
@@ -180,6 +229,12 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
                       onPickLogo: () => _pickImage((f) => logoFile = f),
                       onPickCover: () => _pickImage((f) => coverFile = f),
                       onPickLicense: _pickLicense,
+                      locationController: _locationController,
+                      isLoadingLocation: _isLoadingLocation,
+                      onPickLocation: _pickLocation,
+                      representativeCodeController:
+                          _representativeCodeController,
+                      representativeCodeFocus: _representativeCodeFocus,
                     ),
                     Gaps.vGap30,
                     state is AddMedicalCenterLoading

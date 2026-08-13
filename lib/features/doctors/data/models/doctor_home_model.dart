@@ -1,4 +1,5 @@
 import 'package:alhakim/core/base_classes/base_one_response.dart';
+import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_home_entity.dart';
 
 class DoctorHomeRespModel extends BaseOneResponse {
@@ -19,6 +20,7 @@ class DoctorHomeModel extends DoctorHomeEntity {
   const DoctorHomeModel({
     super.isClinicOpen,
     super.doctorClosedToday,
+    super.doctor,
     super.statistics,
   });
 
@@ -26,6 +28,9 @@ class DoctorHomeModel extends DoctorHomeEntity {
     return DoctorHomeModel(
       isClinicOpen: json['is_clinic_open'],
       doctorClosedToday: json['doctor_closed_today'],
+      doctor: json['doctor'] != null
+          ? DoctorModel.fromJson(json['doctor'])
+          : null,
 
       statistics: json['statistics'] != null
           ? DoctorStatisticsModel.fromJson(json['statistics'])

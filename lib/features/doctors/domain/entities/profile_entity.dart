@@ -1,3 +1,4 @@
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class ProfileEntity extends Equatable {
@@ -5,6 +6,7 @@ class ProfileEntity extends Equatable {
   final String? name;
   final String? description;
   final String? address;
+  final LocationEntity? location;
   final String? countryCode;
   final String? phone;
   final String? email;
@@ -18,6 +20,7 @@ class ProfileEntity extends Equatable {
     this.name,
     this.description,
     this.address,
+    this.location,
     this.countryCode,
     this.phone,
     this.email,
@@ -26,12 +29,14 @@ class ProfileEntity extends Equatable {
     this.isActive,
     this.createdAt,
   });
+
   @override
   List<Object?> get props => [
     id,
     name,
     description,
     address,
+    location,
     countryCode,
     phone,
     email,
