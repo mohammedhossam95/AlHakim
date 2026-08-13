@@ -29,136 +29,135 @@ class AppoinmentSuccessScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-          child: Column(
-            children: [
-              /// Success Icon
-              Lottie.asset(GifAssets.success, height: 200.h),
-
-              // Gaps.vGap24,
-              Text(
-                "booking_confirmed".tr,
-                style: TextStyles.bold24(color: colors.main),
-                textAlign: TextAlign.center,
-              ),
-
-              Gaps.vGap12,
-
-              Text(
-                "booking_confirmed_desc".tr,
-                style: TextStyles.medium14(color: colors.lightTextColor),
-                textAlign: TextAlign.center,
-              ),
-
-              Gaps.vGap32,
-
-              /// Appointment Card
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(18.r),
-                decoration: BoxDecoration(
-                  color: colors.whiteColor,
-                  borderRadius: BorderRadius.circular(24.r),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                /// Success Icon
+                Lottie.asset(GifAssets.success, height: 200.h),
+                Text(
+                  "booking_confirmed".tr,
+                  style: TextStyles.bold24(color: colors.main),
+                  textAlign: TextAlign.center,
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        DiffImage(
-                          image: doctor?.profileImage ?? '',
-                          userName: appLocalizations.isArLocale
-                              ? doctor?.name?.ar ?? ''
-                              : doctor?.name?.en ?? '',
-                          width: 64.w,
-                          height: 64.w,
-                          borderRadius: BorderRadius.circular(32.r),
-                        ),
-                        Gaps.hGap12,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                appLocalizations.isArLocale
-                                    ? doctor?.name?.ar ?? ''
-                                    : doctor?.name?.en ?? '',
-                                style: TextStyles.semiBold18(),
-                                textAlign: TextAlign.start,
-                              ),
-                              Gaps.vGap4,
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 10.w,
-                                  vertical: 4.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colors.main.withValues(alpha: .08),
-                                  borderRadius: BorderRadius.circular(20.r),
-                                ),
-                                child: Text(
-                                  doctor?.specialty?.name ?? '',
+                Gaps.vGap12,
+                Text(
+                  "booking_confirmed_desc".tr,
+                  style: TextStyles.medium14(color: colors.lightTextColor),
+                  textAlign: TextAlign.center,
+                ),
+                Gaps.vGap32,
 
-                                  style: TextStyles.medium12(
-                                    color: colors.main,
+                /// Appointment Card
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(18.r),
+                  decoration: BoxDecoration(
+                    color: colors.whiteColor,
+                    borderRadius: BorderRadius.circular(24.r),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          DiffImage(
+                            image: doctor?.profileImage ?? '',
+                            userName: appLocalizations.isArLocale
+                                ? doctor?.name?.ar ?? ''
+                                : doctor?.name?.en ?? '',
+                            width: 64.w,
+                            height: 64.w,
+                            borderRadius: BorderRadius.circular(32.r),
+                          ),
+                          Gaps.hGap12,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  appLocalizations.isArLocale
+                                      ? doctor?.name?.ar ?? ''
+                                      : doctor?.name?.en ?? '',
+                                  style: TextStyles.semiBold18(),
+                                  textAlign: TextAlign.start,
+                                ),
+                                Gaps.vGap4,
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 10.w,
+                                    vertical: 4.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.main.withValues(alpha: .08),
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+                                  child: Text(
+                                    doctor?.specialty?.name ?? '',
+
+                                    style: TextStyles.medium12(
+                                      color: colors.main,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                        ],
+                      ),
+                      Gaps.vGap8,
+                      _InfoTile(
+                        icon: Icons.calendar_month_outlined,
+                        title: "appointment_date".tr,
+                        value: DateFormat(
+                          'EEEE, d MMM yyyy',
+                          appLocalizations.locale?.languageCode,
+                        ).format(DateTime.parse(appointmentDate)),
+                      ),
+                      if (doctor?.location?.city != null) ...[
+                        Gaps.vGap8,
+                        _InfoTile(
+                          icon: Icons.location_on_outlined,
+                          title: "clinic".tr,
+                          value:
+                              "${doctor?.location?.city ?? ''} - ${doctor?.location?.district ?? ''} - ${doctor?.location?.street ?? ''}",
                         ),
                       ],
-                    ),
-                    Gaps.vGap20,
-                    _InfoTile(
-                      icon: Icons.calendar_month_outlined,
-                      title: "appointment_date".tr,
-                      value: DateFormat(
-                        'EEEE, d MMM yyyy',
-                        appLocalizations.locale?.languageCode,
-                      ).format(DateTime.parse(appointmentDate)),
-                    ),
-                    if (doctor?.location?.city != null) ...[
-                      Gaps.vGap12,
-                      _InfoTile(
-                        icon: Icons.location_on_outlined,
-                        title: "clinic".tr,
-                        value: doctor?.location?.city ?? '',
-                      ),
                     ],
+                  ),
+                ),
+                Gaps.vGap30,
+                // const Spacer(),
+                Column(
+                  children: [
+                    // MyDefaultButton(
+                    //   btnText: "go_to_appointments",
+                    //   onPressed: () {
+                    //     context.read<BottomNavBarCubit>().changeCurrentScreen(
+                    //       index: 1,
+                    //     );
+                    //     context.pushReplacement(Routes.mainPageRoute);
+                    //   },
+                    //   color: colors.backGround,
+                    //   textColor: colors.main,
+                    //   textStyle: TextStyles.semiBold16(),
+                    //   borderColor: colors.main,
+                    // ),
+
+                    // Gaps.vGap16,
+                    MyDefaultButton(
+                      btnText: "go_to_home",
+                      color: colors.main,
+                      borderColor: colors.main,
+                      onPressed: () {
+                        context.go(Routes.mainPageRoute);
+                      },
+                    ),
                   ],
                 ),
-              ),
-              Gaps.vGap30,
-              // const Spacer(),
-              Column(
-                children: [
-                  // MyDefaultButton(
-                  //   btnText: "go_to_appointments",
-                  //   onPressed: () {
-                  //     context.read<BottomNavBarCubit>().changeCurrentScreen(
-                  //       index: 1,
-                  //     );
-                  //     context.pushReplacement(Routes.mainPageRoute);
-                  //   },
-                  //   color: colors.backGround,
-                  //   textColor: colors.main,
-                  //   textStyle: TextStyles.semiBold16(),
-                  //   borderColor: colors.main,
-                  // ),
 
-                  // Gaps.vGap16,
-                  MyDefaultButton(
-                    btnText: "go_to_home",
-                    color: colors.main,
-                    borderColor: colors.main,
-                    onPressed: () {
-                      context.go(Routes.mainPageRoute);
-                    },
-                  ),
-                ],
-              ),
-
-              Gaps.vGap20,
-            ],
+                Gaps.vGap20,
+              ],
+            ),
           ),
         ),
       ),

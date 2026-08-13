@@ -57,9 +57,10 @@
         {
             "name": "alhakim (two)",
             "configurations": [
-               "iPhone 17 Pro",
-               "iPhone 15",
-                "iPhone 11 Pro Max"
+                "iPhone 17 Pro",
+                "iPhone 15",
+                "iPhone 11 Pro Max",
+                "alhakim (CPH1907)",
             ],
         }
     ]
