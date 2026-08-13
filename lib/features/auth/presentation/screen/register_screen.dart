@@ -252,6 +252,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ],
                         ),
+                        Gaps.vGap8,
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 10.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.main.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color: colors.main.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: colors.main,
+                                size: 20,
+                              ),
+                              Gaps.hGap8,
+                              Expanded(
+                                child: Text(
+                                  'phone_must_have_whatsapp'.tr,
+                                  style: TextStyles.regular10(
+                                    color: colors.main,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         Gaps.vGap12,
                         MyTextFormField(
                           controller: _passwordController,

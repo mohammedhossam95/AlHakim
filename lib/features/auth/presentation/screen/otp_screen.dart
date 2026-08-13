@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:alhakim/core/params/auth_params.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/widgets/back_button.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
@@ -119,7 +120,7 @@ class _OtpAuthScreenState extends State<OtpAuthScreen> {
         otp: code,
         phoneNumber: widget.authParams.phoneNumber,
         countryCode: widget.authParams.countryCode,
-        userType: sessionCubit.state.userType,
+        userType: widget.authParams.userType ?? UserType.patient,
         firebaseToken: firebaseToken,
       ),
     );
@@ -143,7 +144,7 @@ class _OtpAuthScreenState extends State<OtpAuthScreen> {
       body: MultiBlocListener(
         listeners: [
           BlocListener<VerifyCodeCubit, VerifyCodeState>(
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state is VerifyCodeLoaded) {
                 Constants.showSnakToast(
                   context: context,
@@ -153,16 +154,19 @@ class _OtpAuthScreenState extends State<OtpAuthScreen> {
                 final data = state.response.data as AuthModel?;
                 if (data == null) return;
 
-                sharedPreferences.saveAuth(data);
+                await sharedPreferences.saveAuth(data);
 
                 if (data.token != null && data.token!.isNotEmpty) {
-                  secureStorage.saveAccessToken(data.token!);
+                  await secureStorage.saveAccessToken(data.token!);
                 }
 
-                context.read<SessionCubit>().loginSuccess(
-                  sessionCubit.state.userType,
-                );
+                final userType =
+                    widget.authParams.userType ?? UserType.patient;
+                final session = context.read<SessionCubit>();
+                await session.setUserType(userType);
+                await session.loginSuccess(userType);
 
+                if (!context.mounted) return;
                 context.read<BottomNavBarCubit>().changeCurrentScreen(
                   index: 0,
                 );

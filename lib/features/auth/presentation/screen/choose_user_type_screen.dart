@@ -5,12 +5,10 @@ import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/back_button.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
-import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/auth/presentation/widgets/user_type_card_widget.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -135,9 +133,10 @@ class _ChooseUserTypeScreenState extends State<ChooseUserTypeScreen> {
               MyDefaultButton(
                 btnText: 'continue',
                 onPressed: () {
-                  final session = BlocProvider.of<SessionCubit>(context);
-                  session.setUserType(_selectedUserType);
-                  context.pushNamed(Routes.loginScreenRoute);
+                  context.pushNamed(
+                    Routes.loginScreenRoute,
+                    extra: _selectedUserType,
+                  );
                 },
               ),
               Gaps.vGap32,

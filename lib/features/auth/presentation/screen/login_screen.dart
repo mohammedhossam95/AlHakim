@@ -25,7 +25,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final UserType userType;
+
+  const LoginScreen({super.key, required this.userType});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -65,13 +67,20 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleAuthSuccess(AuthModel data, AuthenticateParams params) {
+  Future<void> _handleAuthSuccess(
+    AuthModel data,
+    AuthenticateParams params,
+  ) async {
     if (data.token != null && data.token!.isNotEmpty) {
-      secureStorage.saveAccessToken(data.token!);
+      await secureStorage.saveAccessToken(data.token!);
     }
-    sharedPreferences.saveAuth(data);
+    await sharedPreferences.saveAuth(data);
+    if (!mounted) return;
+    final session = context.read<SessionCubit>();
+    await session.setUserType(widget.userType);
+    await session.loginSuccess(widget.userType);
 
-    context.read<SessionCubit>().loginSuccess(sessionCubit.state.userType);
+    if (!mounted) return;
 
     final isVerified = data.user?.isPhoneVerified == true;
     if (!isVerified) {
@@ -80,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
         extra: AuthParams(
           phoneNumber: params.phoneNumber,
           countryCode: params.countryCode,
-          userType: sessionCubit.state.userType,
+          userType: widget.userType,
         ),
       );
       return;
@@ -223,19 +232,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       Gaps.vGap24,
                       BlocConsumer<LoginCubit, LoginState>(
-                        listener: (context, state) {
+                        listener: (context, state) async {
                           if (state is LoginLoaded) {
                             final data = state.response.data as AuthModel?;
                             if (data == null) return;
-                            //
-                            final userType = context
-                                .read<SessionCubit>()
-                                .state
-                                .userType;
+
                             final loggedUserType = UserTypeMapper.fromRole(
                               data.role ?? '',
                             );
-                            if (userType != loggedUserType) {
+                            if (widget.userType != loggedUserType) {
                               Constants.showSnakToast(
                                 context: context,
                                 type: 3,
@@ -248,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               type: 1,
                               message: state.response.message ?? '',
                             );
-                            _handleAuthSuccess(data, state.params);
+                            await _handleAuthSuccess(data, state.params);
                           } else if (state is LoginError) {
                             Constants.showSnakToast(
                               context: context,
@@ -267,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       Gaps.vGap8,
-                      if (sessionCubit.state.userType == UserType.patient) ...[
+                      if (widget.userType == UserType.patient) ...[
                         Align(
                           alignment: Alignment.centerLeft,
                           child: TextButton(

@@ -440,10 +440,10 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
         hidePrice: hidePrice,
         hideConsultationPrice: hideConsultationPrice,
         password: isMedicalCenterSource
-            ? null
+            ? "12345678"
             : _passwordController.text.trim(),
         passwordConfirmation: isMedicalCenterSource
-            ? null
+            ? "12345678"
             : _confirmPasswordController.text.trim(),
       ),
     );
@@ -1058,8 +1058,10 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                         obscureText: _obscurePassword,
                         validatorType: ValidatorType.password,
                         hintText: "password".tr,
-                        prefixIcon:
-                            Icon(Icons.lock_outline, color: colors.main),
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: colors.main,
+                        ),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -1091,8 +1093,10 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                           }
                           return null;
                         },
-                        prefixIcon:
-                            Icon(Icons.lock_outline, color: colors.main),
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: colors.main,
+                        ),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -1179,7 +1183,8 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                             )
                           : Icon(
                               Icons.location_on_outlined,
-                              color: widget.source ==
+                              color:
+                                  widget.source ==
                                       DoctorFormSource.medicalCenter
                                   ? colors.lightTextColor
                                   : colors.main,

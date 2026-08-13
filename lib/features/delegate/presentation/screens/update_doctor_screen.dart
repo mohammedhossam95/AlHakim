@@ -525,11 +525,13 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         }).toList(),
         secretaryCountryCode: "+${_selectedCountry.phoneCode}",
         clinicCountryCode: "+${_selectedCountry.phoneCode}",
-        password: (_doctor?.medicalCenter != null) ||
+        password:
+            (_doctor?.medicalCenter != null) ||
                 _passwordController.text.trim().isEmpty
             ? null
             : _passwordController.text.trim(),
-        passwordConfirmation: (_doctor?.medicalCenter != null) ||
+        passwordConfirmation:
+            (_doctor?.medicalCenter != null) ||
                 _confirmPasswordController.text.trim().isEmpty
             ? null
             : _confirmPasswordController.text.trim(),
@@ -888,50 +890,51 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                     ),
 
                     Gaps.vGap16,
+                    if (_doctor?.medicalCenter == null) ...[
+                      /// secretary phone
+                      buildLabel("clinic_phone".tr),
 
-                    /// secretary phone
-                    buildLabel("clinic_phone".tr),
+                      Gaps.vGap8,
 
-                    Gaps.vGap8,
-
-                    Row(
-                      children: [
-                        CountryCodeWidget(
-                          country: _selectedCountry,
-                          updateValue: (country) {
-                            setState(() {
-                              _selectedCountry = country;
-                            });
-                          },
-                        ),
-                        Gaps.hGap8,
-                        Expanded(
-                          flex: 5,
-                          child: MyTextFormField(
-                            controller: _secretaryPhoneController,
-
-                            focusNode: _secretaryPhoneFocus,
-
-                            textInputAction: TextInputAction.next,
-
-                            onSubmit: (_) {
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(_whatsappNumberFocus);
+                      Row(
+                        children: [
+                          CountryCodeWidget(
+                            country: _selectedCountry,
+                            updateValue: (country) {
+                              setState(() {
+                                _selectedCountry = country;
+                              });
                             },
+                          ),
+                          Gaps.hGap8,
+                          Expanded(
+                            flex: 5,
+                            child: MyTextFormField(
+                              controller: _secretaryPhoneController,
 
-                            keyboardType: TextInputType.phone,
+                              focusNode: _secretaryPhoneFocus,
 
-                            hintText: "enter_secretary_phone".tr,
+                              textInputAction: TextInputAction.next,
 
-                            prefixIcon: Icon(
-                              Icons.support_agent_outlined,
-                              color: colors.main,
+                              onSubmit: (_) {
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_whatsappNumberFocus);
+                              },
+
+                              keyboardType: TextInputType.phone,
+
+                              hintText: "enter_secretary_phone".tr,
+
+                              prefixIcon: Icon(
+                                Icons.support_agent_outlined,
+                                color: colors.main,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
 
                     Gaps.vGap16,
 
@@ -1203,8 +1206,8 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                         obscureText: _obscurePassword,
                         hintText: "password".tr,
                         validator: (value) {
-                          final confirm =
-                              _confirmPasswordController.text.trim();
+                          final confirm = _confirmPasswordController.text
+                              .trim();
                           if ((value == null || value.isEmpty) &&
                               confirm.isEmpty) {
                             return null;
@@ -1214,8 +1217,10 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                           }
                           return null;
                         },
-                        prefixIcon:
-                            Icon(Icons.lock_outline, color: colors.main),
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: colors.main,
+                        ),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -1252,8 +1257,10 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                           }
                           return null;
                         },
-                        prefixIcon:
-                            Icon(Icons.lock_outline, color: colors.main),
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: colors.main,
+                        ),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -1322,7 +1329,9 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                     MyTextFormField(
                       controller: _locationController,
                       backgroundColor: colors.whiteColor,
-                      onTap: _doctor?.medicalCenter != null ? null : _pickLocation,
+                      onTap: _doctor?.medicalCenter != null
+                          ? null
+                          : _pickLocation,
                       hintText: _isLoadingLocation
                           ? 'Getting location...'
                           : 'select_location'.tr,
@@ -1421,64 +1430,102 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                               Gaps.vGap16,
 
                               /// day
-                              DropdownButtonFormField<int>(
-                                initialValue: item.dayOfWeek,
-
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(
-                                    Icons.calendar_today,
-                                    color: colors.main,
-                                  ),
-
-                                  filled: true,
-
-                                  fillColor: colors.main.withValues(alpha: .05),
-
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16.w,
-                                    vertical: 14.h,
-                                  ),
-
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.r),
-
-                                    borderSide: BorderSide.none,
-                                  ),
-
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.r),
-
-                                    borderSide: BorderSide.none,
-                                  ),
-
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16.r),
-
-                                    borderSide: BorderSide(color: colors.main),
-                                  ),
-                                ),
-
-                                hint: Text(
-                                  "choose_day".tr,
-
-                                  style: TextStyles.medium14(),
-                                ),
-
-                                items: availableDaysFor(index)
-                                    .map(
-                                      (e) => DropdownMenuItem<int>(
-                                        value: e['value'],
-
-                                        child: Text(e['title']),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: DropdownButtonFormField<int>(
+                                      initialValue: item.dayOfWeek,
+                                      isExpanded: true,
+                                      isDense: false,
+                                      style: TextStyles.medium14(
+                                        color: colors.textColor,
                                       ),
-                                    )
-                                    .toList(),
+                                      decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.calendar_today,
+                                          color: colors.main,
+                                        ),
 
-                                onChanged: (value) {
-                                  item.dayOfWeek = value;
+                                        filled: true,
 
-                                  setState(() {});
-                                },
+                                        fillColor: colors.main.withValues(
+                                          alpha: .05,
+                                        ),
+
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 16.w,
+                                          // vertical: 14.h,
+                                        ),
+
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+
+                                          borderSide: BorderSide.none,
+                                        ),
+
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+
+                                          borderSide: BorderSide.none,
+                                        ),
+
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+
+                                          borderSide: BorderSide(
+                                            color: colors.main,
+                                          ),
+                                        ),
+                                      ),
+
+                                      hint: Text(
+                                        "choose_day".tr,
+
+                                        style: TextStyles.medium14(),
+                                      ),
+
+                                      items: availableDaysFor(index)
+                                          .map(
+                                            (e) => DropdownMenuItem<int>(
+                                              value: e['value'],
+
+                                              child: Text(e['title']),
+                                            ),
+                                          )
+                                          .toList(),
+
+                                      onChanged: (value) {
+                                        item.dayOfWeek = value;
+
+                                        setState(() {});
+                                      },
+                                    ),
+                                  ),
+                                  Gaps.hGap8,
+
+                                  /// slot duration
+                                  Expanded(
+                                    child: MyTextFormField(
+                                      controller: item.slotDurationController,
+
+                                      keyboardType: TextInputType.number,
+
+                                      hintText: "slot_duration".tr,
+
+                                      prefixIcon: Icon(
+                                        Icons.timelapse_outlined,
+
+                                        color: colors.main,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
 
                               Gaps.vGap16,
@@ -1509,7 +1556,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                                         ),
                                   ),
 
-                                  Gaps.vGap16,
+                                  Gaps.hGap8,
 
                                   /// end time
                                   Expanded(
@@ -1534,22 +1581,6 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                                     ),
                                   ),
                                 ],
-                              ),
-                              Gaps.vGap16,
-
-                              /// slot duration
-                              MyTextFormField(
-                                controller: item.slotDurationController,
-
-                                keyboardType: TextInputType.number,
-
-                                hintText: "slot_duration".tr,
-
-                                prefixIcon: Icon(
-                                  Icons.timelapse_outlined,
-
-                                  color: colors.main,
-                                ),
                               ),
                             ],
                           ),

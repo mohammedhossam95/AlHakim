@@ -1,18 +1,26 @@
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class DoctorHomeEntity extends Equatable {
   final bool? isClinicOpen;
   final bool? doctorClosedToday;
+  final DoctorEntity? doctor;
   final DoctorStatisticsEntity? statistics;
 
   const DoctorHomeEntity({
     this.isClinicOpen,
     this.doctorClosedToday,
+    this.doctor,
     this.statistics,
   });
 
   @override
-  List<Object?> get props => [isClinicOpen, doctorClosedToday, statistics];
+  List<Object?> get props => [
+    isClinicOpen,
+    doctorClosedToday,
+    doctor,
+    statistics,
+  ];
 }
 
 class DoctorStatisticsEntity extends Equatable {

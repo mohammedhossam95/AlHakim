@@ -454,6 +454,26 @@ class _AppointmentCard extends StatelessWidget {
             ],
           ),
           Gaps.vGap12,
+          // Gaps.vGap12,
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: colors.lightBackGroundColor,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.person, size: 18, color: colors.main),
+                Gaps.hGap8,
+
+                Text(
+                  "${'patient_name'.tr} ${item.patient?.kinship == null ? item.patient?.fullPatientName ?? '' : item.patient?.fullName ?? ''}",
+                  style: TextStyles.medium14(),
+                ),
+              ],
+            ),
+          ),
+          Gaps.vGap12,
           Row(
             children: [
               Expanded(
