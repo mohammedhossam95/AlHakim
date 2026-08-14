@@ -36,7 +36,7 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  NotificationService.instance.initialize();
+  await NotificationService.instance.initialize();
   Bloc.observer = AppBlocObserver();
   dioConsumer.updateDeviceTypeHeader();
   await sharedPreferences.clearSecureStorageOnFreshInstall();

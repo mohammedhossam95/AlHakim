@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
 
-        <!-- FCM default channel (must match NotificationService.kHighImportanceChannelId) -->
+        <!-- FCM default channel (must match NotificationService._channelId = high_importance_channel) -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/high_importance_channel" />

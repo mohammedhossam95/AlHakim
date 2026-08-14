@@ -2,12 +2,24 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:alhakim/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (_) {
+    // Firebase may already be initialized in this isolate.
+  }
+
   await NotificationService.instance.setupFlutterNotifications();
   await NotificationService.instance.showNotification(message);
 }
@@ -18,6 +30,9 @@ class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
+  static const String _channelId = 'high_importance_channel';
+  static const String _legacyChannelId = 'com.sharaftech.alhakim';
+
   final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
   bool _isFlutterLocalNotificationsInitialized = false;
@@ -27,6 +42,12 @@ class NotificationService {
 
     // Request permission
     await _requestPermission();
+
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     // Setup message handlers
     await _setupMessageHandlers();
@@ -39,7 +60,6 @@ class NotificationService {
   }
 
   Future<void> _requestPermission() async {
-  
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
@@ -53,29 +73,41 @@ class NotificationService {
       return;
     }
 
+    final androidPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    // Remove orphaned auto-created FCM channel (old id) before creating the
+    // canonical channel.
+    await androidPlugin?.deleteNotificationChannel(_legacyChannelId);
+
     // android setup
     const channel = AndroidNotificationChannel(
-      'high_importance_channel',
+      _channelId,
       'High Importance Notifications',
       description: 'This channel is used for important notifications.',
       importance: Importance.high,
+      playSound: true,
+      sound: null,
+      enableVibration: true,
     );
 
-    await _localNotifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.createNotificationChannel(channel);
+    await androidPlugin?.createNotificationChannel(channel);
 
     const initializationSettingsAndroid = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
 
-    // ios setup
-    // ignore: prefer_const_constructors
-    final initializationSettingsDarwin = DarwinInitializationSettings();
+    // iOS permissions are requested via FirebaseMessaging.requestPermission.
+    // Keep Darwin request flags false to avoid a second system prompt.
+    const initializationSettingsDarwin = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
 
-    final initializationSettings = InitializationSettings(
+    const initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsDarwin,
     );
@@ -98,36 +130,40 @@ class NotificationService {
       },
     );
 
+    await androidPlugin?.requestNotificationsPermission();
+
     _isFlutterLocalNotificationsInitialized = true;
   }
 
   Future<void> showNotification(RemoteMessage message) async {
-    RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
-    if (notification != null && android != null) {
-      await _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'high_importance_channel',
-            'High Importance Notifications',
-            channelDescription:
-                'This channel is used for important notifications.',
-            importance: Importance.high,
-            priority: Priority.high,
-            icon: '@mipmap/ic_launcher',
-          ),
-          iOS: DarwinNotificationDetails(
-            presentAlert: true,
-            presentBadge: true,
-            presentSound: true,
-          ),
+    final RemoteNotification? notification = message.notification;
+    if (notification == null) return;
+
+    await _localNotifications.show(
+      notification.hashCode,
+      notification.title,
+      notification.body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channelId,
+          'High Importance Notifications',
+          channelDescription:
+              'This channel is used for important notifications.',
+          importance: Importance.high,
+          priority: Priority.high,
+          playSound: true,
+          sound: null,
+          icon: '@mipmap/ic_launcher',
         ),
-        payload: json.encode(message.data),
-      );
-    }
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          presentBanner: true,
+        ),
+      ),
+      payload: json.encode(message.data),
+    );
   }
 
   Future<void> _setupMessageHandlers() async {
@@ -152,7 +188,6 @@ class NotificationService {
 
   void _handleBackgroundMessage(RemoteMessage message) {
     log(message.data.toString());
-    
 
     // int? typeId = int.parse(message.data['type_id'] ?? 0);
     // String? type = message.data['type'];
