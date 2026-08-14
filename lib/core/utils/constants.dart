@@ -330,19 +330,36 @@ class Constants {
     }
   }
 
-  /// Opens WhatsApp chat for [phoneNumber] (digits only, no leading +).
+  /// Opens WhatsApp chat for [phoneNumber] (international digits, with or without +).
+  /// Tries the native scheme first, then https fallbacks — does not rely solely on
+  /// [canLaunchUrl], which returns false on many Android/iOS devices.
   static Future<void> openWhatsApp(String phoneNumber) async {
-    final cleaned = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    var cleaned = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    if (cleaned.startsWith('00')) {
+      cleaned = cleaned.substring(2);
+    }
     if (cleaned.isEmpty) return;
 
-    final Uri launchUri = Uri.parse('https://wa.me/$cleaned');
-    try {
-      if (await canLaunchUrl(launchUri)) {
-        await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+    final candidates = <Uri>[
+      Uri.parse('whatsapp://send?phone=$cleaned'),
+      Uri.parse('https://wa.me/$cleaned'),
+      Uri.parse('https://api.whatsapp.com/send?phone=$cleaned'),
+    ];
+
+    Object? lastError;
+    for (final uri in candidates) {
+      try {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (launched) return;
+      } catch (e) {
+        lastError = e;
       }
-    } catch (e) {
-      throw 'Could not launch $launchUri';
     }
+
+    debugPrint('Could not launch WhatsApp for $cleaned: $lastError');
   }
 
   static picker.Country egyptCountryPicker = picker.Country(

@@ -42,12 +42,19 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   Future<SettingChangePasswordRespModel> settingChangePassword(
     ChangePasswordParams params,
   ) async {
-    String path = '/change-password';
     try {
-      final response = await dioConsumer.post(path, body: params.toJson());
-      return SettingChangePasswordRespModel.fromJson(response);
-    } on ServerException catch (e) {
-      throw ServerException(message: e.message);
+      final response = await dioConsumer.post(
+        '/auth/change-password',
+        formData: FormData.fromMap(params.toJson()),
+      );
+
+      if (response['status'] == true) {
+        return SettingChangePasswordRespModel.fromJson(response);
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } on ServerException {
+      rethrow;
     } catch (e) {
       throw ServerException(message: e.toString());
     }

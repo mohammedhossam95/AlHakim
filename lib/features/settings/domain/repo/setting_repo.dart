@@ -13,7 +13,7 @@ import '/core/params/contact_us_param.dart';
 import '/features/settings/domain/entity/support_phone_response.dart';
 
 abstract class SettingRepo {
-  Future<Either<Failure, BaseOneResponse>> settingChangePassword(
+  Future<Either<Failure, BaseListResponse>> settingChangePassword(
     ChangePasswordParams params,
   );
 

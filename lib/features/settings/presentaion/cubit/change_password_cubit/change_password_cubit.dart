@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '/core/base_classes/base_one_response.dart';
+import '/core/base_classes/base_list_response.dart';
 import '/core/params/change_password_params.dart';
 import '/features/settings/domain/use_case/setting_use_case.dart';
 

@@ -20,14 +20,14 @@ class SettingRemoteRepoImpl extends SettingRepo {
   final SettingRemoteDataSource settingRemoteDataSource;
   SettingRemoteRepoImpl({required this.settingRemoteDataSource});
   @override
-  Future<Either<Failure, BaseOneResponse>> settingChangePassword(
+  Future<Either<Failure, BaseListResponse>> settingChangePassword(
     ChangePasswordParams params,
   ) async {
     try {
       final response = await settingRemoteDataSource.settingChangePassword(
         params,
       );
-      return Right(BaseOneResponse(message: response.message));
+      return Right(response);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {

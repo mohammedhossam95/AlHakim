@@ -8,16 +8,21 @@ abstract class ChangePasswordState extends Equatable {
 }
 
 class ChangePasswordInitialState extends ChangePasswordState {}
+
 class ChangePasswordLoadingState extends ChangePasswordState {}
+
 class ChangePasswordSuccessState extends ChangePasswordState {
-  final BaseOneResponse resp;
+  final BaseListResponse resp;
   const ChangePasswordSuccessState({required this.resp});
+
+  @override
+  List<Object> get props => [resp];
 }
+
 class ChangePasswordErrorState extends ChangePasswordState {
   final String message;
   const ChangePasswordErrorState({required this.message});
+
   @override
   List<Object> get props => [message];
 }
-
-

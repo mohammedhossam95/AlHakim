@@ -78,24 +78,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                     Gaps.vGap16,
-                    if (sessionState.status == SessionStatus.authenticated &&
-                        sessionCubit.state.userType == UserType.patient) ...[
+
+                    if (sessionState.status == SessionStatus.authenticated) ...[
                       _buildSectionCard(
                         child: Column(
                           children: [
+                            if (sessionCubit.state.userType ==
+                                UserType.patient) ...[
+                              ProfileWidet(
+                                title: 'tapBarItemMyAccount'.tr,
+                                icon: SvgAssets.editProfileIcon,
+                                onTap: () {
+                                  context.push(Routes.editProfileScreenRoute);
+                                },
+                              ),
+                              ProfileWidet(
+                                title: 'family_members'.tr,
+                                icon: SvgAssets.familyIcon,
+                                onTap: () {
+                                  context.push(Routes.familyMembersScreenRoute);
+                                },
+                              ),
+                            ],
                             ProfileWidet(
-                              title: 'tapBarItemMyAccount'.tr,
-                              icon: SvgAssets.editProfileIcon,
+                              title: 'changePassword'.tr,
+                              icon: SvgAssets.lock,
                               onTap: () {
-                                context.push(Routes.editProfileScreenRoute);
-                              },
-                            ),
-
-                            ProfileWidet(
-                              title: 'family_members'.tr,
-                              icon: SvgAssets.familyIcon,
-                              onTap: () {
-                                context.push(Routes.familyMembersScreenRoute);
+                                context.push(Routes.changePasswordScreenRoute);
                               },
                             ),
                           ],

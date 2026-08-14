@@ -18,7 +18,44 @@ mixin DoctorContactHelpers {
         doctor.medicalCenter?.countryCode ??
         '20';
     final phone = doctor.secretaryPhone ?? doctor.medicalCenter?.phone ?? '';
-    return '$countryCode$phone';
+    return _composeInternationalPhone(countryCode: countryCode, phone: phone);
+  }
+
+  /// Prefer dedicated WhatsApp fields; fall back to clinic contact phone.
+  String get whatsappPhone {
+    final countryCode =
+        doctor.whatsappCountryCode ??
+        doctor.secretaryCountryCode ??
+        doctor.medicalCenter?.countryCode ??
+        '20';
+    final phone =
+        doctor.whatsappNumber ??
+        doctor.secretaryPhone ??
+        doctor.medicalCenter?.phone ??
+        '';
+    return _composeInternationalPhone(countryCode: countryCode, phone: phone);
+  }
+
+  /// Builds E.164-style digits for wa.me (no +, no leading 0 on national number).
+  String _composeInternationalPhone({
+    required String countryCode,
+    required String phone,
+  }) {
+    final codeDigits = countryCode.replaceAll(RegExp(r'[^\d]'), '');
+    var phoneDigits = phone.replaceAll(RegExp(r'[^\d]'), '');
+    if (phoneDigits.isEmpty) return '';
+
+    // Already includes country code (e.g. 2010xxxxxxxx).
+    if (codeDigits.isNotEmpty && phoneDigits.startsWith(codeDigits)) {
+      return phoneDigits;
+    }
+
+    // Strip national trunk prefix (e.g. 010... → 10...).
+    if (phoneDigits.startsWith('0')) {
+      phoneDigits = phoneDigits.substring(1);
+    }
+
+    return '$codeDigits$phoneDigits';
   }
 
   (double, double)? get mapCoordinates {
@@ -45,7 +82,7 @@ mixin DoctorContactHelpers {
   }
 
   Future<void> openWhatsApp() async {
-    await Constants.openWhatsApp(contactPhone);
+    await Constants.openWhatsApp(whatsappPhone);
   }
 
   Future<void> callDoctor() async {
