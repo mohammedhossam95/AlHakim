@@ -134,9 +134,19 @@ class _MainPageState extends State<MainPage> {
     if (sessionState.doctorAccountMode == DoctorAccountMode.medicalCenter &&
         sessionState.activeDoctorId == null) {
       return [
-        BlocProvider(
-          create: (_) =>
-              ServiceLocator.instance<GetMedicalCenterDoctorsCubit>(),
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) =>
+                  ServiceLocator.instance<GetMedicalCenterDoctorsCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<DeleteDoctorCubit>(),
+            ),
+            BlocProvider(
+              create: (_) => ServiceLocator.instance<ToggelDoctorStatusCubit>(),
+            ),
+          ],
           child: const MedicalCenterDoctorsSelectionScreen(),
         ),
         settingsTab,

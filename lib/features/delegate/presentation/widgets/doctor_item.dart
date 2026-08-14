@@ -16,13 +16,24 @@ class DoctorItem extends StatelessWidget {
   final DoctorEntity doctor;
   final VoidCallback? onTap;
   final bool showActions;
+  /// Called after a successful edit/delete/toggle when not using [GetDoctorsCubit].
+  final VoidCallback? onRefresh;
 
   const DoctorItem({
     super.key,
     required this.doctor,
     this.onTap,
     this.showActions = true,
+    this.onRefresh,
   });
+
+  void _refresh(BuildContext context) {
+    if (onRefresh != null) {
+      onRefresh!();
+      return;
+    }
+    context.read<GetDoctorsCubit>().getDoctors();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +65,7 @@ class DoctorItem extends StatelessWidget {
 
               if (result == true) {
                 if (!context.mounted) return;
-                context.read<GetDoctorsCubit>().getDoctors();
+                _refresh(context);
               }
             }
           : null,

@@ -1,13 +1,16 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/params/add_doctor_screen_args.dart';
+import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/widgets/doctor_item.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_medical_center_doctors_cubit/get_medical_center_doctors_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/toggel_doctor_status/toggel_doctor_status_cubit.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -31,17 +34,20 @@ class _MedicalCenterDoctorsSelectionScreenState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
-      final medicalCenterProfile = context
-          .read<SessionCubit>()
-          .state
-          .userProfile;
-      if (medicalCenterProfile?.id == null) return;
-
-      context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
-        int.parse(medicalCenterProfile?.id ?? '0'),
-      );
+      _refreshDoctors();
     });
+  }
+
+  void _refreshDoctors() {
+    final medicalCenterProfile = context
+        .read<SessionCubit>()
+        .state
+        .userProfile;
+    if (medicalCenterProfile?.id == null) return;
+
+    context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
+      int.parse(medicalCenterProfile!.id!),
+    );
   }
 
   Future<void> _openAddDoctorScreen() async {
@@ -58,11 +64,7 @@ class _MedicalCenterDoctorsSelectionScreenState
 
     if (result == true) {
       if (!mounted) return;
-      final profileId = medicalCenterProfile.id;
-      if (profileId == null) return;
-      context.read<GetMedicalCenterDoctorsCubit>().getMedicalCenterDoctors(
-        int.parse(profileId),
-      );
+      _refreshDoctors();
     }
   }
 
@@ -78,62 +80,115 @@ class _MedicalCenterDoctorsSelectionScreenState
         onPressed: _openAddDoctorScreen,
         child: const Icon(Icons.add),
       ),
-      body:
-          BlocBuilder<
-            GetMedicalCenterDoctorsCubit,
-            GetMedicalCenterDoctorsState
-          >(
-            builder: (context, state) {
-              if (state is GetMedicalCenterDoctorsLoading) {
-                return const Center(child: CircularProgressIndicator());
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<DeleteDoctorCubit, DeleteDoctorState>(
+            listener: (context, state) {
+              if (state is DeleteDoctorLoading) {
+                Constants.showLoading(context);
               }
-
-              if (state is GetMedicalCenterDoctorsError) {
-                return Center(
-                  child: ErrorText(
-                    width: ScreenUtil().screenWidth,
-                    text: state.message,
-                  ),
+              if (state is DeleteDoctorSuccess) {
+                _refreshDoctors();
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.response.message,
+                  type: 1,
                 );
               }
+              if (state is DeleteDoctorError) {
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.message,
+                  type: 3,
+                );
+              }
+            },
+          ),
+          BlocListener<ToggelDoctorStatusCubit, ToggelDoctorStatusState>(
+            listener: (context, state) {
+              if (state is ToggleDoctorStatusLoading) {
+                Constants.showLoading(context);
+              }
+              if (state is ToggleDoctorStatusSuccess) {
+                _refreshDoctors();
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.response.message,
+                  type: 1,
+                );
+              }
+              if (state is ToggleDoctorStatusError) {
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  message: state.message,
+                  type: 3,
+                );
+              }
+            },
+          ),
+        ],
+        child:
+            BlocBuilder<
+              GetMedicalCenterDoctorsCubit,
+              GetMedicalCenterDoctorsState
+            >(
+              builder: (context, state) {
+                if (state is GetMedicalCenterDoctorsLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              if (state is GetMedicalCenterDoctorsSuccess) {
-                final doctors = state.response.data as List<DoctorEntity>;
-
-                if (doctors.isEmpty) {
+                if (state is GetMedicalCenterDoctorsError) {
                   return Center(
                     child: ErrorText(
                       width: ScreenUtil().screenWidth,
-                      text: "no_registered_doctors".tr,
+                      text: state.message,
                     ),
                   );
                 }
 
-                return ListView.separated(
-                  padding: EdgeInsets.all(16.w),
-                  itemCount: doctors.length,
-                  separatorBuilder: (_, _) => Gaps.vGap18,
-                  itemBuilder: (context, index) {
-                    final doctor = doctors[index];
-                    return DoctorItem(
-                      doctor: doctor,
-                      showActions: true,
-                      onTap: () {
-                        context
-                            .read<SessionCubit>()
-                            .selectDoctorForMedicalCenter(doctor);
-                        context.read<BottomNavBarCubit>().changeCurrentScreen(
-                          index: 0,
-                        );
-                      },
-                    );
-                  },
-                );
-              }
+                if (state is GetMedicalCenterDoctorsSuccess) {
+                  final doctors = state.response.data as List<DoctorEntity>;
 
-              return const SizedBox.shrink();
-            },
-          ),
+                  if (doctors.isEmpty) {
+                    return Center(
+                      child: ErrorText(
+                        width: ScreenUtil().screenWidth,
+                        text: "no_registered_doctors".tr,
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: EdgeInsets.all(16.w),
+                    itemCount: doctors.length,
+                    separatorBuilder: (_, _) => Gaps.vGap18,
+                    itemBuilder: (context, index) {
+                      final doctor = doctors[index];
+                      return DoctorItem(
+                        doctor: doctor,
+                        showActions: true,
+                        onRefresh: _refreshDoctors,
+                        onTap: () {
+                          context
+                              .read<SessionCubit>()
+                              .selectDoctorForMedicalCenter(doctor);
+                          context.read<BottomNavBarCubit>().changeCurrentScreen(
+                            index: 0,
+                          );
+                        },
+                      );
+                    },
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+            ),
+      ),
     );
   }
 }
