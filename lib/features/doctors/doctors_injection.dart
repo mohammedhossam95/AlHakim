@@ -22,7 +22,7 @@ import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/c
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/delete_doctor/delete_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/delete_schedule_cubit/delete_schedule_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_affected_appoinments_cubit/get_affected_appoinments_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctors_cubit/get_doctors_cubit.dart';
@@ -51,7 +51,7 @@ Future<void> initDoctorsFeatureInjection() async {
   _sl.registerFactory(() => DeleteDoctorCubit(usecase: _sl()));
   _sl.registerFactory(() => ToggelDoctorStatusCubit(usecase: _sl()));
   _sl.registerFactory(() => ToggleClinicCubit(usecase: _sl()));
-  _sl.registerFactory(() => GetDoctorAppoinmentsForDayCubit(usecase: _sl()));
+  _sl.registerFactory(() => GetAffectedAppoinmentsCubit(usecase: _sl()));
   _sl.registerFactory(() => RescheduleCubit(usecase: _sl()));
   _sl.registerFactory(() => DeleteScheduleCubit(usecase: _sl()));
   _sl.registerFactory(() => UpdateScheduleStatusCubit(usecase: _sl()));
@@ -59,7 +59,7 @@ Future<void> initDoctorsFeatureInjection() async {
   /// usecase
 
   _sl.registerLazySingleton(
-    () => GetDoctorAppoinmentsForDayUsecase(repository: _sl()),
+    () => GetAffectedAppoinmentsUsecase(repository: _sl()),
   );
   _sl.registerLazySingleton(
     () => GetMedicalCenterDoctorsUsecase(repository: _sl()),

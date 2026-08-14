@@ -13,7 +13,7 @@ import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/domain/usecases/params/close_clinic_params.dart';
 import 'package:alhakim/features/doctors/domain/usecases/params/update_schedule_status_params.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/close_clinic_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_affected_appoinments_cubit/get_affected_appoinments_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/update_schedule_status_cubit/update_schedule_status_cubit.dart';
@@ -106,15 +106,14 @@ class _RescheduleAppointmentsScreenState
   }
 
   bool _isScheduleFull(AvailableBookingDate selectedDate) {
-    return selectedDate.schedule.scheduleStatus?.toLowerCase().trim() ==
-        'full';
+    return selectedDate.schedule.scheduleStatus?.toLowerCase().trim() == 'full';
   }
 
   void _getAppointments(AvailableBookingDate date) {
     final doctorId = context.read<SessionCubit>().state.activeDoctorId;
     if (doctorId == null || doctorId.isEmpty) return;
 
-    context.read<GetDoctorAppoinmentsForDayCubit>().getDoctorAppoinmentsForDay(
+    context.read<GetAffectedAppoinmentsCubit>().getAffectedAppoinments(
       params: AppoinmentsParams(
         doctorId: doctorId,
 
@@ -354,8 +353,10 @@ class _RescheduleAppointmentsScreenState
                 message: state.response.message ?? '',
               );
 
-              final doctorId =
-                  context.read<SessionCubit>().state.activeDoctorId;
+              final doctorId = context
+                  .read<SessionCubit>()
+                  .state
+                  .activeDoctorId;
               if (doctorId != null && doctorId.isNotEmpty) {
                 context.read<GetDoctorByIdCubit>().getDoctorById(doctorId);
               }
@@ -797,25 +798,24 @@ class _RescheduleAppointmentsScreenState
 
                     child:
                         BlocBuilder<
-                          GetDoctorAppoinmentsForDayCubit,
-                          GetDoctorAppoinmentsForDayState
+                          GetAffectedAppoinmentsCubit,
+                          GetAffectedAppoinmentsState
                         >(
                           builder: (context, state) {
-                            if (state is GetDoctorAppoinmentsForDayLoading) {
+                            if (state is GetAffectedAppoinmentsLoading) {
                               return _buildShimmer();
                             }
 
-                            if (state is GetDoctorAppoinmentsForDayError) {
+                            if (state is GetAffectedAppoinmentsError) {
                               return Center(child: Text(state.message));
                             }
 
-                            List<DoctorAppoinmentsForDayEntity> appointments =
-                                [];
+                            List<AffectedAppoinmentsEntity> appointments = [];
 
-                            if (state is GetDoctorAppoinmentsForDaySuccess) {
+                            if (state is GetAffectedAppoinmentsSuccess) {
                               appointments =
                                   state.response.data
-                                      as List<DoctorAppoinmentsForDayEntity>;
+                                      as List<AffectedAppoinmentsEntity>;
                             }
 
                             return Column(
@@ -824,32 +824,23 @@ class _RescheduleAppointmentsScreenState
                                   children: [
                                     Text(
                                       "affected_periods".tr,
-
                                       style: TextStyles.semiBold18(),
                                     ),
-
                                     Gaps.hGap8,
-
                                     Icon(
                                       Icons.warning_rounded,
-
                                       color: colors.errorColor,
                                     ),
-
                                     const Spacer(),
-
                                     Container(
                                       padding: EdgeInsets.symmetric(
                                         horizontal: 10.w,
-
                                         vertical: 6.h,
                                       ),
-
                                       decoration: BoxDecoration(
                                         color: colors.errorColor.withValues(
                                           alpha: .12,
                                         ),
-
                                         borderRadius: BorderRadius.circular(
                                           20.r,
                                         ),
@@ -857,7 +848,6 @@ class _RescheduleAppointmentsScreenState
 
                                       child: Text(
                                         "${"appointments".tr}: ${appointments.length}",
-
                                         style: TextStyles.medium12(
                                           color: colors.errorColor,
                                         ),
@@ -865,39 +855,28 @@ class _RescheduleAppointmentsScreenState
                                     ),
                                   ],
                                 ),
-
                                 Gaps.vGap20,
-
                                 if (appointments.isEmpty)
                                   Padding(
                                     padding: EdgeInsets.symmetric(
                                       vertical: 30.h,
                                     ),
-
                                     child: Text(
                                       "no_appointments".tr,
-
                                       style: TextStyles.medium14(),
                                     ),
                                   ),
-
                                 if (appointments.isNotEmpty)
                                   ListView.separated(
                                     shrinkWrap: true,
-
                                     physics:
                                         const NeverScrollableScrollPhysics(),
-
                                     itemCount: appointments.length,
-
                                     separatorBuilder: (_, _) => Gaps.vGap12,
-
                                     itemBuilder: (context, index) {
                                       final item = appointments[index];
-
                                       return Container(
                                         padding: EdgeInsets.all(14.w),
-
                                         decoration: BoxDecoration(
                                           color: colors.whiteColor,
 

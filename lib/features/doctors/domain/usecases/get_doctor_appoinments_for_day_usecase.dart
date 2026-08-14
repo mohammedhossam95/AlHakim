@@ -5,11 +5,11 @@ import 'package:alhakim/core/usecases/usecase.dart';
 import 'package:alhakim/features/doctors/domain/repositories/doctor_repository.dart';
 import 'package:dartz/dartz.dart';
 
-class GetDoctorAppoinmentsForDayUsecase
+class GetAffectedAppoinmentsUsecase
     implements UseCase<BaseListResponse, AppoinmentsParams> {
   final DoctorRepository repository;
 
-  GetDoctorAppoinmentsForDayUsecase({required this.repository});
+  GetAffectedAppoinmentsUsecase({required this.repository});
 
   @override
   Future<Either<Failure, BaseListResponse>> call(AppoinmentsParams params) {

@@ -49,7 +49,7 @@ import 'package:alhakim/features/doctors/data/models/doctor_model.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/add_doctor_cubit/add_doctor_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_cubit/close_clinic_cubit.dart';
-import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_appoinments_for_day_cubit/get_doctor_appoinments_for_day_cubit.dart';
+import 'package:alhakim/features/doctors/presentation/cubit/get_affected_appoinments_cubit/get_affected_appoinments_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/reschedule_cubit/reschedule_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/search_doctors_cubit/search_doctors_cubit.dart';
@@ -90,6 +90,7 @@ import '../../features/notifications/presentation/screens/notification_screen.da
 import '../../features/settings/presentaion/cubit/get_user_profile_cubit/get_user_profile_cubit.dart';
 import '../../features/settings/presentaion/screens/change_password_screen.dart';
 import '../../features/settings/presentaion/screens/contact_us_screen.dart';
+import '../../features/settings/presentaion/screens/emergency_categories_screen.dart';
 import '../../features/settings/presentaion/screens/emergency_screen.dart';
 import '../../features/tabbar/presentation/screens/main_page.dart';
 
@@ -129,6 +130,8 @@ abstract class Routes {
   static const String favoritesScreenRoute = '/favoritesScreen';
   static const String userProfileScreenRoute = '/userProfileScreen';
   static const String emergencyScreenRoute = '/emergencyScreen';
+  static const String emergencyCategoriesScreenRoute =
+      '/emergencyCategoriesScreen';
   static const String specialitiesScreenRoute = '/specialitiesScreen';
   static const String doctorsListScreenRoute = '/doctorsListScreen';
   static const String searchDoctorsScreenRoute = '/searchDoctorsScreen';
@@ -161,19 +164,36 @@ abstract class Routes {
     observers: [routeObserver],
     routes: [
       GoRoute(
-        name: emergencyScreenRoute,
-        path: emergencyScreenRoute,
-
+        name: emergencyCategoriesScreenRoute,
+        path: emergencyCategoriesScreenRoute,
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider(create: (_) => sl<GetHospitalEmergencyCubit>()),
-              BlocProvider(create: (_) => sl<GetEmergencyCategoriesCubit>()),
-            ],
-            child: const EmergencyScreen(isInTabBar: false),
+          child: BlocProvider(
+            create: (_) => sl<GetEmergencyCategoriesCubit>(),
+            child: const EmergencyCategoriesScreen(isInTabBar: false),
           ),
         ),
+      ),
+      GoRoute(
+        name: emergencyScreenRoute,
+        path: emergencyScreenRoute,
+        pageBuilder: (context, state) {
+          final args = state.extra as Map<String, dynamic>?;
+          final categoryId = args?['categoryId'] as int?;
+          final categoryName = args?['categoryName'] as String?;
+
+          return buildAdaptivePage(
+            state: state,
+            child: BlocProvider(
+              create: (_) => sl<GetHospitalEmergencyCubit>(),
+              child: EmergencyScreen(
+                isInTabBar: false,
+                categoryId: categoryId,
+                categoryName: categoryName,
+              ),
+            ),
+          );
+        },
       ),
       GoRoute(
         name: patientOffersRoute,
@@ -362,7 +382,7 @@ abstract class Routes {
         builder: (context, state) => MultiBlocProvider(
           providers: [
             BlocProvider(
-              create: (context) => sl<GetDoctorAppoinmentsForDayCubit>(),
+              create: (context) => sl<GetAffectedAppoinmentsCubit>(),
             ),
             BlocProvider(create: (context) => sl<RescheduleCubit>()),
             BlocProvider(create: (context) => sl<CloseClinicCubit>()),

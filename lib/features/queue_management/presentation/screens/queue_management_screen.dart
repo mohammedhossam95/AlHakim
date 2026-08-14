@@ -37,7 +37,7 @@ final Map<BookingStatus, List<BookingAction>> allowedActions = {
   BookingStatus.arrived: [BookingAction.examine, BookingAction.cancel],
   BookingStatus.inExamination: [BookingAction.finish],
   BookingStatus.finished: [],
-  BookingStatus.rescheduled: [],
+  BookingStatus.rescheduled: [BookingAction.arrive, BookingAction.cancel],
   BookingStatus.cancelled: [],
 };
 

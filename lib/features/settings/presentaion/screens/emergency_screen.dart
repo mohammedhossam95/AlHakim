@@ -1,16 +1,14 @@
 import 'dart:async';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/shimmer/hospital_emergency_shimmer.dart';
-import 'package:alhakim/features/settings/domain/entity/emergency_category_entity.dart';
 import 'package:alhakim/features/settings/domain/entity/hospital_emergency_entity.dart';
-import 'package:alhakim/features/settings/presentaion/cubit/get_emergency_categories_cubit/get_emergency_categories_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/get_hospital_emergency_cubit/get_hospital_emergency_cubit.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/custom_app_bar.dart';
-import 'package:alhakim/features/settings/presentaion/widgets/emergency_categories_list.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/hospital_emergency_card.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -19,66 +17,112 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class EmergencyScreen extends StatefulWidget {
   final bool isInTabBar;
-  const EmergencyScreen({super.key, this.isInTabBar = false});
+  final int? categoryId;
+  final String? categoryName;
+
+  const EmergencyScreen({
+    super.key,
+    this.isInTabBar = false,
+    this.categoryId,
+    this.categoryName,
+  });
 
   @override
   State<EmergencyScreen> createState() => _EmergencyScreenState();
 }
 
 class _EmergencyScreenState extends State<EmergencyScreen> {
-  int? _selectedCategoryId;
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
+  Completer<void>? _refreshCompleter;
+  StreamSubscription<GetHospitalEmergencyState>? _refreshSubscription;
 
   @override
   void initState() {
     super.initState();
-    context.read<GetEmergencyCategoriesCubit>().getEmergencyCategories();
     _fetchHospitals();
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _refreshSubscription?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _fetchHospitals({int? categoryId, String? hospitalName}) {
+  String? _normalizedHospitalName([String? value]) {
+    final q = (value ?? _searchController.text).trim();
+    return q.isEmpty ? null : q;
+  }
+
+  bool get _hasActiveSearch => _normalizedHospitalName() != null;
+
+  void _fetchHospitals({String? hospitalName}) {
     context.read<GetHospitalEmergencyCubit>().getHospitalEmergencyNumbers(
-      categoryId: categoryId,
-      hospitalName: hospitalName,
+      categoryId: widget.categoryId,
+      hospitalName: _normalizedHospitalName(hospitalName),
     );
   }
 
   void _onSearchChanged(String? value) {
+    setState(() {});
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 450), () {
-      _fetchHospitals(
-        categoryId: _selectedCategoryId,
-        hospitalName: (value ?? '').trim(),
-      );
+      _fetchHospitals(hospitalName: value);
     });
   }
 
-  void _onCategorySelected(int? categoryId) {
-    if (_selectedCategoryId == categoryId) return;
-    setState(() => _selectedCategoryId = categoryId);
-    _fetchHospitals(
-      categoryId: categoryId,
-      hospitalName: _searchController.text.trim(),
-    );
+  void _onSearchSubmitted(String value) {
+    _debounce?.cancel();
+    _fetchHospitals(hospitalName: value);
   }
 
-  List<EmergencyCategoryEntity> _activeCategories(
-    GetEmergencyCategoriesState state,
-  ) {
-    if (state is! GetEmergencyCategoriesSuccess) return [];
+  void _clearSearch() {
+    _debounce?.cancel();
+    _searchController.clear();
+    setState(() {});
+    _fetchHospitals();
+  }
 
-    return (state.response.data ?? [])
-        .whereType<EmergencyCategoryEntity>()
-        .where((e) => e.isActive != false)
-        .toList();
+  Future<void> _onRefresh() {
+    _refreshSubscription?.cancel();
+    _refreshCompleter = Completer<void>();
+
+    _refreshSubscription = context
+        .read<GetHospitalEmergencyCubit>()
+        .stream
+        .listen((state) {
+          if (state is GetHospitalEmergencySuccess ||
+              state is GetHospitalEmergencyError) {
+            if (!(_refreshCompleter?.isCompleted ?? true)) {
+              _refreshCompleter?.complete();
+            }
+            _refreshSubscription?.cancel();
+            _refreshSubscription = null;
+          }
+        });
+
+    _fetchHospitals();
+    return _refreshCompleter!.future;
+  }
+
+  Widget _buildRefreshableMessage({required Widget child}) {
+    return RefreshIndicator(
+      color: colors.main,
+      onRefresh: _onRefresh,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: Center(child: child),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -92,7 +136,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               child: CustomAppBar(
-                title: 'emergency'.tr,
+                title: widget.categoryName ?? 'emergency'.tr,
                 isInTabBar: widget.isInTabBar,
               ),
             ),
@@ -116,55 +160,21 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                   backgroundColor: colors.whiteColor,
                   hintText: 'searchForPlace'.tr,
                   prefixIcon: Icon(Icons.search, color: colors.main),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          onPressed: _clearSearch,
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: colors.lightTextColor,
+                          ),
+                        )
+                      : null,
                   textInputAction: TextInputAction.search,
                   onChanged: _onSearchChanged,
+                  onSubmit: _onSearchSubmitted,
                 ),
               ),
             ),
-            Gaps.vGap12,
-            BlocBuilder<
-              GetEmergencyCategoriesCubit,
-              GetEmergencyCategoriesState
-            >(
-              builder: (context, state) {
-                if (state is GetEmergencyCategoriesLoading ||
-                    state is GetEmergencyCategoriesInitial) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: SizedBox(
-                      height: 44.h,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 4,
-                        separatorBuilder: (_, _) => SizedBox(width: 8.w),
-                        itemBuilder: (_, _) => Container(
-                          width: 90.w,
-                          decoration: BoxDecoration(
-                            color: colors.whiteColor,
-                            borderRadius: BorderRadius.circular(24.r),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                if (state is GetEmergencyCategoriesError) {
-                  return EmergencyCategoriesList(
-                    categories: const [],
-                    selectedCategoryId: _selectedCategoryId,
-                    onCategorySelected: _onCategorySelected,
-                  );
-                }
-
-                return EmergencyCategoriesList(
-                  categories: _activeCategories(state),
-                  selectedCategoryId: _selectedCategoryId,
-                  onCategorySelected: _onCategorySelected,
-                );
-              },
-            ),
-
             Gaps.vGap20,
             Expanded(
               child:
@@ -179,16 +189,11 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                       }
 
                       if (state is GetHospitalEmergencyError) {
-                        return Center(
+                        return _buildRefreshableMessage(
                           child: ErrorText(
                             width: 300.w,
                             text: state.message,
-                            onRetry: () {
-                              _fetchHospitals(
-                                categoryId: _selectedCategoryId,
-                                hospitalName: _searchController.text.trim(),
-                              );
-                            },
+                            onRetry: () => _fetchHospitals(),
                           ),
                         );
                       }
@@ -200,23 +205,25 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                           : <HospitalEmergencyEntity>[];
 
                       if (items.isEmpty) {
-                        return Center(
-                          child: ErrorText(
-                            width: 300.w,
-                            text: 'no_hospitals_found'.tr,
+                        return _buildRefreshableMessage(
+                          child: Text(
+                            (_hasActiveSearch
+                                    ? 'no_search_results'
+                                    : 'no_hospitals_found')
+                                .tr,
+                            style: TextStyles.medium16(
+                              color: colors.lightTextColor,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         );
                       }
 
                       return RefreshIndicator(
                         color: colors.main,
-                        onRefresh: () async {
-                          _fetchHospitals(
-                            categoryId: _selectedCategoryId,
-                            hospitalName: _searchController.text.trim(),
-                          );
-                        },
+                        onRefresh: _onRefresh,
                         child: ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 24.h),
                           itemCount: items.length,
                           separatorBuilder: (_, _) => Gaps.vGap16,

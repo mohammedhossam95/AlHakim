@@ -433,7 +433,7 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         formData.fields.add(
           MapEntry("whatsapp_country_code", params.whatsappCountryCode!),
         );
-      } 
+      }
       if (params.whatsappNumber != null) {
         formData.fields.add(
           MapEntry("whatsapp_number", params.whatsappNumber!),
@@ -686,7 +686,7 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
   }) async {
     try {
       final response = await dioConsumer.get(
-        '/doctors/${params.doctorId}/appointments',
+        '/doctors/${params.doctorId}/affected-appointments',
 
         queryParameters: {"date": params.appointmentDate},
       );

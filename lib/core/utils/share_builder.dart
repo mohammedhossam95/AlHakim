@@ -3,9 +3,23 @@ import 'dart:io';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/settings/domain/entity/hospital_emergency_entity.dart';
+import 'package:flutter/material.dart';
 
 class ShareTextBuilder {
   ShareTextBuilder._();
+
+  /// Required on iOS/iPad for the share sheet popover anchor.
+  static Rect sharePositionOrigin(BuildContext context) {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box != null && box.hasSize) {
+      final size = box.size;
+      if (size.width > 0 && size.height > 0) {
+        return box.localToGlobal(Offset.zero) & size;
+      }
+    }
+    final media = MediaQuery.sizeOf(context);
+    return Rect.fromLTWH(media.width / 2, media.height / 2, 1, 1);
+  }
 
   /// بناء نص مشاركة بيانات الدكتور
   static String buildDoctorShareText(DoctorEntity doctor) {

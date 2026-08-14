@@ -28,8 +28,7 @@ import 'package:alhakim/features/queue_management/presentation/cubit/notify_exam
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/screens/queue_management_screen.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/get_emergency_categories_cubit/get_emergency_categories_cubit.dart';
-import 'package:alhakim/features/settings/presentaion/cubit/get_hospital_emergency_cubit/get_hospital_emergency_cubit.dart';
-import 'package:alhakim/features/settings/presentaion/screens/emergency_screen.dart';
+import 'package:alhakim/features/settings/presentaion/screens/emergency_categories_screen.dart';
 import 'package:alhakim/features/settings/presentaion/screens/settings_screen.dart';
 import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
 import 'package:alhakim/features/specialities/presentation/screens/specialities_screen.dart';
@@ -119,18 +118,10 @@ class _MainPageState extends State<MainPage> {
           ],
           child: const AppointmentsScreen(),
         ),
-        MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (_) =>
-                  ServiceLocator.instance<GetHospitalEmergencyCubit>(),
-            ),
-            BlocProvider(
-              create: (context) =>
-                  ServiceLocator.instance<GetEmergencyCategoriesCubit>(),
-            ),
-          ],
-          child: const EmergencyScreen(isInTabBar: true),
+        BlocProvider(
+          create: (context) =>
+              ServiceLocator.instance<GetEmergencyCategoriesCubit>(),
+          child: const EmergencyCategoriesScreen(isInTabBar: true),
         ),
 
         settingsTab,

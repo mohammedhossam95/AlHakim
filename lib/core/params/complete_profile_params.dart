@@ -7,7 +7,6 @@ class CompleteProfileParams extends Equatable {
   final String? tall;
   final String? weight;
   final String? bloodType;
-  final String? gender;
   final String? location;
 
   const CompleteProfileParams({
@@ -17,7 +16,6 @@ class CompleteProfileParams extends Equatable {
     this.tall,
     this.weight,
     this.bloodType,
-    this.gender,
     this.location,
   });
 
@@ -48,10 +46,6 @@ class CompleteProfileParams extends Equatable {
       data['blood_type'] = bloodType;
     }
 
-    if (gender != null) {
-      data['gender'] = gender;
-    }
-
     if (location != null) {
       data['location'] = location;
     }
@@ -67,7 +61,6 @@ class CompleteProfileParams extends Equatable {
     tall,
     weight,
     bloodType,
-    gender,
     location,
   ];
 }

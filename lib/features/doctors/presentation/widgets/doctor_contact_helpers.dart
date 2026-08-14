@@ -2,6 +2,7 @@ import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/share_builder.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/injection_container.dart';
+import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 mixin DoctorContactHelpers {
@@ -51,11 +52,12 @@ mixin DoctorContactHelpers {
     await Constants.makePhoneCall(contactPhone);
   }
 
-  Future<void> shareDoctor() async {
+  Future<void> shareDoctor(BuildContext context) async {
     await SharePlus.instance.share(
       ShareParams(
         text: ShareTextBuilder.buildDoctorShareText(doctor),
         subject: 'مشاركة بيانات دكتور - تطبيق الحكيم',
+        sharePositionOrigin: ShareTextBuilder.sharePositionOrigin(context),
       ),
     );
   }

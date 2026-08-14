@@ -37,7 +37,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     'pending_reschedule',
   };
 
-  static const _previousStatuses = {'completed', 'cancelled'};
+  static const _previousStatuses = {
+    'completed',
+    'cancelled',
+    'cancelled_by_doctor',
+  };
 
   /// Patient appointments tab index in [MainPage].
   static const _appointmentsTabIndex = 1;
@@ -333,6 +337,11 @@ class _AppointmentStatusStyle {
       case 'cancelled':
         return _AppointmentStatusStyle(
           label: 'cancelled'.tr,
+          color: colors.errorColor,
+        );
+      case 'cancelled_by_doctor':
+        return _AppointmentStatusStyle(
+          label: 'cancelled_by_doctor'.tr,
           color: colors.errorColor,
         );
       default:

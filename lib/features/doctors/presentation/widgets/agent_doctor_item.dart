@@ -211,7 +211,7 @@ class AgentDoctorItem extends StatelessWidget with DoctorContactHelpers {
                   child: DoctorActionButton(
                     svgAsset: SvgAssets.shareApp,
                     label: 'share'.tr,
-                    onTap: shareDoctor,
+                    onTap: () => shareDoctor(context),
                   ),
                 ),
               ],

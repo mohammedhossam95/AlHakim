@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class DoctorAppoinmentsForDayEntity extends Equatable {
+class AffectedAppoinmentsEntity extends Equatable {
   final int? id;
   final String? appointmentDate;
   final String? status;
@@ -9,7 +9,7 @@ class DoctorAppoinmentsForDayEntity extends Equatable {
   final DoctorAppoinmentsForDayUserEntity? bookedBy;
   final String? createdAt;
 
-  const DoctorAppoinmentsForDayEntity({
+  const AffectedAppoinmentsEntity({
     this.id,
     this.appointmentDate,
     this.status,

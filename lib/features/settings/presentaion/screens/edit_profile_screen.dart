@@ -15,6 +15,7 @@ import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/update_user_profile_cubit/update_user_profile_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -41,7 +42,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final locationFocus = FocusNode();
 
   String? selectedBloodType;
-  String? selectedGender;
+
   late UserEntity user;
 
   final List<String> bloodTypes = [
@@ -71,7 +72,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     weightController.text = user.weight ?? '';
     locationController.text = user.location ?? '';
     selectedBloodType = user.bloodType;
-    selectedGender = user.gender;
   }
 
   @override
@@ -227,9 +227,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           MyTextFormField(
                             controller: heightController,
                             focusNode: heightFocus,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             hintText: "enter_height".tr,
                             keyboardType: TextInputType.number,
-                            validatorType: ValidatorType.numbersOnly,
+                            validatorType: ValidatorType.standard,
                             backgroundColor: colors.main.withValues(alpha: .1),
                             prefixIcon: Icon(Icons.height, color: colors.main),
                           ),
@@ -247,8 +250,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             controller: weightController,
                             focusNode: weightFocus,
                             hintText: "enter_weight".tr,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             keyboardType: TextInputType.number,
-                            validatorType: ValidatorType.numbersOnly,
+                            validatorType: ValidatorType.standard,
                             backgroundColor: colors.main.withValues(alpha: .1),
                             prefixIcon: Icon(
                               Icons.monitor_weight_outlined,
@@ -258,67 +264,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ],
                       ),
                     ),
-                  ],
-                ),
-
-                Gaps.vGap16,
-
-                /// Gender + Blood Type
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("gender".tr, style: TextStyles.semiBold14()),
-                          Gaps.vGap8,
-                          DropdownButtonFormField<String>(
-                            initialValue: selectedGender,
-                            validator: (value) {
-                              if (value == null) {
-                                return "select_gender".tr;
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 12.h,
-                              ),
-                              label: Text("select_gender".tr),
-                              labelStyle: TextStyles.semiBold12(),
-                              prefixIcon: Icon(
-                                Icons.wc_outlined,
-                                color: colors.main,
-                              ),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-                              filled: true,
-                              fillColor: colors.main.withValues(alpha: .1),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16.r),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            items: genders
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e['value'],
-                                    child: Text(e['labelKey']!.tr),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedGender = value;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
                     Gaps.hGap12,
+
+                    ///  Blood Type
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,6 +281,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               }
                               return null;
                             },
+                            isExpanded: true,
+                            menuMaxHeight: ScreenUtil().screenHeight * 0.45,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16.w,
@@ -340,6 +290,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                               label: Text("select_blood_type".tr),
                               labelStyle: TextStyles.semiBold12(),
+
                               prefixIcon: Icon(
                                 Icons.bloodtype_outlined,
                                 color: colors.main,
@@ -373,6 +324,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ],
                 ),
 
+                Gaps.vGap16,
+
                 // Gaps.vGap16,
 
                 /// Location
@@ -405,15 +358,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 return;
                               }
 
-                              if (selectedGender == null) {
-                                Constants.showSnakToast(
-                                  context: context,
-                                  type: 3,
-                                  message: "select_gender".tr,
-                                );
-                                return;
-                              }
-
                               if (selectedBloodType == null) {
                                 Constants.showSnakToast(
                                   context: context,
@@ -433,7 +377,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       tall: heightController.text,
                                       weight: weightController.text,
                                       bloodType: selectedBloodType!,
-                                      gender: selectedGender!,
                                       location: locationController.text,
                                     ),
                                   );

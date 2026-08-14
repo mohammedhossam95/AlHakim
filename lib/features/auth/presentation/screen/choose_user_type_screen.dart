@@ -80,7 +80,8 @@ class _ChooseUserTypeScreenState extends State<ChooseUserTypeScreen> {
               // ),
               Gaps.vGap24,
               _EmergencyBanner(
-                onTap: () => context.push(Routes.emergencyScreenRoute),
+                onTap: () =>
+                    context.push(Routes.emergencyCategoriesScreenRoute),
               ),
               Gaps.vGap24,
               Text(

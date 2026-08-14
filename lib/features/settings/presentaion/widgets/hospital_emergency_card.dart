@@ -43,11 +43,12 @@ class HospitalEmergencyCard extends StatelessWidget {
   //   }
   // }
 
-  Future<void> _shareItem() async {
+  Future<void> _shareItem(BuildContext context) async {
     await SharePlus.instance.share(
       ShareParams(
         text: ShareTextBuilder.buildFacilityShareText(item),
         subject: 'مشاركة مركز طبي - تطبيق الحكيم',
+        sharePositionOrigin: ShareTextBuilder.sharePositionOrigin(context),
       ),
     );
   }
@@ -107,7 +108,7 @@ class HospitalEmergencyCard extends StatelessWidget {
                     Gaps.hGap10,
                     _CircleActionButton(
                       icon: Icons.share,
-                      onTap: () => _shareItem(),
+                      onTap: () => _shareItem(context),
                     ),
 
                     // _ActionCircleButton(

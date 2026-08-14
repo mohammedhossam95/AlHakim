@@ -21,7 +21,7 @@ class DoctorAppoinmentsForDayRespModel extends BaseListResponse {
   }
 }
 
-class DoctorAppoinmentsForDayModel extends DoctorAppoinmentsForDayEntity {
+class DoctorAppoinmentsForDayModel extends AffectedAppoinmentsEntity {
   const DoctorAppoinmentsForDayModel({
     super.id,
     super.appointmentDate,
