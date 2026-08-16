@@ -49,14 +49,34 @@ class NotificationService {
       sound: true,
     );
 
-    // Setup message handlers
-    await _setupMessageHandlers();
+    // Local notifications + Android channel before handlers.
+    // Wrapped so a platform hang/failure cannot block runApp (white screen).
+    try {
+      await setupFlutterNotifications().timeout(const Duration(seconds: 8));
+    } catch (e) {
+      log('setupFlutterNotifications failed or timed out: $e');
+    }
 
-    await setupFlutterNotifications();
+    try {
+      await _setupMessageHandlers().timeout(const Duration(seconds: 5));
+    } catch (e) {
+      log('setupMessageHandlers failed or timed out: $e');
+    }
 
-    // Get FCM token
-    final token = await _messaging.getToken();
-    log('FCM Token: $token');
+    // APNs/FCM token can hang indefinitely on iOS (esp. simulator) — never
+    // block app launch on it.
+    unawaited(_fetchAndLogFcmToken());
+  }
+
+  Future<void> _fetchAndLogFcmToken() async {
+    try {
+      final token = await _messaging.getToken().timeout(
+        const Duration(seconds: 15),
+      );
+      log('FCM Token: $token');
+    } catch (e) {
+      log('FCM Token unavailable: $e');
+    }
   }
 
   Future<void> _requestPermission() async {
