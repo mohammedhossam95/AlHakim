@@ -29,6 +29,7 @@ class ClinicHomeScreen extends StatefulWidget {
 }
 
 class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
+  DoctorHomeEntity? home;
   @override
   void initState() {
     super.initState();
@@ -57,7 +58,8 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     return sessionState.activeDoctorId;
   }
 
-  final today = DateTime.now().weekday;
+  // final today = DateTime.now().weekday;
+  final today = DateTime.now().weekday % 7;
   @override
   Widget build(BuildContext context) {
     final sessionState = context.watch<SessionCubit>().state;
@@ -101,7 +103,12 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
         ],
       ),
 
-      body: BlocBuilder<GetDoctorHomeCubit, GetDoctorHomeState>(
+      body: BlocConsumer<GetDoctorHomeCubit, GetDoctorHomeState>(
+        listener: (context, state) {
+          if (state is GetDoctorHomeSuccess) {
+            home = state.response.data as DoctorHomeEntity;
+          }
+        },
         builder: (context, state) {
           if (state is GetDoctorHomeLoading) {
             return _buildShimmer();
@@ -109,12 +116,6 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
 
           if (state is GetDoctorHomeError) {
             return Center(child: Text(state.message));
-          }
-
-          DoctorHomeEntity? home;
-
-          if (state is GetDoctorHomeSuccess) {
-            home = state.response.data as DoctorHomeEntity;
           }
 
           return SingleChildScrollView(
