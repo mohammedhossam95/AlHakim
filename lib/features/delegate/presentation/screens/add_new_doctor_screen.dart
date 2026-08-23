@@ -1210,7 +1210,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
                         final item = schedules[index];
 
                         return Container(
-                          padding: EdgeInsets.all(16.w),
+                          padding: EdgeInsets.all(12.r),
 
                           decoration: BoxDecoration(
                             color: colors.main.withValues(alpha: .04),

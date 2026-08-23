@@ -470,36 +470,26 @@ class _RescheduleAppointmentsScreenState
                         Gaps.vGap24,
 
                         SizedBox(
-                          height: ScreenUtil().screenHeight * 0.14,
+                          height: ScreenUtil().screenHeight * 0.16,
 
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
-
                             itemCount: availableDates.length,
-
                             separatorBuilder: (_, _) => Gaps.hGap12,
-
                             itemBuilder: (context, index) {
                               final date = availableDates[index];
-
                               final isSelected = selectedDateIndex == index;
-
                               return GestureDetector(
                                 onTap: () {
                                   setState(() {
                                     selectedDateIndex = index;
                                   });
-
                                   _getAppointments(date);
                                 },
-
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 250),
-
                                   width: ScreenUtil().screenWidth * 0.2,
-
                                   padding: EdgeInsets.symmetric(vertical: 12.h),
-
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? colors.main
@@ -507,7 +497,6 @@ class _RescheduleAppointmentsScreenState
 
                                     borderRadius: BorderRadius.circular(20.r),
                                   ),
-
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
 

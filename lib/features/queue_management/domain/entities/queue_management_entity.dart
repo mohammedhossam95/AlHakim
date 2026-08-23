@@ -1,8 +1,10 @@
+import 'package:alhakim/features/booking/domain/entities/appointment_type_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class QueueManagementEntity extends Equatable {
   final int? id;
   final String? appointmentDate;
+  final AppointmentTypeEntity? appointmentType;
   final String? status;
   final String? queuePosition;
   final bool? isCurrent;
@@ -13,6 +15,7 @@ class QueueManagementEntity extends Equatable {
   const QueueManagementEntity({
     this.id,
     this.appointmentDate,
+    this.appointmentType,
     this.status,
     this.queuePosition,
     this.isCurrent,
@@ -25,6 +28,7 @@ class QueueManagementEntity extends Equatable {
   List<Object?> get props => [
     id,
     appointmentDate,
+    appointmentType,
     status,
     queuePosition,
     isCurrent,

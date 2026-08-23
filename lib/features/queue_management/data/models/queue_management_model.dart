@@ -1,4 +1,5 @@
 import 'package:alhakim/core/base_classes/base_list_response.dart';
+import 'package:alhakim/features/booking/data/models/appointment_type_model.dart';
 import 'package:alhakim/features/queue_management/domain/entities/queue_management_entity.dart';
 
 class QueueManagementRespModel extends BaseListResponse {
@@ -21,6 +22,7 @@ class QueueManagementModel extends QueueManagementEntity {
   const QueueManagementModel({
     super.id,
     super.appointmentDate,
+    super.appointmentType,
     super.status,
     super.queuePosition,
     super.isCurrent,
@@ -33,6 +35,9 @@ class QueueManagementModel extends QueueManagementEntity {
     return QueueManagementModel(
       id: json['id'],
       appointmentDate: json['appointment_date'],
+      appointmentType: json['appointment_type'] != null
+          ? AppointmentTypeModel.fromJson(json['appointment_type'])
+          : null,
       status: json['status'],
       queuePosition: json['queue_position']?.toString(),
       isCurrent: json['is_current'],

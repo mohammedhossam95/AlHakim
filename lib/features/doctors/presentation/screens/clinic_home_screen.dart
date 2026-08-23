@@ -68,7 +68,6 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
 
     return Scaffold(
       backgroundColor: colors.backGround,
-
       appBar: AppBar(
         title: Row(
           children: [

@@ -579,17 +579,16 @@ class QueuePatientCard extends StatelessWidget {
             ),
             Gaps.vGap16,
           ],
+
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-
                 decoration: BoxDecoration(
                   color: colors.main.withValues(alpha: .1),
-
                   borderRadius: BorderRadius.circular(18.r),
                 ),
-
                 child: Column(
                   children: [
                     Text(
@@ -604,14 +603,52 @@ class QueuePatientCard extends StatelessWidget {
                   ],
                 ),
               ),
-
               Gaps.hGap12,
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
+                    Row(
+                      children: [
+                        Spacer(),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 8.h,
+                          ),
+
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: .12),
+
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+
+                            children: [
+                              Icon(
+                                getStatusIcon(status),
+
+                                size: 16.sp,
+
+                                color: statusColor,
+                              ),
+
+                              Gaps.hGap6,
+
+                              Text(
+                                getStatusText(status),
+
+                                style: TextStyles.medium12(color: statusColor),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Gaps.vGap8,
                     Text(
                       item.patient?.kinship == null
                           ? item.patient?.fullPatientName ?? ''
@@ -619,6 +656,15 @@ class QueuePatientCard extends StatelessWidget {
                       style: TextStyles.semiBold18(),
                     ),
 
+                    if (item.appointmentType != null) ...[
+                      Gaps.vGap8,
+                      Text(
+                        "${'appointment_type'.tr} : ${item.appointmentType?.name ?? ''}",
+                        style: TextStyles.bold12(color: colors.lightTextColor),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     Gaps.vGap8,
 
                     InkWell(
@@ -647,38 +693,6 @@ class QueuePatientCard extends StatelessWidget {
               ),
 
               Gaps.hGap10,
-
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: .12),
-
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-
-                  children: [
-                    Icon(
-                      getStatusIcon(status),
-
-                      size: 16.sp,
-
-                      color: statusColor,
-                    ),
-
-                    Gaps.hGap6,
-
-                    Text(
-                      getStatusText(status),
-
-                      style: TextStyles.medium12(color: statusColor),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
           Gaps.vGap10,

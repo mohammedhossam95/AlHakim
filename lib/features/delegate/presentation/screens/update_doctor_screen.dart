@@ -1375,7 +1375,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                         final item = schedules[index];
 
                         return Container(
-                          padding: EdgeInsets.all(16.w),
+                          padding: EdgeInsets.all(12.r),
 
                           decoration: BoxDecoration(
                             color: colors.main.withValues(alpha: .04),
@@ -1587,6 +1587,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
                         );
                       },
                     ),
+                    Gaps.vGap4,
 
                     /// add new schedule
                     if (canAddSchedule)
