@@ -248,8 +248,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         },
                       ),
 
-                      if (sessionState.status ==
-                          SessionStatus.authenticated) ...[
+                      if (sessionState.status == SessionStatus.authenticated &&
+                          sessionCubit.state.userType == UserType.patient) ...[
                         Gaps.vGap8,
                         _buildDeleteAccountButton(),
                         Gaps.vGap24,

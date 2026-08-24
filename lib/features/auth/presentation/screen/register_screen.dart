@@ -130,7 +130,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         passwordConfirmation: _confirmPasswordController.text.trim(),
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
-        birthDate: _isUnderReview ? null : _birthDateController.text.trim(),
+        birthDate: _isUnderReview
+            ? "2000-01-01"
+            : _birthDateController.text.trim(),
         firebaseToken: firebaseToken,
       ),
     );

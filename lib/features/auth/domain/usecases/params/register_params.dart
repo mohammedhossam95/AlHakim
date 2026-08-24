@@ -5,7 +5,7 @@ class RegisterParams {
   final String passwordConfirmation;
   final String firstName;
   final String lastName;
-  final String? birthDate;
+  final String birthDate;
   final String firebaseToken;
 
   const RegisterParams({
@@ -15,7 +15,7 @@ class RegisterParams {
     required this.passwordConfirmation,
     required this.firstName,
     required this.lastName,
-    this.birthDate,
+    required this.birthDate,
     required this.firebaseToken,
   });
 
@@ -30,9 +30,7 @@ class RegisterParams {
       'device_token': firebaseToken,
     };
 
-    if (birthDate != null && birthDate!.trim().isNotEmpty) {
-      map['birth_date'] = birthDate!.trim();
-    }
+    map['birth_date'] = birthDate.trim();
 
     return map;
   }
