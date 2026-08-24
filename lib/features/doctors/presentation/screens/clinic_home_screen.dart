@@ -275,7 +275,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                           if (home?.doctorClosedToday == false) Gaps.vGap16,
 
                           /// close today
-                          if (home?.doctorClosedToday != true)
+                          if (home?.doctorClosedToday != true) ...[
                             BlocListener<
                               CloseClinicTodayCubit,
                               CloseClinicTodayState
@@ -327,6 +327,16 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                                 },
                               ),
                             ),
+                            Gaps.vGap16,
+                            MyDefaultButton(
+                              btnText: "export_data",
+                              borderRadius: 30,
+                              color: colors.whiteColor,
+                              textColor: colors.textColor,
+                              borderColor: colors.main,
+                              onPressed: _onExportPressed,
+                            ),
+                          ],
                         ] else ...[
                           Text(
                             "doctor_closed_today".tr,
@@ -350,15 +360,6 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                               Routes.rescheduleAppointmentsScreenRoute,
                             );
                           },
-                        ),
-                        Gaps.vGap16,
-                        MyDefaultButton(
-                          btnText: "export_data",
-                          borderRadius: 30,
-                          color: colors.whiteColor,
-                          textColor: colors.textColor,
-                          borderColor: colors.main,
-                          onPressed: _onExportPressed,
                         ),
                       ],
                     ),

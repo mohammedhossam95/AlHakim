@@ -67,7 +67,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     user = sharedPreferences.getAuth()!.user!;
     firstNameController.text = user.firstName ?? '';
     lastNameController.text = user.lastName ?? '';
-    birthDateController.text = user.birthDate ?? '';
+    birthDateController.text = user.birthDate ?? "";
     heightController.text = user.tall ?? '';
     weightController.text = user.weight ?? '';
     locationController.text = user.location ?? '';
@@ -403,7 +403,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     CompleteProfileParams(
                                       firstName: firstNameController.text,
                                       lastName: lastNameController.text,
-                                      birthDate: birthDateController.text,
+                                      birthDate: _isUnderReview
+                                          ? user.birthDate ?? "2000-01-01"
+                                          : birthDateController.text.trim(),
                                       tall: heightController.text,
                                       weight: weightController.text,
                                       bloodType: selectedBloodType!,

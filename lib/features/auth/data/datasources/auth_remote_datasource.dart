@@ -325,7 +325,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<DeleteUserAccountRespModel> deleteUserAccount() async {
     try {
-      final response = await dioConsumer.post('/auth/delete-account');
+      final response = await dioConsumer.delete('/auth/delete-account');
 
       if (response['status'] == true) {
         return DeleteUserAccountRespModel.fromJson(response);

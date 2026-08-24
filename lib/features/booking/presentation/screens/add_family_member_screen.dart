@@ -64,21 +64,23 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final birthDate = _isUnderReview
-        ? (widget.member?.birthDate ?? '')
-        : _birthDateController.text;
+        ? (widget.member?.birthDate ?? "2000-01-01")
+        : _birthDateController.text.trim();
 
     if (widget.isEditMode) {
       context.read<AddFamilyMemberCubit>().updateFamilyMember(
         id: widget.member!.id!,
         fullName: _nameController.text,
-        birthDate: birthDate,
+        birthDate: _isUnderReview
+            ? widget.member?.birthDate ?? "2000-01-01"
+            : birthDate,
       );
       return;
     }
 
     context.read<AddFamilyMemberCubit>().addFamilyMember(
       fullName: _nameController.text,
-      birthDate: birthDate,
+      birthDate: _isUnderReview ? "2000-01-01" : birthDate,
       kinship: selectedKinship?.value ?? '',
     );
   }
