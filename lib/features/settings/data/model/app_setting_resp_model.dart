@@ -8,19 +8,13 @@ class AppSettingRespModel extends BaseOneResponse {
     return AppSettingRespModel(
       status: json['status'],
       message: json['message'],
-      data: json['data'] == null
-          ? null
-          : AppConfigModel.fromJson(json['data']),
+      data: json['data'] == null ? null : AppConfigModel.fromJson(json['data']),
     );
   }
 }
 
 class AppConfigModel extends AppConfigEntity {
-  const AppConfigModel({
-    super.update,
-    super.business,
-    super.externalLinks,
-  });
+  const AppConfigModel({super.update, super.business, super.externalLinks});
 
   factory AppConfigModel.fromJson(Map<String, dynamic> json) {
     return AppConfigModel(
@@ -39,6 +33,39 @@ class AppConfigModel extends AppConfigEntity {
             ),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'update': update is AppUpdateModel
+        ? (update as AppUpdateModel).toJson()
+        : update == null
+        ? null
+        : {
+            'type': update?.type,
+            'latest_version': update?.latestVersion,
+            'minimum_supported_version': update?.minimumSupportedVersion,
+            'store_url': update?.storeUrl,
+            'under_review': update?.underReview,
+          },
+    'business': business is AppBusinessModel
+        ? (business as AppBusinessModel).toJson()
+        : business == null
+        ? null
+        : {
+            'commercial_registration_number':
+                business?.commercialRegistrationNumber,
+          },
+    'external_links': externalLinks
+        ?.map(
+          (e) => e is ExternalLinkModel
+              ? e.toJson()
+              : {
+                  'name': e.name,
+                  'icon': e.icon,
+                  'url': e.url,
+                },
+        )
+        .toList(),
+  };
 }
 
 class AppUpdateModel extends AppUpdateEntity {
@@ -47,17 +74,28 @@ class AppUpdateModel extends AppUpdateEntity {
     super.latestVersion,
     super.minimumSupportedVersion,
     super.storeUrl,
+    super.underReview,
   });
 
   factory AppUpdateModel.fromJson(Map<String, dynamic> json) {
     return AppUpdateModel(
       type: json['type']?.toString(),
       latestVersion: json['latest_version']?.toString(),
-      minimumSupportedVersion:
-          json['minimum_supported_version']?.toString(),
+      minimumSupportedVersion: json['minimum_supported_version']?.toString(),
       storeUrl: json['store_url']?.toString(),
+      underReview: json['under_review'] == true ||
+          json['under_review'] == 1 ||
+          json['under_review'] == '1',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'latest_version': latestVersion,
+    'minimum_supported_version': minimumSupportedVersion,
+    'store_url': storeUrl,
+    'under_review': underReview,
+  };
 }
 
 class AppBusinessModel extends AppBusinessEntity {
@@ -65,18 +103,18 @@ class AppBusinessModel extends AppBusinessEntity {
 
   factory AppBusinessModel.fromJson(Map<String, dynamic> json) {
     return AppBusinessModel(
-      commercialRegistrationNumber:
-          json['commercial_registration_number']?.toString(),
+      commercialRegistrationNumber: json['commercial_registration_number']
+          ?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'commercial_registration_number': commercialRegistrationNumber,
+  };
 }
 
 class ExternalLinkModel extends ExternalLinkEntity {
-  const ExternalLinkModel({
-    super.name,
-    super.icon,
-    super.url,
-  });
+  const ExternalLinkModel({super.name, super.icon, super.url});
 
   factory ExternalLinkModel.fromJson(Map<String, dynamic> json) {
     return ExternalLinkModel(
@@ -85,4 +123,10 @@ class ExternalLinkModel extends ExternalLinkEntity {
       url: json['url']?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'icon': icon,
+    'url': url,
+  };
 }

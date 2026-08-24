@@ -65,14 +65,17 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required String kinship,
   }) async {
     try {
+      final body = <String, dynamic>{
+        "full_name": fullName,
+        "kinship": kinship,
+      };
+      if (birthDate.trim().isNotEmpty) {
+        body["birth_date"] = birthDate;
+      }
+
       final response = await dioConsumer.post(
         '/family-members',
-
-        formData: FormData.fromMap({
-          "full_name": fullName,
-          "birth_date": birthDate,
-          "kinship": kinship,
-        }),
+        formData: FormData.fromMap(body),
       );
 
       if (response['status'] == true) {
@@ -92,12 +95,16 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required String birthDate,
   }) async {
     try {
+      final body = <String, dynamic>{
+        'full_name': fullName,
+      };
+      if (birthDate.trim().isNotEmpty) {
+        body['birth_date'] = birthDate;
+      }
+
       final response = await dioConsumer.patch(
         '/family-members/$id',
-        body: {
-          'full_name': fullName,
-          'birth_date': birthDate,
-        },
+        body: body,
       );
 
       if (response['status'] == true) {

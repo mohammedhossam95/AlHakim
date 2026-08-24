@@ -27,7 +27,8 @@ abstract class ApiConstants {
     required String scheduleId,
   }) => '/doctors/$doctorId/schedules/$scheduleId';
 
-  static String closeClinic(String doctorId) => '/doctors/$doctorId/close-clinic';
+  static String closeClinic(String doctorId) =>
+      '/doctors/$doctorId/close-clinic';
 
   static String updateDoctorScheduleStatus({
     required String doctorId,
@@ -37,6 +38,12 @@ abstract class ApiConstants {
 
 abstract class DioConsumer {
   Future<dynamic> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  });
+
+  Future<List<int>> getBytes(
     String path, {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
@@ -187,6 +194,41 @@ class DioConsumerImpl implements DioConsumer {
     } on DioException catch (error) {
       _handleDioError(error);
     } catch (error) {
+      throw ServerException(message: error.toString());
+    }
+  }
+
+  @override
+  Future<List<int>> getBytes(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      Log.i('[GET BYTES][$path], params: ${queryParameters.toString()}');
+      await _handleAccessTokenHeader();
+      final response = await client.get<List<int>>(
+        path,
+        queryParameters: queryParameters,
+        options: Options(responseType: ResponseType.bytes, headers: headers),
+      );
+      final data = response.data;
+      if (data == null) {
+        throw ServerException(message: 'Empty response');
+      }
+      Log.i('[GET BYTES][$path], bytes: ${data.length}');
+      return data;
+    } on SocketException {
+      throw InternetConnectionException(message: Strings.noInternetConnection);
+    } on DioException catch (error) {
+      _handleDioError(error);
+      throw ServerException(message: error.message ?? 'Unknown Error');
+    } catch (error) {
+      if (error is ServerException ||
+          error is InternetConnectionException ||
+          error is UnauthorizedException) {
+        rethrow;
+      }
       throw ServerException(message: error.toString());
     }
   }

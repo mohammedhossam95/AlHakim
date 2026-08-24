@@ -1,6 +1,7 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
 import 'package:alhakim/core/utils/constants.dart';
+import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/country_code_widget.dart';
@@ -13,6 +14,7 @@ import 'package:alhakim/features/auth/presentation/cubit/register_cubit/register
 import 'package:alhakim/injection_container.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,13 +39,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late Country _selectedCountry;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _acceptedPrivacy = false;
+  late final bool _isUnderReview;
   String firebaseToken = '';
+  late final TapGestureRecognizer _privacyTapRecognizer;
 
   @override
   void initState() {
     super.initState();
     _selectedCountry = CountryParser.parsePhoneCode('20');
+    _isUnderReview =
+        sharedPreferences.getAppConfig()?.update?.underReview == true;
     getFirebaseToken();
+    _privacyTapRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        context.push(
+          Routes.staticPageScreenRoute,
+          extra: StaticPageType.privacy,
+        );
+      };
   }
 
   void getFirebaseToken() async {
@@ -59,6 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _privacyTapRecognizer.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -70,6 +85,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _onRegisterPressed() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!_acceptedPrivacy) {
+      Constants.showSnakToast(
+        context: context,
+        type: 3,
+        message: 'must_accept_privacy_policy'.tr,
+      );
+      return;
+    }
 
     if (_passwordController.text.trim() !=
         _confirmPasswordController.text.trim()) {
@@ -106,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         passwordConfirmation: _confirmPasswordController.text.trim(),
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
-        birthDate: _birthDateController.text.trim(),
+        birthDate: _isUnderReview ? null : _birthDateController.text.trim(),
         firebaseToken: firebaseToken,
       ),
     );
@@ -217,16 +241,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
                         Gaps.vGap12,
-                        SplitDatePicker(
-                          controller: _birthDateController,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'select_birth_date'.tr;
-                            }
-                            return null;
-                          },
-                        ),
-                        Gaps.vGap12,
+                        if (!_isUnderReview) ...[
+                          SplitDatePicker(
+                            controller: _birthDateController,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'select_birth_date'.tr;
+                              }
+                              return null;
+                            },
+                          ),
+                          Gaps.vGap12,
+                        ],
                         Row(
                           children: [
                             CountryCodeWidget(
@@ -335,6 +361,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               color: colors.lightTextColor,
                             ),
                           ),
+                        ),
+                        Gaps.vGap16,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 24.w,
+                              height: 24.h,
+                              child: Checkbox(
+                                value: _acceptedPrivacy,
+                                activeColor: colors.main,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _acceptedPrivacy = value ?? false;
+                                  });
+                                },
+                              ),
+                            ),
+                            Gaps.hGap8,
+                            Expanded(
+                              child: Text.rich(
+                                TextSpan(
+                                  style: TextStyles.medium12(
+                                    color: colors.lightTextColor,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: '${'agree_privacy_prefix'.tr} ',
+                                    ),
+                                    TextSpan(
+                                      text: 'privacy_policy'.tr,
+                                      style:
+                                          TextStyles.semiBold12(
+                                            color: colors.main,
+                                          ).copyWith(
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationColor: colors.main,
+                                          ),
+                                      recognizer: _privacyTapRecognizer,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         Gaps.vGap24,
                         MyDefaultButton(

@@ -5,6 +5,8 @@ import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/auth/data/models/get_setting_response_model.dart';
 import 'package:alhakim/features/auth/domain/entities/auth_entity.dart';
 import 'package:alhakim/features/auth/domain/entities/setting_entity.dart';
+import 'package:alhakim/features/settings/data/model/app_setting_resp_model.dart';
+import 'package:alhakim/features/settings/domain/entity/app_setting_entity.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,6 +37,7 @@ abstract class _AppSharedPreferencesKeys {
 
   static const settings = 'settings';
   static const auth = 'auth';
+  static const appConfig = 'appConfig';
 }
 
 abstract class AppSharedPreferences {
@@ -140,6 +143,10 @@ abstract class AppSharedPreferences {
 
   Future<bool> saveSettings(SettingModel? data);
   SettingEntity? getSettings();
+
+  Future<bool> saveAppConfig(AppConfigEntity config);
+  AppConfigEntity? getAppConfig();
+  Future<bool> removeAppConfig();
 
   Future<bool> clearAll();
 }
@@ -512,6 +519,55 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
     _AppSharedPreferencesKeys.settings,
     jsonEncode(settings),
   );
+
+  @override
+  Future<bool> saveAppConfig(AppConfigEntity config) {
+    final model = config is AppConfigModel
+        ? config
+        : AppConfigModel(
+            update: config.update == null
+                ? null
+                : AppUpdateModel(
+                    type: config.update?.type,
+                    latestVersion: config.update?.latestVersion,
+                    minimumSupportedVersion:
+                        config.update?.minimumSupportedVersion,
+                    storeUrl: config.update?.storeUrl,
+                    underReview: config.update?.underReview,
+                  ),
+            business: config.business == null
+                ? null
+                : AppBusinessModel(
+                    commercialRegistrationNumber:
+                        config.business?.commercialRegistrationNumber,
+                  ),
+            externalLinks: config.externalLinks
+                ?.map(
+                  (e) => ExternalLinkModel(
+                    name: e.name,
+                    icon: e.icon,
+                    url: e.url,
+                  ),
+                )
+                .toList(),
+          );
+
+    return instance.setString(
+      _AppSharedPreferencesKeys.appConfig,
+      jsonEncode(model.toJson()),
+    );
+  }
+
+  @override
+  AppConfigEntity? getAppConfig() {
+    final configStr = instance.getString(_AppSharedPreferencesKeys.appConfig);
+    if (configStr == null || configStr.isEmpty) return null;
+    return AppConfigModel.fromJson(jsonDecode(configStr));
+  }
+
+  @override
+  Future<bool> removeAppConfig() =>
+      instance.remove(_AppSharedPreferencesKeys.appConfig);
 
   //endregion
 }

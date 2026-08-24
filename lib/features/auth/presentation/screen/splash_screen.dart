@@ -81,6 +81,10 @@ class _SplashScreenState extends State<SplashScreen> {
         listener: (context, state) async {
           if (state is AppSettingLoaded) {
             final config = state.resp.data as AppConfigEntity?;
+            if (config != null) {
+              await sharedPreferences.saveAppConfig(config);
+            }
+
             final update = config?.update;
             final updateType = update?.type?.toLowerCase();
 

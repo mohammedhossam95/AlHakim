@@ -57,4 +57,16 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<int>>> exportAppointments() async {
+    try {
+      final result = await remoteDataSource.exportAppointments();
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }
