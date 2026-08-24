@@ -3,9 +3,11 @@ import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/cancel_appointment_cubit/cancel_appointment_cubit.dart';
+import 'package:alhakim/features/appointments/presentation/cubt/export_appointments_cubit/export_appointments_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_appointments/get_appointments_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:alhakim/features/auth/presentation/cubit/logout/logout_cubit.dart';
+import 'package:alhakim/features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/cubit/delete_medical_center_cubit/delete_medical_center_cubit.dart';
 import 'package:alhakim/features/delegate/presentation/cubit/get_medical_centers_cubit/get_medical_centers_cubit.dart';
@@ -56,8 +58,15 @@ class _MainPageState extends State<MainPage> {
   List<Widget> _buildTabsFor(SessionState sessionState) {
     final role = sessionState.userType;
 
-    final settingsTab = BlocProvider(
-      create: (_) => ServiceLocator.instance<LogoutCubit>(),
+    final settingsTab = MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => ServiceLocator.instance<LogoutCubit>(),
+        ),
+        BlocProvider(
+          create: (_) => ServiceLocator.instance<DeleteUserAccountCubit>(),
+        ),
+      ],
       child: const SettingsScreen(),
     );
 
@@ -164,6 +173,9 @@ class _MainPageState extends State<MainPage> {
           ),
           BlocProvider(
             create: (_) => ServiceLocator.instance<ToggleClinicCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => ServiceLocator.instance<ExportAppointmentsCubit>(),
           ),
         ],
         child: const ClinicHomeScreen(),

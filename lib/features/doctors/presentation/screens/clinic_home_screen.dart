@@ -8,6 +8,7 @@ import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/appointments/presentation/cubt/export_appointments_cubit/export_appointments_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_home_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
@@ -19,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ClinicHomeScreen extends StatefulWidget {
@@ -56,6 +58,20 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     }
 
     return sessionState.activeDoctorId;
+  }
+
+  Future<void> _onExportPressed() async {
+    final confirmed = await Constants.showConfirmDialog(
+      context: context,
+      title: 'confirm_export_data'.tr,
+      content: 'confirm_export_data_message'.tr,
+      yesText: 'yes',
+      noText: 'no',
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    context.read<ExportAppointmentsCubit>().exportAppointments();
   }
 
   // final today = DateTime.now().weekday;
@@ -102,7 +118,34 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
         ],
       ),
 
-      body: BlocConsumer<GetDoctorHomeCubit, GetDoctorHomeState>(
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<ExportAppointmentsCubit, ExportAppointmentsState>(
+            listener: (context, state) async {
+              if (state is ExportAppointmentsLoading) {
+                Constants.showLoading(context);
+              } else if (state is ExportAppointmentsSuccess) {
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  type: 1,
+                  message: 'export_data_success'.tr,
+                );
+                await SharePlus.instance.share(
+                  ShareParams(files: [XFile(state.filePath)]),
+                );
+              } else if (state is ExportAppointmentsError) {
+                Constants.hideLoading(context);
+                Constants.showSnakToast(
+                  context: context,
+                  type: 3,
+                  message: state.message,
+                );
+              }
+            },
+          ),
+        ],
+        child: BlocConsumer<GetDoctorHomeCubit, GetDoctorHomeState>(
         listener: (context, state) {
           if (state is GetDoctorHomeSuccess) {
             home = state.response.data as DoctorHomeEntity;
@@ -306,6 +349,15 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                           );
                         },
                       ),
+                      Gaps.vGap16,
+                      MyDefaultButton(
+                        btnText: "export_data",
+                        borderRadius: 30,
+                        color: colors.whiteColor,
+                        textColor: colors.textColor,
+                        borderColor: colors.main,
+                        onPressed: _onExportPressed,
+                      ),
                     ],
                   ),
                 ),
@@ -372,6 +424,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

@@ -40,7 +40,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final heightFocus = FocusNode();
   final weightFocus = FocusNode();
   final locationFocus = FocusNode();
-
+  late final bool _isUnderReview;
   String? selectedBloodType;
 
   late UserEntity user;
@@ -72,6 +72,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     weightController.text = user.weight ?? '';
     locationController.text = user.location ?? '';
     selectedBloodType = user.bloodType;
+    _isUnderReview =
+        sharedPreferences.getAppConfig()?.update?.underReview == true;
   }
 
   @override
@@ -206,125 +208,153 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Gaps.vGap16,
 
                 /// Birth Date
-                Text("birth_date".tr, style: TextStyles.semiBold14()),
+                if (!_isUnderReview) ...[
+                  Text("birth_date".tr, style: TextStyles.semiBold14()),
+                  Gaps.vGap8,
+                  SplitDatePicker(controller: birthDateController),
+                  Gaps.vGap16,
 
-                Gaps.vGap8,
-
-                SplitDatePicker(controller: birthDateController),
-
-                Gaps.vGap16,
-
-                /// Height + Weight
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("height".tr, style: TextStyles.semiBold14()),
-                          Gaps.vGap8,
-                          MyTextFormField(
-                            controller: heightController,
-                            focusNode: heightFocus,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            hintText: "enter_height".tr,
-                            keyboardType: TextInputType.number,
-                            validatorType: ValidatorType.standard,
-                            backgroundColor: colors.main.withValues(alpha: .1),
-                            prefixIcon: Icon(Icons.height, color: colors.main),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Gaps.hGap12,
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("weight".tr, style: TextStyles.semiBold14()),
-                          Gaps.vGap8,
-                          MyTextFormField(
-                            controller: weightController,
-                            focusNode: weightFocus,
-                            hintText: "enter_weight".tr,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            keyboardType: TextInputType.number,
-                            validatorType: ValidatorType.standard,
-                            backgroundColor: colors.main.withValues(alpha: .1),
-                            prefixIcon: Icon(
-                              Icons.monitor_weight_outlined,
-                              color: colors.main,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Gaps.hGap12,
-
-                    ///  Blood Type
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("blood_type".tr, style: TextStyles.semiBold14()),
-                          Gaps.vGap8,
-                          DropdownButtonFormField<String>(
-                            initialValue: selectedBloodType,
-                            validator: (value) {
-                              if (value == null) {
-                                return "select_blood_type".tr;
-                              }
-                              return null;
-                            },
-                            isExpanded: true,
-                            menuMaxHeight: ScreenUtil().screenHeight * 0.45,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 12.h,
+                  /// Height + Weight
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("height".tr, style: TextStyles.semiBold12()),
+                            Gaps.vGap4,
+                            MyTextFormField(
+                              controller: heightController,
+                              focusNode: heightFocus,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              hintText: "height".tr,
+                              keyboardType: TextInputType.number,
+                              validatorType: ValidatorType.standard,
+                              backgroundColor: colors.main.withValues(
+                                alpha: .1,
                               ),
-                              label: Text("select_blood_type".tr),
-                              labelStyle: TextStyles.semiBold12(),
-
                               prefixIcon: Icon(
-                                Icons.bloodtype_outlined,
+                                Icons.height,
                                 color: colors.main,
-                              ),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-                              filled: true,
-                              fillColor: colors.main.withValues(alpha: .1),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16.r),
-                                borderSide: BorderSide.none,
+                                size: 18.sp,
                               ),
                             ),
-                            items: bloodTypes
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedBloodType = value;
-                              });
-                            },
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      Gaps.hGap6,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("weight".tr, style: TextStyles.semiBold12()),
+                            Gaps.vGap4,
+                            MyTextFormField(
+                              controller: weightController,
+                              focusNode: weightFocus,
+                              hintText: "weight".tr,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              keyboardType: TextInputType.number,
+                              validatorType: ValidatorType.standard,
+                              backgroundColor: colors.main.withValues(
+                                alpha: .1,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.monitor_weight_outlined,
+                                color: colors.main,
+                                size: 18.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Gaps.hGap6,
 
-                Gaps.vGap16,
+                      ///  Blood Type
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "blood_type".tr,
+                              style: TextStyles.semiBold12(),
+                            ),
+                            Gaps.vGap4,
+                            DropdownButtonFormField<String>(
+                              initialValue: selectedBloodType,
+                              validator: (value) {
+                                if (value == null) {
+                                  return "blood_type".tr;
+                                }
+                                return null;
+                              },
+                              isExpanded: true,
+                              isDense: true,
+                              style: TextStyles.medium12(),
+                              iconSize: 18.sp,
+                              menuMaxHeight: ScreenUtil().screenHeight * 0.4,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 10.h,
+                                ),
+                                hintText: "select_blood_type".tr,
+                                hintStyle: TextStyles.medium10(
+                                  color: colors.lightTextColor,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.bloodtype_outlined,
+                                  color: colors.main,
+                                  size: 18.sp,
+                                ),
+                                prefixIconConstraints: BoxConstraints(
+                                  minWidth: 32.w,
+                                  minHeight: 32.h,
+                                ),
+                                filled: true,
+                                fillColor: colors.main.withValues(alpha: .1),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  borderSide: BorderSide.none,
+                                ),
+                                errorStyle: TextStyles.medium10(
+                                  color: colors.errorColor,
+                                ),
+                              ),
+                              items: bloodTypes
+                                  .map(
+                                    (e) => DropdownMenuItem(
+                                      value: e,
+                                      child: Text(
+                                        e,
+                                        style: TextStyles.medium12(
+                                          color: colors.textColor,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedBloodType = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Gaps.vGap16,
+                ],
 
                 // Gaps.vGap16,
 
@@ -344,7 +374,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 //     color: colors.main,
                 //   ),
                 // ),
-                Gaps.vGap40,
+                if (!_isUnderReview) ...[Gaps.vGap40],
 
                 BlocBuilder<UpdateUserProfileCubit, UpdateUserProfileState>(
                   builder: (context, state) {

@@ -40,7 +40,9 @@ abstract class AuthRemoteDataSource {
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
-  Future<AuthRespModel> authenticate({required AuthenticateParams params}) async {
+  Future<AuthRespModel> authenticate({
+    required AuthenticateParams params,
+  }) async {
     try {
       final response = await dioConsumer.post(
         '/auth/authenticate',
@@ -323,10 +325,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<DeleteUserAccountRespModel> deleteUserAccount() async {
     try {
-      final dynamic response = await dioConsumer.delete('/api/v1/user/delete');
-      if (response['status'] == 'success') {
+      final response = await dioConsumer.post('/auth/delete-account');
+
+      if (response['status'] == true) {
         return DeleteUserAccountRespModel.fromJson(response);
       }
+
       throw ServerException(message: response['message'] ?? '');
     } catch (error) {
       rethrow;

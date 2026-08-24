@@ -9,6 +9,7 @@ abstract class AppointmentRemoteDataSource {
   Future<AppointmentRespModel> getAppointments();
   Future<BaseOneResponse> cancelAppointment({required String appointmentId});
   Future<QueueStatusRespModel> getQueueStatus({required String appointmentId});
+  Future<List<int>> exportAppointments();
 }
 
 class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
@@ -65,6 +66,15 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
       }
 
       throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<int>> exportAppointments() async {
+    try {
+      return await dioConsumer.getBytes('/appointments/export');
     } catch (e) {
       rethrow;
     }

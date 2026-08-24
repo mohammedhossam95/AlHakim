@@ -34,13 +34,19 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
 
   late final TextEditingController _nameController;
   late final TextEditingController _birthDateController;
+  late final bool _isUnderReview;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.member?.fullName ?? '');
-    _birthDateController =
-        TextEditingController(text: widget.member?.birthDate ?? '');
+    _nameController = TextEditingController(
+      text: widget.member?.fullName ?? '',
+    );
+    _birthDateController = TextEditingController(
+      text: widget.member?.birthDate ?? '',
+    );
+    _isUnderReview =
+        sharedPreferences.getAppConfig()?.update?.underReview == true;
 
     if (!widget.isEditMode) {
       context.read<GetKinshipsCubit>().getKinships();
@@ -57,20 +63,24 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
+    final birthDate = _isUnderReview
+        ? (widget.member?.birthDate ?? '')
+        : _birthDateController.text;
+
     if (widget.isEditMode) {
       context.read<AddFamilyMemberCubit>().updateFamilyMember(
-            id: widget.member!.id!,
-            fullName: _nameController.text,
-            birthDate: _birthDateController.text,
-          );
+        id: widget.member!.id!,
+        fullName: _nameController.text,
+        birthDate: birthDate,
+      );
       return;
     }
 
     context.read<AddFamilyMemberCubit>().addFamilyMember(
-          fullName: _nameController.text,
-          birthDate: _birthDateController.text,
-          kinship: selectedKinship?.value ?? '',
-        );
+      fullName: _nameController.text,
+      birthDate: birthDate,
+      kinship: selectedKinship?.value ?? '',
+    );
   }
 
   @override
@@ -122,20 +132,22 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
                     },
                   ),
                   Gaps.vGap16,
-                  _Label('birth_date'.tr),
-                  Gaps.vGap8,
-                  SplitDatePicker(
-                    controller: _birthDateController,
-                    firstYear: 1950,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'birth_date_hint'.tr;
-                      }
-                      return null;
-                    },
-                  ),
-                  if (!widget.isEditMode) ...[
+                  if (!_isUnderReview) ...[
+                    _Label('birth_date'.tr),
+                    Gaps.vGap8,
+                    SplitDatePicker(
+                      controller: _birthDateController,
+                      firstYear: 1950,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'birth_date_hint'.tr;
+                        }
+                        return null;
+                      },
+                    ),
                     Gaps.vGap16,
+                  ],
+                  if (!widget.isEditMode) ...[
                     _Label('relation'.tr),
                     Gaps.vGap8,
                     BlocBuilder<GetKinshipsCubit, GetKinshipsState>(
@@ -209,7 +221,8 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
                         return const SizedBox();
                       },
                     ),
-                  ] else if ((widget.member?.kinship?.label ?? '').isNotEmpty) ...[
+                  ] else if ((widget.member?.kinship?.label ?? '')
+                      .isNotEmpty) ...[
                     Gaps.vGap16,
                     _Label('relation'.tr),
                     Gaps.vGap8,

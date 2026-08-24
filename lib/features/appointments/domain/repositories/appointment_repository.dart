@@ -11,4 +11,5 @@ abstract class AppointmentRepository {
   Future<Either<Failure, BaseOneResponse>> getQueueStatus({
     required String appointmentId,
   });
+  Future<Either<Failure, List<int>>> exportAppointments();
 }

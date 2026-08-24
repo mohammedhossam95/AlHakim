@@ -20,12 +20,14 @@ class AppUpdateEntity extends Equatable {
   final String? latestVersion;
   final String? minimumSupportedVersion;
   final String? storeUrl;
+  final bool? underReview;
 
   const AppUpdateEntity({
     this.type,
     this.latestVersion,
     this.minimumSupportedVersion,
     this.storeUrl,
+    this.underReview,
   });
 
   @override
@@ -34,6 +36,7 @@ class AppUpdateEntity extends Equatable {
         latestVersion,
         minimumSupportedVersion,
         storeUrl,
+        underReview,
       ];
 }
 
