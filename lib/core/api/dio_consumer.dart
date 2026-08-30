@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_nullable_for_final_variable_declarations
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -12,6 +10,7 @@ import '../error/exceptions.dart';
 import '../utils/extension.dart';
 import '../utils/log_utils.dart';
 import '../utils/values/strings.dart';
+import 'retry_interceptor.dart';
 import 'status_code.dart';
 
 abstract class ApiConstants {
@@ -88,7 +87,10 @@ class DioConsumerImpl implements DioConsumer {
 
   DioConsumerImpl({required this.client}) {
     (client.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
+      final httpClient = HttpClient();
+      // Drop idle keep-alive sockets before the server closes them, which
+      // otherwise surfaces as intermittent DioExceptionType.connectionError.
+      httpClient.idleTimeout = const Duration(seconds: 3);
       // client.findProxy = (uri) {
       // Proxy all request to localhost:8888.
       // Be aware, the proxy should went through you running device,
@@ -96,9 +98,11 @@ class DioConsumerImpl implements DioConsumer {
       //   return 'PROXY https://doctor-app-production.up.railway.app';
       // };
 
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      return client;
+      if (kDebugMode) {
+        httpClient.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+      }
+      return httpClient;
     };
 
     Map<String, String> header = {
@@ -116,17 +120,27 @@ class DioConsumerImpl implements DioConsumer {
       ..baseUrl = ApiConstants.baseUrl
       //..responseType = ResponseType.plain
       ..contentType = 'application/json'
+      ..connectTimeout = const Duration(seconds: 15)
+      ..receiveTimeout = const Duration(seconds: 30)
+      ..sendTimeout = const Duration(seconds: 30)
       ..queryParameters = {
         // 'country_id': '${sharedPreferences.getCountryId() ?? 1}',
       }
       ..headers = header;
+    // Retry transient connection failures before app/auth interceptors.
+    client.interceptors.add(RetryInterceptor(client));
     client.interceptors.add(appInterceptors);
     if (kDebugMode) {
       client.interceptors.add(logInterceptor);
     }
   }
 
-  Future<void> _handleAccessTokenHeader() async {
+  /// Resolves the Bearer token (SecureStorage → SharedPreferences fallback)
+  /// and returns it as per-request headers so concurrent calls cannot race
+  /// on the shared [client.options.headers] map.
+  Future<Map<String, dynamic>> _resolveAuthHeaders([
+    Map<String, dynamic>? extraHeaders,
+  ]) async {
     String? accessToken = await secureStorage.getAccessToken();
 
     // Fallback: restore from cached auth if SecureStorage was wiped unexpectedly.
@@ -138,12 +152,25 @@ class DioConsumerImpl implements DioConsumer {
       }
     }
 
+    final headers = <String, dynamic>{...?extraHeaders};
+
     if (accessToken != null && accessToken.isNotEmpty) {
-      client.options.headers[HttpHeaders.authorizationHeader] =
-          'Bearer $accessToken';
+      headers[HttpHeaders.authorizationHeader] = 'Bearer $accessToken';
     } else {
-      client.options.headers.remove(HttpHeaders.authorizationHeader);
+      headers.remove(HttpHeaders.authorizationHeader);
     }
+
+    return headers;
+  }
+
+  Future<Options> _requestOptions({
+    Map<String, dynamic>? headers,
+    ResponseType? responseType,
+  }) async {
+    return Options(
+      headers: await _resolveAuthHeaders(headers),
+      responseType: responseType,
+    );
   }
 
   @override
@@ -181,11 +208,10 @@ class DioConsumerImpl implements DioConsumer {
   }) async {
     try {
       Log.i('[GET][$path], params: ${queryParameters.toString()}');
-      await _handleAccessTokenHeader();
       final response = await client.get(
         path,
         queryParameters: queryParameters,
-        options: headers == null ? null : Options(headers: headers),
+        options: await _requestOptions(headers: headers),
       );
       Log.i('[GET][$path], response: ${response.data.toString()}');
       return response.data;
@@ -206,11 +232,13 @@ class DioConsumerImpl implements DioConsumer {
   }) async {
     try {
       Log.i('[GET BYTES][$path], params: ${queryParameters.toString()}');
-      await _handleAccessTokenHeader();
       final response = await client.get<List<int>>(
         path,
         queryParameters: queryParameters,
-        options: Options(responseType: ResponseType.bytes, headers: headers),
+        options: await _requestOptions(
+          headers: headers,
+          responseType: ResponseType.bytes,
+        ),
       );
       final data = response.data;
       if (data == null) {
@@ -244,11 +272,11 @@ class DioConsumerImpl implements DioConsumer {
       Log.i(
         '[POST][$path], formData: ${formData?.toPrint}, body: ${body.toString()}, params: ${queryParameters.toString()}',
       );
-      await _handleAccessTokenHeader();
       final response = await client.post(
         path,
         queryParameters: queryParameters,
         data: formData ?? body,
+        options: await _requestOptions(),
       );
       Log.i('[POST][$path], response: ${response.data.toString()}');
       return response.data;
@@ -272,11 +300,11 @@ class DioConsumerImpl implements DioConsumer {
       Log.i(
         '[PUT][$path], formData: ${formData?.toPrint}, body: ${body.toString()}, params: ${queryParameters.toString()}',
       );
-      await _handleAccessTokenHeader();
       final response = await client.put(
         path,
         queryParameters: queryParameters,
         data: formData ?? body,
+        options: await _requestOptions(),
       );
       Log.i('[PUT][$path], response: ${response.data.toString()}');
       return response.data;
@@ -296,11 +324,11 @@ class DioConsumerImpl implements DioConsumer {
     Object? data,
   }) async {
     try {
-      await _handleAccessTokenHeader();
       final response = await client.delete(
         path,
         queryParameters: queryParameters,
         data: data,
+        options: await _requestOptions(),
       );
       Log.i('[DELETE][$path], response: ${response.data.toString()}');
       return response.data;
@@ -314,6 +342,13 @@ class DioConsumerImpl implements DioConsumer {
   }
 
   void _handleDioError(DioException error) {
+    Log.e(
+      '[DIO] type=${error.type} '
+      'errorType=${error.error?.runtimeType} '
+      'message=${error.message} '
+      'path=${error.requestOptions.path}',
+    );
+
     String getErrorMessage(dynamic data) {
       if (data is Map && data.containsKey('message')) {
         return data['message'].toString();
@@ -377,11 +412,11 @@ class DioConsumerImpl implements DioConsumer {
       Log.i(
         '[PATCH][$path], formData: ${formData?.toPrint}, body: ${body.toString()}, params: ${queryParameters.toString()}',
       );
-      await _handleAccessTokenHeader();
       final response = await client.patch(
         path,
         queryParameters: queryParameters,
         data: formData ?? body,
+        options: await _requestOptions(),
       );
       Log.i('[PATCH][$path], response: ${response.data.toString()}');
       return response.data;

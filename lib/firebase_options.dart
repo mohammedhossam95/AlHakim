@@ -57,11 +57,11 @@ class DefaultFirebaseOptions {
     storageBucket: 'al-hakim-6f7ba.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAHMfntdhtlmZs1OWJujC9kws5AMRx03NI',
-    appId: '1:1062564717227:ios:5623991d3d44debfdacdee',
+    apiKey: 'AIzaSyDSeiWQfGSyh0hRQQPdwQdSN36i6zW5PK4',
+    appId: '1:1062564717227:ios:61040cfb62862044dacdee',
     messagingSenderId: '1062564717227',
     projectId: 'al-hakim-6f7ba',
     storageBucket: 'al-hakim-6f7ba.firebasestorage.app',
-    iosBundleId: 'com.sharaftech.alhakim',
+    iosBundleId: 'com.sharaftech.alhakimapp',
   );
 }

@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:alhakim/core/services/local_database/database_helper.dart';
-import 'package:alhakim/core/services/local_database/favorite_database_helper.dart';
 import 'package:alhakim/core/services/notifications/notification_service.dart';
+import 'package:alhakim/core/utils/log_utils.dart';
 import 'package:alhakim/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -15,34 +14,37 @@ import 'core/services/bloc_observer/bloc_observer.dart';
 import 'injection_container.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await ServiceLocator.init();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await ServiceLocator.init();
 
-  // Initialize timeago locales
-  timeago.setLocaleMessages('ar', timeago.ArMessages());
-  timeago.setLocaleMessages('en', timeago.EnMessages());
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0xffFFFFFF),
-      systemNavigationBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent, // Transparent status bar
-      statusBarBrightness: Brightness.light, // for iOS
-      statusBarIconBrightness: Brightness.dark, // for Android
-    ),
-  );
+    // Initialize timeago locales
+    timeago.setLocaleMessages('ar', timeago.ArMessages());
+    timeago.setLocaleMessages('en', timeago.EnMessages());
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xffFFFFFF),
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent, // Transparent status bar
+        statusBarBrightness: Brightness.light, // for iOS
+        statusBarIconBrightness: Brightness.dark, // for Android
+      ),
+    );
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-  await NotificationService.instance.initialize();
-  Bloc.observer = AppBlocObserver();
-  dioConsumer.updateDeviceTypeHeader();
-  await sharedPreferences.clearSecureStorageOnFreshInstall();
-  await DBHelper.initDB();
-  await FavoriteDatabaseHelper.instance.database;
-  
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    await NotificationService.instance.initialize();
+    Bloc.observer = AppBlocObserver();
+    dioConsumer.updateDeviceTypeHeader();
+    await sharedPreferences.clearSecureStorageOnFreshInstall();
 
-  runApp(const App());
+    runApp(const App());
+  } catch (e) {
+    Log.e('Error in main: $e');
+  }
 }
