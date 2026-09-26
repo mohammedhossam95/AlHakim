@@ -4,8 +4,10 @@ import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/home/presentation/cubit/ai_consent_cubit/ai_consent_cubit.dart';
 import 'package:alhakim/features/settings/domain/entity/app_setting_entity.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/app_setting_cubit/app_setting_cubit.dart';
+import 'package:alhakim/features/settings/presentaion/widgets/ai_consent_setting_tile.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/custom_app_bar.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/language_setting_widget.dart';
 import 'package:alhakim/features/settings/presentaion/widgets/profile_widget.dart';
@@ -39,228 +41,242 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DeleteUserAccountCubit, DeleteUserAccountState>(
-      listener: (context, state) async {
-        if (state is DeleteUserAccountLoading && state.isLoading) {
-          Constants.showLoading(context);
-        } else if (state is DeleteUserAccountLoaded) {
-          if (mounted) Constants.hideLoading(context);
-          Constants.showSnakToast(
-            context: context,
-            type: 1,
-            message: state.response.message ?? 'delete_account_success'.tr,
-          );
-          await _clearSessionAndNavigate();
-        } else if (state is DeleteUserAccountError) {
-          if (mounted) Constants.hideLoading(context);
-          Constants.showSnakToast(
-            context: context,
-            type: 3,
-            message: state.message,
-          );
-        }
-      },
-      child: BlocBuilder<SessionCubit, SessionState>(
-        builder: (context, sessionState) {
-          return SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: EdgeInsets.all(16.w),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      Row(
-                        children: [
-                          CustomAppBar(title: 'settings'.tr, isInTabBar: true),
-                          Spacer(),
-                          (sessionState.status == SessionStatus.authenticated)
-                              ? InkWell(
-                                  onTap: () async {
-                                    _handleLogout();
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.logout,
-                                        color: colors.errorColor,
-                                        size: 20.sp,
-                                      ),
-                                      Gaps.hGap6,
-                                      Text(
-                                        'logout'.tr,
-                                        style: TextStyles.semiBold12(
+    return BlocProvider(
+      create: (_) => ServiceLocator.instance<AiConsentCubit>()..checkConsent(),
+      child: BlocListener<DeleteUserAccountCubit, DeleteUserAccountState>(
+        listener: (context, state) async {
+          if (state is DeleteUserAccountLoading && state.isLoading) {
+            Constants.showLoading(context);
+          } else if (state is DeleteUserAccountLoaded) {
+            if (mounted) Constants.hideLoading(context);
+            Constants.showSnakToast(
+              context: context,
+              type: 1,
+              message: state.response.message ?? 'delete_account_success'.tr,
+            );
+            await _clearSessionAndNavigate();
+          } else if (state is DeleteUserAccountError) {
+            if (mounted) Constants.hideLoading(context);
+            Constants.showSnakToast(
+              context: context,
+              type: 3,
+              message: state.message,
+            );
+          }
+        },
+        child: BlocBuilder<SessionCubit, SessionState>(
+          builder: (context, sessionState) {
+            return SafeArea(
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.all(16.w),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        Row(
+                          children: [
+                            CustomAppBar(
+                              title: 'settings'.tr,
+                              isInTabBar: true,
+                            ),
+                            Spacer(),
+                            (sessionState.status == SessionStatus.authenticated)
+                                ? InkWell(
+                                    onTap: () async {
+                                      _handleLogout();
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.logout,
                                           color: colors.errorColor,
+                                          size: 20.sp,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : SizedBox.shrink(),
-                        ],
-                      ),
-                      Gaps.vGap16,
+                                        Gaps.hGap6,
+                                        Text(
+                                          'logout'.tr,
+                                          style: TextStyles.semiBold12(
+                                            color: colors.errorColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : SizedBox.shrink(),
+                          ],
+                        ),
+                        Gaps.vGap16,
 
-                      if (sessionState.status ==
-                          SessionStatus.authenticated) ...[
-                        _buildSectionCard(
-                          child: Column(
-                            children: [
-                              if (sessionCubit.state.userType ==
-                                  UserType.patient) ...[
+                        if (sessionState.status ==
+                            SessionStatus.authenticated) ...[
+                          _buildSectionCard(
+                            child: Column(
+                              children: [
+                                if (sessionCubit.state.userType ==
+                                    UserType.patient) ...[
+                                  ProfileWidet(
+                                    title: 'tapBarItemMyAccount'.tr,
+                                    icon: SvgAssets.editProfileIcon,
+                                    onTap: () {
+                                      context.push(
+                                        Routes.editProfileScreenRoute,
+                                      );
+                                    },
+                                  ),
+                                  ProfileWidet(
+                                    title: 'family_members'.tr,
+                                    icon: SvgAssets.familyIcon,
+                                    onTap: () {
+                                      context.push(
+                                        Routes.familyMembersScreenRoute,
+                                      );
+                                    },
+                                  ),
+                                ],
                                 ProfileWidet(
-                                  title: 'tapBarItemMyAccount'.tr,
-                                  icon: SvgAssets.editProfileIcon,
-                                  onTap: () {
-                                    context.push(Routes.editProfileScreenRoute);
-                                  },
-                                ),
-                                ProfileWidet(
-                                  title: 'family_members'.tr,
-                                  icon: SvgAssets.familyIcon,
+                                  title: 'changePassword'.tr,
+                                  icon: SvgAssets.lock,
                                   onTap: () {
                                     context.push(
-                                      Routes.familyMembersScreenRoute,
+                                      Routes.changePasswordScreenRoute,
                                     );
                                   },
                                 ),
                               ],
+                            ),
+                          ),
+                        ],
+
+                        _buildSectionCard(
+                          title: 'settings_and_support'.tr,
+                          child: Column(
+                            children: [
+                              if (sessionState.status !=
+                                  SessionStatus.authenticated)
+                                ProfileWidet(
+                                  title: 'login_as_delegate'.tr,
+                                  icon: SvgAssets.user,
+                                  onTap: () {
+                                    context.pushNamed(
+                                      Routes.loginScreenRoute,
+                                      extra: UserType.delegate,
+                                    );
+                                  },
+                                ),
                               ProfileWidet(
-                                title: 'changePassword'.tr,
-                                icon: SvgAssets.lock,
+                                title: 'language'.tr,
+                                icon: SvgAssets.languageIcon,
+                                onTap: () {
+                                  Constants.buildCustomShowModel(
+                                    context: context,
+                                    child: const LanguageSettingWidget(),
+                                  );
+                                },
+                              ),
+                              const AiConsentSettingTile(),
+                              ProfileWidet(
+                                title: 'how_we'.tr,
+                                icon: SvgAssets.aboutAppIcon,
                                 onTap: () {
                                   context.push(
-                                    Routes.changePasswordScreenRoute,
+                                    Routes.staticPageScreenRoute,
+                                    extra: StaticPageType.aboutUs,
+                                  );
+                                },
+                              ),
+                              ProfileWidet(
+                                title: 'privacy_policy'.tr,
+                                icon: SvgAssets.privacyIcon,
+                                onTap: () {
+                                  context.push(
+                                    Routes.staticPageScreenRoute,
+                                    extra: StaticPageType.privacy,
+                                  );
+                                },
+                              ),
+                              ProfileWidet(
+                                title: 'public_questions'.tr,
+                                icon: SvgAssets.faqIcon,
+                                onTap: () {
+                                  context.push(
+                                    Routes.staticPageScreenRoute,
+                                    extra: StaticPageType.faq,
                                   );
                                 },
                               ),
                             ],
                           ),
                         ),
-                      ],
 
-                      _buildSectionCard(
-                        title: 'settings_and_support'.tr,
-                        child: Column(
-                          children: [
-                            if (sessionState.status !=
-                                SessionStatus.authenticated)
-                              ProfileWidet(
-                                title: 'login_as_delegate'.tr,
-                                icon: SvgAssets.user,
-                                onTap: () {
-                                  context.pushNamed(
-                                    Routes.loginScreenRoute,
-                                    extra: UserType.delegate,
-                                  );
-                                },
+                        (sessionState.status == SessionStatus.authenticated)
+                            ? SizedBox.shrink()
+                            : Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Gaps.vGap25,
+                                  MyDefaultButton(
+                                    height: 40.h,
+                                    borderRadius: 20.r,
+                                    onPressed: () async {
+                                      Constants.showLoading(context);
+                                      await Future.delayed(
+                                        Duration(seconds: 2),
+                                      );
+                                      if (!context.mounted) return;
+                                      Constants.hideLoading(context);
+                                      context.push(
+                                        Routes.chooseUserTypeScreenRoute,
+                                      );
+                                    },
+                                    btnText: 'login',
+                                  ),
+                                  Gaps.vGap25,
+                                ],
                               ),
-                            ProfileWidet(
-                              title: 'language'.tr,
-                              icon: SvgAssets.languageIcon,
-                              onTap: () {
-                                Constants.buildCustomShowModel(
-                                  context: context,
-                                  child: const LanguageSettingWidget(),
-                                );
-                              },
-                            ),
-                            ProfileWidet(
-                              title: 'how_we'.tr,
-                              icon: SvgAssets.aboutAppIcon,
-                              onTap: () {
-                                context.push(
-                                  Routes.staticPageScreenRoute,
-                                  extra: StaticPageType.aboutUs,
-                                );
-                              },
-                            ),
-                            ProfileWidet(
-                              title: 'privacy_policy'.tr,
-                              icon: SvgAssets.privacyIcon,
-                              onTap: () {
-                                context.push(
-                                  Routes.staticPageScreenRoute,
-                                  extra: StaticPageType.privacy,
-                                );
-                              },
-                            ),
-                            ProfileWidet(
-                              title: 'public_questions'.tr,
-                              icon: SvgAssets.faqIcon,
-                              onTap: () {
-                                context.push(
-                                  Routes.staticPageScreenRoute,
-                                  extra: StaticPageType.faq,
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
 
-                      (sessionState.status == SessionStatus.authenticated)
-                          ? SizedBox.shrink()
-                          : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Gaps.vGap25,
-                                MyDefaultButton(
-                                  height: 40.h,
-                                  borderRadius: 20.r,
-                                  onPressed: () async {
-                                    Constants.showLoading(context);
-                                    await Future.delayed(Duration(seconds: 2));
-                                    if (!context.mounted) return;
-                                    Constants.hideLoading(context);
-                                    context.push(
-                                      Routes.chooseUserTypeScreenRoute,
-                                    );
-                                  },
-                                  btnText: 'login',
-                                ),
-                                Gaps.vGap25,
-                              ],
-                            ),
-
-                      BlocBuilder<AppSettingCubit, AppSettingState>(
-                        builder: (context, state) {
-                          if (state is AppSettingLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (state is AppSettingLoaded) {
-                            final config = state.resp.data as AppConfigEntity?;
-                            if (config == null) {
-                              return const SizedBox.shrink();
+                        BlocBuilder<AppSettingCubit, AppSettingState>(
+                          builder: (context, state) {
+                            if (state is AppSettingLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
                             }
-                            return FadeInUp(
-                              child: _buildAppInfoSection(config),
-                            );
-                          }
-                          if (state is AppSettingError) {
-                            return ErrorText(
-                              width: ScreenUtil().screenWidth * 0.6,
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
+                            if (state is AppSettingLoaded) {
+                              final config =
+                                  state.resp.data as AppConfigEntity?;
+                              if (config == null) {
+                                return const SizedBox.shrink();
+                              }
+                              return FadeInUp(
+                                child: _buildAppInfoSection(config),
+                              );
+                            }
+                            if (state is AppSettingError) {
+                              return ErrorText(
+                                width: ScreenUtil().screenWidth * 0.6,
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
 
-                      if (sessionState.status == SessionStatus.authenticated &&
-                          sessionCubit.state.userType == UserType.patient) ...[
-                        Gaps.vGap8,
-                        _buildDeleteAccountButton(),
-                        Gaps.vGap24,
-                      ],
-                    ]),
+                        if (sessionState.status ==
+                                SessionStatus.authenticated &&
+                            sessionCubit.state.userType ==
+                                UserType.patient) ...[
+                          Gaps.vGap8,
+                          _buildDeleteAccountButton(),
+                          Gaps.vGap24,
+                        ],
+                      ]),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -23,6 +23,12 @@
             "deviceId": "69f4dba"
         },
         {
+            "name": "M1908C3JGG",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "X4T4NRLROVK7AME6"
+        },
+        {
             "name": "alhakim (Redmi Note 8)",
             "request": "launch",
             "type": "dart",
@@ -57,10 +63,8 @@
         {
             "name": "alhakim (two)",
             "configurations": [
-                "iPhone 17 Pro",
-                "iPhone 15",
+                "M1908C3JGG",
                 "iPhone 11 Pro Max",
-                "alhakim (CPH1907)",
             ],
         }
     ]

@@ -12,6 +12,7 @@ import 'package:alhakim/features/doctors/presentation/widgets/agent_doctor_item.
 import 'package:alhakim/features/home/data/models/analyze_complaint_response_model.dart';
 import 'package:alhakim/features/home/presentation/cubit/analyze_complaint_cubit/analyze_complaint_cubit.dart';
 import 'package:alhakim/features/home/presentation/cubit/analyze_complaint_cubit/analyze_complaint_state.dart';
+import 'package:alhakim/features/home/presentation/widgets/ai_consent_bottom_sheet.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -73,6 +74,8 @@ class _AIAgentScreenState extends State<AIAgentScreen> {
                 type: 3,
                 message: state.message,
               );
+            } else if (state is AnalyzeComplaintConsentRequired) {
+              showAiConsentBottomSheet(context: context);
             }
           },
           builder: (context, state) {
@@ -202,6 +205,11 @@ class _ComplaintInputCard extends StatelessWidget {
                       'agent_desc'.tr,
                       style: TextStyles.regular10(color: colors.textColor),
                     ),
+                    Gaps.vGap4,
+                    Text(
+                      'ai_gemini_notice'.tr,
+                      style: TextStyles.regular10(color: colors.lightTextColor),
+                    ),
                   ],
                 ),
               ),
@@ -241,14 +249,6 @@ class _ComplaintInputCard extends StatelessWidget {
             ),
           ),
           Gaps.vGap24,
-          MyDefaultButton(
-            isLoading: isLoading,
-            onPressed: isLoading ? null : onAnalyze,
-            btnText: 'analyze_and_suggest',
-            svgAsset: SvgAssets.autoAwesome,
-            rightIcon: true,
-          ),
-          Gaps.vGap16,
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -272,6 +272,14 @@ class _ComplaintInputCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          Gaps.vGap16,
+          MyDefaultButton(
+            isLoading: isLoading,
+            onPressed: isLoading ? null : onAnalyze,
+            btnText: 'analyze_and_suggest',
+            svgAsset: SvgAssets.autoAwesome,
+            rightIcon: true,
           ),
         ],
       ),

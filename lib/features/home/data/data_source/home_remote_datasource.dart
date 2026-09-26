@@ -1,3 +1,5 @@
+import 'package:alhakim/core/utils/log_utils.dart';
+import 'package:alhakim/features/home/data/data_source/ai_consent_local_datasource.dart';
 import 'package:alhakim/features/home/data/models/analyze_complaint_request.dart';
 import 'package:alhakim/features/home/data/models/analyze_complaint_response_model.dart';
 import 'package:alhakim/features/home/data/models/get_ads_resp_model.dart';
@@ -44,6 +46,15 @@ class HomeRemoteDatasourceImpl implements HomeRemoteDatasource {
     AnalyzeComplaintRequest request,
   ) async {
     try {
+      final consent = await ServiceLocator.instance<AiConsentLocalDataSource>()
+          .getConsent();
+      if (!consent.accepted) {
+        Log.e(
+          '[analyzeComplaint] blocked at remote data source: AI consent not granted',
+        );
+        throw const CacheException(message: '');
+      }
+
       final response = await dioConsumer.post(
         ApiConstants.analyzeComplaint,
         formData: request.toFormData(),

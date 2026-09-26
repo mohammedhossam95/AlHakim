@@ -105,6 +105,7 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ///TODO: add the date to the local storage and get it from there
     final today = DateFormat(
       'EEEE، d MMMM',
       appLocalizations.isArLocale ? 'ar' : 'en',

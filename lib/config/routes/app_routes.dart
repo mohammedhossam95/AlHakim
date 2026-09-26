@@ -83,6 +83,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../features/auth/presentation/cubit/delete_user_account/delete_user_account_cubit.dart';
 import '../../features/auth/presentation/screen/phone_entry_screen.dart';
+import '../../features/home/presentation/cubit/ai_consent_cubit/ai_consent_cubit.dart';
 import '../../features/home/presentation/cubit/all_ads_cubit/all_ads_cubit.dart';
 import '../../features/home/presentation/cubit/analyze_complaint_cubit/analyze_complaint_cubit.dart';
 import '../../features/notifications/presentation/cubits/notifications_cubit/notifications_cubit.dart';
@@ -498,8 +499,11 @@ abstract class Routes {
         name: agentScreenRoute,
         pageBuilder: (context, state) => buildAdaptivePage(
           state: state,
-          child: BlocProvider(
-            create: (context) => sl<AnalyzeComplaintCubit>(),
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => sl<AnalyzeComplaintCubit>()),
+              BlocProvider(create: (context) => sl<AiConsentCubit>()),
+            ],
             child: const AIAgentScreen(),
           ),
         ),

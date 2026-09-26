@@ -1,5 +1,6 @@
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/config/routes/app_routes.dart';
+import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/svg_manager.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
@@ -8,6 +9,9 @@ import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/core/widgets/notifications_icon_button.dart';
+import 'package:alhakim/features/home/presentation/cubit/ai_consent_cubit/ai_consent_cubit.dart';
+import 'package:alhakim/features/home/presentation/cubit/ai_consent_cubit/ai_consent_state.dart';
+import 'package:alhakim/features/home/presentation/widgets/ai_consent_bottom_sheet.dart';
 import 'package:alhakim/features/specialities/domain/entities/specialty_entity.dart';
 import 'package:alhakim/features/specialities/presentation/cubit/get_specialties_cubit/get_specialties_cubit.dart';
 import 'package:alhakim/features/specialities/presentation/widgets/speciality_item.dart';
@@ -347,217 +351,222 @@ class _SpecialitiesScreenState extends State<SpecialitiesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: colors.backGround,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Column(
-            children: [
-              /// welcome row - ثابت فوق مش بيسكرول
-              Row(
-                children: [
-                  DiffImage(
-                    image: sharedPreferences.getAuth()?.user?.profilePhotoUrl,
-                    height: 60,
-                    width: 60,
-                    isCircle: true,
-                    userName: "${sharedPreferences.getAuth()?.user?.firstName}",
-                  ),
-                  Gaps.hGap12,
-                  Text(
-                    "welcome".tr,
-                    style: TextStyles.medium14(color: colors.lightTextColor),
-                  ),
-                  Gaps.hGap4,
-                  Text(
-                    sharedPreferences.getAuth()?.user?.firstName ?? '',
-                    style: TextStyles.semiBold14(),
-                  ),
-                  const Spacer(),
-                  const NotificationsIconButton(),
-                ],
-              ),
+    return BlocProvider(
+      create: (_) => ServiceLocator.instance<AiConsentCubit>(),
+      child: Scaffold(
+        backgroundColor: colors.backGround,
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Column(
+              children: [
+                /// welcome row - ثابت فوق مش بيسكرول
+                Row(
+                  children: [
+                    DiffImage(
+                      image: sharedPreferences.getAuth()?.user?.profilePhotoUrl,
+                      height: 60,
+                      width: 60,
+                      isCircle: true,
+                      userName:
+                          "${sharedPreferences.getAuth()?.user?.firstName}",
+                    ),
+                    Gaps.hGap12,
+                    Text(
+                      "welcome".tr,
+                      style: TextStyles.medium14(color: colors.lightTextColor),
+                    ),
+                    Gaps.hGap4,
+                    Text(
+                      sharedPreferences.getAuth()?.user?.firstName ?? '',
+                      style: TextStyles.semiBold14(),
+                    ),
+                    const Spacer(),
+                    const NotificationsIconButton(),
+                  ],
+                ),
 
-              Gaps.vGap10,
+                Gaps.vGap10,
 
-              /// من هنا لتحت كله جوه CustomScrollView (أداء أفضل، lazy building حقيقي)
-              Expanded(
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics(),
-                  ),
-                  slivers: [
-                    /// search field
-                    SliverToBoxAdapter(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colors.whiteColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.main.withValues(alpha: .1),
-                              blurRadius: 10.r,
-                              offset: Offset(0, 10.h),
+                /// من هنا لتحت كله جوه CustomScrollView (أداء أفضل، lazy building حقيقي)
+                Expanded(
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
+                    slivers: [
+                      /// search field
+                      SliverToBoxAdapter(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colors.whiteColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: colors.main.withValues(alpha: .1),
+                                blurRadius: 10.r,
+                                offset: Offset(0, 10.h),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: MyTextFormField(
+                            controller: _searchController,
+                            backgroundColor: colors.whiteColor,
+                            hintText: 'search_speciality'.tr,
+                            prefixIcon: Icon(Icons.search, color: colors.main),
+                            textInputAction: TextInputAction.search,
+                            onSubmit: (value) {
+                              final query = value.trim();
+                              if (query.isEmpty) return;
+
+                              context.push(
+                                Routes.searchDoctorsScreenRoute,
+                                extra: query,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      SliverToBoxAdapter(child: Gaps.vGap16),
+
+                      /// banner
+                      const SliverToBoxAdapter(child: _BannerCard()),
+
+                      SliverToBoxAdapter(child: Gaps.vGap16),
+
+                      /// header
+                      SliverToBoxAdapter(
+                        child: Row(
+                          children: [
+                            Text(
+                              "all_specialities".tr,
+                              style: TextStyles.semiBold16(),
                             ),
                           ],
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: MyTextFormField(
-                          controller: _searchController,
-                          backgroundColor: colors.whiteColor,
-                          hintText: 'search_speciality'.tr,
-                          prefixIcon: Icon(Icons.search, color: colors.main),
-                          textInputAction: TextInputAction.search,
-                          onSubmit: (value) {
-                            final query = value.trim();
-                            if (query.isEmpty) return;
-
-                            context.push(
-                              Routes.searchDoctorsScreenRoute,
-                              extra: query,
-                            );
-                          },
                         ),
                       ),
-                    ),
 
-                    SliverToBoxAdapter(child: Gaps.vGap16),
+                      SliverToBoxAdapter(child: Gaps.vGap16),
 
-                    /// banner
-                    const SliverToBoxAdapter(child: _BannerCard()),
-
-                    SliverToBoxAdapter(child: Gaps.vGap16),
-
-                    /// header
-                    SliverToBoxAdapter(
-                      child: Row(
-                        children: [
-                          Text(
-                            "all_specialities".tr,
-                            style: TextStyles.semiBold16(),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SliverToBoxAdapter(child: Gaps.vGap16),
-
-                    /// grid - lazy sliver
-                    BlocBuilder<GetSpecialtiesCubit, GetSpecialtiesState>(
-                      builder: (context, state) {
-                        if (state is GetSpecialtiesLoading) {
-                          return SliverGrid.builder(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 14.h,
-                                  crossAxisSpacing: 14.w,
-                                  childAspectRatio: .88,
-                                ),
-                            itemCount: 6,
-                            itemBuilder: (context, index) {
-                              return Shimmer.fromColors(
-                                baseColor: Colors.grey.shade300,
-                                highlightColor: Colors.grey.shade100,
-                                child: Container(
-                                  padding: EdgeInsets.all(14.w),
-                                  decoration: BoxDecoration(
-                                    color: colors.whiteColor,
-                                    borderRadius: BorderRadius.circular(22.r),
+                      /// grid - lazy sliver
+                      BlocBuilder<GetSpecialtiesCubit, GetSpecialtiesState>(
+                        builder: (context, state) {
+                          if (state is GetSpecialtiesLoading) {
+                            return SliverGrid.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 14.h,
+                                    crossAxisSpacing: 14.w,
+                                    childAspectRatio: .88,
                                   ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        height: 70.h,
-                                        width: 70.w,
-                                        decoration: BoxDecoration(
-                                          color: colors.whiteColor,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      Gaps.vGap16,
-                                      Container(
-                                        height: 12.h,
-                                        width: 90.w,
-                                        decoration: BoxDecoration(
-                                          color: colors.whiteColor,
-                                          borderRadius: BorderRadius.circular(
-                                            20.r,
+                              itemCount: 6,
+                              itemBuilder: (context, index) {
+                                return Shimmer.fromColors(
+                                  baseColor: Colors.grey.shade300,
+                                  highlightColor: Colors.grey.shade100,
+                                  child: Container(
+                                    padding: EdgeInsets.all(14.w),
+                                    decoration: BoxDecoration(
+                                      color: colors.whiteColor,
+                                      borderRadius: BorderRadius.circular(22.r),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          height: 70.h,
+                                          width: 70.w,
+                                          decoration: BoxDecoration(
+                                            color: colors.whiteColor,
+                                            shape: BoxShape.circle,
                                           ),
                                         ),
-                                      ),
-                                      Gaps.vGap10,
-                                      Container(
-                                        height: 10.h,
-                                        width: 60.w,
-                                        decoration: BoxDecoration(
-                                          color: colors.whiteColor,
-                                          borderRadius: BorderRadius.circular(
-                                            20.r,
+                                        Gaps.vGap16,
+                                        Container(
+                                          height: 12.h,
+                                          width: 90.w,
+                                          decoration: BoxDecoration(
+                                            color: colors.whiteColor,
+                                            borderRadius: BorderRadius.circular(
+                                              20.r,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        Gaps.vGap10,
+                                        Container(
+                                          height: 10.h,
+                                          width: 60.w,
+                                          decoration: BoxDecoration(
+                                            color: colors.whiteColor,
+                                            borderRadius: BorderRadius.circular(
+                                              20.r,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          } else if (state is GetSpecialtiesError) {
+                            return SliverToBoxAdapter(
+                              child: SizedBox(
+                                height: 200.h,
+                                child: Center(
+                                  child: ErrorText(
+                                    width: 100.w,
+                                    text: state.message,
+                                    onRetry: () => context
+                                        .read<GetSpecialtiesCubit>()
+                                        .getSpecialties(),
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else if (state is GetSpecialtiesSuccess) {
+                            final List<SpecialtyEntity> specialities =
+                                state.response.data as List<SpecialtyEntity>;
+
+                            if (specialities.isEmpty) {
+                              return SliverToBoxAdapter(
+                                child: Center(
+                                  child: ErrorText(
+                                    width: 300.w,
+                                    text: "noData".tr,
                                   ),
                                 ),
                               );
-                            },
-                          );
-                        } else if (state is GetSpecialtiesError) {
-                          return SliverToBoxAdapter(
-                            child: SizedBox(
-                              height: 200.h,
-                              child: Center(
-                                child: ErrorText(
-                                  width: 100.w,
-                                  text: state.message,
-                                  onRetry: () => context
-                                      .read<GetSpecialtiesCubit>()
-                                      .getSpecialties(),
-                                ),
-                              ),
-                            ),
-                          );
-                        } else if (state is GetSpecialtiesSuccess) {
-                          final List<SpecialtyEntity> specialities =
-                              state.response.data as List<SpecialtyEntity>;
-
-                          if (specialities.isEmpty) {
-                            return SliverToBoxAdapter(
-                              child: Center(
-                                child: ErrorText(
-                                  width: 300.w,
-                                  text: "noData".tr,
-                                ),
-                              ),
+                            }
+                            return SliverGrid.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 14.h,
+                                    crossAxisSpacing: 14.w,
+                                    childAspectRatio: .75,
+                                  ),
+                              itemCount: specialities.length,
+                              itemBuilder: (context, index) {
+                                final item = specialities[index];
+                                return SpecialityItem(item);
+                              },
                             );
                           }
-                          return SliverGrid.builder(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 14.h,
-                                  crossAxisSpacing: 14.w,
-                                  childAspectRatio: .75,
-                                ),
-                            itemCount: specialities.length,
-                            itemBuilder: (context, index) {
-                              final item = specialities[index];
-                              return SpecialityItem(item);
-                            },
-                          );
-                        }
-                        return const SliverToBoxAdapter(child: SizedBox());
-                      },
-                    ),
+                          return const SliverToBoxAdapter(child: SizedBox());
+                        },
+                      ),
 
-                    /// مساحة آخر السكرول
-                    SliverToBoxAdapter(child: Gaps.vGap20),
-                  ],
+                      /// مساحة آخر السكرول
+                      SliverToBoxAdapter(child: Gaps.vGap20),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -620,9 +629,7 @@ class _BannerCard extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: MyDefaultButton(
               borderColor: colors.whiteColor,
-              onPressed: () {
-                context.push(Routes.agentScreenRoute);
-              },
+              onPressed: () => _onAiAssistantPressed(context),
               btnText: "start_diagnosis",
               color: colors.whiteColor,
               svgAsset: SvgAssets.iconArrowBackEn,
@@ -635,5 +642,29 @@ class _BannerCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+Future<void> _onAiAssistantPressed(BuildContext context) async {
+  final cubit = context.read<AiConsentCubit>();
+  Constants.showLoading(context);
+  await cubit.checkConsent();
+  if (!context.mounted) return;
+  Constants.hideLoading(context);
+
+  final state = cubit.state;
+  if (state is AiConsentGranted) {
+    context.push(Routes.agentScreenRoute);
+  } else if (state is AiConsentNotGranted) {
+    await showAiConsentBottomSheet(
+      context: context,
+      onAccepted: () {
+        if (context.mounted) {
+          context.push(Routes.agentScreenRoute);
+        }
+      },
+    );
+  } else if (state is AiConsentError) {
+    Constants.showSnakToast(context: context, type: 3, message: state.message);
   }
 }

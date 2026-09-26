@@ -12,6 +12,15 @@ class AnalyzeComplaintInitial extends AnalyzeComplaintState {}
 
 class AnalyzeComplaintLoading extends AnalyzeComplaintState {}
 
+class AnalyzeComplaintConsentRequired extends AnalyzeComplaintState {
+  final DateTime blockedAt;
+
+  AnalyzeComplaintConsentRequired() : blockedAt = DateTime.now();
+
+  @override
+  List<Object?> get props => [blockedAt];
+}
+
 class AnalyzeComplaintSuccess extends AnalyzeComplaintState {
   final AnalyzeComplaintResponse response;
 

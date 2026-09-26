@@ -69,14 +69,18 @@ class Constants {
     }
   }
 
-  static Future<File?> getCompressedFile(File file, [String? targetPath]) async {
+  static Future<File?> getCompressedFile(
+    File file, [
+    String? targetPath,
+  ]) async {
     if (!await file.exists()) {
       Log.e('Compress skipped, source file missing: ${file.path}');
       return null;
     }
 
     try {
-      final outputPath = targetPath ??
+      final outputPath =
+          targetPath ??
           '${Directory.systemTemp.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
       XFile? result = await FlutterImageCompress.compressAndGetFile(
@@ -750,10 +754,14 @@ class Constants {
   // }
 
   /// Type: 1 done , 2: warning, 3: error
-  static void showSnakToast({required context, message, type}) {
+  static void showSnakToast({
+    required BuildContext? context,
+    required String? message,
+    required int? type,
+  }) {
     Color background = colors.main;
     Color textColor = colors.textColor;
-    var width = MediaQuery.of(context).size.width;
+    var width = MediaQuery.of(context!).size.width;
 
     String icon = '';
 
@@ -805,7 +813,7 @@ class Constants {
                     child: SizedBox(
                       width: width * 0.7,
                       child: Text(
-                        message,
+                        message ?? '',
                         style: TextStyles.regular12(color: textColor),
                         maxLines: 2,
                       ),
@@ -820,7 +828,7 @@ class Constants {
                     width: width * 0.8,
                     child: Center(
                       child: Text(
-                        message,
+                        message ?? '',
                         style: TextStyles.regular12(color: textColor),
                         maxLines: 2,
                       ),

@@ -34,6 +34,8 @@ abstract class _AppSharedPreferencesKeys {
   static const branches = 'branches';
   static const lastSyncedUserId = 'lastSyncedUserId';
   static const isAddressSynced = 'isAddressSynced';
+  static const aiConsentAccepted = 'ai_consent_accepted';
+  static const aiConsentAcceptedAt = 'ai_consent_accepted_at';
 
   static const settings = 'settings';
   static const auth = 'auth';
@@ -139,6 +141,16 @@ abstract class AppSharedPreferences {
   bool getIsAddressSynced();
   Future<bool> saveIsAddressSynced(bool isSynced);
   Future<bool> removeIsAddressSynced();
+  //endregion
+
+  //region:: AI Consent
+  bool getAiConsentAccepted();
+  Future<bool> saveAiConsentAccepted(bool accepted);
+  Future<bool> removeAiConsentAccepted();
+
+  String? getAiConsentAcceptedAt();
+  Future<bool> saveAiConsentAcceptedAt(String iso8601);
+  Future<bool> removeAiConsentAcceptedAt();
   //endregion
 
   Future<bool> saveSettings(SettingModel? data);
@@ -503,6 +515,32 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
   @override
   Future<bool> removeIsAddressSynced() =>
       instance.remove(_AppSharedPreferencesKeys.isAddressSynced);
+
+  //region:: AI Consent
+  @override
+  bool getAiConsentAccepted() =>
+      instance.getBool(_AppSharedPreferencesKeys.aiConsentAccepted) ?? false;
+
+  @override
+  Future<bool> saveAiConsentAccepted(bool accepted) =>
+      instance.setBool(_AppSharedPreferencesKeys.aiConsentAccepted, accepted);
+
+  @override
+  Future<bool> removeAiConsentAccepted() =>
+      instance.remove(_AppSharedPreferencesKeys.aiConsentAccepted);
+
+  @override
+  String? getAiConsentAcceptedAt() =>
+      instance.getString(_AppSharedPreferencesKeys.aiConsentAcceptedAt);
+
+  @override
+  Future<bool> saveAiConsentAcceptedAt(String iso8601) =>
+      instance.setString(_AppSharedPreferencesKeys.aiConsentAcceptedAt, iso8601);
+
+  @override
+  Future<bool> removeAiConsentAcceptedAt() =>
+      instance.remove(_AppSharedPreferencesKeys.aiConsentAcceptedAt);
+  //endregion
 
   @override
   SettingEntity? getSettings() {

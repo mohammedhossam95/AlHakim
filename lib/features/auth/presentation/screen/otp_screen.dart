@@ -160,16 +160,14 @@ class _OtpAuthScreenState extends State<OtpAuthScreen> {
                   await secureStorage.saveAccessToken(data.token!);
                 }
 
-                final userType =
-                    widget.authParams.userType ?? UserType.patient;
+                final userType = widget.authParams.userType ?? UserType.patient;
+                if (!context.mounted) return;
                 final session = context.read<SessionCubit>();
                 await session.setUserType(userType);
                 await session.loginSuccess(userType);
 
                 if (!context.mounted) return;
-                context.read<BottomNavBarCubit>().changeCurrentScreen(
-                  index: 0,
-                );
+                context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
                 context.go(Routes.mainPageRoute);
               } else if (state is VerifyCodeError) {
                 _showError(state.message);

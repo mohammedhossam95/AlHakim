@@ -14,8 +14,9 @@ import 'retry_interceptor.dart';
 import 'status_code.dart';
 
 abstract class ApiConstants {
-  static const String dev = 'https://alhakim-eg.com/api/v1';
+  static const String dev = 'https://yayalabs.dev/api/v1';
   static const String live = 'https://alhakim-eg.com/api/v1';
+
   static const String baseUrl = dev;
   static const String analyzeComplaint = '/complaints/analyze';
   static const String getNotifications = '/notifications';
