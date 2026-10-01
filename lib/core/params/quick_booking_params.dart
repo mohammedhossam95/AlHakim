@@ -7,6 +7,7 @@ class QuickBookingParams extends Equatable {
   final String? lastName;
   final String? countryCode;
   final String? phoneNumber;
+  final int? appointmentTypeId;
 
   const QuickBookingParams({
     this.doctorId,
@@ -15,6 +16,7 @@ class QuickBookingParams extends Equatable {
     this.lastName,
     this.countryCode,
     this.phoneNumber,
+    this.appointmentTypeId,
   });
 
   Map<String, dynamic> toJson() {
@@ -44,6 +46,10 @@ class QuickBookingParams extends Equatable {
       data['phone_number'] = phoneNumber;
     }
 
+    if (appointmentTypeId != null) {
+      data['appointment_type_id'] = appointmentTypeId;
+    }
+
     return data;
   }
 
@@ -55,5 +61,6 @@ class QuickBookingParams extends Equatable {
     lastName,
     countryCode,
     phoneNumber,
+    appointmentTypeId,
   ];
 }

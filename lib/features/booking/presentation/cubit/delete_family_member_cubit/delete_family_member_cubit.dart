@@ -10,7 +10,7 @@ class DeleteFamilyMemberCubit extends Cubit<DeleteFamilyMemberState> {
   final DeleteFamilyMemberUsecase usecase;
 
   DeleteFamilyMemberCubit({required this.usecase})
-      : super(DeleteFamilyMemberInitial());
+    : super(DeleteFamilyMemberInitial());
 
   Future<void> deleteFamilyMember({required String id}) async {
     emit(DeleteFamilyMemberLoading());

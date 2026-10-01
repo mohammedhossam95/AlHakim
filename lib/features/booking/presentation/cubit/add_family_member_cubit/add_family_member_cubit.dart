@@ -11,10 +11,8 @@ class AddFamilyMemberCubit extends Cubit<AddFamilyMemberState> {
   final AddFamilyMemberUsecase addUsecase;
   final UpdateFamilyMemberUsecase updateUsecase;
 
-  AddFamilyMemberCubit({
-    required this.addUsecase,
-    required this.updateUsecase,
-  }) : super(AddFamilyMemberInitial());
+  AddFamilyMemberCubit({required this.addUsecase, required this.updateUsecase})
+    : super(AddFamilyMemberInitial());
 
   Future<void> addFamilyMember({
     required String fullName,

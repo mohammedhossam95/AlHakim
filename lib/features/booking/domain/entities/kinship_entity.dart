@@ -4,14 +4,8 @@ class KinshipEntity extends Equatable {
   final String? value;
   final String? label;
 
-  const KinshipEntity({
-    this.value,
-    this.label,
-  });
+  const KinshipEntity({this.value, this.label});
 
   @override
-  List<Object?> get props => [
-        value,
-        label,
-      ];
+  List<Object?> get props => [value, label];
 }

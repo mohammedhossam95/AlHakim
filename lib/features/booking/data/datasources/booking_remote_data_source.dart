@@ -65,10 +65,7 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required String kinship,
   }) async {
     try {
-      final body = <String, dynamic>{
-        "full_name": fullName,
-        "kinship": kinship,
-      };
+      final body = <String, dynamic>{"full_name": fullName, "kinship": kinship};
       if (birthDate.trim().isNotEmpty) {
         body["birth_date"] = birthDate;
       }
@@ -95,9 +92,7 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     required String birthDate,
   }) async {
     try {
-      final body = <String, dynamic>{
-        'full_name': fullName,
-      };
+      final body = <String, dynamic>{'full_name': fullName};
       if (birthDate.trim().isNotEmpty) {
         body['birth_date'] = birthDate;
       }

@@ -12,6 +12,8 @@ import 'package:alhakim/features/booking/domain/entities/schedule.dart';
 import 'package:alhakim/features/booking/domain/usecases/params/booking_params.dart';
 import 'package:alhakim/features/booking/presentation/cubit/book_appointment_cubit/book_appointment_cubit.dart';
 import 'package:alhakim/features/booking/presentation/widgets/appointment_type_bottom_sheet.dart';
+import 'package:alhakim/features/booking/presentation/widgets/booking_dates_selector.dart';
+import 'package:alhakim/features/booking/presentation/widgets/selected_booking_date_card.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_by_id_cubit/get_doctor_by_id_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/widgets/doctor_list_item.dart';
@@ -77,9 +79,7 @@ class _BookingScreenState extends State<BookingScreen> {
     List<AvailableBookingDate> dates,
     List<ScheduleExceptionEntity>? exceptions,
   ) {
-    final index = dates.indexWhere(
-      (booking) => !_isDateDisabled(booking, exceptions: exceptions),
-    );
+    final index = BookingDatesHelper.firstSelectableIndex(dates, exceptions);
     return index >= 0 ? index : 0;
   }
 
@@ -87,34 +87,10 @@ class _BookingScreenState extends State<BookingScreen> {
     AvailableBookingDate booking, {
     List<ScheduleExceptionEntity>? exceptions,
   }) {
-    final scheduleStatus = booking.schedule.scheduleStatus
-        ?.toLowerCase()
-        .trim();
-    if (scheduleStatus == 'full') return true;
-
-    final exceptionDates = exceptions ?? displayDoctor.scheduleExceptions ?? [];
-    if (exceptionDates.isEmpty) return false;
-
-    final bookingDateKey = DateFormat('yyyy-MM-dd').format(booking.date);
-    return exceptionDates.any((exception) {
-      final exceptionDate = exception.date?.trim();
-      if (exceptionDate == null || exceptionDate.isEmpty) return false;
-      return exceptionDate.startsWith(bookingDateKey);
-    });
-  }
-
-  String formatTime(String time) {
-    final parts = time.split(':');
-
-    final date = DateTime(2025, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
-
-    final hour = DateFormat('hh:mm', 'en').format(date);
-
-    final period = date.hour >= 12
-        ? (appLocalizations.isArLocale ? 'مساء' : 'PM')
-        : (appLocalizations.isArLocale ? 'صباحاً' : 'AM');
-
-    return "$hour $period";
+    return BookingDatesHelper.isDateDisabled(
+      booking,
+      exceptions ?? displayDoctor.scheduleExceptions,
+    );
   }
 
   @override
@@ -187,210 +163,18 @@ class _BookingScreenState extends State<BookingScreen> {
                 Gaps.vGap20,
 
                 /// dates
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(availableDates.length, (index) {
-                      final bookingDate = availableDates[index];
-                      final date = bookingDate.date;
-                      final isDisabled = _isDateDisabled(bookingDate);
-                      final isSelected =
-                          selectedDateIndex == index && !isDisabled;
-                      final isLast = index == availableDates.length - 1;
-
-                      final backgroundColor = isDisabled
-                          ? colors.lightTextColor.withValues(alpha: 0.08)
-                          : isSelected
-                          ? colors.main
-                          : colors.whiteColor;
-                      final borderColor = isDisabled
-                          ? colors.lightTextColor.withValues(alpha: 0.15)
-                          : isSelected
-                          ? colors.main
-                          : colors.main.withValues(alpha: .08);
-                      final primaryTextColor = isDisabled
-                          ? colors.lightTextColor.withValues(alpha: 0.45)
-                          : isSelected
-                          ? colors.whiteColor
-                          : colors.textColor;
-                      final secondaryTextColor = isDisabled
-                          ? colors.lightTextColor.withValues(alpha: 0.4)
-                          : isSelected
-                          ? colors.whiteColor
-                          : colors.lightTextColor;
-
-                      return Padding(
-                        padding: EdgeInsetsDirectional.only(
-                          end: isLast ? 0 : 12.w,
-                        ),
-                        child: GestureDetector(
-                          onTap: isDisabled
-                              ? null
-                              : () {
-                                  setState(() {
-                                    selectedDateIndex = index;
-                                  });
-                                },
-                          child: Opacity(
-                            opacity: isDisabled ? 0.55 : 1,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 20.w,
-                                vertical: 10.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: backgroundColor,
-                                borderRadius: BorderRadius.circular(22.r),
-                                border: Border.all(color: borderColor),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    DateFormat(
-                                      'EEE',
-                                      appLocalizations.locale?.languageCode,
-                                    ).format(date),
-                                    style: TextStyles.medium14(
-                                      color: secondaryTextColor,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Gaps.vGap4,
-                                  Text(
-                                    '${date.day}',
-                                    style: TextStyles.semiBold24(
-                                      color: primaryTextColor,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  Gaps.vGap4,
-                                  Text(
-                                    DateFormat(
-                                      'MMM',
-                                      appLocalizations.locale?.languageCode,
-                                    ).format(date),
-                                    style: TextStyles.medium12(
-                                      color: secondaryTextColor,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
+                BookingDatesSelector(
+                  dates: availableDates,
+                  selectedIndex: selectedDateIndex,
+                  isDisabled: _isDateDisabled,
+                  onSelected: (index) {
+                    setState(() => selectedDateIndex = index);
+                  },
                 ),
                 Gaps.vGap20,
 
                 /// selected date card
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(18.w),
-                  decoration: BoxDecoration(
-                    color: colors.main.withValues(alpha: .05),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(12.w),
-                            decoration: BoxDecoration(
-                              color: colors.main.withValues(alpha: .12),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.calendar_month_rounded,
-                              color: colors.main,
-                            ),
-                          ),
-                          Gaps.hGap16,
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "selected_date".tr,
-                                  style: TextStyles.medium12(
-                                    color: colors.lightTextColor,
-                                  ),
-                                ),
-                                Gaps.vGap8,
-                                Text(
-                                  DateFormat(
-                                    'EEEE, d MMM yyyy',
-                                    appLocalizations.locale?.languageCode,
-                                  ).format(selectedBooking.date),
-                                  style: TextStyles.medium14(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(),
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(12.w),
-
-                            decoration: BoxDecoration(
-                              color: colors.secondary.withValues(alpha: .12),
-
-                              shape: BoxShape.circle,
-                            ),
-
-                            child: Icon(
-                              Icons.access_time,
-                              color: colors.secondary,
-                            ),
-                          ),
-
-                          Gaps.hGap16,
-
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-
-                              children: [
-                                Text(
-                                  "available_time".tr,
-
-                                  style: TextStyles.medium12(
-                                    color: colors.lightTextColor,
-                                  ),
-                                ),
-
-                                Gaps.vGap8,
-
-                                Text(
-                                  "from_to_time".trParams({
-                                    "start": formatTime(
-                                      selectedBooking.schedule.startTime ?? '',
-                                    ),
-
-                                    "end": formatTime(
-                                      selectedBooking.schedule.endTime ?? '',
-                                    ),
-                                  }),
-
-                                  style: TextStyles.medium14(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                SelectedBookingDateCard(booking: selectedBooking),
 
                 Gaps.vGap30,
 

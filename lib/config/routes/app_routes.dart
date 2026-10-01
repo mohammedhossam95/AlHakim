@@ -405,8 +405,11 @@ abstract class Routes {
       GoRoute(
         path: quickBookingScreenRoute,
         name: quickBookingScreenRoute,
-        builder: (context, state) => BlocProvider(
-          create: (context) => sl<QuickBookingCubit>(),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => sl<QuickBookingCubit>()),
+            BlocProvider(create: (context) => sl<GetDoctorByIdCubit>()),
+          ],
           child: const QuickBookingScreen(),
         ),
       ),

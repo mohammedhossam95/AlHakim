@@ -10,9 +10,9 @@ class UpdateFamilyMemberParams {
   });
 
   Map<String, dynamic> toJson() => {
-        'full_name': fullName,
-        'birth_date': birthDate,
-      };
+    'full_name': fullName,
+    'birth_date': birthDate,
+  };
 
   UpdateFamilyMemberParams copyWith({
     String? id,

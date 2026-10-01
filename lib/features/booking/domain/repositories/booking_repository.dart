@@ -22,5 +22,7 @@ abstract class BookingRepository {
   Future<Either<Failure, BaseOneResponse>> deleteFamilyMember({
     required DeleteFamilyMemberParams params,
   });
-  Future<Either<Failure, BaseOneResponse>> bookAppointment(BookingParams params);
+  Future<Either<Failure, BaseOneResponse>> bookAppointment(
+    BookingParams params,
+  );
 }
