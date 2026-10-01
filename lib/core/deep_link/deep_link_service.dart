@@ -22,7 +22,9 @@ class DeepLinkService {
     try {
       final initialUri = await _appLinks.getInitialLink();
       _enqueueDoctorId(
-        initialUri == null ? null : DeepLinkParser.parseDoctorBookingId(initialUri),
+        initialUri == null
+            ? null
+            : DeepLinkParser.parseDoctorBookingId(initialUri),
       );
     } catch (e, st) {
       log('DeepLinkService getInitialLink: $e', stackTrace: st);

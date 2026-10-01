@@ -1,10 +1,7 @@
 import 'values/strings.dart';
 
 abstract class Validator {
-  static String? call({
-    required String? value,
-    required ValidatorType type,
-  }) {
+  static String? call({required String? value, required ValidatorType type}) {
     String? validateNotEmpty = _notEmpty(value);
     if (validateNotEmpty == null) {
       return type.condition.call(value!) ?? validateNotEmpty;
@@ -36,25 +33,24 @@ abstract class Validator {
   // }
 
   static String? _phone(String value) {
-  // Remove spaces and dashes for basic digit length check
-  final cleaned = value.replaceAll(RegExp(r'\D'), '');
+    // Remove spaces and dashes for basic digit length check
+    final cleaned = value.replaceAll(RegExp(r'\D'), '');
 
-  // Require at least 8 digits (can adjust to 10+ if needed)
-  if (cleaned.length < 8) {
-    return Strings.errorValidPhoneNumber;
+    // Require at least 8 digits (can adjust to 10+ if needed)
+    if (cleaned.length < 8) {
+      return Strings.errorValidPhoneNumber;
+    }
+
+    // Basic phone number regex allowing +, (), -, spaces
+    const pattern = r'^\+?[0-9\s\-\(\)]{8,20}$';
+    final regExp = RegExp(pattern);
+
+    if (!regExp.hasMatch(value)) {
+      return Strings.errorValidPhoneNumber;
+    }
+
+    return null;
   }
-
-  // Basic phone number regex allowing +, (), -, spaces
-  const pattern = r'^\+?[0-9\s\-\(\)]{8,20}$';
-  final regExp = RegExp(pattern);
-
-  if (!regExp.hasMatch(value)) {
-    return Strings.errorValidPhoneNumber;
-  }
-
-  return null;
-}
-
 
   static String? _email(String value) {
     const pattern =
@@ -75,8 +71,6 @@ abstract class Validator {
   }
 
   static String? _password(String value) {
-
-
     // const pattern =
     //     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$';
     // final regExp = RegExp(pattern);
@@ -85,7 +79,7 @@ abstract class Validator {
     // }
     // return null;
 
-    value=value.trim();
+    value = value.trim();
     // if (value.length < 6) return TranslationBase.of(context).passwordValidate;
     if (value.length < 6) return Strings.errorValidPassword;
 
@@ -110,7 +104,7 @@ enum ValidatorType {
   phone,
   numbersOnly,
   password,
-  confirmPassword
+  confirmPassword,
 }
 
 extension ValidatorTypeExtension on ValidatorType {

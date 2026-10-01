@@ -534,8 +534,10 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
       instance.getString(_AppSharedPreferencesKeys.aiConsentAcceptedAt);
 
   @override
-  Future<bool> saveAiConsentAcceptedAt(String iso8601) =>
-      instance.setString(_AppSharedPreferencesKeys.aiConsentAcceptedAt, iso8601);
+  Future<bool> saveAiConsentAcceptedAt(String iso8601) => instance.setString(
+    _AppSharedPreferencesKeys.aiConsentAcceptedAt,
+    iso8601,
+  );
 
   @override
   Future<bool> removeAiConsentAcceptedAt() =>
@@ -581,11 +583,8 @@ class AppSharedPreferencesImpl extends AppSharedPreferences {
                   ),
             externalLinks: config.externalLinks
                 ?.map(
-                  (e) => ExternalLinkModel(
-                    name: e.name,
-                    icon: e.icon,
-                    url: e.url,
-                  ),
+                  (e) =>
+                      ExternalLinkModel(name: e.name, icon: e.icon, url: e.url),
                 )
                 .toList(),
           );

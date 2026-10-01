@@ -1,3 +1,4 @@
+import 'package:alhakim/core/utils/english_digits_input_formatter.dart';
 // ignore_for_file: deprecated_member_use
 
 import 'package:alhakim/core/utils/values/text_styles.dart';
@@ -74,6 +75,11 @@ class MyTextFormField extends StatelessWidget {
     this.borderColor,
   });
 
+  /// Phone fields only accept English digits, wherever they're used.
+  bool get _isPhoneField =>
+      validatorType == ValidatorType.phone ||
+      keyboardType == TextInputType.phone;
+
   @override
   Widget build(BuildContext context) {
     final bool isFocused = focusNode?.hasFocus ?? false;
@@ -91,8 +97,7 @@ class MyTextFormField extends StatelessWidget {
       maxLines: maxLines ?? 1,
       minLines: minLines,
 
-      textDirection:
-          textDirection ?? (arLang ? TextDirection.rtl : null),
+      textDirection: textDirection ?? (arLang ? TextDirection.rtl : null),
       keyboardType: keyboardType,
       textInputAction: textInputAction ?? TextInputAction.done,
       validator: validatorType != null
@@ -103,7 +108,9 @@ class MyTextFormField extends StatelessWidget {
       textAlign: textAlign,
       obscureText: obscureText,
       cursorColor: colors.main,
-      inputFormatters: inputFormatters,
+      inputFormatters: _isPhoneField
+          ? [const EnglishDigitsInputFormatter(), ...?inputFormatters]
+          : inputFormatters,
       decoration: InputDecoration(
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,

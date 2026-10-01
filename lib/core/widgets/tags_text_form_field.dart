@@ -1,3 +1,4 @@
+import 'package:alhakim/core/utils/english_digits_input_formatter.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,6 +77,12 @@ class AppTextFormField extends StatelessWidget {
     this.hintColor,
     this.autofillHints,
   });
+
+  /// Phone fields only accept English digits, wherever they're used.
+  bool get _isPhoneField =>
+      validatorType == ValidatorType.phone ||
+      keyboardType == TextInputType.phone;
+
   @override
   Widget build(BuildContext context) {
     Color color = labelText != null
@@ -104,7 +111,9 @@ class AppTextFormField extends StatelessWidget {
       textAlign: textAlign,
       obscureText: obscureText,
       cursorColor: colors.textColor,
-      inputFormatters: inputFormatters,
+      inputFormatters: _isPhoneField
+          ? [const EnglishDigitsInputFormatter(), ...?inputFormatters]
+          : inputFormatters,
       decoration: InputDecoration(
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,

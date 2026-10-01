@@ -13,8 +13,7 @@ abstract final class DeepLinkParser {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
 
     final doctorSegmentIndex = segments.indexOf('doctor');
-    if (doctorSegmentIndex != -1 &&
-        doctorSegmentIndex + 1 < segments.length) {
+    if (doctorSegmentIndex != -1 && doctorSegmentIndex + 1 < segments.length) {
       final id = Uri.decodeComponent(segments[doctorSegmentIndex + 1]).trim();
       if (id.isNotEmpty) {
         return id;

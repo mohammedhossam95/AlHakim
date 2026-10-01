@@ -39,7 +39,7 @@ class _CountryCodeWidgetState extends State<CountryCodeWidget> {
         decoration: BoxDecoration(
           border: Border.all(color: colors.main.withValues(alpha: .1)),
           borderRadius: BorderRadius.circular(12.r),
-          color:    colors.main.withValues(alpha: 0.1),
+          color: colors.main.withValues(alpha: 0.1),
           //
         ),
         child: Row(

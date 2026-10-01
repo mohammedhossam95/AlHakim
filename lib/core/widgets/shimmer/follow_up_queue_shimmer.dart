@@ -23,9 +23,13 @@ class FollowUpQueueShimmer extends StatelessWidget {
             Gaps.vGap16,
             Row(
               children: [
-                Expanded(child: _box(height: 120.h, radius: 16.r)),
+                Expanded(
+                  child: _box(height: 120.h, radius: 16.r),
+                ),
                 Gaps.hGap12,
-                Expanded(child: _box(height: 120.h, radius: 16.r)),
+                Expanded(
+                  child: _box(height: 120.h, radius: 16.r),
+                ),
               ],
             ),
             Gaps.vGap24,

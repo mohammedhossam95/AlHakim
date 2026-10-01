@@ -12,9 +12,12 @@ class ImageAssets {
   static const String accept = 'assets/images/Done2.png';
   static const String logo = 'assets/images/sulalat_logo.png';
   static const String splashEllipse = 'assets/images/splash_ellipse.png';
-  static const String onboradingEllipse1 = 'assets/images/onborading_ellipse_1.png';
-  static const String onboradingEllipse2 = 'assets/images/onborading_ellipse_2.png';
-  static const String onboradingEllipse3 = 'assets/images/onborading_ellipse_3.png';
+  static const String onboradingEllipse1 =
+      'assets/images/onborading_ellipse_1.png';
+  static const String onboradingEllipse2 =
+      'assets/images/onborading_ellipse_2.png';
+  static const String onboradingEllipse3 =
+      'assets/images/onborading_ellipse_3.png';
   static const String onboradingImage1 = 'assets/images/onborading_image_1.png';
   static const String onboradingImage2 = 'assets/images/onborading_image_2.png';
   static const String callCenter = 'assets/images/call_center.png';

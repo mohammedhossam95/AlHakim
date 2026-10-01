@@ -18,7 +18,7 @@ class Pagination extends Equatable {
     this.totalPages,
     this.nextPageUrl,
     this.prevPageUrl,
-    this.hasMore
+    this.hasMore,
   });
 
   @override
@@ -30,6 +30,6 @@ class Pagination extends Equatable {
     totalPages,
     nextPageUrl,
     prevPageUrl,
-    hasMore
+    hasMore,
   ];
 }

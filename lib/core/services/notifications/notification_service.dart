@@ -43,11 +43,12 @@ class NotificationService {
     // Request permission
     await _requestPermission();
 
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
 
     // Local notifications + Android channel before handlers.
     // Wrapped so a platform hang/failure cannot block runApp (white screen).

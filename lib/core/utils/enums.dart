@@ -32,8 +32,6 @@ enum AvailableTimes { anyDay, today, tomorrow }
 
 enum UserType { doctor, delegate, patient }
 
-
-
 enum DoctorAccountMode { singleDoctor, medicalCenter }
 
 enum DoctorFormSource { delegate, medicalCenter }

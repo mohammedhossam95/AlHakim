@@ -23,7 +23,7 @@ class Gaps {
   static Widget hGap40 = SizedBox(width: 40.w);
   static Widget hGap50 = SizedBox(width: 50.w);
 
-//Vertical
+  //Vertical
   static Widget vGap2 = SizedBox(height: 2.0.h);
   static Widget vGap4 = SizedBox(height: 4.0.h);
   static Widget vGap5 = SizedBox(height: 5.h);

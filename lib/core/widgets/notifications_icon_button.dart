@@ -43,10 +43,7 @@ class NotificationsIconButton extends StatelessWidget {
                         color: colors.main.withValues(alpha: .12),
                         borderRadius: BorderRadius.circular(14.r),
                       ),
-                      child: Icon(
-                        Icons.notifications_none,
-                        color: colors.main,
-                      ),
+                      child: Icon(Icons.notifications_none, color: colors.main),
                     ),
                     if (unreadCount > 0)
                       Positioned(

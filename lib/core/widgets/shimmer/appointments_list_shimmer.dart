@@ -95,7 +95,7 @@ class AppointmentsListShimmer extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Container( 
+                      child: Container(
                         height: 40.h,
                         decoration: BoxDecoration(
                           color: colors.whiteColor,

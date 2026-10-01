@@ -58,9 +58,7 @@ class ShareTextBuilder {
     final doctorId = doctor.id?.trim();
     if (doctorId != null && doctorId.isNotEmpty) {
       buffer.writeln();
-      buffer.writeln(
-        '🔗 احجز الموعد مباشرة من التطبيق:',
-      );
+      buffer.writeln('🔗 احجز الموعد مباشرة من التطبيق:');
       buffer.writeln(DeepLinkConstants.doctorBookingUniversalLink(doctorId));
     }
 

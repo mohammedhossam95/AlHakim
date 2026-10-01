@@ -131,6 +131,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                           controller: _phoneController,
                           focusNode: _phoneFocus,
                           hint: 'phone_number'.tr,
+                          keyboardType: TextInputType.phone,
                         ),
                       ),
                       Gaps.vGap24,
@@ -189,11 +190,12 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     required FocusNode focusNode,
     required String hint,
     int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
   }) {
     return AppTextFormField(
       controller: controller,
       focusNode: focusNode,
-      keyboardType: TextInputType.text,
+      keyboardType: keyboardType,
       textInputAction: TextInputAction.done,
       validatorType: ValidatorType.standard,
       hintText: hint,
