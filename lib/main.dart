@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'app.dart';
+import 'core/deep_link/deep_link_service.dart';
 import 'core/services/bloc_observer/bloc_observer.dart';
 import 'injection_container.dart';
 
@@ -42,6 +43,7 @@ Future<void> main() async {
     Bloc.observer = AppBlocObserver();
     dioConsumer.updateDeviceTypeHeader();
     await sharedPreferences.clearSecureStorageOnFreshInstall();
+    await DeepLinkService.instance.initialize();
 
     runApp(const App());
   } catch (e) {

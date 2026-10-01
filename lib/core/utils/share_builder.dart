@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:alhakim/core/constants/deep_link_constants.dart';
 import 'package:alhakim/core/utils/app_strings.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/settings/domain/entity/hospital_emergency_entity.dart';
@@ -52,6 +53,15 @@ class ShareTextBuilder {
       buffer.writeln(
         '🗺️ الموقع على الخريطة: https://maps.google.com/?q=${doctor.latitude},${doctor.longitude}',
       );
+    }
+
+    final doctorId = doctor.id?.trim();
+    if (doctorId != null && doctorId.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln(
+        '🔗 احجز الموعد مباشرة من التطبيق:',
+      );
+      buffer.writeln(DeepLinkConstants.doctorBookingUniversalLink(doctorId));
     }
 
     buffer.writeln();

@@ -49,6 +49,27 @@
                 <action android:name="FLUTTER_NOTIFICATION_CLICK"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
+
+            <!-- Doctor booking deep links (App Links — requires Digital Asset Links on server) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="alhakim-eg.com"
+                    android:pathPrefix="/doctor"/>
+            </intent-filter>
+
+            <!-- Custom scheme fallback: alhakim://doctor/{id}/book -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="alhakim"
+                    android:host="doctor"/>
+            </intent-filter>
         </activity>
 
         <!-- FCM default channel (must match NotificationService._channelId = high_importance_channel) -->

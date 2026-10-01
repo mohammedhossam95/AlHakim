@@ -10,6 +10,7 @@ import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
 import 'package:alhakim/features/settings/domain/entity/app_setting_entity.dart';
 import 'package:alhakim/features/settings/presentaion/cubit/app_setting_cubit/app_setting_cubit.dart';
+import 'package:alhakim/core/deep_link/deep_link_service.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,10 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       context.go(Routes.chooseUserTypeScreenRoute);
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      DeepLinkService.instance.onAppReadyForDeepLinks();
+    });
   }
 
   void _showForceUpdateDialog(String? storeUrl) {

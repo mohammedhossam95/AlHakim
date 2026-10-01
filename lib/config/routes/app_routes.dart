@@ -137,6 +137,8 @@ abstract class Routes {
   static const String doctorsListScreenRoute = '/doctorsListScreen';
   static const String searchDoctorsScreenRoute = '/searchDoctorsScreen';
   static const String bookingScreenRoute = '/bookingScreen';
+  static const String doctorBookingDeepLinkRoute = 'doctorBookingDeepLink';
+  static const String doctorBookingDeepLinkPath = '/doctor/:doctorId/book';
   static const String familyMembersScreenRoute = '/familyMembersScreen';
   static const String addFamilyMemberScreenRoute = '/addFamilyMemberScreen';
   static const String chooseUserTypeScreenRoute = '/ChooseUserTypeScreen';
@@ -560,20 +562,22 @@ abstract class Routes {
         ),
       ),
       GoRoute(
+        path: doctorBookingDeepLinkPath,
+        name: doctorBookingDeepLinkRoute,
+        pageBuilder: (context, state) {
+          final doctorId = state.pathParameters['doctorId']?.trim() ?? '';
+          return _buildBookingScreenPage(
+            state: state,
+            doctor: DoctorModel(id: doctorId),
+          );
+        },
+      ),
+      GoRoute(
         path: bookingScreenRoute,
         name: bookingScreenRoute,
         pageBuilder: (context, state) {
           final doctor = state.extra as DoctorEntity;
-          return buildAdaptivePage(
-            state: state,
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (context) => sl<BookAppointmentCubit>()),
-                BlocProvider(create: (context) => sl<GetDoctorByIdCubit>()),
-              ],
-              child: BookingScreen(doctor: doctor),
-            ),
-          );
+          return _buildBookingScreenPage(state: state, doctor: doctor);
         },
       ),
 
@@ -728,6 +732,22 @@ abstract class Routes {
     routesStack.removeLast();
     ServiceLocator.injectRoutesStackSingleton(routesStack);
   }
+}
+
+Page<void> _buildBookingScreenPage({
+  required GoRouterState state,
+  required DoctorEntity doctor,
+}) {
+  return buildAdaptivePage(
+    state: state,
+    child: MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => Routes.sl<BookAppointmentCubit>()),
+        BlocProvider(create: (context) => Routes.sl<GetDoctorByIdCubit>()),
+      ],
+      child: BookingScreen(doctor: doctor),
+    ),
+  );
 }
 
 AppointmentEntity? _resolveFollowUpAppointmentArgs(
