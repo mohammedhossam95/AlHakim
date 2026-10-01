@@ -254,7 +254,7 @@
   "book_now": "Book Now",
   "quick_consult": "Need quick consultation?",
   "ai_engine_title": "AI engine to find your doctor",
-  "ai_engine_desc": "Answer a few questions to suggest the best speciality or doctor for your case",
+  "ai_engine_desc": "Describe your complaint to get tips that help until you see a doctor, plus recommendations for doctors suited to your case.",
   "start_diagnosis": "Start diagnosis now",
   "agent_title": "AI Medical Assistant",
   "complaint_description": "Complaint Description",
@@ -536,7 +536,7 @@
   "your_follow_up_doctor": "Your follow-up doctor",
   "call_clinic": "Call the clinic",
   "clinic_not_started_title": "Clinic has not started yet",
-  "clinic_not_started_message": "The doctor has not started receiving patients yet. Please wait and the queue status will update automatically.",
+  "clinic_not_started_message": "The doctor has not started receiving patients yet. Please wait, and we will notify you as soon as the clinic opens.",
   "exclusive_offers_services": "Exclusive offers and services",
   "appointment_number": "Appointment Number",
   "expected_waiting_time": "Expected waiting time",
@@ -589,5 +589,6 @@
   "camera_permission_denied": "Camera access was denied. Please allow it from Settings to take a photo.",
   "photos_permission_denied": "Photo access was denied. Please allow it from Settings to choose a photo.",
   "open_settings": "Open Settings",
-  "image_pick_failed": "Couldn't pick the image, please try again."
+  "image_pick_failed": "Couldn't pick the image, please try again.",
+  "queue_updated": "Queue status updated"
 }

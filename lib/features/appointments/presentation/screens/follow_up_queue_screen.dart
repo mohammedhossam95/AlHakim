@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:alhakim/config/locale/app_localizations.dart';
+import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/error_text.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
@@ -23,17 +26,93 @@ class FollowUpQueueScreen extends StatefulWidget {
   State<FollowUpQueueScreen> createState() => _FollowUpQueueScreenState();
 }
 
-class _FollowUpQueueScreenState extends State<FollowUpQueueScreen> {
+class _FollowUpQueueScreenState extends State<FollowUpQueueScreen>
+    with WidgetsBindingObserver {
+  static const _autoRefreshInterval = Duration(seconds: 30);
+
+  bool _isRefreshing = false;
+  bool _isAutoRefreshing = false;
+  Timer? _autoRefreshTimer;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fetchQueueStatus();
+    _startAutoRefresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _autoRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  /// No polling while the app is in the background; catch up right away
+  /// when the user comes back.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _autoRefresh();
+      _startAutoRefresh();
+    } else if (state == AppLifecycleState.paused) {
+      _autoRefreshTimer?.cancel();
+    }
+  }
+
+  void _startAutoRefresh() {
+    _autoRefreshTimer?.cancel();
+    _autoRefreshTimer = Timer.periodic(
+      _autoRefreshInterval,
+      (_) => _autoRefresh(),
+    );
   }
 
   Future<void> _fetchQueueStatus() async {
     final id = widget.appointment.id?.toString();
     if (id == null) return;
     await context.read<GetQueueStatusCubit>().getQueueStatus(appointmentId: id);
+  }
+
+  /// Silent background refresh: no spinner, no toast, and failures are
+  /// ignored so the current data stays on screen until the next tick.
+  Future<void> _autoRefresh() async {
+    final id = widget.appointment.id?.toString();
+    final cubit = context.read<GetQueueStatusCubit>();
+    if (id == null ||
+        _isRefreshing ||
+        _isAutoRefreshing ||
+        cubit.state is GetQueueStatusLoading) {
+      return;
+    }
+
+    _isAutoRefreshing = true;
+    try {
+      await cubit.refreshQueueStatus(appointmentId: id);
+    } finally {
+      _isAutoRefreshing = false;
+    }
+  }
+
+  /// Keeps the current data on screen while refreshing, unlike
+  /// [_fetchQueueStatus] which shows the full-page shimmer.
+  Future<void> _refreshQueueStatus() async {
+    final id = widget.appointment.id?.toString();
+    if (id == null || _isRefreshing) return;
+
+    setState(() => _isRefreshing = true);
+    final error = await context.read<GetQueueStatusCubit>().refreshQueueStatus(
+      appointmentId: id,
+    );
+    if (!mounted) return;
+    setState(() => _isRefreshing = false);
+
+    Constants.showSnakToast(
+      context: context,
+      type: error == null ? 1 : 3,
+      message: error ?? 'queue_updated'.tr,
+    );
   }
 
   @override
@@ -71,10 +150,12 @@ class _FollowUpQueueScreenState extends State<FollowUpQueueScreen> {
             }
 
             return RefreshIndicator(
-              onRefresh: _fetchQueueStatus,
+              onRefresh: _refreshQueueStatus,
               child: _FollowUpQueueBody(
                 appointment: widget.appointment,
                 queueStatus: queueStatus,
+                isRefreshing: _isRefreshing,
+                onRefresh: _refreshQueueStatus,
               ),
             );
           }
@@ -89,17 +170,17 @@ class _FollowUpQueueScreenState extends State<FollowUpQueueScreen> {
 class _FollowUpQueueBody extends StatelessWidget {
   final AppointmentEntity appointment;
   final QueueStatusEntity queueStatus;
+  final bool isRefreshing;
+  final VoidCallback onRefresh;
 
   const _FollowUpQueueBody({
     required this.appointment,
     required this.queueStatus,
+    required this.isRefreshing,
+    required this.onRefresh,
   });
 
   bool get _clinicOpen => queueStatus.clinicOpen == true;
-
-  String get _doctorName => appLocalizations.isArLocale
-      ? appointment.doctor?.name?.ar ?? ''
-      : appointment.doctor?.name?.en ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +191,10 @@ class _FollowUpQueueBody extends StatelessWidget {
         children: [
           _OffersSliderSection(ads: queueStatus.ads ?? []),
           Gaps.vGap24,
-          const _ClinicNotStartedAlert(),
+          _ClinicNotStartedAlert(
+            isRefreshing: isRefreshing,
+            onRefresh: onRefresh,
+          ),
         ],
       );
     }
@@ -133,7 +217,7 @@ class _FollowUpQueueBody extends StatelessWidget {
         //   appointmentNumber: queueData.appointmentNumber,
         // ),
         // Gaps.vGap16,
-        _ClinicStartedBanner(doctorName: _doctorName),
+        _ClinicStartedBanner(isRefreshing: isRefreshing, onRefresh: onRefresh),
         Gaps.vGap16,
         _QueueInfoRow(
           yourNumber: queueData.yourNumber,
@@ -240,7 +324,13 @@ class _AppointmentStatusStyle {
 }
 
 class _ClinicNotStartedAlert extends StatelessWidget {
-  const _ClinicNotStartedAlert();
+  final bool isRefreshing;
+  final VoidCallback onRefresh;
+
+  const _ClinicNotStartedAlert({
+    required this.isRefreshing,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -273,6 +363,12 @@ class _ClinicNotStartedAlert extends StatelessWidget {
             style: TextStyles.regular14(color: colors.lightTextColor),
             textAlign: TextAlign.center,
           ),
+          Gaps.vGap16,
+          _RefreshQueueButton(
+            isRefreshing: isRefreshing,
+            onPressed: onRefresh,
+            color: colors.main,
+          ),
         ],
       ),
     );
@@ -290,9 +386,13 @@ class _OffersSliderSection extends StatelessWidget {
 }
 
 class _ClinicStartedBanner extends StatelessWidget {
-  final String doctorName;
+  final bool isRefreshing;
+  final VoidCallback onRefresh;
 
-  const _ClinicStartedBanner({required this.doctorName});
+  const _ClinicStartedBanner({
+    required this.isRefreshing,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -319,7 +419,58 @@ class _ClinicStartedBanner extends StatelessWidget {
               style: TextStyles.medium14(color: colors.success),
             ),
           ),
+          Gaps.hGap8,
+          _RefreshQueueButton(
+            isRefreshing: isRefreshing,
+            onPressed: onRefresh,
+            color: colors.success,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _RefreshQueueButton extends StatelessWidget {
+  final bool isRefreshing;
+  final VoidCallback onPressed;
+  final Color color;
+
+  const _RefreshQueueButton({
+    required this.isRefreshing,
+    required this.onPressed,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: colors.whiteColor,
+      borderRadius: BorderRadius.circular(20.r),
+      child: InkWell(
+        onTap: isRefreshing ? null : onPressed,
+        borderRadius: BorderRadius.circular(20.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: color.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 16.r,
+                height: 16.r,
+                child: isRefreshing
+                    ? CircularProgressIndicator(strokeWidth: 2, color: color)
+                    : Icon(Icons.refresh_rounded, color: color, size: 16.r),
+              ),
+              Gaps.hGap6,
+              Text('update'.tr, style: TextStyles.medium12(color: color)),
+            ],
+          ),
+        ),
       ),
     );
   }

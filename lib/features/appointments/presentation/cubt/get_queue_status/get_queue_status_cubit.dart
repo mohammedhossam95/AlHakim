@@ -23,4 +23,21 @@ class GetQueueStatusCubit extends Cubit<GetQueueStatusState> {
       (r) => emit(GetQueueStatusSuccess(response: r)),
     );
   }
+
+  /// Refreshes without emitting [GetQueueStatusLoading], so the current data
+  /// stays on screen. On failure the state is kept and the error message is
+  /// returned for the caller to show.
+  Future<String?> refreshQueueStatus({required String appointmentId}) async {
+    final result = await usecase(
+      GetQueueStatusParams(appointmentId: appointmentId),
+    );
+
+    // The screen may have been closed while the request was in flight.
+    if (isClosed) return null;
+
+    return result.fold((l) => l.message ?? '', (r) {
+      emit(GetQueueStatusSuccess(response: r));
+      return null;
+    });
+  }
 }
