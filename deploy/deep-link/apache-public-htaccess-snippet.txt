@@ -1,0 +1,4 @@
+# Add in Laravel public/.htaccess BEFORE "RewriteRule ^ index.php"
+# (only if you cannot edit routes/web.php)
+
+RewriteRule ^doctor/([a-zA-Z0-9\-]+)/book/?$ https://alhakim-eg.com/ [R=302,L]

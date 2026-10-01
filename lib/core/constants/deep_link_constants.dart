@@ -1,6 +1,10 @@
 /// Universal links and custom-scheme deep links for AlHakim.
 abstract final class DeepLinkConstants {
   static const String webHost = 'alhakim-eg.com';
+
+  /// Browser fallback when the app is not installed (configure on the server).
+  static const String webHomeUrl = 'https://alhakim-eg.com/';
+
   static const String customScheme = 'alhakim';
 
   /// Public HTTPS path: `/doctor/{doctorId}/book`
