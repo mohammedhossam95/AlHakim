@@ -589,5 +589,6 @@
   "photos_permission_denied": "تم رفض الوصول إلى الصور. يُرجى السماح به من الإعدادات لاختيار صورة.",
   "open_settings": "فتح الإعدادات",
   "image_pick_failed": "تعذر اختيار الصورة، حاول مرة أخرى.",
-  "queue_updated": "تم تحديث حالة الدور"
+  "queue_updated": "تم تحديث حالة الدور",
+  "profile_updated_successfully": "تم تحديث الملف الشخصي بنجاح"
 }

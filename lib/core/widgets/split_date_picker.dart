@@ -11,12 +11,17 @@ class SplitDatePicker extends StatefulWidget {
   final int firstYear;
   final int? lastYear;
 
+  /// When false, leaving all three empty is valid, but a partly picked date
+  /// is still an error.
+  final bool isRequired;
+
   const SplitDatePicker({
     super.key,
     required this.controller,
     this.validator,
     this.firstYear = 1900,
     this.lastYear,
+    this.isRequired = true,
   });
 
   @override
@@ -101,6 +106,9 @@ class _SplitDatePickerState extends State<SplitDatePicker> {
     if (widget.validator != null) {
       return widget.validator!(widget.controller.text);
     }
+    final nothingPicked =
+        selectedMonth == null && selectedDay == null && selectedYear == null;
+    if (!widget.isRequired && nothingPicked) return null;
     if (selectedMonth == null || selectedDay == null || selectedYear == null) {
       return 'select_birth_date'.tr;
     }

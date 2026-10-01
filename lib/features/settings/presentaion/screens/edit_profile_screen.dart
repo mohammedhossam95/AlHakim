@@ -99,6 +99,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
+  /// Optional fields left empty aren't sent, so the server keeps its value.
+  String? _nullIfEmpty(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   void _showPhotoSourceSheet() {
     showModalBottomSheet(
       context: context,
@@ -352,7 +358,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 if (!_isUnderReview) ...[
                   Text("birth_date".tr, style: TextStyles.semiBold14()),
                   Gaps.vGap8,
-                  SplitDatePicker(controller: birthDateController),
+                  SplitDatePicker(
+                    controller: birthDateController,
+                    isRequired: false,
+                  ),
                   Gaps.vGap16,
 
                   /// Height + Weight
@@ -373,7 +382,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ],
                               hintText: "height".tr,
                               keyboardType: TextInputType.number,
-                              validatorType: ValidatorType.standard,
                               backgroundColor: colors.main.withValues(
                                 alpha: .1,
                               ),
@@ -401,7 +409,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 FilteringTextInputFormatter.digitsOnly,
                               ],
                               keyboardType: TextInputType.number,
-                              validatorType: ValidatorType.standard,
                               backgroundColor: colors.main.withValues(
                                 alpha: .1,
                               ),
@@ -428,12 +435,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             Gaps.vGap4,
                             DropdownButtonFormField<String>(
                               initialValue: selectedBloodType,
-                              validator: (value) {
-                                if (value == null) {
-                                  return "blood_type".tr;
-                                }
-                                return null;
-                              },
                               isExpanded: true,
                               isDense: true,
                               style: TextStyles.medium12(),
@@ -529,15 +530,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 return;
                               }
 
-                              if (selectedBloodType == null) {
-                                Constants.showSnakToast(
-                                  context: context,
-                                  type: 3,
-                                  message: "choose_blood_type".tr,
-                                );
-                                return;
-                              }
-
                               context
                                   .read<UpdateUserProfileCubit>()
                                   .updateUserProfile(
@@ -546,10 +538,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       lastName: lastNameController.text,
                                       birthDate: _isUnderReview
                                           ? user.birthDate ?? "2000-01-01"
-                                          : birthDateController.text.trim(),
-                                      tall: heightController.text,
-                                      weight: weightController.text,
-                                      bloodType: selectedBloodType!,
+                                          : _nullIfEmpty(
+                                              birthDateController.text,
+                                            ),
+                                      tall: _nullIfEmpty(heightController.text),
+                                      weight: _nullIfEmpty(
+                                        weightController.text,
+                                      ),
+                                      bloodType: selectedBloodType,
                                       location: locationController.text,
                                       profilePhoto: _pickedPhoto,
                                     ),

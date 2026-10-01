@@ -590,5 +590,6 @@
   "photos_permission_denied": "Photo access was denied. Please allow it from Settings to choose a photo.",
   "open_settings": "Open Settings",
   "image_pick_failed": "Couldn't pick the image, please try again.",
-  "queue_updated": "Queue status updated"
+  "queue_updated": "Queue status updated",
+  "profile_updated_successfully": "Profile updated successfully"
 }
