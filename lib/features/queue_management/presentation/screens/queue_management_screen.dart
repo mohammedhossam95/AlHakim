@@ -103,13 +103,19 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
     });
   }
 
+  /// The working day ends at 5 AM instead of midnight, so times between
+  /// 00:00 and 04:59 still belong to the previous day.
+  DateTime _businessDay() {
+    const dayStartHour = 5;
+    return DateTime.now().subtract(const Duration(hours: dayStartHour));
+  }
+
   @override
   Widget build(BuildContext context) {
-    ///TODO: add the date to the local storage and get it from there
     final today = DateFormat(
       'EEEE، d MMMM',
       appLocalizations.isArLocale ? 'ar' : 'en',
-    ).format(DateTime.now());
+    ).format(_businessDay());
 
     return MultiBlocListener(
       listeners: [

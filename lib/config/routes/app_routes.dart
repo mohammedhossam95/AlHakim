@@ -669,6 +669,7 @@ abstract class Routes {
             child: AppoinmentSuccessScreen(
               doctor: args['doctor'],
               appointmentDate: args['appointmentDate'],
+              appointment: args['appointment'],
             ),
           );
         },

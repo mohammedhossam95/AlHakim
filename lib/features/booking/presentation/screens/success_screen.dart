@@ -5,6 +5,7 @@ import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/features/booking/domain/entities/appointment_booking_entity.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +17,13 @@ import 'package:lottie/lottie.dart';
 class AppoinmentSuccessScreen extends StatelessWidget {
   final DoctorEntity? doctor;
   final String appointmentDate;
+  final AppointmentBookingEntity? appointment;
 
   const AppoinmentSuccessScreen({
     super.key,
     required this.doctor,
     required this.appointmentDate,
+    this.appointment,
   });
 
   @override
@@ -113,6 +116,14 @@ class AppoinmentSuccessScreen extends StatelessWidget {
                           appLocalizations.locale?.languageCode,
                         ).format(DateTime.parse(appointmentDate)),
                       ),
+                      if (appointment?.queuePosition != null) ...[
+                        Gaps.vGap8,
+                        _InfoTile(
+                          icon: Icons.format_list_numbered_outlined,
+                          title: "your_queue_number".tr,
+                          value: '${appointment?.queuePosition}',
+                        ),
+                      ],
                       if (doctor?.location?.city != null) ...[
                         Gaps.vGap8,
                         _InfoTile(

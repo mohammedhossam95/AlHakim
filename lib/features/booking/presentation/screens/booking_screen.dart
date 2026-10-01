@@ -540,6 +540,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         extra: {
                           "doctor": widget.doctor,
                           "appointmentDate": selectedBooking.date.toString(),
+                          "appointment": state.response.data,
                         },
                       );
                     } else if (state is BookAppointmentError) {

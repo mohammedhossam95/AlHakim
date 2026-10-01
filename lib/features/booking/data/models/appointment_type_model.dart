@@ -22,10 +22,7 @@ class AppointmentTypeRespModel extends BaseListResponse {
 }
 
 class AppointmentTypeModel extends AppointmentTypeEntity {
-  const AppointmentTypeModel({
-    required super.id,
-    required super.name,
-  });
+  const AppointmentTypeModel({required super.id, required super.name});
 
   factory AppointmentTypeModel.fromJson(Map<String, dynamic> json) {
     return AppointmentTypeModel(
@@ -34,5 +31,8 @@ class AppointmentTypeModel extends AppointmentTypeEntity {
           : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       name: json['name']?.toString() ?? '',
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'name': name};
   }
 }
