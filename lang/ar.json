@@ -590,5 +590,10 @@
   "open_settings": "فتح الإعدادات",
   "image_pick_failed": "تعذر اختيار الصورة، حاول مرة أخرى.",
   "queue_updated": "تم تحديث حالة الدور",
-  "profile_updated_successfully": "تم تحديث الملف الشخصي بنجاح"
+  "profile_updated_successfully": "تم تحديث الملف الشخصي بنجاح",
+  "send": "إرسال",
+  "patients_message_title": "رسالة للمرضى",
+  "patients_message_desc": "ستظهر هذه الرسالة للمرضى في صفحة متابعة الدور، مثل تأخر الطبيب أو أي تنبيه مهم.",
+  "patients_message_hint": "اكتب رسالتك للمرضى...",
+  "patients_message_sent": "تم إرسال الرسالة للمرضى"
 }

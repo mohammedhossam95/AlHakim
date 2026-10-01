@@ -19,6 +19,10 @@ abstract class QueueManagementRemoteDataSource {
   Future<QuickBookingRespModel> quickBooking({
     required QuickBookingParams params,
   });
+  Future<BaseOneResponse> broadcastMessage({
+    required String doctorId,
+    required String message,
+  });
 }
 
 class QueueManagementRemoteDataSourceImpl
@@ -97,6 +101,32 @@ class QueueManagementRemoteDataSourceImpl
     try {
       final response = await dioConsumer.post(
         '/appointments/$appointmentId/notify-examination',
+      );
+
+      if (response['status'] == true) {
+        return BaseOneResponse(
+          status: response['status'],
+          message: response['message'],
+          data: response['data'],
+        );
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> broadcastMessage({
+    required String doctorId,
+    required String message,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        '/doctors/$doctorId/broadcast-notifications',
+
+        formData: FormData.fromMap({"message": message}),
       );
 
       if (response['status'] == true) {

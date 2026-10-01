@@ -591,5 +591,10 @@
   "open_settings": "Open Settings",
   "image_pick_failed": "Couldn't pick the image, please try again.",
   "queue_updated": "Queue status updated",
-  "profile_updated_successfully": "Profile updated successfully"
+  "profile_updated_successfully": "Profile updated successfully",
+  "send": "Send",
+  "patients_message_title": "Message to patients",
+  "patients_message_desc": "This message will appear to patients on the queue tracking page, e.g. a delay or any important notice.",
+  "patients_message_hint": "Write your message to patients...",
+  "patients_message_sent": "Message sent to patients"
 }

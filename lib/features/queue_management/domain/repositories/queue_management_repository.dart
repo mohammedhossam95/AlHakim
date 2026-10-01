@@ -20,4 +20,8 @@ abstract class QueueManagementRepository {
   Future<Either<Failure, BaseOneResponse>> quickBooking({
     required QuickBookingParams params,
   });
+  Future<Either<Failure, BaseOneResponse>> broadcastMessage({
+    required String doctorId,
+    required String message,
+  });
 }

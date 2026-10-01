@@ -9,6 +9,7 @@ import 'package:alhakim/features/queue_management/domain/entities/queue_manageme
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/notify_examination_cubit/notify_examination_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/widgets/broadcast_message_bottom_sheet.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -178,7 +179,20 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
           child: Icon(Icons.add, color: colors.whiteColor),
         ),
 
-        appBar: AppBar(title: Text("queue_management".tr)),
+        appBar: AppBar(
+          title: Text("queue_management".tr),
+          actions: [
+            IconButton(
+              tooltip: "patients_message_title".tr,
+              icon: Icon(Icons.campaign_outlined, color: colors.main),
+              onPressed: () {
+                final doctorId = _activeDoctorId(context);
+                if (doctorId == null || doctorId.isEmpty) return;
+                BroadcastMessageBottomSheet.show(context, doctorId: doctorId);
+              },
+            ),
+          ],
+        ),
 
         body: BlocBuilder<GetQueueManagementCubit, GetQueueManagementState>(
           builder: (context, state) {
