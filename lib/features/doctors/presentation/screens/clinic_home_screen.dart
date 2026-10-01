@@ -9,7 +9,9 @@ import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/export_appointments_cubit/export_appointments_cubit.dart';
+import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
+import 'package:alhakim/features/doctors/domain/entities/doctor_entity.dart';
 import 'package:alhakim/features/doctors/domain/entities/doctor_home_entity.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
@@ -32,6 +34,7 @@ class ClinicHomeScreen extends StatefulWidget {
 
 class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
   DoctorHomeEntity? home;
+  bool _syncDoctorAfterFetch = false;
   @override
   void initState() {
     super.initState();
@@ -58,6 +61,33 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     }
 
     return sessionState.activeDoctorId;
+  }
+
+  Future<void> _syncUpdatedDoctor(DoctorEntity? doctor) async {
+    if (doctor == null) return;
+    final sessionCubit = context.read<SessionCubit>();
+
+    if (sessionCubit.state.doctorAccountMode ==
+        DoctorAccountMode.singleDoctor) {
+      final auth = sharedPreferences.getAuth();
+      if (auth == null) return;
+      await sharedPreferences.saveAuth(
+        AuthModel(
+          token: auth.token,
+          role: auth.role,
+          user: auth.user,
+          doctor: doctor,
+          profile: auth.profile,
+          nextStep: auth.nextStep,
+        ),
+      );
+      if (mounted) setState(() {});
+      return;
+    }
+
+    if (sessionCubit.state.selectedDoctor != null) {
+      sessionCubit.selectDoctorForMedicalCenter(doctor);
+    }
   }
 
   Future<void> _onExportPressed() async {
@@ -99,6 +129,21 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
             ],
             Expanded(
               child: Text("${"welcome".tr} ${displayDoctor?.name?.ar ?? ''}"),
+            ),
+            // Spacer(),
+            InkWell(
+              onTap: () async {
+                final result = await context.push(
+                  Routes.updateDoctorScreenRoute,
+                  extra: displayDoctor,
+                );
+
+                if (result == true && mounted) {
+                  _syncDoctorAfterFetch = true;
+                  getDoctorHome();
+                }
+              },
+              child: const Icon(Icons.edit),
             ),
           ],
         ),
@@ -149,6 +194,12 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
           listener: (context, state) {
             if (state is GetDoctorHomeSuccess) {
               home = state.response.data as DoctorHomeEntity;
+              if (_syncDoctorAfterFetch) {
+                _syncDoctorAfterFetch = false;
+                _syncUpdatedDoctor(home?.doctor);
+              }
+            } else if (state is! GetDoctorHomeLoading) {
+              _syncDoctorAfterFetch = false;
             }
           },
           builder: (context, state) {

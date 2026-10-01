@@ -134,6 +134,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     },
                                   ),
                                 ],
+                                // if (sessionCubit.state.userType ==
+                                //     UserType.doctor) ...[
+                                //   ProfileWidet(
+                                //     title: 'edit_profile'.tr,
+                                //     icon: SvgAssets.editProfileIcon,
+                                //     onTap: () {
+                                //       context.push(
+                                //         Routes.updateDoctorScreenRoute,
+                                //         // extra: 
+                                //       );
+                                //     },
+                                //   ),
+                                // ],
                                 ProfileWidet(
                                   title: 'changePassword'.tr,
                                   icon: SvgAssets.lock,

@@ -36,6 +36,16 @@
 				<string>app-1-1062564717227-ios-5623991d3d44debfdacdee</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.sharaftech.alhakimapp.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>alhakim</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
