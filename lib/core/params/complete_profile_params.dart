@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 
 class CompleteProfileParams extends Equatable {
@@ -9,6 +11,9 @@ class CompleteProfileParams extends Equatable {
   final String? bloodType;
   final String? location;
 
+  /// Sent as a multipart file, so it's not part of [toJson].
+  final File? profilePhoto;
+
   const CompleteProfileParams({
     this.firstName,
     this.lastName,
@@ -17,6 +22,7 @@ class CompleteProfileParams extends Equatable {
     this.weight,
     this.bloodType,
     this.location,
+    this.profilePhoto,
   });
 
   Map<String, dynamic> toJson() {
@@ -62,5 +68,6 @@ class CompleteProfileParams extends Equatable {
     weight,
     bloodType,
     location,
+    profilePhoto?.path,
   ];
 }

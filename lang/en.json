@@ -581,5 +581,13 @@
   "stop_booking": "Stop Booking",
   "confirm_stop_booking": "Are you sure you want to stop booking for this day?",
   "open_booking": "Open Booking",
-  "confirm_open_booking": "Are you sure you want to open booking for this day?"
+  "confirm_open_booking": "Are you sure you want to open booking for this day?",
+  "change_profile_photo": "Change profile photo",
+  "take_photo": "Take a photo",
+  "choose_from_gallery": "Choose from gallery",
+  "permission_required": "Permission required",
+  "camera_permission_denied": "Camera access was denied. Please allow it from Settings to take a photo.",
+  "photos_permission_denied": "Photo access was denied. Please allow it from Settings to choose a photo.",
+  "open_settings": "Open Settings",
+  "image_pick_failed": "Couldn't pick the image, please try again."
 }

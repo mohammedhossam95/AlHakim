@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
@@ -6,6 +7,7 @@ import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/validator.dart';
 import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/defult_text_field.dart';
+import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/loading_view.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
@@ -18,6 +20,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -42,6 +46,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final locationFocus = FocusNode();
   late final bool _isUnderReview;
   String? selectedBloodType;
+  final _imagePicker = ImagePicker();
+  File? _pickedPhoto;
+  bool _isPickingPhoto = false;
 
   late UserEntity user;
 
@@ -90,6 +97,136 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     weightFocus.dispose();
     locationFocus.dispose();
     super.dispose();
+  }
+
+  void _showPhotoSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Gaps.vGap8,
+            Text('change_profile_photo'.tr, style: TextStyles.semiBold14()),
+            ListTile(
+              leading: Icon(Icons.photo_camera_outlined, color: colors.main),
+              title: Text('take_photo'.tr, style: TextStyles.medium14()),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _pickPhoto(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_library_outlined, color: colors.main),
+              title: Text(
+                'choose_from_gallery'.tr,
+                style: TextStyles.medium14(),
+              ),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _pickPhoto(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The gallery uses the system photo picker (no permission needed) and the
+  /// camera uses the system camera app, so the OS asks for permission itself.
+  /// We only handle the case where the user denied it before.
+  Future<void> _pickPhoto(ImageSource source) async {
+    if (_isPickingPhoto) return;
+    _isPickingPhoto = true;
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1080,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+      if (picked == null || !mounted) return;
+      setState(() => _pickedPhoto = File(picked.path));
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code == 'camera_access_denied') {
+        _showPermissionDeniedDialog('camera_permission_denied'.tr);
+      } else if (e.code == 'photo_access_denied') {
+        _showPermissionDeniedDialog('photos_permission_denied'.tr);
+      } else {
+        Constants.showSnakToast(
+          context: context,
+          type: 3,
+          message: 'image_pick_failed'.tr,
+        );
+      }
+    } finally {
+      _isPickingPhoto = false;
+    }
+  }
+
+  Future<void> _showPermissionDeniedDialog(String message) async {
+    final openSettings = await Constants.showConfirmDialog(
+      context: context,
+      title: 'permission_required'.tr,
+      content: message,
+      yesText: 'open_settings',
+      noText: 'cancel',
+    );
+    if (openSettings == true) {
+      await openAppSettings();
+    }
+  }
+
+  Widget _buildProfilePhoto() {
+    final size = 100.r;
+    return Center(
+      child: GestureDetector(
+        onTap: _showPhotoSourceSheet,
+        child: Stack(
+          children: [
+            _pickedPhoto != null
+                ? ClipOval(
+                    child: Image.file(
+                      _pickedPhoto!,
+                      width: size,
+                      height: size,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : DiffImage(
+                    image: user.profilePhotoUrl,
+                    width: size,
+                    height: size,
+                    isCircle: true,
+                    fitType: BoxFit.cover,
+                    userName: user.firstName,
+                  ),
+            PositionedDirectional(
+              bottom: 0,
+              end: 0,
+              child: Container(
+                padding: EdgeInsets.all(6.r),
+                decoration: BoxDecoration(
+                  color: colors.main,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colors.whiteColor, width: 2),
+                ),
+                child: Icon(
+                  Icons.camera_alt_outlined,
+                  color: colors.whiteColor,
+                  size: 16.r,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -157,6 +294,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// Profile Photo
+                _buildProfilePhoto(),
+                Gaps.vGap24,
+
                 /// First Name + Last Name
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,6 +551,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       weight: weightController.text,
                                       bloodType: selectedBloodType!,
                                       location: locationController.text,
+                                      profilePhoto: _pickedPhoto,
                                     ),
                                   );
                             },

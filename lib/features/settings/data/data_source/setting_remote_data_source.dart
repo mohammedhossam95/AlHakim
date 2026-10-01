@@ -2,7 +2,6 @@ import 'package:alhakim/core/params/auth_params.dart';
 import 'package:alhakim/core/params/complete_profile_params.dart';
 import 'package:alhakim/core/utils/constants.dart';
 import 'package:alhakim/core/utils/enums.dart';
-import 'package:alhakim/core/utils/log_utils.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/app_setting_resp_model.dart';
 import 'package:alhakim/features/settings/data/model/common_questions_resp_model.dart';
@@ -114,15 +113,26 @@ class SettingRemoteDataSourceImpl extends SettingRemoteDataSource {
   @override
   Future<UserModel> updateUserProfile(CompleteProfileParams params) async {
     try {
-      FormData formData = FormData();
+      final dynamic response;
 
-      Log.d('formData: ${formData.fields.toString()}');
+      if (params.profilePhoto != null) {
+        // Files need multipart, which the server only parses on POST,
+        // so spoof the PATCH with `_method`.
+        final compressedImage = await Constants.getCompressedFile(
+          params.profilePhoto!,
+        );
+        final imageFile = compressedImage ?? params.profilePhoto!;
 
-      // ===== 3. طلب الـ API =====
-      final dynamic response = await dioConsumer.patch(
-        '/profile',
-        body: params.toJson(),
-      );
+        final formData = FormData.fromMap({
+          ...params.toJson(),
+          '_method': 'PATCH',
+          'profile_photo': await MultipartFile.fromFile(imageFile.path),
+        });
+
+        response = await dioConsumer.post('/profile', formData: formData);
+      } else {
+        response = await dioConsumer.patch('/profile', body: params.toJson());
+      }
 
       if (response['status'] == true) {
         return UserModel.fromJson(response['data']);

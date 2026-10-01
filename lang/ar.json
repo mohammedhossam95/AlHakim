@@ -580,5 +580,13 @@
   "stop_booking": "إيقاف الحجز",
   "confirm_stop_booking": "هل أنت متأكد من إيقاف الحجز لهذا اليوم؟",
   "open_booking": "فتح الحجز",
-  "confirm_open_booking": "هل أنت متأكد من فتح الحجز لهذا اليوم؟"
+  "confirm_open_booking": "هل أنت متأكد من فتح الحجز لهذا اليوم؟",
+  "change_profile_photo": "تغيير صورة البروفايل",
+  "take_photo": "التقاط صورة بالكاميرا",
+  "choose_from_gallery": "اختيار من المعرض",
+  "permission_required": "مطلوب إذن",
+  "camera_permission_denied": "تم رفض الوصول إلى الكاميرا. يُرجى السماح به من الإعدادات لالتقاط صورة.",
+  "photos_permission_denied": "تم رفض الوصول إلى الصور. يُرجى السماح به من الإعدادات لاختيار صورة.",
+  "open_settings": "فتح الإعدادات",
+  "image_pick_failed": "تعذر اختيار الصورة، حاول مرة أخرى."
 }

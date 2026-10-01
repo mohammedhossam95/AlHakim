@@ -169,13 +169,13 @@ class _SplitDatePickerState extends State<SplitDatePicker> {
       children: [
         Expanded(
           child: _buildDropdown(
-            key: null,
-            value: selectedMonth,
-            hint: 'month'.tr,
-            values: List.generate(12, (i) => i + 1),
+            key: ValueKey('day_${selectedYear}_${selectedMonth}_$selectedDay'),
+            value: selectedDay,
+            hint: 'day'.tr,
+            values: daysInSelectedMonth,
             onChanged: (value) {
               setState(() {
-                selectedMonth = value;
+                selectedDay = value;
                 _updateDate();
               });
             },
@@ -184,13 +184,13 @@ class _SplitDatePickerState extends State<SplitDatePicker> {
         Gaps.hGap8,
         Expanded(
           child: _buildDropdown(
-            key: ValueKey('day_${selectedYear}_${selectedMonth}_$selectedDay'),
-            value: selectedDay,
-            hint: 'day'.tr,
-            values: daysInSelectedMonth,
+            key: null,
+            value: selectedMonth,
+            hint: 'month'.tr,
+            values: List.generate(12, (i) => i + 1),
             onChanged: (value) {
               setState(() {
-                selectedDay = value;
+                selectedMonth = value;
                 _updateDate();
               });
             },
