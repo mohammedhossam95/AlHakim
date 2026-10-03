@@ -11,7 +11,7 @@ class AppointmentEntity extends Equatable {
   final String? status;
   final DoctorEntity? doctor;
   final String? createdAt;
-   final QueueUserEntity? bookedBy;
+  final QueueUserEntity? bookedBy;
   final QueueUserEntity? patient;
 
   const AppointmentEntity({

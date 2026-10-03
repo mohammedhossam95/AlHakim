@@ -15,8 +15,6 @@ class GetQueueStatusUsecase
   Future<Either<Failure, BaseOneResponse>> call(
     GetQueueStatusParams params,
   ) async {
-    return await repository.getQueueStatus(
-      appointmentId: params.appointmentId,
-    );
+    return await repository.getQueueStatus(appointmentId: params.appointmentId);
   }
 }

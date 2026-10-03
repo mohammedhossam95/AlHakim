@@ -35,7 +35,9 @@ class ExportAppointmentsCubit extends Cubit<ExportAppointmentsState> {
   }
 
   Future<String> _saveExcelFile(List<int> bytes) async {
-    final directory = await getApplicationDocumentsDirectory();
+    // Temp dir: the file is only needed until it's shared, the OS cleans it
+    // up, and it stays out of iCloud backups (patients' data).
+    final directory = await getTemporaryDirectory();
     final fileName =
         'appointments_export_${DateTime.now().millisecondsSinceEpoch}.xlsx';
     final file = File('${directory.path}/$fileName');

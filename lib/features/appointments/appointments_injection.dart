@@ -29,9 +29,7 @@ Future<void> initAppointmentsInjection() async {
 
   _sl.registerLazySingleton(() => GetQueueStatusUsecase(repository: _sl()));
 
-  _sl.registerLazySingleton(
-    () => ExportAppointmentsUsecase(repository: _sl()),
-  );
+  _sl.registerLazySingleton(() => ExportAppointmentsUsecase(repository: _sl()));
 
   /// repository
   _sl.registerLazySingleton<AppointmentRepository>(

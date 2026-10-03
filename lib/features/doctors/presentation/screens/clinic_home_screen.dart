@@ -33,6 +33,7 @@ class ClinicHomeScreen extends StatefulWidget {
 }
 
 class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
+  final _exportButtonKey = GlobalKey();
   DoctorHomeEntity? home;
   bool _syncDoctorAfterFetch = false;
   @override
@@ -104,6 +105,54 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     context.read<ExportAppointmentsCubit>().exportAppointments();
   }
 
+  Future<void> _shareExportedFile(String filePath) async {
+    try {
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile(
+              filePath,
+              mimeType:
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ),
+          ],
+          // Required on iPad, where the share sheet is a popover.
+          sharePositionOrigin: _exportButtonRect(),
+        ),
+      );
+      if (!mounted || result.status == ShareResultStatus.dismissed) return;
+      Constants.showSnakToast(
+        context: context,
+        type: 1,
+        message: 'export_data_success'.tr,
+      );
+    } catch (e) {
+      log('share export failed: $e');
+      if (!mounted) return;
+      Constants.showSnakToast(
+        context: context,
+        type: 3,
+        message: 'error_occurred'.tr,
+      );
+    }
+  }
+
+  /// The export button's position on screen, falling back to the screen's
+  /// center if it isn't laid out.
+  Rect _exportButtonRect() {
+    final box =
+        _exportButtonKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box != null && box.hasSize) {
+      return box.localToGlobal(Offset.zero) & box.size;
+    }
+    final size = MediaQuery.sizeOf(context);
+    return Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: 1,
+      height: 1,
+    );
+  }
+
   // final today = DateTime.now().weekday;
   final today = DateTime.now().weekday % 7;
   @override
@@ -171,14 +220,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                 Constants.showLoading(context);
               } else if (state is ExportAppointmentsSuccess) {
                 Constants.hideLoading(context);
-                Constants.showSnakToast(
-                  context: context,
-                  type: 1,
-                  message: 'export_data_success'.tr,
-                );
-                await SharePlus.instance.share(
-                  ShareParams(files: [XFile(state.filePath)]),
-                );
+                await _shareExportedFile(state.filePath);
               } else if (state is ExportAppointmentsError) {
                 Constants.hideLoading(context);
                 Constants.showSnakToast(
@@ -380,6 +422,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                             ),
                             Gaps.vGap16,
                             MyDefaultButton(
+                              key: _exportButtonKey,
                               btnText: "export_data",
                               borderRadius: 30,
                               color: colors.whiteColor,

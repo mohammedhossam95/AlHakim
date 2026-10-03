@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:alhakim/config/locale/app_localizations.dart';
 import 'package:alhakim/core/base_classes/base_one_response.dart';
 import 'package:alhakim/core/error/exceptions.dart';
 import 'package:alhakim/features/appointments/data/models/appointment_model.dart';
@@ -74,9 +77,31 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
   @override
   Future<List<int>> exportAppointments() async {
     try {
-      return await dioConsumer.getBytes('/appointments/export');
+      final bytes = await dioConsumer.getBytes(
+        '/appointments/export',
+        // Big sheets on slow networks need more than the default 30s.
+        receiveTimeout: const Duration(minutes: 2),
+      );
+
+      // .xlsx files are zip archives, which always start with "PK".
+      final isXlsx = bytes.length > 4 && bytes[0] == 0x50 && bytes[1] == 0x4B;
+      if (!isXlsx) {
+        throw ServerException(message: _messageFromBody(bytes));
+      }
+      return bytes;
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// The server may answer 200 with a JSON error instead of the file.
+  String _messageFromBody(List<int> bytes) {
+    try {
+      final body = jsonDecode(utf8.decode(bytes));
+      if (body is Map && body['message'] != null) {
+        return body['message'].toString();
+      }
+    } catch (_) {}
+    return 'error_occurred'.tr;
   }
 }

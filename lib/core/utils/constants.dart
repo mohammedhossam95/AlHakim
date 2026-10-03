@@ -942,16 +942,21 @@ class Constants {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return Center(
-          child: Container(
-            decoration: BoxDecoration(
-              color: colors.backGround,
-              borderRadius: BorderRadius.circular(5.0),
+        // Block the Android back button too: if the user closed the dialog,
+        // hideLoading would pop the screen underneath instead.
+        return PopScope(
+          canPop: false,
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.backGround,
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              padding: const EdgeInsets.all(50.0),
+              child: CircularProgressIndicator(
+                color: colors.textColor,
+              ).appLoading,
             ),
-            padding: const EdgeInsets.all(50.0),
-            child: CircularProgressIndicator(
-              color: colors.textColor,
-            ).appLoading,
           ),
         );
       },

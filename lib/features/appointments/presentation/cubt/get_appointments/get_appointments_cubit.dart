@@ -28,12 +28,11 @@ class GetAppointmentsCubit extends Cubit<GetAppointmentsState> {
 
     final result = await usecase(NoParams());
 
-    result.fold(
-      (l) => emit(GetAppointmentsError(message: l.message ?? '')),
-      (r) {
-        _hasLoaded = true;
-        emit(GetAppointmentsSuccess(response: r));
-      },
-    );
+    result.fold((l) => emit(GetAppointmentsError(message: l.message ?? '')), (
+      r,
+    ) {
+      _hasLoaded = true;
+      emit(GetAppointmentsSuccess(response: r));
+    });
   }
 }

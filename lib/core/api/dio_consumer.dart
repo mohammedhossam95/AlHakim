@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -47,6 +48,7 @@ abstract class DioConsumer {
     String path, {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
+    Duration? receiveTimeout,
   });
 
   Future<dynamic> post(
@@ -167,11 +169,23 @@ class DioConsumerImpl implements DioConsumer {
   Future<Options> _requestOptions({
     Map<String, dynamic>? headers,
     ResponseType? responseType,
+    Duration? receiveTimeout,
   }) async {
     return Options(
       headers: await _resolveAuthHeaders(headers),
       responseType: responseType,
+      receiveTimeout: receiveTimeout,
     );
+  }
+
+  /// Turns a bytes body into JSON when possible, else into plain text.
+  static dynamic _decodeBytesBody(List<int> bytes) {
+    final text = utf8.decode(bytes, allowMalformed: true);
+    try {
+      return jsonDecode(text);
+    } catch (_) {
+      return text;
+    }
   }
 
   @override
@@ -230,6 +244,7 @@ class DioConsumerImpl implements DioConsumer {
     String path, {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
+    Duration? receiveTimeout,
   }) async {
     try {
       Log.i('[GET BYTES][$path], params: ${queryParameters.toString()}');
@@ -239,6 +254,7 @@ class DioConsumerImpl implements DioConsumer {
         options: await _requestOptions(
           headers: headers,
           responseType: ResponseType.bytes,
+          receiveTimeout: receiveTimeout,
         ),
       );
       final data = response.data;
@@ -250,6 +266,12 @@ class DioConsumerImpl implements DioConsumer {
     } on SocketException {
       throw InternetConnectionException(message: Strings.noInternetConnection);
     } on DioException catch (error) {
+      // Error bodies arrive as bytes too; decode them so the user sees the
+      // server's message instead of a list of numbers.
+      final response = error.response;
+      if (response != null && response.data is List<int>) {
+        response.data = _decodeBytesBody(response.data as List<int>);
+      }
       _handleDioError(error);
       throw ServerException(message: error.message ?? 'Unknown Error');
     } catch (error) {
