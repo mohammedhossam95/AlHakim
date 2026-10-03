@@ -617,5 +617,6 @@
   "your_notes": "Your notes",
   "rating_notes_hint": "Write your notes about the visit here...",
   "submit_rating": "Submit rating",
-  "rate_all_categories": "Please rate all items before submitting"
+  "rate_all_categories": "Please rate all items before submitting",
+  "address_details_hint": "Address details (e.g. Al-Zahraa Tower, Mostafa Kamel St.)"
 }

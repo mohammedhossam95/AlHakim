@@ -58,6 +58,9 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
   String? selectedDistrict;
   String? selectedStreet;
 
+  /// Hand-typed address details from the map screen.
+  String? selectedAddressDetails;
+
   late Country _selectedCountry;
   File? logoFile;
   File? coverFile;
@@ -115,6 +118,7 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
               extra: {
                 'location': selectedLocation ?? LatLng(30.4323, 30.5136),
                 'onChanged': (LatLng pos) {},
+                'addressDetails': selectedAddressDetails,
               },
             )
             as Map<String, dynamic>?;
@@ -126,9 +130,14 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
     selectedCity = result['city'] as String?;
     selectedDistrict = result['district'] as String?;
     selectedStreet = result['street'] as String?;
-    _locationController.text = address.isNotEmpty
+    selectedAddressDetails = result['address_details'] as String?;
+    final googleAddress = address.isNotEmpty
         ? address
         : '${location.latitude}, ${location.longitude}';
+    _locationController.text = [
+      selectedAddressDetails,
+      googleAddress,
+    ].where((e) => e != null && e.trim().isNotEmpty).join('، ');
     setState(() {});
   }
 
@@ -158,6 +167,7 @@ class _AddNewMedicalCenterScreenState extends State<AddNewMedicalCenterScreen> {
         city: selectedCity,
         district: selectedDistrict,
         street: selectedStreet,
+        addressDetails: selectedAddressDetails,
         representativeCode: _representativeCodeController.text,
         logo: logoFile,
         cover: coverFile,

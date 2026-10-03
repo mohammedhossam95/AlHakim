@@ -59,6 +59,9 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
   String? selectedDistrict;
   String? selectedStreet;
 
+  /// Hand-typed address details from the map screen.
+  String? selectedAddressDetails;
+
   late Country _selectedCountry;
   File? logoFile;
   File? coverFile;
@@ -80,6 +83,7 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
     selectedCity = widget.medicalCenter.city;
     selectedDistrict = widget.medicalCenter.district;
     selectedStreet = widget.medicalCenter.street;
+    selectedAddressDetails = widget.medicalCenter.addressDetails;
 
     final lat = double.tryParse(widget.medicalCenter.latitude ?? '');
     final lng = double.tryParse(widget.medicalCenter.longitude ?? '');
@@ -88,6 +92,7 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
     }
 
     final addressParts = [
+      selectedAddressDetails,
       selectedStreet,
       selectedDistrict,
       selectedCity,
@@ -142,6 +147,7 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
               extra: {
                 'location': selectedLocation ?? LatLng(30.4323, 30.5136),
                 'onChanged': (LatLng pos) {},
+                'addressDetails': selectedAddressDetails,
               },
             )
             as Map<String, dynamic>?;
@@ -153,9 +159,14 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
     selectedCity = result['city'] as String?;
     selectedDistrict = result['district'] as String?;
     selectedStreet = result['street'] as String?;
-    _locationController.text = address.isNotEmpty
+    selectedAddressDetails = result['address_details'] as String?;
+    final googleAddress = address.isNotEmpty
         ? address
         : '${location.latitude}, ${location.longitude}';
+    _locationController.text = [
+      selectedAddressDetails,
+      googleAddress,
+    ].where((e) => e != null && e.trim().isNotEmpty).join('، ');
     setState(() {});
   }
 
@@ -190,6 +201,7 @@ class _UpdateMedicalCenterScreenState extends State<UpdateMedicalCenterScreen> {
         city: selectedCity,
         district: selectedDistrict,
         street: selectedStreet,
+        addressDetails: selectedAddressDetails,
         logo: logoFile,
         cover: coverFile,
         license: licenseFile,

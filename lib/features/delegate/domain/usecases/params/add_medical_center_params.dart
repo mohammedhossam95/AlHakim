@@ -17,6 +17,7 @@ class AddMedicalCenterParams extends Equatable {
   final String? city;
   final String? district;
   final String? street;
+  final String? addressDetails;
   final String? representativeCode;
   final File? logo;
   final File? cover;
@@ -37,6 +38,7 @@ class AddMedicalCenterParams extends Equatable {
     this.city,
     this.district,
     this.street,
+    this.addressDetails,
     this.representativeCode,
     this.logo,
     this.cover,
@@ -58,6 +60,7 @@ class AddMedicalCenterParams extends Equatable {
     String? city,
     String? district,
     String? street,
+    String? addressDetails,
     String? representativeCode,
     File? logo,
     File? cover,
@@ -78,6 +81,7 @@ class AddMedicalCenterParams extends Equatable {
       city: city ?? this.city,
       district: district ?? this.district,
       street: street ?? this.street,
+      addressDetails: addressDetails ?? this.addressDetails,
       representativeCode: representativeCode ?? this.representativeCode,
       logo: logo ?? this.logo,
       cover: cover ?? this.cover,
@@ -101,6 +105,7 @@ class AddMedicalCenterParams extends Equatable {
     city,
     district,
     street,
+    addressDetails,
     representativeCode,
     logo,
     cover,

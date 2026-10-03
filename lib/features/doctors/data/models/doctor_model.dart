@@ -313,6 +313,7 @@ class LocationModel extends LocationEntity {
     super.street,
     super.latitude,
     super.longitude,
+    super.addressDetails,
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
@@ -326,6 +327,8 @@ class LocationModel extends LocationEntity {
       latitude: json['latitude'],
 
       longitude: json['longitude'],
+
+      addressDetails: json['address_details'],
     );
   }
 
@@ -335,6 +338,7 @@ class LocationModel extends LocationEntity {
     "street": street,
     "latitude": latitude,
     "longitude": longitude,
+    "address_details": addressDetails,
   };
 }
 

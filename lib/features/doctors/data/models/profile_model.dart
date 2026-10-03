@@ -51,6 +51,7 @@ class ProfileModel extends ProfileEntity {
             "street": location?.street,
             "latitude": location?.latitude,
             "longitude": location?.longitude,
+            "address_details": location?.addressDetails,
           },
     "country_code": countryCode,
     "phone": phone,

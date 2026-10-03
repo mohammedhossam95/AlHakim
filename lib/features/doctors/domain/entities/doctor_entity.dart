@@ -147,16 +147,28 @@ class LocationEntity extends Equatable {
   final String? latitude;
   final String? longitude;
 
+  /// Typed by hand (building, floor, landmark...), separate from the parts
+  /// that come from Google.
+  final String? addressDetails;
+
   const LocationEntity({
     this.city,
     this.district,
     this.street,
     this.latitude,
     this.longitude,
+    this.addressDetails,
   });
 
   @override
-  List<Object?> get props => [city, district, street, latitude, longitude];
+  List<Object?> get props => [
+    city,
+    district,
+    street,
+    latitude,
+    longitude,
+    addressDetails,
+  ];
 }
 
 class LanguageEntity extends Equatable {

@@ -61,6 +61,9 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
   String? selectedDistrict;
   String? selectedStreet;
 
+  /// Hand-typed address details from the map screen.
+  String? selectedAddressDetails;
+
   final _formKey = GlobalKey<FormState>();
   final List<DoctorScheduleModel> schedules = [DoctorScheduleModel()];
 
@@ -190,6 +193,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     selectedCity = location.city;
     selectedDistrict = location.district;
     selectedStreet = location.street;
+    selectedAddressDetails = location.addressDetails;
 
     final lat = double.tryParse(location.latitude ?? '');
     final lng = double.tryParse(location.longitude ?? '');
@@ -198,6 +202,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     }
 
     final addressParts = [
+      selectedAddressDetails,
       selectedStreet,
       selectedDistrict,
       selectedCity,
@@ -292,6 +297,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
               extra: {
                 'location': selectedLocation ?? LatLng(30.4323, 30.5136),
                 'onChanged': (LatLng pos) {},
+                'addressDetails': selectedAddressDetails,
               },
             )
             as Map<String, dynamic>?;
@@ -303,9 +309,14 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
     selectedCity = result['city'] as String?;
     selectedDistrict = result['district'] as String?;
     selectedStreet = result['street'] as String?;
-    _locationController.text = address.isNotEmpty
+    selectedAddressDetails = result['address_details'] as String?;
+    final googleAddress = address.isNotEmpty
         ? address
         : '${location.latitude}, ${location.longitude}';
+    _locationController.text = [
+      selectedAddressDetails,
+      googleAddress,
+    ].where((e) => e != null && e.trim().isNotEmpty).join('، ');
     setState(() {});
   }
 
@@ -414,6 +425,7 @@ class _AddNewDoctorScreenState extends State<AddNewDoctorScreen> {
         city: selectedCity,
         district: selectedDistrict,
         street: selectedStreet,
+        addressDetails: selectedAddressDetails,
         minPatients: _minPatientsController.text,
         appointmentDaysNumber: appointmentDaysNumber,
         appointmentTypeIds: selectedAppointmentTypes.map((e) => e.id).toList(),

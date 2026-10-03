@@ -235,6 +235,12 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
         formData.fields.add(MapEntry("street", params.street!));
       }
 
+      if (params.addressDetails != null) {
+        formData.fields.add(
+          MapEntry("address_details", params.addressDetails!),
+        );
+      }
+
       if (params.password != null && params.password!.isNotEmpty) {
         formData.fields.add(MapEntry("password", params.password!));
       }
@@ -458,6 +464,12 @@ class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
 
       if (params.street != null) {
         formData.fields.add(MapEntry("street", params.street!));
+      }
+
+      if (params.addressDetails != null) {
+        formData.fields.add(
+          MapEntry("address_details", params.addressDetails!),
+        );
       }
 
       if (params.password != null && params.password!.isNotEmpty) {

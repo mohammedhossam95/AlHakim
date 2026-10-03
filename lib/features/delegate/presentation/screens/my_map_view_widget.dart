@@ -40,10 +40,14 @@ class MyMapView extends StatefulWidget {
   final LatLng location;
   final LocationCallback onLocationChanged;
 
+  /// Previously saved hand-typed address details, to edit them.
+  final String? initialAddressDetails;
+
   const MyMapView({
     Key? key,
     required this.location,
     required this.onLocationChanged,
+    this.initialAddressDetails,
   }) : super(key: key);
 
   @override
@@ -61,6 +65,8 @@ class _MyMapViewState extends State<MyMapView> {
   String? _selectedStreet;
 
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _addressDetailsController =
+      TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   List<_PlacePrediction> _suggestions = [];
   Timer? _debounce;
@@ -80,6 +86,7 @@ class _MyMapViewState extends State<MyMapView> {
   @override
   void initState() {
     super.initState();
+    _addressDetailsController.text = widget.initialAddressDetails ?? '';
     _addMarker(widget.location, updateAddress: true);
   }
 
@@ -88,6 +95,7 @@ class _MyMapViewState extends State<MyMapView> {
     _debounce?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _addressDetailsController.dispose();
     super.dispose();
   }
 
@@ -513,6 +521,7 @@ class _MyMapViewState extends State<MyMapView> {
                   ),
                 ),
                 _buildSelectedAddressBar(),
+                _buildAddressDetailsField(),
                 Gaps.vGap12,
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -528,6 +537,8 @@ class _MyMapViewState extends State<MyMapView> {
                           'city': _selectedCity,
                           'district': _selectedDistrict,
                           'street': _selectedStreet,
+                          'address_details': _addressDetailsController.text
+                              .trim(),
                         });
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -913,6 +924,48 @@ class _MyMapViewState extends State<MyMapView> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Hand-typed details (e.g. "برج الزهراء، شارع مصطفى كامل"), for places
+  /// where Google's address is vague or just a plus code.
+  Widget _buildAddressDetailsField() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 0),
+      child: TextField(
+        controller: _addressDetailsController,
+        textInputAction: TextInputAction.done,
+        maxLines: 2,
+        minLines: 1,
+        style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+        decoration: InputDecoration(
+          hintText: 'address_details_hint'.tr,
+          hintStyle: TextStyle(fontSize: 13.sp, color: colors.lightTextColor),
+          prefixIcon: Icon(
+            Icons.edit_location_alt_outlined,
+            color: colors.main,
+            size: 20.sp,
+          ),
+          filled: true,
+          fillColor: colors.whiteColor,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 14.w,
+            vertical: 12.h,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide(color: colors.main.withValues(alpha: 0.2)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide(color: colors.main.withValues(alpha: 0.2)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide(color: colors.main),
+          ),
         ),
       ),
     );

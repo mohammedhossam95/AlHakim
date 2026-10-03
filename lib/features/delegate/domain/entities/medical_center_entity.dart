@@ -17,6 +17,7 @@ class MedicalCenterEntity extends Equatable {
   final String? city;
   final String? district;
   final String? street;
+  final String? addressDetails;
 
   const MedicalCenterEntity({
     this.id,
@@ -35,6 +36,7 @@ class MedicalCenterEntity extends Equatable {
     this.city,
     this.district,
     this.street,
+    this.addressDetails,
   });
 
   @override
@@ -55,5 +57,6 @@ class MedicalCenterEntity extends Equatable {
     city,
     district,
     street,
+    addressDetails,
   ];
 }

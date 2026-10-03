@@ -123,6 +123,9 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
   String? selectedCity;
   String? selectedDistrict;
   String? selectedStreet;
+
+  /// Hand-typed address details from the map screen.
+  String? selectedAddressDetails;
   String? existingLicenseName;
   final bool _isLoadingLocation = false;
 
@@ -236,6 +239,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     selectedCity = doctor.location?.city;
     selectedDistrict = doctor.location?.district;
     selectedStreet = doctor.location?.street;
+    selectedAddressDetails = doctor.location?.addressDetails;
 
     // Load location from medical center if applicable
     if (doctor.medicalCenter != null) {
@@ -245,6 +249,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         selectedCity = location.city;
         selectedDistrict = location.district;
         selectedStreet = location.street;
+        selectedAddressDetails = location.addressDetails;
 
         final mcLat = double.tryParse(location.latitude ?? '');
         final mcLng = double.tryParse(location.longitude ?? '');
@@ -264,7 +269,10 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
       }
     }
 
-    final address = _buildAddressFromLocation();
+    final address = [
+      selectedAddressDetails,
+      _buildAddressFromLocation(),
+    ].where((e) => e != null && e.trim().isNotEmpty).join('، ');
     if (address.isNotEmpty) {
       _locationController.text = address;
     } else if (selectedLocation != null) {
@@ -366,6 +374,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
               extra: {
                 'location': selectedLocation ?? LatLng(30.4323, 30.5136),
                 'onChanged': (LatLng pos) {},
+                'addressDetails': selectedAddressDetails,
               },
             )
             as Map<String, dynamic>?;
@@ -377,9 +386,14 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
     selectedCity = result['city'] as String?;
     selectedDistrict = result['district'] as String?;
     selectedStreet = result['street'] as String?;
-    _locationController.text = address.isNotEmpty
+    selectedAddressDetails = result['address_details'] as String?;
+    final googleAddress = address.isNotEmpty
         ? address
         : '${location.latitude}, ${location.longitude}';
+    _locationController.text = [
+      selectedAddressDetails,
+      googleAddress,
+    ].where((e) => e != null && e.trim().isNotEmpty).join('، ');
     setState(() {});
   }
 
@@ -505,6 +519,7 @@ class _UpdateDoctorScreenState extends State<UpdateDoctorScreen> {
         city: selectedCity,
         district: selectedDistrict,
         street: selectedStreet,
+        addressDetails: selectedAddressDetails,
         minPatients: _minPatientsController.text,
         appointmentDaysNumber: appointmentDaysNumber,
         appointmentTypeIds: selectedAppointmentTypes.map((e) => e.id).toList(),

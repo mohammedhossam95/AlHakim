@@ -34,6 +34,7 @@ class AddDoctorParams extends Equatable {
   final String? city;
   final String? district;
   final String? street;
+  final String? addressDetails;
 
   final String? password;
   final String? passwordConfirmation;
@@ -79,6 +80,7 @@ class AddDoctorParams extends Equatable {
     this.city,
     this.district,
     this.street,
+    this.addressDetails,
   });
 
   @override
@@ -116,5 +118,6 @@ class AddDoctorParams extends Equatable {
     city,
     district,
     street,
+    addressDetails,
   ];
 }

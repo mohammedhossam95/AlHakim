@@ -173,6 +173,10 @@ class MedicalCenterRemoteDataSourceImpl
     if (params.street != null) {
       formData.fields.add(MapEntry('street', params.street!));
     }
+
+    if (params.addressDetails != null) {
+      formData.fields.add(MapEntry('address_details', params.addressDetails!));
+    }
     if (params.representativeCode != null &&
         params.representativeCode!.trim().isNotEmpty) {
       formData.fields.add(

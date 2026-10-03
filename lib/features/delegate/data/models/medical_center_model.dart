@@ -37,6 +37,7 @@ class MedicalCenterModel extends MedicalCenterEntity {
     super.city,
     super.district,
     super.street,
+    super.addressDetails,
   });
 
   factory MedicalCenterModel.fromJson(Map<String, dynamic> json) {
@@ -61,6 +62,8 @@ class MedicalCenterModel extends MedicalCenterEntity {
       city: (json['city'] ?? location?['city'])?.toString(),
       district: (json['district'] ?? location?['district'])?.toString(),
       street: (json['street'] ?? location?['street'])?.toString(),
+      addressDetails: (json['address_details'] ?? location?['address_details'])
+          ?.toString(),
     );
   }
 }

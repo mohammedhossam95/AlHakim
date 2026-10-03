@@ -351,6 +351,7 @@ abstract class Routes {
           return MyMapView(
             location: initialLocation,
             onLocationChanged: onChanged ?? (pos) {},
+            initialAddressDetails: map?['addressDetails'] as String?,
           );
         },
       ),
