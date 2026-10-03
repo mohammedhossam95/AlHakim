@@ -119,7 +119,25 @@ class _FollowUpQueueScreenState extends State<FollowUpQueueScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colors.backGround,
-      appBar: AppBar(title: Text('follow_up_appointment'.tr)),
+      appBar: AppBar(
+        title: Text('follow_up_appointment'.tr),
+        actions: [
+          IconButton(
+            tooltip: 'update'.tr,
+            onPressed: _isRefreshing ? null : _refreshQueueStatus,
+            icon: _isRefreshing
+                ? SizedBox(
+                    width: 20.r,
+                    height: 20.r,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.main,
+                    ),
+                  )
+                : Icon(Icons.refresh_rounded, color: colors.main),
+          ),
+        ],
+      ),
       body: BlocBuilder<GetQueueStatusCubit, GetQueueStatusState>(
         builder: (context, state) {
           if (state is GetQueueStatusLoading) {
@@ -154,8 +172,6 @@ class _FollowUpQueueScreenState extends State<FollowUpQueueScreen>
               child: _FollowUpQueueBody(
                 appointment: widget.appointment,
                 queueStatus: queueStatus,
-                isRefreshing: _isRefreshing,
-                onRefresh: _refreshQueueStatus,
               ),
             );
           }
@@ -170,17 +186,15 @@ class _FollowUpQueueScreenState extends State<FollowUpQueueScreen>
 class _FollowUpQueueBody extends StatelessWidget {
   final AppointmentEntity appointment;
   final QueueStatusEntity queueStatus;
-  final bool isRefreshing;
-  final VoidCallback onRefresh;
 
   const _FollowUpQueueBody({
     required this.appointment,
     required this.queueStatus,
-    required this.isRefreshing,
-    required this.onRefresh,
   });
 
   bool get _clinicOpen => queueStatus.clinicOpen == true;
+
+  String get _doctorMessage => queueStatus.doctorMessage?.trim() ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -189,12 +203,13 @@ class _FollowUpQueueBody extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(16.w),
         children: [
+          if (_doctorMessage.isNotEmpty) ...[
+            _DoctorMessageCard(message: _doctorMessage),
+            Gaps.vGap16,
+          ],
           _OffersSliderSection(ads: queueStatus.ads ?? []),
           Gaps.vGap24,
-          _ClinicNotStartedAlert(
-            isRefreshing: isRefreshing,
-            onRefresh: onRefresh,
-          ),
+          const _ClinicNotStartedAlert(),
         ],
       );
     }
@@ -208,6 +223,10 @@ class _FollowUpQueueBody extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       children: [
+        if (_doctorMessage.isNotEmpty) ...[
+          _DoctorMessageCard(message: _doctorMessage),
+          Gaps.vGap16,
+        ],
         _OffersSliderSection(ads: queueStatus.ads ?? []),
         Gaps.vGap16,
 
@@ -217,7 +236,7 @@ class _FollowUpQueueBody extends StatelessWidget {
         //   appointmentNumber: queueData.appointmentNumber,
         // ),
         // Gaps.vGap16,
-        _ClinicStartedBanner(isRefreshing: isRefreshing, onRefresh: onRefresh),
+        const _ClinicStartedBanner(),
         Gaps.vGap16,
         _QueueInfoRow(
           yourNumber: queueData.yourNumber,
@@ -324,13 +343,7 @@ class _AppointmentStatusStyle {
 }
 
 class _ClinicNotStartedAlert extends StatelessWidget {
-  final bool isRefreshing;
-  final VoidCallback onRefresh;
-
-  const _ClinicNotStartedAlert({
-    required this.isRefreshing,
-    required this.onRefresh,
-  });
+  const _ClinicNotStartedAlert();
 
   @override
   Widget build(BuildContext context) {
@@ -363,12 +376,6 @@ class _ClinicNotStartedAlert extends StatelessWidget {
             style: TextStyles.regular14(color: colors.lightTextColor),
             textAlign: TextAlign.center,
           ),
-          Gaps.vGap16,
-          _RefreshQueueButton(
-            isRefreshing: isRefreshing,
-            onPressed: onRefresh,
-            color: colors.main,
-          ),
         ],
       ),
     );
@@ -386,13 +393,7 @@ class _OffersSliderSection extends StatelessWidget {
 }
 
 class _ClinicStartedBanner extends StatelessWidget {
-  final bool isRefreshing;
-  final VoidCallback onRefresh;
-
-  const _ClinicStartedBanner({
-    required this.isRefreshing,
-    required this.onRefresh,
-  });
+  const _ClinicStartedBanner();
 
   @override
   Widget build(BuildContext context) {
@@ -419,58 +420,62 @@ class _ClinicStartedBanner extends StatelessWidget {
               style: TextStyles.medium14(color: colors.success),
             ),
           ),
-          Gaps.hGap8,
-          _RefreshQueueButton(
-            isRefreshing: isRefreshing,
-            onPressed: onRefresh,
-            color: colors.success,
-          ),
         ],
       ),
     );
   }
 }
 
-class _RefreshQueueButton extends StatelessWidget {
-  final bool isRefreshing;
-  final VoidCallback onPressed;
-  final Color color;
+/// Important notices from the doctor (delays, changes, ...), styled to
+/// stand out from everything else on the screen.
+class _DoctorMessageCard extends StatelessWidget {
+  final String message;
 
-  const _RefreshQueueButton({
-    required this.isRefreshing,
-    required this.onPressed,
-    required this.color,
-  });
+  const _DoctorMessageCard({required this.message});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: colors.whiteColor,
-      borderRadius: BorderRadius.circular(20.r),
-      child: InkWell(
-        onTap: isRefreshing ? null : onPressed,
-        borderRadius: BorderRadius.circular(20.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: color.withValues(alpha: 0.4)),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: colors.review.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: colors.review, width: 1.5),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.r),
+            decoration: BoxDecoration(
+              color: colors.review,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.campaign_rounded,
+              color: colors.whiteColor,
+              size: 22.r,
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 16.r,
-                height: 16.r,
-                child: isRefreshing
-                    ? CircularProgressIndicator(strokeWidth: 2, color: color)
-                    : Icon(Icons.refresh_rounded, color: color, size: 16.r),
-              ),
-              Gaps.hGap6,
-              Text('update'.tr, style: TextStyles.medium12(color: color)),
-            ],
+          Gaps.hGap12,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'doctor_message_title'.tr,
+                  style: TextStyles.bold14(color: colors.review),
+                ),
+                Gaps.vGap5,
+                Text(
+                  message,
+                  style: TextStyles.semiBold16(color: colors.textColor),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -635,6 +640,36 @@ class _EstimatedWaitCard extends StatelessWidget {
 
   const _EstimatedWaitCard({required this.minutes});
 
+  /// Up to 60 minutes shows minutes only; above that, hours and minutes
+  /// (e.g. 225 -> "3 ساعات و45 دقيقة", 120 -> "ساعتين").
+  String _formatWaitTime(int minutes) {
+    if (minutes <= 60) return _minutesText(minutes);
+
+    final hours = minutes ~/ 60;
+    final remaining = minutes % 60;
+    if (remaining == 0) return _hoursText(hours);
+
+    return appLocalizations.isArLocale
+        ? '${_hoursText(hours)} و${_minutesText(remaining)}'
+        : '${_hoursText(hours)} ${_minutesText(remaining)}';
+  }
+
+  String _hoursText(int hours) => appLocalizations.isArLocale
+      ? _arabicCount(hours, 'ساعة', 'ساعتين', 'ساعات')
+      : 'hours_count'.trParams({'hours': '$hours'});
+
+  String _minutesText(int minutes) => appLocalizations.isArLocale
+      ? _arabicCount(minutes, 'دقيقة', 'دقيقتين', 'دقائق')
+      : 'minutes_count'.trParams({'count': '$minutes'});
+
+  /// Arabic counting: 1 ساعة, 2 ساعتين, 3-10 ساعات, 11+ ساعة.
+  String _arabicCount(int n, String single, String dual, String plural) {
+    if (n == 1) return single;
+    if (n == 2) return dual;
+    if (n >= 3 && n <= 10) return '$n $plural';
+    return '$n $single';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -664,7 +699,7 @@ class _EstimatedWaitCard extends StatelessWidget {
               ),
               Gaps.vGap4,
               Text(
-                'minutes_count'.trParams({'count': minutes.toString()}),
+                _formatWaitTime(minutes),
                 style: TextStyles.semiBold16(color: colors.textColor),
               ),
             ],

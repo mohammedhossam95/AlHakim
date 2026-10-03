@@ -18,24 +18,10 @@ void handleNotificationNavigation(
         return;
       }
 
-      if (sessionCubit.state.userType == UserType.patient) {
-        context.read<BottomNavBarCubit>().changeCurrentScreen(index: 1);
-        if (context.canPop()) {
-          context.pop();
-        }
-      } else {
-        context.go(Routes.mainPageRoute);
-      }
+      _openAppointmentsTab(context);
       break;
     case 'doctor_rescheduled':
-      if (sessionCubit.state.userType == UserType.patient) {
-        context.read<BottomNavBarCubit>().changeCurrentScreen(index: 1);
-        if (context.canPop()) {
-          context.pop();
-        }
-      } else {
-        context.go(Routes.mainPageRoute);
-      }
+      _openAppointmentsTab(context);
       break;
     case 'appointment_completed':
       context.pushNamed(Routes.patientOffersRoute);
@@ -43,5 +29,24 @@ void handleNotificationNavigation(
 
     default:
       break;
+  }
+}
+
+/// Index 1 is "My appointments" for patients and "Queue management" for
+/// doctors, so both land where they can see the booking.
+void _openAppointmentsTab(BuildContext context) {
+  final session = sessionCubit.state;
+  final hasAppointmentsTab =
+      session.userType == UserType.patient ||
+      (session.isDoctor && !session.needsDoctorSelection);
+
+  if (!hasAppointmentsTab) {
+    context.go(Routes.mainPageRoute);
+    return;
+  }
+
+  context.read<BottomNavBarCubit>().changeCurrentScreen(index: 1);
+  if (context.canPop()) {
+    context.pop();
   }
 }

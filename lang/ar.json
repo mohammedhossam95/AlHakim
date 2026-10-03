@@ -595,5 +595,11 @@
   "patients_message_title": "رسالة للمرضى",
   "patients_message_desc": "ستظهر هذه الرسالة للمرضى في صفحة متابعة الدور، مثل تأخر الطبيب أو أي تنبيه مهم.",
   "patients_message_hint": "اكتب رسالتك للمرضى...",
-  "patients_message_sent": "تم إرسال الرسالة للمرضى"
+  "patients_message_sent": "تم إرسال الرسالة للمرضى",
+  "doctor_message_title": "تنبيه من الطبيب",
+  "broadcast_message_title": "إرسال إشعار للمرضى",
+  "broadcast_message_desc": "سيتم إرسال هذه الرسالة كإشعار إلى مرضاك.",
+  "broadcast_message_sent": "تم إرسال الإشعار للمرضى",
+  "message_not_sent": "لم يتم إرسال الرسالة",
+  "hours_count": "{hours} ساعة"
 }

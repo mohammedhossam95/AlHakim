@@ -23,6 +23,10 @@ abstract class QueueManagementRemoteDataSource {
     required String doctorId,
     required String message,
   });
+  Future<BaseOneResponse> updateQueueMessage({
+    required String doctorId,
+    required String message,
+  });
 }
 
 class QueueManagementRemoteDataSourceImpl
@@ -127,6 +131,32 @@ class QueueManagementRemoteDataSourceImpl
         '/doctors/$doctorId/broadcast-notifications',
 
         formData: FormData.fromMap({"message": message}),
+      );
+
+      if (response['status'] == true) {
+        return BaseOneResponse(
+          status: response['status'],
+          message: response['message'],
+          data: response['data'],
+        );
+      }
+
+      throw ServerException(message: response['message'] ?? '');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BaseOneResponse> updateQueueMessage({
+    required String doctorId,
+    required String message,
+  }) async {
+    try {
+      final response = await dioConsumer.post(
+        '/doctors/$doctorId/queue-message',
+
+        formData: FormData.fromMap({"_method": "PATCH", "message": message}),
       );
 
       if (response['status'] == true) {

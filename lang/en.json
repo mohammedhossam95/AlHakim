@@ -596,5 +596,11 @@
   "patients_message_title": "Message to patients",
   "patients_message_desc": "This message will appear to patients on the queue tracking page, e.g. a delay or any important notice.",
   "patients_message_hint": "Write your message to patients...",
-  "patients_message_sent": "Message sent to patients"
+  "patients_message_sent": "Message sent to patients",
+  "doctor_message_title": "Notice from the doctor",
+  "broadcast_message_title": "Send a notification to patients",
+  "broadcast_message_desc": "This message will be sent to your patients as a notification.",
+  "broadcast_message_sent": "Notification sent to patients",
+  "message_not_sent": "Message was not sent",
+  "hours_count": "{hours} h"
 }

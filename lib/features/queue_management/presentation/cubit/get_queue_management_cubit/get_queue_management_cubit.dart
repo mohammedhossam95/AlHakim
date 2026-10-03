@@ -20,14 +20,22 @@ class GetQueueManagementCubit extends Cubit<GetQueueManagementState> {
     await getQueueManagement(doctorId: doctorId);
   }
 
-  Future<void> getQueueManagement({required String doctorId}) async {
-    emit(GetQueueManagementLoading());
+  /// With [silent], the list already on screen stays there while loading,
+  /// and a failure keeps it instead of replacing it with an error. It only
+  /// applies when there's data to keep; otherwise it loads normally.
+  Future<void> getQueueManagement({
+    required String doctorId,
+    bool silent = false,
+  }) async {
+    final keepCurrent = silent && state is GetQueueManagementSuccess;
+    if (!keepCurrent) emit(GetQueueManagementLoading());
 
     final result = await usecase(doctorId: doctorId);
+    if (isClosed) return;
 
-    result.fold(
-      (l) => emit(GetQueueManagementError(message: l.message ?? '')),
-      (r) => emit(GetQueueManagementSuccess(response: r)),
-    );
+    result.fold((l) {
+      if (keepCurrent) return;
+      emit(GetQueueManagementError(message: l.message ?? ''));
+    }, (r) => emit(GetQueueManagementSuccess(response: r)));
   }
 }

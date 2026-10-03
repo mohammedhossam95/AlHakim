@@ -28,6 +28,7 @@ class QueueStatusModel extends QueueStatusEntity {
     super.patientsAhead,
     super.slotDuration,
     super.estimatedWaitMinutes,
+    super.doctorMessage,
     super.ads,
   });
 
@@ -44,6 +45,7 @@ class QueueStatusModel extends QueueStatusEntity {
       patientsAhead: json['patients_ahead'],
       slotDuration: json['slot_duration'],
       estimatedWaitMinutes: json['estimated_wait_minutes'],
+      doctorMessage: json['doctor_message'],
       ads: json['ads'] != null
           ? (json['ads'] as List).map((e) => AdModel.fromJson(e)).toList()
           : null,

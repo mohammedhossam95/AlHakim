@@ -9,7 +9,9 @@ import 'package:alhakim/features/queue_management/domain/entities/queue_manageme
 import 'package:alhakim/features/queue_management/presentation/cubit/get_queue_management_cubit/get_queue_management_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/notify_examination_cubit/notify_examination_cubit.dart';
 import 'package:alhakim/features/queue_management/presentation/cubit/update_queue_status_cubit/update_queue_status_cubit.dart';
-import 'package:alhakim/features/queue_management/presentation/widgets/broadcast_message_bottom_sheet.dart';
+import 'package:alhakim/features/queue_management/presentation/cubit/patient_message_cubit/patient_message_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/widgets/patient_message_bottom_sheet.dart';
+import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -86,13 +88,17 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
     return context.read<SessionCubit>().state.activeDoctorId;
   }
 
-  void _loadQueue(BuildContext context) {
+  void _loadQueue(BuildContext context, {bool silent = false}) {
     final doctorId = _activeDoctorId(context);
     if (doctorId == null || doctorId.isEmpty) return;
     context.read<GetQueueManagementCubit>().getQueueManagement(
       doctorId: doctorId,
+      silent: silent,
     );
   }
+
+  /// This screen's position in the doctor's bottom navigation bar.
+  static const _queueTabIndex = 1;
 
   @override
   void initState() {
@@ -120,6 +126,14 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
 
     return MultiBlocListener(
       listeners: [
+        // The tab stays alive between switches, so reload whenever it's
+        // shown again (e.g. opened from a "new booking" notification).
+        BlocListener<BottomNavBarCubit, BottomNavBarState>(
+          listenWhen: (previous, current) =>
+              current.index == _queueTabIndex &&
+              current.tapId != previous.tapId,
+          listener: (context, state) => _loadQueue(context, silent: true),
+        ),
         BlocListener<UpdateQueueStatusCubit, UpdateQueueStatusState>(
           listener: (context, state) {
             if (state is UpdateQueueStatusLoading) {
@@ -188,7 +202,11 @@ class _QueueManagementScreenState extends State<QueueManagementScreen> {
               onPressed: () {
                 final doctorId = _activeDoctorId(context);
                 if (doctorId == null || doctorId.isEmpty) return;
-                BroadcastMessageBottomSheet.show(context, doctorId: doctorId);
+                PatientMessageBottomSheet.show(
+                  context,
+                  doctorId: doctorId,
+                  type: PatientMessageType.queue,
+                );
               },
             ),
           ],

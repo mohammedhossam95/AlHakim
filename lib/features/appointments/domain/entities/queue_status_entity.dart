@@ -12,6 +12,7 @@ class QueueStatusEntity extends Equatable {
   final int? patientsAhead;
   final int? slotDuration;
   final int? estimatedWaitMinutes;
+  final String? doctorMessage;
   final List<Ad>? ads;
 
   const QueueStatusEntity({
@@ -26,6 +27,7 @@ class QueueStatusEntity extends Equatable {
     this.patientsAhead,
     this.slotDuration,
     this.estimatedWaitMinutes,
+    this.doctorMessage,
     this.ads,
   });
 
@@ -42,6 +44,7 @@ class QueueStatusEntity extends Equatable {
     patientsAhead,
     slotDuration,
     estimatedWaitMinutes,
+    doctorMessage,
     ads,
   ];
 }

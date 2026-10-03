@@ -8,6 +8,7 @@ import 'package:alhakim/core/utils/values/text_styles.dart';
 import 'package:alhakim/core/widgets/diff_img.dart';
 import 'package:alhakim/core/widgets/gaps.dart';
 import 'package:alhakim/core/widgets/my_default_button.dart';
+import 'package:alhakim/core/widgets/notifications_icon_button.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/export_appointments_cubit/export_appointments_cubit.dart';
 import 'package:alhakim/features/auth/data/models/auth_resp_model.dart';
 import 'package:alhakim/features/auth/presentation/cubit/session_cubit/session_cubit.dart';
@@ -16,6 +17,8 @@ import 'package:alhakim/features/doctors/domain/entities/doctor_home_entity.dart
 import 'package:alhakim/features/doctors/presentation/cubit/close_clinic_today_cubit/close_clinic_today_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/get_doctor_home_cubit/get_doctor_home_cubit.dart';
 import 'package:alhakim/features/doctors/presentation/cubit/toggle_clinic_cubit/toggle_clinic_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/cubit/patient_message_cubit/patient_message_cubit.dart';
+import 'package:alhakim/features/queue_management/presentation/widgets/patient_message_bottom_sheet.dart';
 import 'package:alhakim/features/tabbar/presentation/cubit/bottom_nav_bar_cubit/bottom_nav_bar_cubit.dart';
 import 'package:alhakim/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -153,6 +156,15 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     );
   }
 
+  /// The name in the app's language, falling back to the other language
+  /// when it's missing.
+  String _doctorDisplayName(DoctorEntity? doctor) {
+    final ar = doctor?.name?.ar?.trim() ?? '';
+    final en = doctor?.name?.en?.trim() ?? '';
+    if (appLocalizations.isArLocale) return ar.isNotEmpty ? ar : en;
+    return en.isNotEmpty ? en : ar;
+  }
+
   // final today = DateTime.now().weekday;
   final today = DateTime.now().weekday % 7;
   @override
@@ -164,52 +176,77 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     return Scaffold(
       backgroundColor: colors.backGround,
       appBar: AppBar(
-        title: Row(
-          children: [
-            if (displayDoctor?.profileImage != null) ...[
-              DiffImage(
-                image: displayDoctor?.profileImage ?? '',
+        // Smaller spacing after the notifications button than the default 16
+        // on the start side.
+        titleSpacing: 0,
+        title: Padding(
+          padding: EdgeInsetsDirectional.only(start: 16.w, end: 8.w),
+          child: Row(
+            children: [
+              if (displayDoctor?.profileImage != null) ...[
+                DiffImage(
+                  image: displayDoctor?.profileImage ?? '',
 
-                height: 40.h,
+                  height: 40.h,
 
-                width: 40.w,
+                  width: 40.w,
+                ),
+                Gaps.hGap12,
+              ],
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "welcome".tr,
+                      style: TextStyles.medium12(color: colors.lightTextColor),
+                    ),
+                    Text(
+                      _doctorDisplayName(displayDoctor),
+                      style: TextStyles.semiBold16(color: colors.textColor),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              Gaps.hGap12,
-            ],
-            Expanded(
-              child: Text("${"welcome".tr} ${displayDoctor?.name?.ar ?? ''}"),
-            ),
-            // Spacer(),
-            InkWell(
-              onTap: () async {
-                final result = await context.push(
-                  Routes.updateDoctorScreenRoute,
-                  extra: displayDoctor,
-                );
+              // Spacer(),
+              _AppBarIconButton(
+                icon: Icons.edit_outlined,
+                onTap: () async {
+                  final result = await context.push(
+                    Routes.updateDoctorScreenRoute,
+                    extra: displayDoctor,
+                  );
 
-                if (result == true && mounted) {
-                  _syncDoctorAfterFetch = true;
-                  getDoctorHome();
-                }
-              },
-              child: const Icon(Icons.edit),
-            ),
-          ],
+                  if (result == true && mounted) {
+                    _syncDoctorAfterFetch = true;
+                    getDoctorHome();
+                  }
+                },
+              ),
+              Gaps.hGap8,
+              const NotificationsIconButton(),
+              if (sessionState.isMedicalCenterDoctorAccount &&
+                  sessionState.activeDoctorId != null) ...[
+                Gaps.hGap8,
+                _AppBarIconButton(
+                  icon: Icons.swap_horiz,
+                  tooltip: 'doctors'.tr,
+                  onTap: () {
+                    context.read<SessionCubit>().clearSelectedDoctor();
+                    context.read<BottomNavBarCubit>().changeCurrentScreen(
+                      index: 0,
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
         ),
         automaticallyImplyLeading: false,
         centerTitle: false,
-        actions: [
-          if (sessionState.isMedicalCenterDoctorAccount &&
-              sessionState.activeDoctorId != null)
-            IconButton(
-              tooltip: 'doctors'.tr,
-              onPressed: () {
-                context.read<SessionCubit>().clearSelectedDoctor();
-                context.read<BottomNavBarCubit>().changeCurrentScreen(index: 0);
-              },
-              icon: const Icon(Icons.swap_horiz),
-            ),
-        ],
       ),
 
       body: MultiBlocListener(
@@ -442,6 +479,25 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
                         ],
                         if (home?.doctorClosedToday != true) Gaps.vGap16,
 
+                        /// notify patients
+                        MyDefaultButton(
+                          btnText: "broadcast_message_title",
+                          borderRadius: 30,
+                          color: colors.whiteColor,
+                          textColor: colors.textColor,
+                          borderColor: colors.main,
+                          onPressed: () {
+                            final doctorId = _activeDoctorId(context);
+                            if (doctorId == null || doctorId.isEmpty) return;
+                            PatientMessageBottomSheet.show(
+                              context,
+                              doctorId: doctorId,
+                              type: PatientMessageType.broadcast,
+                            );
+                          },
+                        ),
+                        Gaps.vGap16,
+
                         /// reschedule
                         MyDefaultButton(
                           btnText: "reschedule_clinic",
@@ -642,5 +698,35 @@ class DoctorStatCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Same look as [NotificationsIconButton], so the app bar icons match.
+class _AppBarIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final String? tooltip;
+
+  const _AppBarIconButton({
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final button = InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14.r),
+      child: Container(
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.main.withValues(alpha: .12),
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+        child: Icon(icon, color: colors.main),
+      ),
+    );
+    return tooltip == null ? button : Tooltip(message: tooltip!, child: button);
   }
 }

@@ -24,4 +24,8 @@ abstract class QueueManagementRepository {
     required String doctorId,
     required String message,
   });
+  Future<Either<Failure, BaseOneResponse>> updateQueueMessage({
+    required String doctorId,
+    required String message,
+  });
 }
