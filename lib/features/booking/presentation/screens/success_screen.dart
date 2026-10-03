@@ -129,8 +129,17 @@ class AppoinmentSuccessScreen extends StatelessWidget {
                         _InfoTile(
                           icon: Icons.location_on_outlined,
                           title: "clinic".tr,
+                          // Skip missing parts so it never shows "city -  - ".
                           value:
-                              "${doctor?.location?.city ?? ''} - ${doctor?.location?.district ?? ''} - ${doctor?.location?.street ?? ''}",
+                              [
+                                    doctor?.location?.city,
+                                    doctor?.location?.district,
+                                    doctor?.location?.street,
+                                  ]
+                                  .map((part) => part?.trim() ?? '')
+                                  .where((part) => part.isNotEmpty)
+                                  .join(' - '),
+                          maxLines: 2,
                         ),
                       ],
                     ],
@@ -181,10 +190,14 @@ class _InfoTile extends StatelessWidget {
   final String title;
   final String value;
 
+  /// Long values wrap up to this many lines, then end with "...".
+  final int? maxLines;
+
   const _InfoTile({
     required this.icon,
     required this.title,
     required this.value,
+    this.maxLines,
   });
 
   @override
@@ -224,6 +237,8 @@ class _InfoTile extends StatelessWidget {
                   value,
                   style: TextStyles.semiBold16(),
                   textAlign: TextAlign.start,
+                  maxLines: maxLines,
+                  overflow: maxLines == null ? null : TextOverflow.ellipsis,
                 ),
               ],
             ),
