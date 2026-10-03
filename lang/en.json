@@ -602,5 +602,20 @@
   "broadcast_message_desc": "This message will be sent to your patients as a notification.",
   "broadcast_message_sent": "Notification sent to patients",
   "message_not_sent": "Message was not sent",
-  "hours_count": "{hours} h"
+  "hours_count": "{hours} h",
+  "rate_appointment": "Rate your visit",
+  "rate_appointment_button": "Rate visit",
+  "rate_your_experience": "Rate your experience",
+  "rating_doctor": "Doctor",
+  "rating_doctor_desc": "Care and diagnosis",
+  "rating_secretary": "Secretary",
+  "rating_secretary_desc": "Reception and organization",
+  "rating_clinic": "Clinic",
+  "rating_clinic_desc": "Cleanliness and waiting time",
+  "rating_app": "App",
+  "rating_app_desc": "Ease of booking and use",
+  "your_notes": "Your notes",
+  "rating_notes_hint": "Write your notes about the visit here...",
+  "submit_rating": "Submit rating",
+  "rate_all_categories": "Please rate all items before submitting"
 }

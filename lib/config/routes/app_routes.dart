@@ -8,6 +8,7 @@ import 'package:alhakim/core/utils/enums.dart';
 import 'package:alhakim/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:alhakim/features/appointments/presentation/cubt/get_queue_status/get_queue_status_cubit.dart';
 import 'package:alhakim/features/appointments/presentation/screens/follow_up_queue_screen.dart';
+import 'package:alhakim/features/appointments/presentation/screens/rate_appointment_screen.dart';
 import 'package:alhakim/features/auth/presentation/cubit/complete_profile_cubit/complete_profile_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/forgot_password_cubit/forgot_password_cubit.dart';
 import 'package:alhakim/features/auth/presentation/cubit/get_all_cities_cubit/get_all_cities_cubit.dart';
@@ -158,6 +159,8 @@ abstract class Routes {
   static const String quickBookingScreenRoute = '/QuickBookingScreenRoute';
   static const String appoinmentSuccessScreen = '/AppoinmentSuccessScreen';
   static const String followUpQueueScreenRoute = '/FollowUpQueueScreenRoute';
+  static const String rateAppointmentScreenRoute =
+      '/RateAppointmentScreenRoute';
   static const String patientOffersRoute = '/patient-offers';
 
   static final sl = ServiceLocator.instance;
@@ -412,6 +415,18 @@ abstract class Routes {
           ],
           child: const QuickBookingScreen(),
         ),
+      ),
+
+      GoRoute(
+        path: rateAppointmentScreenRoute,
+        name: rateAppointmentScreenRoute,
+        pageBuilder: (context, state) {
+          final appointment = state.extra as AppointmentEntity;
+          return buildAdaptivePage(
+            state: state,
+            child: RateAppointmentScreen(appointment: appointment),
+          );
+        },
       ),
 
       GoRoute(

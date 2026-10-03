@@ -378,6 +378,8 @@ class _AppointmentCard extends StatelessWidget {
 
   bool get _canConfirmReschedule => _isPendingReschedule;
 
+  bool get _canRate => !isUpcoming && _status == 'completed';
+
   void _confirmReschedule(BuildContext context) {
     Constants.showConfirmDialog(
       context: context,
@@ -512,6 +514,38 @@ class _AppointmentCard extends StatelessWidget {
               ),
             ],
           ),
+          if (_canRate) ...[
+            Gaps.vGap16,
+            GestureDetector(
+              onTap: () => context.pushNamed(
+                Routes.rateAppointmentScreenRoute,
+                extra: item,
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: colors.main,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.star_rounded,
+                      color: colors.whiteColor,
+                      size: 20.r,
+                    ),
+                    Gaps.hGap8,
+                    Text(
+                      'rate_appointment_button'.tr,
+                      style: TextStyles.medium14(color: colors.whiteColor),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           if (isUpcoming && (showPrimaryAction || _canCancel)) ...[
             Gaps.vGap16,
             Row(

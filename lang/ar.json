@@ -601,5 +601,20 @@
   "broadcast_message_desc": "سيتم إرسال هذه الرسالة كإشعار إلى مرضاك.",
   "broadcast_message_sent": "تم إرسال الإشعار للمرضى",
   "message_not_sent": "لم يتم إرسال الرسالة",
-  "hours_count": "{hours} ساعة"
+  "hours_count": "{hours} ساعة",
+  "rate_appointment": "تقييم الكشف",
+  "rate_appointment_button": "قيّم الكشف",
+  "rate_your_experience": "قيّم تجربتك",
+  "rating_doctor": "الدكتور",
+  "rating_doctor_desc": "التعامل والتشخيص",
+  "rating_secretary": "السكرتيرة",
+  "rating_secretary_desc": "الاستقبال والتنظيم",
+  "rating_clinic": "العيادة",
+  "rating_clinic_desc": "النظافة ووقت الانتظار",
+  "rating_app": "التطبيق",
+  "rating_app_desc": "سهولة الحجز والاستخدام",
+  "your_notes": "ملاحظاتك",
+  "rating_notes_hint": "اكتب ملاحظاتك عن الكشف هنا...",
+  "submit_rating": "إرسال التقييم",
+  "rate_all_categories": "يُرجى تقييم كل العناصر قبل الإرسال"
 }
